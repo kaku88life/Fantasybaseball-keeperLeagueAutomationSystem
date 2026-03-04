@@ -34,5 +34,8 @@ frontend/out/
 # Database
 data/*.db
 
+# SSL certificates (local dev)
+certs/
+
 # Claude
 .claude/

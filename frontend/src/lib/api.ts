@@ -2,7 +2,7 @@
  * API client for communicating with the FastAPI backend.
  */
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8002";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://localhost:8002";
 
 function getToken(): string | null {
   if (typeof window === "undefined") return null;
@@ -19,10 +19,23 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
     headers["Authorization"] = `Bearer ${token}`;
   }
 
-  const res = await fetch(`${API_BASE}${path}`, {
-    ...options,
-    headers,
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${API_BASE}${path}`, {
+      ...options,
+      headers,
+    });
+  } catch {
+    // Network error - likely self-signed cert not yet accepted
+    if (API_BASE.startsWith("https://localhost")) {
+      throw new ApiError(
+        0,
+        "Cannot connect to backend. Please login first to accept the SSL certificate, " +
+        `or visit ${API_BASE}/api/health in your browser and accept the certificate.`,
+      );
+    }
+    throw new ApiError(0, "Cannot connect to backend server.");
+  }
 
   if (!res.ok) {
     const body = await res.json().catch(() => ({ detail: res.statusText }));
@@ -43,16 +56,6 @@ export class ApiError extends Error {
 }
 
 // ========== Auth ==========
-
-export async function loginWithYahoo(): Promise<{ auth_url: string }> {
-  return request("/api/auth/yahoo/login", { method: "POST" });
-}
-
-export async function exchangeCode(
-  code: string,
-): Promise<{ token: string; user: import("@/types").UserInfo }> {
-  return request(`/api/auth/yahoo/exchange?code=${encodeURIComponent(code)}`, { method: "POST" });
-}
 
 export async function getCurrentUser(): Promise<import("@/types").UserInfo> {
   return request("/api/auth/me");

@@ -18,7 +18,7 @@ from api.database import (
     upsert_user,
 )
 from api.dependencies import create_jwt_token, get_current_user
-from api.schemas import CallbackResponse, LoginResponse, UserInfoSchema
+from api.schemas import CallbackResponse, UserInfoSchema
 
 router = APIRouter()
 
@@ -52,9 +52,11 @@ def _get_redirect_uri() -> str:
     return os.getenv("OAUTH_REDIRECT_URI", "oob")
 
 
-@router.post("/yahoo/login", response_model=LoginResponse)
+@router.get("/yahoo/login")
 async def yahoo_login():
-    """Start Yahoo OAuth2 authorization flow. Returns the Yahoo auth URL."""
+    """Start Yahoo OAuth2 authorization flow.
+    Redirects the browser directly to Yahoo for authentication.
+    """
     state = secrets.token_urlsafe(32)
     _pending_states.add(state)
 
@@ -66,7 +68,7 @@ async def yahoo_login():
         "state": state,
     }
     auth_url = f"{YAHOO_AUTH_URL}?{urlencode(params)}"
-    return LoginResponse(auth_url=auth_url)
+    return RedirectResponse(auth_url)
 
 
 @router.post("/yahoo/exchange")
