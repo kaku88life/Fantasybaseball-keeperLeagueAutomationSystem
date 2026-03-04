@@ -54,7 +54,7 @@ export default function HomePage() {
 
   return (
     <div className="py-10 text-center">
-      <h1 className="mb-4 text-2xl font-bold">Welcome, {user.yahoo_nickname}</h1>
+      <h1 className="mb-4 text-2xl font-bold">Welcome{user.yahoo_nickname ? `, ${user.yahoo_nickname}` : ""}!</h1>
       {user.manager_name && (
         <p className="text-gray-600">
           Team: {user.manager_name}
