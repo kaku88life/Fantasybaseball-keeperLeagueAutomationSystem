@@ -14,6 +14,7 @@ interface AuthContextType {
   user: UserInfo | null;
   loading: boolean;
   login: (token: string, user: UserInfo) => void;
+  loginWithToken: (token: string) => Promise<void>;
   logout: () => void;
   refresh: () => Promise<void>;
 }
@@ -22,6 +23,7 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   loading: true,
   login: () => {},
+  loginWithToken: async () => {},
   logout: () => {},
   refresh: async () => {},
 });
@@ -57,13 +59,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(u);
   }, []);
 
+  const loginWithToken = useCallback(async (token: string) => {
+    localStorage.setItem("auth_token", token);
+    const u = await getCurrentUser();
+    setUser(u);
+  }, []);
+
   const logout = useCallback(() => {
     localStorage.removeItem("auth_token");
     setUser(null);
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, refresh }}>
+    <AuthContext.Provider value={{ user, loading, login, loginWithToken, logout, refresh }}>
       {children}
     </AuthContext.Provider>
   );

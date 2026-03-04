@@ -48,11 +48,10 @@ export async function loginWithYahoo(): Promise<{ auth_url: string }> {
   return request("/api/auth/yahoo/login", { method: "POST" });
 }
 
-export async function authCallback(
+export async function exchangeCode(
   code: string,
-  state: string,
 ): Promise<{ token: string; user: import("@/types").UserInfo }> {
-  return request(`/api/auth/yahoo/callback?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state)}`);
+  return request(`/api/auth/yahoo/exchange?code=${encodeURIComponent(code)}`, { method: "POST" });
 }
 
 export async function getCurrentUser(): Promise<import("@/types").UserInfo> {

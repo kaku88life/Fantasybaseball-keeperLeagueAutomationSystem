@@ -3,32 +3,37 @@
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth";
-import { authCallback } from "@/lib/api";
+import { getCurrentUser } from "@/lib/api";
 
 function CallbackHandler() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { login } = useAuth();
+  const { loginWithToken } = useAuth();
   const [error, setError] = useState("");
 
   useEffect(() => {
-    const code = searchParams.get("code");
-    const state = searchParams.get("state") || "";
+    const token = searchParams.get("token");
+    const errorParam = searchParams.get("error");
 
-    if (!code) {
-      setError("No authorization code received from Yahoo.");
+    if (errorParam) {
+      setError(`Authentication failed: ${errorParam}`);
       return;
     }
 
-    authCallback(code, state)
-      .then(({ token, user }) => {
-        login(token, user);
+    if (!token) {
+      setError("No authentication token received.");
+      return;
+    }
+
+    // Save token, fetch user info, then redirect to home
+    loginWithToken(token)
+      .then(() => {
         router.push("/");
       })
       .catch((e) => {
-        setError(e instanceof Error ? e.message : "Authentication failed");
+        setError(e instanceof Error ? e.message : "Failed to load user info");
       });
-  }, [searchParams, login, router]);
+  }, [searchParams, loginWithToken, router]);
 
   if (error) {
     return (

@@ -9,6 +9,7 @@ from urllib.parse import urlencode
 
 import requests
 from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi.responses import RedirectResponse
 
 from api.database import (
     get_all_teams,
@@ -44,8 +45,11 @@ def _get_yahoo_client_secret() -> str:
 
 
 def _get_redirect_uri() -> str:
-    frontend = os.getenv("FRONTEND_URL", "http://localhost:3000")
-    return f"{frontend}/auth/callback"
+    """Return the OAuth redirect URI.
+    Uses 'oob' (out-of-band) for local dev to avoid Yahoo's https requirement.
+    For production, set OAUTH_REDIRECT_URI env var to the https backend callback URL.
+    """
+    return os.getenv("OAUTH_REDIRECT_URI", "oob")
 
 
 @router.post("/yahoo/login", response_model=LoginResponse)
@@ -65,20 +69,50 @@ async def yahoo_login():
     return LoginResponse(auth_url=auth_url)
 
 
+@router.post("/yahoo/exchange")
+async def yahoo_exchange_code(
+    code: str = Query(...),
+) -> CallbackResponse:
+    """
+    Exchange a Yahoo authorization code for a JWT token.
+    Used with OOB flow: user copies the code from Yahoo and pastes it in the frontend.
+    Also used as the general code-exchange endpoint for production redirect flow.
+    """
+    return await _exchange_code_for_jwt(code)
+
+
 @router.get("/yahoo/callback")
 async def yahoo_callback(
     code: str = Query(...),
     state: str = Query(""),
-) -> CallbackResponse:
+):
     """
-    Yahoo OAuth callback. Exchanges authorization code for tokens,
-    fetches user profile, matches to team, and returns JWT.
+    Yahoo OAuth callback (production only, when OAUTH_REDIRECT_URI is set to a https URL).
+    Yahoo redirects here with the auth code, backend processes it and
+    redirects to frontend /auth/callback?token=xxx.
     """
+    frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3001")
+
     # Validate state
     if state and state not in _pending_states:
-        raise HTTPException(status_code=400, detail="Invalid state parameter")
+        return RedirectResponse(
+            f"{frontend_url}/auth/callback?error=invalid_state"
+        )
     _pending_states.discard(state)
 
+    try:
+        result = await _exchange_code_for_jwt(code)
+        return RedirectResponse(
+            f"{frontend_url}/auth/callback?token={result.token}"
+        )
+    except HTTPException as e:
+        return RedirectResponse(
+            f"{frontend_url}/auth/callback?error={e.detail}"
+        )
+
+
+async def _exchange_code_for_jwt(code: str) -> CallbackResponse:
+    """Core logic: exchange Yahoo auth code for JWT token."""
     # Exchange code for access token
     token_resp = requests.post(
         YAHOO_TOKEN_URL,
@@ -118,8 +152,7 @@ async def yahoo_callback(
         email = profile.get("email", "")
 
     if not yahoo_guid:
-        # Fallback: try to get GUID from profile
-        yahoo_guid = profile.get("sub", "")
+        yahoo_guid = profile.get("sub", "") if profile_resp.status_code == 200 else ""
 
     if not yahoo_guid:
         raise HTTPException(status_code=400, detail="Could not determine Yahoo user ID")
@@ -141,7 +174,7 @@ async def yahoo_callback(
     )
 
     # Create JWT
-    token = create_jwt_token(user["id"], is_commissioner=is_commissioner)
+    jwt_token = create_jwt_token(user["id"], is_commissioner=is_commissioner)
 
     # Build response
     team = get_team_by_id(user["team_id"]) if user.get("team_id") else None
@@ -155,7 +188,7 @@ async def yahoo_callback(
         is_commissioner=is_commissioner,
     )
 
-    return CallbackResponse(token=token, user=user_info)
+    return CallbackResponse(token=jwt_token, user=user_info)
 
 
 def _match_user_to_team(access_token: str, yahoo_guid: str, nickname: str) -> int | None:
