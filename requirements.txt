@@ -1,0 +1,29 @@
+# Fantasy Baseball Keeper League Automation System
+# Core dependencies
+
+# Excel parsing
+openpyxl>=3.1.0
+
+# Yahoo Fantasy API
+yahoo_oauth>=2.0
+yahoo_fantasy_api>=3.3.0
+requests>=2.31.0
+
+# Environment variables
+python-dotenv>=1.0.0
+
+# Web API (Phase 2)
+fastapi>=0.110.0
+uvicorn>=0.29.0
+python-jose[cryptography]>=3.3.0
+python-multipart>=0.0.9
+
+# AI summaries (Phase 4)
+# anthropic>=0.40.0
+
+# LINE Bot notifications (Phase 3)
+# line-bot-sdk>=3.0
+# flask>=3.0
+
+# Scheduling (Phase 3)
+# apscheduler>=3.10

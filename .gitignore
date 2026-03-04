@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+venv/
+.venv/
+
+# Environment
+.env
+oauth2.json
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Data files (keep Excel templates out of repo)
+*.xlsx
+*.xls
+
+# Reports output
+reports/
+
+# Node / Next.js
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+
+# Database
+data/*.db
+
+# Claude
+.claude/
