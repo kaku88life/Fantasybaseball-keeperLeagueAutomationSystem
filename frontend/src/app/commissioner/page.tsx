@@ -47,7 +47,7 @@ export default function CommissionerDashboard() {
   if (!user?.is_commissioner) {
     return (
       <div className="py-10 text-center text-red-600">
-        Commissioner access required.
+        需要 Commissioner 權限才能存取此頁面。
       </div>
     );
   }
@@ -58,7 +58,7 @@ export default function CommissionerDashboard() {
   return (
     <div>
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Commissioner Dashboard</h1>
+        <h1 className="text-2xl font-bold">Commissioner 管理面板</h1>
         <div className="flex items-center gap-4">
           <select
             value={selectedYear}
@@ -75,7 +75,7 @@ export default function CommissionerDashboard() {
             href="/commissioner/import"
             className="rounded bg-indigo-600 px-3 py-1.5 text-sm text-white hover:bg-indigo-500"
           >
-            Import Excel
+            匯入 Excel
           </Link>
         </div>
       </div>
@@ -83,23 +83,23 @@ export default function CommissionerDashboard() {
       {/* Stats */}
       <div className="mb-6 flex gap-4">
         <div className="rounded-lg border bg-white px-4 py-3">
-          <p className="text-xs text-gray-500">Total Teams</p>
+          <p className="text-xs text-gray-500">總隊伍</p>
           <p className="text-2xl font-bold">{submissions.length}</p>
         </div>
         <div className="rounded-lg border bg-green-50 px-4 py-3">
-          <p className="text-xs text-gray-500">Submitted</p>
+          <p className="text-xs text-gray-500">已繳交</p>
           <p className="text-2xl font-bold text-green-600">
             {submitted.length}
           </p>
         </div>
         <div className="rounded-lg border bg-yellow-50 px-4 py-3">
-          <p className="text-xs text-gray-500">Pending</p>
+          <p className="text-xs text-gray-500">未繳交</p>
           <p className="text-2xl font-bold text-yellow-600">
             {pending.length}
           </p>
         </div>
         <div className="rounded-lg border bg-blue-50 px-4 py-3">
-          <p className="text-xs text-gray-500">Approved</p>
+          <p className="text-xs text-gray-500">已審核</p>
           <p className="text-2xl font-bold text-blue-600">
             {submitted.filter((s) => s.commissioner_approved).length}
           </p>
@@ -125,15 +125,15 @@ export default function CommissionerDashboard() {
                 <h3 className="font-semibold">{s.manager_name}</h3>
                 {s.commissioner_approved ? (
                   <span className="rounded bg-blue-100 px-1.5 py-0.5 text-xs text-blue-700">
-                    Approved
+                    已審核
                   </span>
                 ) : s.is_submitted ? (
                   <span className="rounded bg-green-100 px-1.5 py-0.5 text-xs text-green-700">
-                    Submitted
+                    已繳交
                   </span>
                 ) : (
                   <span className="rounded bg-gray-100 px-1.5 py-0.5 text-xs text-gray-500">
-                    Pending
+                    未繳交
                   </span>
                 )}
               </div>
@@ -151,14 +151,14 @@ export default function CommissionerDashboard() {
                   href={`/${selectedYear}/${s.team_id}`}
                   className="text-xs text-indigo-600 hover:underline"
                 >
-                  View
+                  查看
                 </Link>
                 {s.is_submitted && !s.commissioner_approved && (
                   <button
                     onClick={() => handleApprove(s.team_id, true)}
                     className="text-xs text-green-600 hover:underline"
                   >
-                    Approve
+                    審核通過
                   </button>
                 )}
               </div>

@@ -20,13 +20,13 @@ export default function Navbar() {
                   href={`/${new Date().getFullYear()}`}
                   className="text-sm text-gray-300 hover:text-white"
                 >
-                  League
+                  聯盟
                 </Link>
                 <Link
                   href="/rules"
                   className="text-sm text-gray-300 hover:text-white"
                 >
-                  Rules
+                  規則
                 </Link>
                 {user.is_commissioner && (
                   <Link

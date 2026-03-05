@@ -85,9 +85,9 @@ export default function YearOverviewPage() {
     <div>
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">{year} Season</h1>
+          <h1 className="text-2xl font-bold">{year} 賽季</h1>
           <p className="text-sm text-gray-500">
-            Salary Cap: ${summary.salary_cap} | {summary.teams.length} Teams
+            薪資上限: ${summary.salary_cap} | {summary.teams.length} 隊
           </p>
         </div>
         <div className="flex gap-2">
@@ -126,7 +126,7 @@ export default function YearOverviewPage() {
                 <h3 className="font-semibold">{t.manager_name}</h3>
                 {isMyTeam && (
                   <span className="rounded bg-indigo-100 px-1.5 py-0.5 text-xs text-indigo-700">
-                    My Team
+                    我的隊伍
                   </span>
                 )}
               </div>
@@ -135,18 +135,18 @@ export default function YearOverviewPage() {
               )}
               <div className="space-y-1 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-gray-500">Keepers:</span>
+                  <span className="text-gray-500">留用:</span>
                   <span>
-                    {t.active_keepers} active
-                    {t.bench_keepers > 0 && ` + ${t.bench_keepers} bench`}
+                    {t.active_keepers} 活躍
+                    {t.bench_keepers > 0 && ` + ${t.bench_keepers} 板凳`}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-500">Keeper Cost:</span>
+                  <span className="text-gray-500">留用成本:</span>
                   <span className="font-medium">${t.total_keeper_cost}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-500">Available:</span>
+                  <span className="text-gray-500">可用薪資:</span>
                   <span
                     className={
                       t.available_salary < 20
@@ -159,7 +159,7 @@ export default function YearOverviewPage() {
                 </div>
                 {t.ranking_bonus > 0 && (
                   <div className="flex justify-between">
-                    <span className="text-gray-500">Rank Bonus:</span>
+                    <span className="text-gray-500">排名獎勵:</span>
                     <span className="text-yellow-600">+${t.ranking_bonus}</span>
                   </div>
                 )}
