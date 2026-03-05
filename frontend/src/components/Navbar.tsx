@@ -64,12 +64,12 @@ export default function Navbar() {
                 </button>
               </>
             ) : (
-              <Link
-                href="/login"
+              <a
+                href={`${process.env.NEXT_PUBLIC_API_URL || "https://localhost:8002"}/api/auth/yahoo/login`}
                 className="rounded bg-indigo-600 px-3 py-1.5 text-sm hover:bg-indigo-500"
               >
                 Login with Yahoo
-              </Link>
+              </a>
             )}
           </div>
         </div>

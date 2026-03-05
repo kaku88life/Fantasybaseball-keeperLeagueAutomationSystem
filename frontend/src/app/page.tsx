@@ -23,6 +23,7 @@ export default function HomePage() {
   }
 
   if (!user) {
+    const apiBase = process.env.NEXT_PUBLIC_API_URL || "https://localhost:8002";
     return (
       <div className="mx-auto max-w-lg py-20 text-center">
         <h1 className="mb-4 text-3xl font-bold">5-Man Keeper League</h1>
@@ -30,7 +31,7 @@ export default function HomePage() {
           Fantasy Baseball Keeper League Automation System
         </p>
         <a
-          href="/login"
+          href={`${apiBase}/api/auth/yahoo/login`}
           className="rounded-lg bg-indigo-600 px-6 py-3 text-white hover:bg-indigo-500"
         >
           Login with Yahoo
