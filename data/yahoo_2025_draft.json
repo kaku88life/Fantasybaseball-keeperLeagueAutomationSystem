@@ -1,0 +1,3890 @@
+[
+  {
+    "round": 1,
+    "pick": 1,
+    "team_key": "458.l.40288.t.5",
+    "player_key": "458.p.8780",
+    "cost": 31,
+    "player_name": "Chris Sale",
+    "manager": "wei"
+  },
+  {
+    "round": 1,
+    "pick": 2,
+    "team_key": "458.l.40288.t.14",
+    "player_key": "458.p.9877",
+    "cost": 72,
+    "player_name": "Aaron Judge",
+    "manager": "謙謙"
+  },
+  {
+    "round": 1,
+    "pick": 3,
+    "team_key": "458.l.40288.t.13",
+    "player_key": "458.p.10480",
+    "cost": 61,
+    "player_name": "Kyle Tucker",
+    "manager": "TIMMY LIU"
+  },
+  {
+    "round": 1,
+    "pick": 4,
+    "team_key": "458.l.40288.t.8",
+    "player_key": "458.p.9116",
+    "cost": 51,
+    "player_name": "Francisco Lindor",
+    "manager": "Billy"
+  },
+  {
+    "round": 1,
+    "pick": 5,
+    "team_key": "458.l.40288.t.7",
+    "player_key": "458.p.10237",
+    "cost": 24,
+    "player_name": "Ozzie Albies",
+    "manager": "rawstuff"
+  },
+  {
+    "round": 1,
+    "pick": 6,
+    "team_key": "458.l.40288.t.12",
+    "player_key": "458.p.9319",
+    "cost": 21,
+    "player_name": "Xander Bogaerts",
+    "manager": "Hyper"
+  },
+  {
+    "round": 1,
+    "pick": 7,
+    "team_key": "458.l.40288.t.15",
+    "player_key": "458.p.10514",
+    "cost": 24,
+    "player_name": "Luis Castillo",
+    "manager": "魚魚"
+  },
+  {
+    "round": 1,
+    "pick": 8,
+    "team_key": "458.l.40288.t.6",
+    "player_key": "458.p.10883",
+    "cost": 67,
+    "player_name": "Yordan Alvarez",
+    "manager": "Tony"
+  },
+  {
+    "round": 1,
+    "pick": 9,
+    "team_key": "458.l.40288.t.2",
+    "player_key": "458.p.8875",
+    "cost": 54,
+    "player_name": "Bryce Harper",
+    "manager": "Leo"
+  },
+  {
+    "round": 1,
+    "pick": 10,
+    "team_key": "458.l.40288.t.2",
+    "player_key": "458.p.10056",
+    "cost": 60,
+    "player_name": "Trea Turner",
+    "manager": "Leo"
+  },
+  {
+    "round": 1,
+    "pick": 11,
+    "team_key": "458.l.40288.t.2",
+    "player_key": "458.p.9882",
+    "cost": 37,
+    "player_name": "Aaron Nola",
+    "manager": "Leo"
+  },
+  {
+    "round": 1,
+    "pick": 12,
+    "team_key": "458.l.40288.t.10",
+    "player_key": "458.p.64803",
+    "cost": 50,
+    "player_name": "Roki Sasaki",
+    "manager": "哈寶好"
+  },
+  {
+    "round": 1,
+    "pick": 13,
+    "team_key": "458.l.40288.t.1",
+    "player_key": "458.p.62973",
+    "cost": 35,
+    "player_name": "Wyatt Langford",
+    "manager": "Ｋａｋｕ"
+  },
+  {
+    "round": 1,
+    "pick": 14,
+    "team_key": "458.l.40288.t.9",
+    "player_key": "458.p.11381",
+    "cost": 53,
+    "player_name": "Logan Gilbert",
+    "manager": "YWC"
+  },
+  {
+    "round": 1,
+    "pick": 15,
+    "team_key": "458.l.40288.t.11",
+    "player_key": "458.p.10918",
+    "cost": 46,
+    "player_name": "Pete Alonso",
+    "manager": "小喆"
+  },
+  {
+    "round": 1,
+    "pick": 16,
+    "team_key": "458.l.40288.t.7",
+    "player_key": "458.p.9124",
+    "cost": 54,
+    "player_name": "Zack Wheeler",
+    "manager": "rawstuff"
+  },
+  {
+    "round": 2,
+    "pick": 17,
+    "team_key": "458.l.40288.t.8",
+    "player_key": "458.p.12122",
+    "cost": 36,
+    "player_name": "Jordan Westburg",
+    "manager": "Billy"
+  },
+  {
+    "round": 2,
+    "pick": 18,
+    "team_key": "458.l.40288.t.16",
+    "player_key": "458.p.10235",
+    "cost": 51,
+    "player_name": "Rafael Devers",
+    "manager": "Ponpon"
+  },
+  {
+    "round": 2,
+    "pick": 19,
+    "team_key": "458.l.40288.t.4",
+    "player_key": "458.p.11625",
+    "cost": 29,
+    "player_name": "Emmanuel Clase",
+    "manager": "EDDIE"
+  },
+  {
+    "round": 2,
+    "pick": 20,
+    "team_key": "458.l.40288.t.9",
+    "player_key": "458.p.9605",
+    "cost": 57,
+    "player_name": "Matt Olson",
+    "manager": "YWC"
+  },
+  {
+    "round": 2,
+    "pick": 21,
+    "team_key": "458.l.40288.t.12",
+    "player_key": "458.p.10910",
+    "cost": 49,
+    "player_name": "Corbin Burnes",
+    "manager": "Hyper"
+  },
+  {
+    "round": 2,
+    "pick": 22,
+    "team_key": "458.l.40288.t.9",
+    "player_key": "458.p.11138",
+    "cost": 50,
+    "player_name": "Framber Valdez",
+    "manager": "YWC"
+  },
+  {
+    "round": 2,
+    "pick": 23,
+    "team_key": "458.l.40288.t.4",
+    "player_key": "458.p.9727",
+    "cost": 5,
+    "player_name": "Kirby Yates",
+    "manager": "EDDIE"
+  },
+  {
+    "round": 2,
+    "pick": 24,
+    "team_key": "458.l.40288.t.9",
+    "player_key": "458.p.12497",
+    "cost": 5,
+    "player_name": "Hayden Wesneski",
+    "manager": "YWC"
+  },
+  {
+    "round": 2,
+    "pick": 25,
+    "team_key": "458.l.40288.t.8",
+    "player_key": "458.p.9095",
+    "cost": 22,
+    "player_name": "Yu Darvish",
+    "manager": "Billy"
+  },
+  {
+    "round": 2,
+    "pick": 26,
+    "team_key": "458.l.40288.t.7",
+    "player_key": "458.p.9111",
+    "cost": 36,
+    "player_name": "Manny Machado",
+    "manager": "rawstuff"
+  },
+  {
+    "round": 2,
+    "pick": 27,
+    "team_key": "458.l.40288.t.15",
+    "player_key": "458.p.8861",
+    "cost": 32,
+    "player_name": "Mike Trout",
+    "manager": "魚魚"
+  },
+  {
+    "round": 2,
+    "pick": 28,
+    "team_key": "458.l.40288.t.2",
+    "player_key": "458.p.9121",
+    "cost": 7,
+    "player_name": "Gerrit Cole",
+    "manager": "Leo"
+  },
+  {
+    "round": 2,
+    "pick": 29,
+    "team_key": "458.l.40288.t.16",
+    "player_key": "458.p.11014",
+    "cost": 28,
+    "player_name": "Freddy Peralta",
+    "manager": "Ponpon"
+  },
+  {
+    "round": 2,
+    "pick": 30,
+    "team_key": "458.l.40288.t.10",
+    "player_key": "458.p.9620",
+    "cost": 33,
+    "player_name": "Max Fried",
+    "manager": "哈寶好"
+  },
+  {
+    "round": 2,
+    "pick": 31,
+    "team_key": "458.l.40288.t.11",
+    "player_key": "458.p.9616",
+    "cost": 44,
+    "player_name": "Tyler Glasnow",
+    "manager": "小喆"
+  },
+  {
+    "round": 2,
+    "pick": 32,
+    "team_key": "458.l.40288.t.9",
+    "player_key": "458.p.10131",
+    "cost": 24,
+    "player_name": "Josh Hader",
+    "manager": "YWC"
+  },
+  {
+    "round": 3,
+    "pick": 33,
+    "team_key": "458.l.40288.t.8",
+    "player_key": "458.p.10215",
+    "cost": 9,
+    "player_name": "Tyler O'Neill",
+    "manager": "Billy"
+  },
+  {
+    "round": 3,
+    "pick": 34,
+    "team_key": "458.l.40288.t.15",
+    "player_key": "458.p.11104",
+    "cost": 15,
+    "player_name": "Randy Arozarena",
+    "manager": "魚魚"
+  },
+  {
+    "round": 3,
+    "pick": 35,
+    "team_key": "458.l.40288.t.5",
+    "player_key": "458.p.9459",
+    "cost": 31,
+    "player_name": "Sonny Gray",
+    "manager": "wei"
+  },
+  {
+    "round": 3,
+    "pick": 36,
+    "team_key": "458.l.40288.t.4",
+    "player_key": "458.p.11526",
+    "cost": 20,
+    "player_name": "Andrés Muñoz",
+    "manager": "EDDIE"
+  },
+  {
+    "round": 3,
+    "pick": 37,
+    "team_key": "458.l.40288.t.5",
+    "player_key": "458.p.10166",
+    "cost": 15,
+    "player_name": "Willson Contreras",
+    "manager": "wei"
+  },
+  {
+    "round": 3,
+    "pick": 38,
+    "team_key": "458.l.40288.t.12",
+    "player_key": "458.p.12776",
+    "cost": 33,
+    "player_name": "Kodai Senga",
+    "manager": "Hyper"
+  },
+  {
+    "round": 3,
+    "pick": 39,
+    "team_key": "458.l.40288.t.8",
+    "player_key": "458.p.10627",
+    "cost": 5,
+    "player_name": "Jesús Luzardo",
+    "manager": "Billy"
+  },
+  {
+    "round": 3,
+    "pick": 40,
+    "team_key": "458.l.40288.t.9",
+    "player_key": "458.p.64330",
+    "cost": 10,
+    "player_name": "Cam Smith",
+    "manager": "YWC"
+  },
+  {
+    "round": 3,
+    "pick": 41,
+    "team_key": "458.l.40288.t.14",
+    "player_key": "458.p.9320",
+    "cost": 30,
+    "player_name": "Christian Yelich",
+    "manager": "謙謙"
+  },
+  {
+    "round": 3,
+    "pick": 42,
+    "team_key": "458.l.40288.t.6",
+    "player_key": "458.p.12390",
+    "cost": 36,
+    "player_name": "Matt McLain",
+    "manager": "Tony"
+  },
+  {
+    "round": 3,
+    "pick": 43,
+    "team_key": "458.l.40288.t.6",
+    "player_key": "458.p.12301",
+    "cost": 22,
+    "player_name": "Alexis Díaz",
+    "manager": "Tony"
+  },
+  {
+    "round": 3,
+    "pick": 44,
+    "team_key": "458.l.40288.t.11",
+    "player_key": "458.p.12322",
+    "cost": 26,
+    "player_name": "Ezequiel Tovar",
+    "manager": "小喆"
+  },
+  {
+    "round": 3,
+    "pick": 45,
+    "team_key": "458.l.40288.t.16",
+    "player_key": "458.p.10183",
+    "cost": 35,
+    "player_name": "Alex Bregman",
+    "manager": "Ponpon"
+  },
+  {
+    "round": 3,
+    "pick": 46,
+    "team_key": "458.l.40288.t.7",
+    "player_key": "458.p.10440",
+    "cost": 16,
+    "player_name": "Ian Happ",
+    "manager": "rawstuff"
+  },
+  {
+    "round": 3,
+    "pick": 47,
+    "team_key": "458.l.40288.t.10",
+    "player_key": "458.p.11817",
+    "cost": 12,
+    "player_name": "Bryson Stott",
+    "manager": "哈寶好"
+  },
+  {
+    "round": 3,
+    "pick": 48,
+    "team_key": "458.l.40288.t.4",
+    "player_key": "458.p.10642",
+    "cost": 23,
+    "player_name": "Will Smith",
+    "manager": "EDDIE"
+  },
+  {
+    "round": 4,
+    "pick": 49,
+    "team_key": "458.l.40288.t.8",
+    "player_key": "458.p.10429",
+    "cost": 10,
+    "player_name": "Ryan Mountcastle",
+    "manager": "Billy"
+  },
+  {
+    "round": 4,
+    "pick": 50,
+    "team_key": "458.l.40288.t.6",
+    "player_key": "458.p.60131",
+    "cost": 15,
+    "player_name": "Christian Encarnacion-Strand",
+    "manager": "Tony"
+  },
+  {
+    "round": 4,
+    "pick": 51,
+    "team_key": "458.l.40288.t.11",
+    "player_key": "458.p.10898",
+    "cost": 10,
+    "player_name": "Dustin May",
+    "manager": "小喆"
+  },
+  {
+    "round": 4,
+    "pick": 52,
+    "team_key": "458.l.40288.t.11",
+    "player_key": "458.p.10881",
+    "cost": 14,
+    "player_name": "Isaac Paredes",
+    "manager": "小喆"
+  },
+  {
+    "round": 4,
+    "pick": 53,
+    "team_key": "458.l.40288.t.12",
+    "player_key": "458.p.10683",
+    "cost": 16,
+    "player_name": "Nick Pivetta",
+    "manager": "Hyper"
+  },
+  {
+    "round": 4,
+    "pick": 54,
+    "team_key": "458.l.40288.t.15",
+    "player_key": "458.p.9108",
+    "cost": 15,
+    "player_name": "Nick Castellanos",
+    "manager": "魚魚"
+  },
+  {
+    "round": 4,
+    "pick": 55,
+    "team_key": "458.l.40288.t.4",
+    "player_key": "458.p.11536",
+    "cost": 2,
+    "player_name": "Camilo Doval",
+    "manager": "EDDIE"
+  },
+  {
+    "round": 4,
+    "pick": 56,
+    "team_key": "458.l.40288.t.9",
+    "player_key": "458.p.10868",
+    "cost": 4,
+    "player_name": "Willi Castro",
+    "manager": "YWC"
+  },
+  {
+    "round": 4,
+    "pick": 57,
+    "team_key": "458.l.40288.t.1",
+    "player_key": "458.p.10011",
+    "cost": 2,
+    "player_name": "Matthew Boyd",
+    "manager": "Ｋａｋｕ"
+  },
+  {
+    "round": 4,
+    "pick": 58,
+    "team_key": "458.l.40288.t.1",
+    "player_key": "458.p.9896",
+    "cost": 17,
+    "player_name": "Jeff Hoffman",
+    "manager": "Ｋａｋｕ"
+  },
+  {
+    "round": 4,
+    "pick": 59,
+    "team_key": "458.l.40288.t.10",
+    "player_key": "458.p.9718",
+    "cost": 15,
+    "player_name": "J.T. Realmuto",
+    "manager": "哈寶好"
+  },
+  {
+    "round": 4,
+    "pick": 60,
+    "team_key": "458.l.40288.t.7",
+    "player_key": "458.p.9358",
+    "cost": 15,
+    "player_name": "Ryan Pressly",
+    "manager": "rawstuff"
+  },
+  {
+    "round": 4,
+    "pick": 61,
+    "team_key": "458.l.40288.t.16",
+    "player_key": "458.p.11125",
+    "cost": 12,
+    "player_name": "Brandon Lowe",
+    "manager": "Ponpon"
+  },
+  {
+    "round": 4,
+    "pick": 62,
+    "team_key": "458.l.40288.t.1",
+    "player_key": "458.p.9414",
+    "cost": 9,
+    "player_name": "Joc Pederson",
+    "manager": "Ｋａｋｕ"
+  },
+  {
+    "round": 4,
+    "pick": 63,
+    "team_key": "458.l.40288.t.4",
+    "player_key": "458.p.11596",
+    "cost": 28,
+    "player_name": "Tommy Edman",
+    "manager": "EDDIE"
+  },
+  {
+    "round": 4,
+    "pick": 64,
+    "team_key": "458.l.40288.t.12",
+    "player_key": "458.p.10964",
+    "cost": 12,
+    "player_name": "Luis García Jr.",
+    "manager": "Hyper"
+  },
+  {
+    "round": 5,
+    "pick": 65,
+    "team_key": "458.l.40288.t.4",
+    "player_key": "458.p.8270",
+    "cost": 8,
+    "player_name": "Charlie Morton",
+    "manager": "EDDIE"
+  },
+  {
+    "round": 5,
+    "pick": 66,
+    "team_key": "458.l.40288.t.8",
+    "player_key": "458.p.11750",
+    "cost": 11,
+    "player_name": "Nick Lodolo",
+    "manager": "Billy"
+  },
+  {
+    "round": 5,
+    "pick": 67,
+    "team_key": "458.l.40288.t.4",
+    "player_key": "458.p.9771",
+    "cost": 18,
+    "player_name": "Chris Taylor",
+    "manager": "EDDIE"
+  },
+  {
+    "round": 5,
+    "pick": 68,
+    "team_key": "458.l.40288.t.6",
+    "player_key": "458.p.11323",
+    "cost": 3,
+    "player_name": "Brady Singer",
+    "manager": "Tony"
+  },
+  {
+    "round": 5,
+    "pick": 69,
+    "team_key": "458.l.40288.t.5",
+    "player_key": "458.p.9334",
+    "cost": 17,
+    "player_name": "Kevin Gausman",
+    "manager": "wei"
+  },
+  {
+    "round": 5,
+    "pick": 70,
+    "team_key": "458.l.40288.t.12",
+    "player_key": "458.p.9691",
+    "cost": 24,
+    "player_name": "Robbie Ray",
+    "manager": "Hyper"
+  },
+  {
+    "round": 5,
+    "pick": 71,
+    "team_key": "458.l.40288.t.6",
+    "player_key": "458.p.9651",
+    "cost": 4,
+    "player_name": "Nick Martinez",
+    "manager": "Tony"
+  },
+  {
+    "round": 5,
+    "pick": 72,
+    "team_key": "458.l.40288.t.15",
+    "player_key": "458.p.11348",
+    "cost": 8,
+    "player_name": "Luke Raley",
+    "manager": "魚魚"
+  },
+  {
+    "round": 5,
+    "pick": 73,
+    "team_key": "458.l.40288.t.14",
+    "player_key": "458.p.11692",
+    "cost": 2,
+    "player_name": "Jake Cronenworth",
+    "manager": "謙謙"
+  },
+  {
+    "round": 5,
+    "pick": 74,
+    "team_key": "458.l.40288.t.1",
+    "player_key": "458.p.12025",
+    "cost": 11,
+    "player_name": "Masyn Winn",
+    "manager": "Ｋａｋｕ"
+  },
+  {
+    "round": 5,
+    "pick": 75,
+    "team_key": "458.l.40288.t.16",
+    "player_key": "458.p.12011",
+    "cost": 11,
+    "player_name": "Logan O'Hoppe",
+    "manager": "Ponpon"
+  },
+  {
+    "round": 5,
+    "pick": 76,
+    "team_key": "458.l.40288.t.10",
+    "player_key": "458.p.10234",
+    "cost": 12,
+    "player_name": "Dansby Swanson",
+    "manager": "哈寶好"
+  },
+  {
+    "round": 5,
+    "pick": 77,
+    "team_key": "458.l.40288.t.16",
+    "player_key": "458.p.10601",
+    "cost": 8,
+    "player_name": "Josh Lowe",
+    "manager": "Ponpon"
+  },
+  {
+    "round": 5,
+    "pick": 78,
+    "team_key": "458.l.40288.t.14",
+    "player_key": "458.p.10274",
+    "cost": 9,
+    "player_name": "Carlos Estévez",
+    "manager": "謙謙"
+  },
+  {
+    "round": 5,
+    "pick": 79,
+    "team_key": "458.l.40288.t.4",
+    "player_key": "458.p.11717",
+    "cost": 15,
+    "player_name": "Trevor Megill",
+    "manager": "EDDIE"
+  },
+  {
+    "round": 5,
+    "pick": 80,
+    "team_key": "458.l.40288.t.1",
+    "player_key": "458.p.11728",
+    "cost": 9,
+    "player_name": "Shea Langeliers",
+    "manager": "Ｋａｋｕ"
+  },
+  {
+    "round": 6,
+    "pick": 81,
+    "team_key": "458.l.40288.t.8",
+    "player_key": "458.p.10849",
+    "cost": 10,
+    "player_name": "Cedric Mullins",
+    "manager": "Billy"
+  },
+  {
+    "round": 6,
+    "pick": 82,
+    "team_key": "458.l.40288.t.15",
+    "player_key": "458.p.60592",
+    "cost": 1,
+    "player_name": "Andrew Painter",
+    "manager": "魚魚"
+  },
+  {
+    "round": 6,
+    "pick": 83,
+    "team_key": "458.l.40288.t.2",
+    "player_key": "458.p.12036",
+    "cost": 15,
+    "player_name": "Ryan Pepiot",
+    "manager": "Leo"
+  },
+  {
+    "round": 6,
+    "pick": 84,
+    "team_key": "458.l.40288.t.1",
+    "player_key": "458.p.9606",
+    "cost": 14,
+    "player_name": "Max Muncy",
+    "manager": "Ｋａｋｕ"
+  },
+  {
+    "round": 6,
+    "pick": 85,
+    "team_key": "458.l.40288.t.7",
+    "player_key": "458.p.11253",
+    "cost": 9,
+    "player_name": "Jordan Romano",
+    "manager": "rawstuff"
+  },
+  {
+    "round": 6,
+    "pick": 86,
+    "team_key": "458.l.40288.t.12",
+    "player_key": "458.p.60056",
+    "cost": 13,
+    "player_name": "Brandon Pfaadt",
+    "manager": "Hyper"
+  },
+  {
+    "round": 6,
+    "pick": 87,
+    "team_key": "458.l.40288.t.5",
+    "player_key": "458.p.10152",
+    "cost": 20,
+    "player_name": "Reynaldo López",
+    "manager": "wei"
+  },
+  {
+    "round": 6,
+    "pick": 88,
+    "team_key": "458.l.40288.t.9",
+    "player_key": "458.p.11265",
+    "cost": 6,
+    "player_name": "Jake McCarthy",
+    "manager": "YWC"
+  },
+  {
+    "round": 6,
+    "pick": 89,
+    "team_key": "458.l.40288.t.12",
+    "player_key": "458.p.10970",
+    "cost": 6,
+    "player_name": "Nestor Cortes",
+    "manager": "Hyper"
+  },
+  {
+    "round": 6,
+    "pick": 90,
+    "team_key": "458.l.40288.t.6",
+    "player_key": "458.p.10456",
+    "cost": 8,
+    "player_name": "Tyler Stephenson",
+    "manager": "Tony"
+  },
+  {
+    "round": 6,
+    "pick": 91,
+    "team_key": "458.l.40288.t.4",
+    "player_key": "458.p.11238",
+    "cost": 12,
+    "player_name": "Lane Thomas",
+    "manager": "EDDIE"
+  },
+  {
+    "round": 6,
+    "pick": 92,
+    "team_key": "458.l.40288.t.14",
+    "player_key": "458.p.8967",
+    "cost": 12,
+    "player_name": "Paul Goldschmidt",
+    "manager": "謙謙"
+  },
+  {
+    "round": 6,
+    "pick": 93,
+    "team_key": "458.l.40288.t.12",
+    "player_key": "458.p.10465",
+    "cost": 16,
+    "player_name": "Yandy Díaz",
+    "manager": "Hyper"
+  },
+  {
+    "round": 6,
+    "pick": 94,
+    "team_key": "458.l.40288.t.10",
+    "player_key": "458.p.11263",
+    "cost": 11,
+    "player_name": "Yusei Kikuchi",
+    "manager": "哈寶好"
+  },
+  {
+    "round": 6,
+    "pick": 95,
+    "team_key": "458.l.40288.t.1",
+    "player_key": "458.p.9582",
+    "cost": 4,
+    "player_name": "Sean Manaea",
+    "manager": "Ｋａｋｕ"
+  },
+  {
+    "round": 6,
+    "pick": 96,
+    "team_key": "458.l.40288.t.14",
+    "player_key": "458.p.11768",
+    "cost": 10,
+    "player_name": "Jeremy Peña",
+    "manager": "謙謙"
+  },
+  {
+    "round": 7,
+    "pick": 97,
+    "team_key": "458.l.40288.t.5",
+    "player_key": "458.p.12275",
+    "cost": 5,
+    "player_name": "Dylan Lee",
+    "manager": "wei"
+  },
+  {
+    "round": 7,
+    "pick": 98,
+    "team_key": "458.l.40288.t.15",
+    "player_key": "458.p.12024",
+    "cost": 4,
+    "player_name": "Jordan Walker",
+    "manager": "魚魚"
+  },
+  {
+    "round": 7,
+    "pick": 99,
+    "team_key": "458.l.40288.t.11",
+    "player_key": "458.p.12309",
+    "cost": 1,
+    "player_name": "Jonathan Aranda",
+    "manager": "小喆"
+  },
+  {
+    "round": 7,
+    "pick": 100,
+    "team_key": "458.l.40288.t.6",
+    "player_key": "458.p.10175",
+    "cost": 1,
+    "player_name": "Ryan McMahon",
+    "manager": "Tony"
+  },
+  {
+    "round": 7,
+    "pick": 101,
+    "team_key": "458.l.40288.t.10",
+    "player_key": "458.p.10659",
+    "cost": 6,
+    "player_name": "Lucas Erceg",
+    "manager": "哈寶好"
+  },
+  {
+    "round": 7,
+    "pick": 102,
+    "team_key": "458.l.40288.t.12",
+    "player_key": "458.p.9573",
+    "cost": 8,
+    "player_name": "Carlos Correa",
+    "manager": "Hyper"
+  },
+  {
+    "round": 7,
+    "pick": 103,
+    "team_key": "458.l.40288.t.14",
+    "player_key": "458.p.12690",
+    "cost": 6,
+    "player_name": "Fernando Cruz",
+    "manager": "謙謙"
+  },
+  {
+    "round": 7,
+    "pick": 104,
+    "team_key": "458.l.40288.t.8",
+    "player_key": "458.p.60016",
+    "cost": 13,
+    "player_name": "Cade Smith",
+    "manager": "Billy"
+  },
+  {
+    "round": 7,
+    "pick": 105,
+    "team_key": "458.l.40288.t.2",
+    "player_key": "458.p.9590",
+    "cost": 7,
+    "player_name": "Byron Buxton",
+    "manager": "Leo"
+  },
+  {
+    "round": 7,
+    "pick": 106,
+    "team_key": "458.l.40288.t.3",
+    "player_key": "458.p.10919",
+    "cost": 7,
+    "player_name": "Andrés Giménez",
+    "manager": "叫我寬哥"
+  },
+  {
+    "round": 7,
+    "pick": 107,
+    "team_key": "458.l.40288.t.2",
+    "player_key": "458.p.12550",
+    "cost": 7,
+    "player_name": "Alec Burleson",
+    "manager": "Leo"
+  },
+  {
+    "round": 7,
+    "pick": 108,
+    "team_key": "458.l.40288.t.5",
+    "player_key": "458.p.10940",
+    "cost": 10,
+    "player_name": "MacKenzie Gore",
+    "manager": "wei"
+  },
+  {
+    "round": 7,
+    "pick": 109,
+    "team_key": "458.l.40288.t.16",
+    "player_key": "458.p.11866",
+    "cost": 1,
+    "player_name": "Andrew Vaughn",
+    "manager": "Ponpon"
+  },
+  {
+    "round": 7,
+    "pick": 110,
+    "team_key": "458.l.40288.t.8",
+    "player_key": "458.p.10431",
+    "cost": 2,
+    "player_name": "Keegan Akin",
+    "manager": "Billy"
+  },
+  {
+    "round": 7,
+    "pick": 111,
+    "team_key": "458.l.40288.t.13",
+    "player_key": "458.p.10556",
+    "cost": 5,
+    "player_name": "Rhys Hoskins",
+    "manager": "TIMMY LIU"
+  },
+  {
+    "round": 7,
+    "pick": 112,
+    "team_key": "458.l.40288.t.13",
+    "player_key": "458.p.11645",
+    "cost": 7,
+    "player_name": "David Bednar",
+    "manager": "TIMMY LIU"
+  },
+  {
+    "round": 8,
+    "pick": 113,
+    "team_key": "458.l.40288.t.5",
+    "player_key": "458.p.9559",
+    "cost": 1,
+    "player_name": "Pierce Johnson",
+    "manager": "wei"
+  },
+  {
+    "round": 8,
+    "pick": 114,
+    "team_key": "458.l.40288.t.15",
+    "player_key": "458.p.10227",
+    "cost": 5,
+    "player_name": "Victor Robles",
+    "manager": "魚魚"
+  },
+  {
+    "round": 8,
+    "pick": 115,
+    "team_key": "458.l.40288.t.11",
+    "player_key": "458.p.11782",
+    "cost": 3,
+    "player_name": "JJ Bleday",
+    "manager": "小喆"
+  },
+  {
+    "round": 8,
+    "pick": 116,
+    "team_key": "458.l.40288.t.14",
+    "player_key": "458.p.9872",
+    "cost": 11,
+    "player_name": "José Berríos",
+    "manager": "謙謙"
+  },
+  {
+    "round": 8,
+    "pick": 117,
+    "team_key": "458.l.40288.t.12",
+    "player_key": "458.p.10548",
+    "cost": 12,
+    "player_name": "A.J. Puk",
+    "manager": "Hyper"
+  },
+  {
+    "round": 8,
+    "pick": 118,
+    "team_key": "458.l.40288.t.16",
+    "player_key": "458.p.10496",
+    "cost": 11,
+    "player_name": "Taylor Ward",
+    "manager": "Ponpon"
+  },
+  {
+    "round": 8,
+    "pick": 119,
+    "team_key": "458.l.40288.t.7",
+    "player_key": "458.p.60188",
+    "cost": 9,
+    "player_name": "Spencer Arrighetti",
+    "manager": "rawstuff"
+  },
+  {
+    "round": 8,
+    "pick": 120,
+    "team_key": "458.l.40288.t.5",
+    "player_key": "458.p.11795",
+    "cost": 5,
+    "player_name": "Matt Wallner",
+    "manager": "wei"
+  },
+  {
+    "round": 8,
+    "pick": 121,
+    "team_key": "458.l.40288.t.10",
+    "player_key": "458.p.10616",
+    "cost": 7,
+    "player_name": "Lourdes Gurriel Jr.",
+    "manager": "哈寶好"
+  },
+  {
+    "round": 8,
+    "pick": 122,
+    "team_key": "458.l.40288.t.10",
+    "player_key": "458.p.12667",
+    "cost": 20,
+    "player_name": "Kerry Carpenter",
+    "manager": "哈寶好"
+  },
+  {
+    "round": 8,
+    "pick": 123,
+    "team_key": "458.l.40288.t.7",
+    "player_key": "458.p.11090",
+    "cost": 7,
+    "player_name": "Nathaniel Lowe",
+    "manager": "rawstuff"
+  },
+  {
+    "round": 8,
+    "pick": 124,
+    "team_key": "458.l.40288.t.5",
+    "player_key": "458.p.10569",
+    "cost": 12,
+    "player_name": "Clay Holmes",
+    "manager": "wei"
+  },
+  {
+    "round": 8,
+    "pick": 125,
+    "team_key": "458.l.40288.t.16",
+    "player_key": "458.p.11482",
+    "cost": 10,
+    "player_name": "Edwin Uceta",
+    "manager": "Ponpon"
+  },
+  {
+    "round": 8,
+    "pick": 126,
+    "team_key": "458.l.40288.t.4",
+    "player_key": "458.p.12203",
+    "cost": 15,
+    "player_name": "Griffin Jax",
+    "manager": "EDDIE"
+  },
+  {
+    "round": 8,
+    "pick": 127,
+    "team_key": "458.l.40288.t.4",
+    "player_key": "458.p.12370",
+    "cost": 9,
+    "player_name": "Connor Norby",
+    "manager": "EDDIE"
+  },
+  {
+    "round": 8,
+    "pick": 128,
+    "team_key": "458.l.40288.t.16",
+    "player_key": "458.p.9105",
+    "cost": 11,
+    "player_name": "Nolan Arenado",
+    "manager": "Ponpon"
+  },
+  {
+    "round": 9,
+    "pick": 129,
+    "team_key": "458.l.40288.t.1",
+    "player_key": "458.p.60411",
+    "cost": 11,
+    "player_name": "Kyle Manzardo",
+    "manager": "Ｋａｋｕ"
+  },
+  {
+    "round": 9,
+    "pick": 130,
+    "team_key": "458.l.40288.t.15",
+    "player_key": "458.p.11097",
+    "cost": 4,
+    "player_name": "Joey Bart",
+    "manager": "魚魚"
+  },
+  {
+    "round": 9,
+    "pick": 131,
+    "team_key": "458.l.40288.t.10",
+    "player_key": "458.p.12336",
+    "cost": 10,
+    "player_name": "Maikel Garcia",
+    "manager": "哈寶好"
+  },
+  {
+    "round": 9,
+    "pick": 132,
+    "team_key": "458.l.40288.t.15",
+    "player_key": "458.p.12401",
+    "cost": 9,
+    "player_name": "Gavin Williams",
+    "manager": "魚魚"
+  },
+  {
+    "round": 9,
+    "pick": 133,
+    "team_key": "458.l.40288.t.8",
+    "player_key": "458.p.11292",
+    "cost": 6,
+    "player_name": "Jonathan India",
+    "manager": "Billy"
+  },
+  {
+    "round": 9,
+    "pick": 134,
+    "team_key": "458.l.40288.t.13",
+    "player_key": "458.p.11626",
+    "cost": 11,
+    "player_name": "Kevin Ginkel",
+    "manager": "TIMMY LIU"
+  },
+  {
+    "round": 9,
+    "pick": 135,
+    "team_key": "458.l.40288.t.11",
+    "player_key": "458.p.10463",
+    "cost": 4,
+    "player_name": "Nolan Jones",
+    "manager": "小喆"
+  },
+  {
+    "round": 9,
+    "pick": 136,
+    "team_key": "458.l.40288.t.9",
+    "player_key": "458.p.11912",
+    "cost": 1,
+    "player_name": "Chas McCormick",
+    "manager": "YWC"
+  },
+  {
+    "round": 9,
+    "pick": 137,
+    "team_key": "458.l.40288.t.1",
+    "player_key": "458.p.9875",
+    "cost": 2,
+    "player_name": "Michael Conforto",
+    "manager": "Ｋａｋｕ"
+  },
+  {
+    "round": 9,
+    "pick": 138,
+    "team_key": "458.l.40288.t.13",
+    "player_key": "458.p.9057",
+    "cost": 9,
+    "player_name": "Liam Hendriks",
+    "manager": "TIMMY LIU"
+  },
+  {
+    "round": 9,
+    "pick": 139,
+    "team_key": "458.l.40288.t.3",
+    "player_key": "458.p.9339",
+    "cost": 2,
+    "player_name": "George Springer",
+    "manager": "叫我寬哥"
+  },
+  {
+    "round": 9,
+    "pick": 140,
+    "team_key": "458.l.40288.t.14",
+    "player_key": "458.p.11815",
+    "cost": 1,
+    "player_name": "Erik Miller",
+    "manager": "謙謙"
+  },
+  {
+    "round": 9,
+    "pick": 141,
+    "team_key": "458.l.40288.t.16",
+    "player_key": "458.p.8193",
+    "cost": 11,
+    "player_name": "Max Scherzer",
+    "manager": "Ponpon"
+  },
+  {
+    "round": 9,
+    "pick": 142,
+    "team_key": "458.l.40288.t.7",
+    "player_key": "458.p.12005",
+    "cost": 4,
+    "player_name": "Tyler Soderstrom",
+    "manager": "rawstuff"
+  },
+  {
+    "round": 9,
+    "pick": 143,
+    "team_key": "458.l.40288.t.4",
+    "player_key": "458.p.9883",
+    "cost": 1,
+    "player_name": "Josh Bell",
+    "manager": "EDDIE"
+  },
+  {
+    "round": 9,
+    "pick": 144,
+    "team_key": "458.l.40288.t.13",
+    "player_key": "458.p.11290",
+    "cost": 6,
+    "player_name": "TJ Friedl",
+    "manager": "TIMMY LIU"
+  },
+  {
+    "round": 10,
+    "pick": 145,
+    "team_key": "458.l.40288.t.3",
+    "player_key": "458.p.62953",
+    "cost": 3,
+    "player_name": "Nolan Schanuel",
+    "manager": "叫我寬哥"
+  },
+  {
+    "round": 10,
+    "pick": 146,
+    "team_key": "458.l.40288.t.15",
+    "player_key": "458.p.11914",
+    "cost": 1,
+    "player_name": "Spencer Torkelson",
+    "manager": "魚魚"
+  },
+  {
+    "round": 10,
+    "pick": 147,
+    "team_key": "458.l.40288.t.11",
+    "player_key": "458.p.60329",
+    "cost": 4,
+    "player_name": "Orion Kerkering",
+    "manager": "小喆"
+  },
+  {
+    "round": 10,
+    "pick": 148,
+    "team_key": "458.l.40288.t.6",
+    "player_key": "458.p.60122",
+    "cost": 7,
+    "player_name": "Porter Hodge",
+    "manager": "Tony"
+  },
+  {
+    "round": 10,
+    "pick": 149,
+    "team_key": "458.l.40288.t.12",
+    "player_key": "458.p.11121",
+    "cost": 4,
+    "player_name": "Jeffrey Springs",
+    "manager": "Hyper"
+  },
+  {
+    "round": 10,
+    "pick": 150,
+    "team_key": "458.l.40288.t.12",
+    "player_key": "458.p.10842",
+    "cost": 1,
+    "player_name": "Pavin Smith",
+    "manager": "Hyper"
+  },
+  {
+    "round": 10,
+    "pick": 151,
+    "team_key": "458.l.40288.t.13",
+    "player_key": "458.p.9571",
+    "cost": 4,
+    "player_name": "Trevor Story",
+    "manager": "TIMMY LIU"
+  },
+  {
+    "round": 10,
+    "pick": 152,
+    "team_key": "458.l.40288.t.13",
+    "player_key": "458.p.12731",
+    "cost": 4,
+    "player_name": "Wilyer Abreu",
+    "manager": "TIMMY LIU"
+  },
+  {
+    "round": 10,
+    "pick": 153,
+    "team_key": "458.l.40288.t.10",
+    "player_key": "458.p.12763",
+    "cost": 3,
+    "player_name": "Masataka Yoshida",
+    "manager": "哈寶好"
+  },
+  {
+    "round": 10,
+    "pick": 154,
+    "team_key": "458.l.40288.t.13",
+    "player_key": "458.p.12730",
+    "cost": 10,
+    "player_name": "Ceddanne Rafaela",
+    "manager": "TIMMY LIU"
+  },
+  {
+    "round": 10,
+    "pick": 155,
+    "team_key": "458.l.40288.t.6",
+    "player_key": "458.p.11310",
+    "cost": 4,
+    "player_name": "Parker Meadows",
+    "manager": "Tony"
+  },
+  {
+    "round": 10,
+    "pick": 156,
+    "team_key": "458.l.40288.t.13",
+    "player_key": "458.p.9684",
+    "cost": 10,
+    "player_name": "Chris Martin",
+    "manager": "TIMMY LIU"
+  },
+  {
+    "round": 10,
+    "pick": 157,
+    "team_key": "458.l.40288.t.16",
+    "player_key": "458.p.60420",
+    "cost": 1,
+    "player_name": "Chandler Simpson",
+    "manager": "Ponpon"
+  },
+  {
+    "round": 10,
+    "pick": 158,
+    "team_key": "458.l.40288.t.13",
+    "player_key": "458.p.64311",
+    "cost": 6,
+    "player_name": "Travis Bazzana",
+    "manager": "TIMMY LIU"
+  },
+  {
+    "round": 10,
+    "pick": 159,
+    "team_key": "458.l.40288.t.4",
+    "player_key": "458.p.7590",
+    "cost": 3,
+    "player_name": "Justin Verlander",
+    "manager": "EDDIE"
+  },
+  {
+    "round": 10,
+    "pick": 160,
+    "team_key": "458.l.40288.t.11",
+    "player_key": "458.p.9228",
+    "cost": 5,
+    "player_name": "Jorge Soler",
+    "manager": "小喆"
+  },
+  {
+    "round": 11,
+    "pick": 161,
+    "team_key": "458.l.40288.t.4",
+    "player_key": "458.p.10893",
+    "cost": 5,
+    "player_name": "Jo Adell",
+    "manager": "EDDIE"
+  },
+  {
+    "round": 11,
+    "pick": 162,
+    "team_key": "458.l.40288.t.13",
+    "player_key": "458.p.10509",
+    "cost": 20,
+    "player_name": "Walker Buehler",
+    "manager": "TIMMY LIU"
+  },
+  {
+    "round": 11,
+    "pick": 163,
+    "team_key": "458.l.40288.t.11",
+    "player_key": "458.p.12484",
+    "cost": 1,
+    "player_name": "Chase Petty",
+    "manager": "小喆"
+  },
+  {
+    "round": 11,
+    "pick": 164,
+    "team_key": "458.l.40288.t.6",
+    "player_key": "458.p.10133",
+    "cost": 1,
+    "player_name": "Taylor Rogers",
+    "manager": "Tony"
+  },
+  {
+    "round": 11,
+    "pick": 165,
+    "team_key": "458.l.40288.t.8",
+    "player_key": "458.p.10565",
+    "cost": 1,
+    "player_name": "Mitch Keller",
+    "manager": "Billy"
+  },
+  {
+    "round": 11,
+    "pick": 166,
+    "team_key": "458.l.40288.t.12",
+    "player_key": "458.p.12212",
+    "cost": 6,
+    "player_name": "Lars Nootbaar",
+    "manager": "Hyper"
+  },
+  {
+    "round": 11,
+    "pick": 167,
+    "team_key": "458.l.40288.t.1",
+    "player_key": "458.p.12429",
+    "cost": 6,
+    "player_name": "Reese Olson",
+    "manager": "Ｋａｋｕ"
+  },
+  {
+    "round": 11,
+    "pick": 168,
+    "team_key": "458.l.40288.t.15",
+    "player_key": "458.p.11379",
+    "cost": 7,
+    "player_name": "Ryan Weathers",
+    "manager": "魚魚"
+  },
+  {
+    "round": 11,
+    "pick": 169,
+    "team_key": "458.l.40288.t.10",
+    "player_key": "458.p.12351",
+    "cost": 1,
+    "player_name": "Brendan Donovan",
+    "manager": "哈寶好"
+  },
+  {
+    "round": 11,
+    "pick": 170,
+    "team_key": "458.l.40288.t.6",
+    "player_key": "458.p.11709",
+    "cost": 6,
+    "player_name": "Kyle Finnegan",
+    "manager": "Tony"
+  },
+  {
+    "round": 11,
+    "pick": 171,
+    "team_key": "458.l.40288.t.11",
+    "player_key": "458.p.10923",
+    "cost": 3,
+    "player_name": "Thairo Estrada",
+    "manager": "小喆"
+  },
+  {
+    "round": 11,
+    "pick": 172,
+    "team_key": "458.l.40288.t.14",
+    "player_key": "458.p.12606",
+    "cost": 1,
+    "player_name": "Tyler Holton",
+    "manager": "謙謙"
+  },
+  {
+    "round": 11,
+    "pick": 173,
+    "team_key": "458.l.40288.t.13",
+    "player_key": "458.p.11208",
+    "cost": 19,
+    "player_name": "Bryan Abreu",
+    "manager": "TIMMY LIU"
+  },
+  {
+    "round": 11,
+    "pick": 174,
+    "team_key": "458.l.40288.t.10",
+    "player_key": "458.p.64895",
+    "cost": 18,
+    "player_name": "Tomoyuki Sugano",
+    "manager": "哈寶好"
+  },
+  {
+    "round": 11,
+    "pick": 175,
+    "team_key": "458.l.40288.t.4",
+    "player_key": "458.p.10499",
+    "cost": 1,
+    "player_name": "Brandon Marsh",
+    "manager": "EDDIE"
+  },
+  {
+    "round": 11,
+    "pick": 176,
+    "team_key": "458.l.40288.t.1",
+    "player_key": "458.p.61346",
+    "cost": 4,
+    "player_name": "Tyler Fitzgerald",
+    "manager": "Ｋａｋｕ"
+  },
+  {
+    "round": 12,
+    "pick": 177,
+    "team_key": "458.l.40288.t.12",
+    "player_key": "458.p.10730",
+    "cost": 7,
+    "player_name": "Brandon Woodruff",
+    "manager": "Hyper"
+  },
+  {
+    "round": 12,
+    "pick": 178,
+    "team_key": "458.l.40288.t.8",
+    "player_key": "458.p.9547",
+    "cost": 3,
+    "player_name": "Hunter Harvey",
+    "manager": "Billy"
+  },
+  {
+    "round": 12,
+    "pick": 179,
+    "team_key": "458.l.40288.t.1",
+    "player_key": "458.p.60218",
+    "cost": 9,
+    "player_name": "Ben Joyce",
+    "manager": "Ｋａｋｕ"
+  },
+  {
+    "round": 12,
+    "pick": 180,
+    "team_key": "458.l.40288.t.7",
+    "player_key": "458.p.9799",
+    "cost": 2,
+    "player_name": "Chris Bassitt",
+    "manager": "rawstuff"
+  },
+  {
+    "round": 12,
+    "pick": 181,
+    "team_key": "458.l.40288.t.8",
+    "player_key": "458.p.11836",
+    "cost": 5,
+    "player_name": "Ivan Herrera",
+    "manager": "Billy"
+  },
+  {
+    "round": 12,
+    "pick": 182,
+    "team_key": "458.l.40288.t.7",
+    "player_key": "458.p.12748",
+    "cost": 1,
+    "player_name": "Ben Brown",
+    "manager": "rawstuff"
+  },
+  {
+    "round": 12,
+    "pick": 183,
+    "team_key": "458.l.40288.t.9",
+    "player_key": "458.p.12395",
+    "cost": 1,
+    "player_name": "Andrew Abbott",
+    "manager": "YWC"
+  },
+  {
+    "round": 12,
+    "pick": 184,
+    "team_key": "458.l.40288.t.10",
+    "player_key": "458.p.8616",
+    "cost": 5,
+    "player_name": "Aroldis Chapman",
+    "manager": "哈寶好"
+  },
+  {
+    "round": 12,
+    "pick": 185,
+    "team_key": "458.l.40288.t.13",
+    "player_key": "458.p.12374",
+    "cost": 3,
+    "player_name": "Joey Ortiz",
+    "manager": "TIMMY LIU"
+  },
+  {
+    "round": 12,
+    "pick": 186,
+    "team_key": "458.l.40288.t.2",
+    "player_key": "458.p.11794",
+    "cost": 2,
+    "player_name": "Ryan Jeffers",
+    "manager": "Leo"
+  },
+  {
+    "round": 12,
+    "pick": 187,
+    "team_key": "458.l.40288.t.14",
+    "player_key": "458.p.9388",
+    "cost": 1,
+    "player_name": "Ryan Brasier",
+    "manager": "謙謙"
+  },
+  {
+    "round": 12,
+    "pick": 188,
+    "team_key": "458.l.40288.t.16",
+    "player_key": "458.p.12665",
+    "cost": 11,
+    "player_name": "Hunter Gaddis",
+    "manager": "Ponpon"
+  },
+  {
+    "round": 12,
+    "pick": 189,
+    "team_key": "458.l.40288.t.1",
+    "player_key": "458.p.12503",
+    "cost": 5,
+    "player_name": "Zack Gelof",
+    "manager": "Ｋａｋｕ"
+  },
+  {
+    "round": 12,
+    "pick": 190,
+    "team_key": "458.l.40288.t.13",
+    "player_key": "458.p.12085",
+    "cost": 4,
+    "player_name": "Bowden Francis",
+    "manager": "TIMMY LIU"
+  },
+  {
+    "round": 12,
+    "pick": 191,
+    "team_key": "458.l.40288.t.5",
+    "player_key": "458.p.8619",
+    "cost": 1,
+    "player_name": "Carlos Santana",
+    "manager": "wei"
+  },
+  {
+    "round": 12,
+    "pick": 192,
+    "team_key": "458.l.40288.t.8",
+    "player_key": "458.p.12204",
+    "cost": 2,
+    "player_name": "Jason Foley",
+    "manager": "Billy"
+  },
+  {
+    "round": 13,
+    "pick": 193,
+    "team_key": "458.l.40288.t.11",
+    "player_key": "458.p.10293",
+    "cost": 1,
+    "player_name": "Chad Green",
+    "manager": "小喆"
+  },
+  {
+    "round": 13,
+    "pick": 194,
+    "team_key": "458.l.40288.t.6",
+    "player_key": "458.p.12330",
+    "cost": 1,
+    "player_name": "Brayan Bello",
+    "manager": "Tony"
+  },
+  {
+    "round": 13,
+    "pick": 195,
+    "team_key": "458.l.40288.t.7",
+    "player_key": "458.p.12152",
+    "cost": 1,
+    "player_name": "Garrett Mitchell",
+    "manager": "rawstuff"
+  },
+  {
+    "round": 13,
+    "pick": 196,
+    "team_key": "458.l.40288.t.7",
+    "player_key": "458.p.10549",
+    "cost": 4,
+    "player_name": "Grant Holmes",
+    "manager": "rawstuff"
+  },
+  {
+    "round": 13,
+    "pick": 197,
+    "team_key": "458.l.40288.t.10",
+    "player_key": "458.p.64858",
+    "cost": 1,
+    "player_name": "Hyeseong Kim",
+    "manager": "哈寶好"
+  },
+  {
+    "round": 13,
+    "pick": 198,
+    "team_key": "458.l.40288.t.13",
+    "player_key": "458.p.12409",
+    "cost": 1,
+    "player_name": "Hunter Goodman",
+    "manager": "TIMMY LIU"
+  },
+  {
+    "round": 13,
+    "pick": 199,
+    "team_key": "458.l.40288.t.2",
+    "player_key": "458.p.11483",
+    "cost": 1,
+    "player_name": "Connor Wong",
+    "manager": "Leo"
+  },
+  {
+    "round": 13,
+    "pick": 200,
+    "team_key": "458.l.40288.t.14",
+    "player_key": "458.p.60295",
+    "cost": 1,
+    "player_name": "Will Warren",
+    "manager": "謙謙"
+  },
+  {
+    "round": 13,
+    "pick": 201,
+    "team_key": "458.l.40288.t.16",
+    "player_key": "458.p.10229",
+    "cost": 8,
+    "player_name": "Erick Fedde",
+    "manager": "Ponpon"
+  },
+  {
+    "round": 13,
+    "pick": 202,
+    "team_key": "458.l.40288.t.1",
+    "player_key": "458.p.11391",
+    "cost": 1,
+    "player_name": "Nolan Gorman",
+    "manager": "Ｋａｋｕ"
+  },
+  {
+    "round": 13,
+    "pick": 203,
+    "team_key": "458.l.40288.t.13",
+    "player_key": "458.p.11251",
+    "cost": 3,
+    "player_name": "Merrill Kelly",
+    "manager": "TIMMY LIU"
+  },
+  {
+    "round": 13,
+    "pick": 204,
+    "team_key": "458.l.40288.t.5",
+    "player_key": "458.p.60266",
+    "cost": 1,
+    "player_name": "Brooks Lee",
+    "manager": "wei"
+  },
+  {
+    "round": 13,
+    "pick": 205,
+    "team_key": "458.l.40288.t.11",
+    "player_key": "458.p.9672",
+    "cost": 2,
+    "player_name": "Blake Treinen",
+    "manager": "小喆"
+  },
+  {
+    "round": 13,
+    "pick": 206,
+    "team_key": "458.l.40288.t.11",
+    "player_key": "458.p.11009",
+    "cost": 4,
+    "player_name": "Jason Adam",
+    "manager": "小喆"
+  },
+  {
+    "round": 13,
+    "pick": 207,
+    "team_key": "458.l.40288.t.6",
+    "player_key": "458.p.63299",
+    "cost": 1,
+    "player_name": "DJ Herz",
+    "manager": "Tony"
+  },
+  {
+    "round": 13,
+    "pick": 208,
+    "team_key": "458.l.40288.t.7",
+    "player_key": "458.p.63500",
+    "cost": 1,
+    "player_name": "Justin Slaten",
+    "manager": "rawstuff"
+  },
+  {
+    "round": 14,
+    "pick": 209,
+    "team_key": "458.l.40288.t.9",
+    "player_key": "458.p.11496",
+    "cost": 1,
+    "player_name": "Jose Miranda",
+    "manager": "YWC"
+  },
+  {
+    "round": 14,
+    "pick": 210,
+    "team_key": "458.l.40288.t.10",
+    "player_key": "458.p.10485",
+    "cost": 1,
+    "player_name": "Ryan O'Hearn",
+    "manager": "哈寶好"
+  },
+  {
+    "round": 14,
+    "pick": 211,
+    "team_key": "458.l.40288.t.3",
+    "player_key": "458.p.11349",
+    "cost": 3,
+    "player_name": "Francisco Alvarez",
+    "manager": "叫我寬哥"
+  },
+  {
+    "round": 14,
+    "pick": 212,
+    "team_key": "458.l.40288.t.14",
+    "player_key": "458.p.8634",
+    "cost": 3,
+    "player_name": "Giancarlo Stanton",
+    "manager": "謙謙"
+  },
+  {
+    "round": 14,
+    "pick": 213,
+    "team_key": "458.l.40288.t.16",
+    "player_key": "458.p.12614",
+    "cost": 5,
+    "player_name": "Yennier Cano",
+    "manager": "Ponpon"
+  },
+  {
+    "round": 14,
+    "pick": 214,
+    "team_key": "458.l.40288.t.3",
+    "player_key": "458.p.10899",
+    "cost": 1,
+    "player_name": "Keibert Ruiz",
+    "manager": "叫我寬哥"
+  },
+  {
+    "round": 14,
+    "pick": 215,
+    "team_key": "458.l.40288.t.5",
+    "player_key": "458.p.11083",
+    "cost": 1,
+    "player_name": "Casey Mize",
+    "manager": "wei"
+  },
+  {
+    "round": 14,
+    "pick": 216,
+    "team_key": "458.l.40288.t.15",
+    "player_key": "458.p.10960",
+    "cost": 1,
+    "player_name": "Nate Pearson",
+    "manager": "魚魚"
+  },
+  {
+    "round": 14,
+    "pick": 217,
+    "team_key": "458.l.40288.t.11",
+    "player_key": "458.p.11920",
+    "cost": 3,
+    "player_name": "Alex Vesia",
+    "manager": "小喆"
+  },
+  {
+    "round": 14,
+    "pick": 218,
+    "team_key": "458.l.40288.t.6",
+    "player_key": "458.p.12333",
+    "cost": 1,
+    "player_name": "JP Sears",
+    "manager": "Tony"
+  },
+  {
+    "round": 14,
+    "pick": 219,
+    "team_key": "458.l.40288.t.7",
+    "player_key": "458.p.12468",
+    "cost": 3,
+    "player_name": "Eury Pérez",
+    "manager": "rawstuff"
+  },
+  {
+    "round": 14,
+    "pick": 220,
+    "team_key": "458.l.40288.t.9",
+    "player_key": "458.p.11547",
+    "cost": 1,
+    "player_name": "Tobias Myers",
+    "manager": "YWC"
+  },
+  {
+    "round": 14,
+    "pick": 221,
+    "team_key": "458.l.40288.t.2",
+    "player_key": "458.p.60269",
+    "cost": 1,
+    "player_name": "David Festa",
+    "manager": "Leo"
+  },
+  {
+    "round": 14,
+    "pick": 222,
+    "team_key": "458.l.40288.t.14",
+    "player_key": "458.p.63627",
+    "cost": 1,
+    "player_name": "Hayden Birdsong",
+    "manager": "謙謙"
+  },
+  {
+    "round": 14,
+    "pick": 223,
+    "team_key": "458.l.40288.t.3",
+    "player_key": "458.p.10843",
+    "cost": 1,
+    "player_name": "Daulton Varsho",
+    "manager": "叫我寬哥"
+  },
+  {
+    "round": 14,
+    "pick": 224,
+    "team_key": "458.l.40288.t.5",
+    "player_key": "458.p.62975",
+    "cost": 1,
+    "player_name": "Chase Dollander",
+    "manager": "wei"
+  },
+  {
+    "round": 15,
+    "pick": 225,
+    "team_key": "458.l.40288.t.15",
+    "player_key": "458.p.10794",
+    "cost": 1,
+    "player_name": "A.J. Minter",
+    "manager": "魚魚"
+  },
+  {
+    "round": 15,
+    "pick": 226,
+    "team_key": "458.l.40288.t.9",
+    "player_key": "458.p.10328",
+    "cost": 1,
+    "player_name": "Jeimer Candelario",
+    "manager": "YWC"
+  },
+  {
+    "round": 15,
+    "pick": 227,
+    "team_key": "458.l.40288.t.2",
+    "player_key": "458.p.11853",
+    "cost": 1,
+    "player_name": "Alejandro Kirk",
+    "manager": "Leo"
+  },
+  {
+    "round": 15,
+    "pick": 228,
+    "team_key": "458.l.40288.t.14",
+    "player_key": "458.p.12604",
+    "cost": 1,
+    "player_name": "Beau Brieske",
+    "manager": "謙謙"
+  },
+  {
+    "round": 15,
+    "pick": 229,
+    "team_key": "458.l.40288.t.3",
+    "player_key": "458.p.11431",
+    "cost": 1,
+    "player_name": "Kutter Crawford",
+    "manager": "叫我寬哥"
+  },
+  {
+    "round": 15,
+    "pick": 230,
+    "team_key": "458.l.40288.t.5",
+    "player_key": "458.p.60092",
+    "cost": 1,
+    "player_name": "Samuel Basallo",
+    "manager": "wei"
+  },
+  {
+    "round": 15,
+    "pick": 231,
+    "team_key": "458.l.40288.t.15",
+    "player_key": "458.p.9653",
+    "cost": 1,
+    "player_name": "Tommy Kahnle",
+    "manager": "魚魚"
+  },
+  {
+    "round": 15,
+    "pick": 232,
+    "team_key": "458.l.40288.t.9",
+    "player_key": "458.p.11193",
+    "cost": 1,
+    "player_name": "Joel Payamps",
+    "manager": "YWC"
+  },
+  {
+    "round": 15,
+    "pick": 233,
+    "team_key": "458.l.40288.t.2",
+    "player_key": "458.p.12339",
+    "cost": 1,
+    "player_name": "James Outman",
+    "manager": "Leo"
+  },
+  {
+    "round": 15,
+    "pick": 234,
+    "team_key": "458.l.40288.t.3",
+    "player_key": "458.p.60440",
+    "cost": 1,
+    "player_name": "Cody Bradford",
+    "manager": "叫我寬哥"
+  },
+  {
+    "round": 15,
+    "pick": 235,
+    "team_key": "458.l.40288.t.15",
+    "player_key": "458.p.60615",
+    "cost": 1,
+    "player_name": "Robert Garcia",
+    "manager": "魚魚"
+  },
+  {
+    "round": 15,
+    "pick": 236,
+    "team_key": "458.l.40288.t.9",
+    "player_key": "458.p.11347",
+    "cost": 1,
+    "player_name": "Trevor Larnach",
+    "manager": "YWC"
+  },
+  {
+    "round": 15,
+    "pick": 237,
+    "team_key": "458.l.40288.t.2",
+    "player_key": "458.p.12311",
+    "cost": 1,
+    "player_name": "Calvin Faucher",
+    "manager": "Leo"
+  },
+  {
+    "round": 15,
+    "pick": 238,
+    "team_key": "458.l.40288.t.3",
+    "player_key": "458.p.62138",
+    "cost": 1,
+    "player_name": "Jacob Young",
+    "manager": "叫我寬哥"
+  },
+  {
+    "round": 15,
+    "pick": 239,
+    "team_key": "458.l.40288.t.9",
+    "player_key": "458.p.11327",
+    "cost": 1,
+    "player_name": "José Soriano",
+    "manager": "YWC"
+  },
+  {
+    "round": 15,
+    "pick": 240,
+    "team_key": "458.l.40288.t.2",
+    "player_key": "458.p.10355",
+    "cost": 1,
+    "player_name": "Matt Strahm",
+    "manager": "Leo"
+  },
+  {
+    "round": 16,
+    "pick": 241,
+    "team_key": "458.l.40288.t.3",
+    "player_key": "458.p.62874",
+    "cost": 1,
+    "player_name": "Quinn Mathews",
+    "manager": "叫我寬哥"
+  },
+  {
+    "round": 16,
+    "pick": 242,
+    "team_key": "458.l.40288.t.9",
+    "player_key": "458.p.11118",
+    "cost": 1,
+    "player_name": "Jeff McNeil",
+    "manager": "YWC"
+  },
+  {
+    "round": 16,
+    "pick": 243,
+    "team_key": "458.l.40288.t.2",
+    "player_key": "458.p.10444",
+    "cost": 1,
+    "player_name": "Bryan Hudson",
+    "manager": "Leo"
+  },
+  {
+    "round": 16,
+    "pick": 244,
+    "team_key": "458.l.40288.t.9",
+    "player_key": "458.p.11052",
+    "cost": 2,
+    "player_name": "Evan Phillips",
+    "manager": "YWC"
+  },
+  {
+    "round": 16,
+    "pick": 245,
+    "team_key": "458.l.40288.t.2",
+    "player_key": "458.p.11296",
+    "cost": 1,
+    "player_name": "Bo Naylor",
+    "manager": "Leo"
+  },
+  {
+    "round": 16,
+    "pick": 246,
+    "team_key": "458.l.40288.t.3",
+    "player_key": "458.p.9779",
+    "cost": 1,
+    "player_name": "Héctor Neris",
+    "manager": "叫我寬哥"
+  },
+  {
+    "round": 16,
+    "pick": 247,
+    "team_key": "458.l.40288.t.2",
+    "player_key": "458.p.60057",
+    "cost": 1,
+    "player_name": "Deyvison De Los Santos",
+    "manager": "Leo"
+  },
+  {
+    "round": 16,
+    "pick": 248,
+    "team_key": "458.l.40288.t.3",
+    "player_key": "458.p.12156",
+    "cost": 1,
+    "player_name": "Cole Sands",
+    "manager": "叫我寬哥"
+  },
+  {
+    "round": 16,
+    "pick": 249,
+    "team_key": "458.l.40288.t.2",
+    "player_key": "458.p.12054",
+    "cost": 1,
+    "player_name": "Patrick Bailey",
+    "manager": "Leo"
+  },
+  {
+    "round": 16,
+    "pick": 250,
+    "team_key": "458.l.40288.t.3",
+    "player_key": "458.p.12768",
+    "cost": 1,
+    "player_name": "Kevin Kelly",
+    "manager": "叫我寬哥"
+  },
+  {
+    "round": 16,
+    "pick": 251,
+    "team_key": "458.l.40288.t.2",
+    "player_key": "458.p.9173",
+    "cost": 1,
+    "player_name": "Miles Mikolas",
+    "manager": "Leo"
+  },
+  {
+    "round": 16,
+    "pick": 252,
+    "team_key": "458.l.40288.t.3",
+    "player_key": "458.p.8622",
+    "cost": 1,
+    "player_name": "Craig Kimbrel",
+    "manager": "叫我寬哥"
+  },
+  {
+    "round": 16,
+    "pick": 253,
+    "team_key": "458.l.40288.t.2",
+    "player_key": "458.p.9842",
+    "cost": 1,
+    "player_name": "Tommy Pham",
+    "manager": "Leo"
+  },
+  {
+    "round": 16,
+    "pick": 254,
+    "team_key": "458.l.40288.t.3",
+    "player_key": "458.p.12337",
+    "cost": 1,
+    "player_name": "José Buttó",
+    "manager": "叫我寬哥"
+  },
+  {
+    "round": 16,
+    "pick": 255,
+    "team_key": "458.l.40288.t.3",
+    "player_key": "458.p.10566",
+    "cost": 1,
+    "player_name": "Ke'Bryan Hayes",
+    "manager": "叫我寬哥"
+  },
+  {
+    "round": 16,
+    "pick": 256,
+    "team_key": "458.l.40288.t.3",
+    "player_key": "458.p.11662",
+    "cost": 1,
+    "player_name": "Jonah Heim",
+    "manager": "叫我寬哥"
+  },
+  {
+    "round": 17,
+    "pick": 257,
+    "team_key": "458.l.40288.t.3",
+    "player_key": "458.p.10095",
+    "cost": 1,
+    "player_name": "Max Kepler",
+    "manager": "叫我寬哥"
+  },
+  {
+    "round": 17,
+    "pick": 258,
+    "team_key": "458.l.40288.t.3",
+    "player_key": "458.p.12476",
+    "cost": 1,
+    "player_name": "Sal Frelick",
+    "manager": "叫我寬哥"
+  },
+  {
+    "round": 17,
+    "pick": 259,
+    "team_key": "458.l.40288.t.3",
+    "player_key": "458.p.12657",
+    "cost": 1,
+    "player_name": "Michael Massey",
+    "manager": "叫我寬哥"
+  },
+  {
+    "round": 17,
+    "pick": 260,
+    "team_key": "458.l.40288.t.16",
+    "player_key": "458.p.10867",
+    "cost": 1,
+    "player_name": "Shane Bieber",
+    "manager": "Ponpon"
+  },
+  {
+    "round": 17,
+    "pick": 261,
+    "team_key": "458.l.40288.t.16",
+    "player_key": "458.p.11789",
+    "cost": 1,
+    "player_name": "Drew Rasmussen",
+    "manager": "Ponpon"
+  },
+  {
+    "round": 17,
+    "pick": 262,
+    "team_key": "458.l.40288.t.16",
+    "player_key": "458.p.12554",
+    "cost": 1,
+    "player_name": "Taj Bradley",
+    "manager": "Ponpon"
+  },
+  {
+    "round": 17,
+    "pick": 263,
+    "team_key": "458.l.40288.t.16",
+    "player_key": "458.p.11689",
+    "cost": 3,
+    "player_name": "Luis Gil",
+    "manager": "Ponpon"
+  },
+  {
+    "round": 17,
+    "pick": 264,
+    "team_key": "458.l.40288.t.16",
+    "player_key": "458.p.11597",
+    "cost": 7,
+    "player_name": "Pete Fairbanks",
+    "manager": "Ponpon"
+  },
+  {
+    "round": 17,
+    "pick": 265,
+    "team_key": "458.l.40288.t.16",
+    "player_key": "458.p.12354",
+    "cost": 10,
+    "player_name": "Robert Suarez",
+    "manager": "Ponpon"
+  },
+  {
+    "round": 17,
+    "pick": 266,
+    "team_key": "458.l.40288.t.16",
+    "player_key": "458.p.12046",
+    "cost": 9,
+    "player_name": "Garrett Crochet",
+    "manager": "Ponpon"
+  },
+  {
+    "round": 17,
+    "pick": 267,
+    "team_key": "458.l.40288.t.16",
+    "player_key": "458.p.12556",
+    "cost": 1,
+    "player_name": "Carson Williams",
+    "manager": "Ponpon"
+  },
+  {
+    "round": 17,
+    "pick": 268,
+    "team_key": "458.l.40288.t.16",
+    "player_key": "458.p.12121",
+    "cost": 3,
+    "player_name": "Heston Kjerstad",
+    "manager": "Ponpon"
+  },
+  {
+    "round": 17,
+    "pick": 269,
+    "team_key": "458.l.40288.t.16",
+    "player_key": "458.p.11809",
+    "cost": 3,
+    "player_name": "Anthony Volpe",
+    "manager": "Ponpon"
+  },
+  {
+    "round": 17,
+    "pick": 270,
+    "team_key": "458.l.40288.t.16",
+    "player_key": "458.p.10666",
+    "cost": 9,
+    "player_name": "Anthony Santander",
+    "manager": "Ponpon"
+  },
+  {
+    "round": 17,
+    "pick": 271,
+    "team_key": "458.l.40288.t.16",
+    "player_key": "458.p.9893",
+    "cost": 10,
+    "player_name": "Willy Adames",
+    "manager": "Ponpon"
+  },
+  {
+    "round": 17,
+    "pick": 272,
+    "team_key": "458.l.40288.t.15",
+    "player_key": "458.p.60294",
+    "cost": 9,
+    "player_name": "Spencer Jones",
+    "manager": "魚魚"
+  },
+  {
+    "round": 18,
+    "pick": 273,
+    "team_key": "458.l.40288.t.15",
+    "player_key": "458.p.11365",
+    "cost": 11,
+    "player_name": "Alec Bohm",
+    "manager": "魚魚"
+  },
+  {
+    "round": 18,
+    "pick": 274,
+    "team_key": "458.l.40288.t.15",
+    "player_key": "458.p.60584",
+    "cost": 15,
+    "player_name": "Bryan Woo",
+    "manager": "魚魚"
+  },
+  {
+    "round": 18,
+    "pick": 275,
+    "team_key": "458.l.40288.t.15",
+    "player_key": "458.p.62972",
+    "cost": 15,
+    "player_name": "Paul Skenes",
+    "manager": "魚魚"
+  },
+  {
+    "round": 18,
+    "pick": 276,
+    "team_key": "458.l.40288.t.15",
+    "player_key": "458.p.10036",
+    "cost": 18,
+    "player_name": "Ketel Marte",
+    "manager": "魚魚"
+  },
+  {
+    "round": 18,
+    "pick": 277,
+    "team_key": "458.l.40288.t.15",
+    "player_key": "458.p.10946",
+    "cost": 11,
+    "player_name": "Ryan Helsley",
+    "manager": "魚魚"
+  },
+  {
+    "round": 18,
+    "pick": 278,
+    "team_key": "458.l.40288.t.15",
+    "player_key": "458.p.11495",
+    "cost": 12,
+    "player_name": "Jhoan Duran",
+    "manager": "魚魚"
+  },
+  {
+    "round": 18,
+    "pick": 279,
+    "team_key": "458.l.40288.t.15",
+    "player_key": "458.p.11398",
+    "cost": 18,
+    "player_name": "Shane McClanahan",
+    "manager": "魚魚"
+  },
+  {
+    "round": 18,
+    "pick": 280,
+    "team_key": "458.l.40288.t.15",
+    "player_key": "458.p.11370",
+    "cost": 15,
+    "player_name": "Oneil Cruz",
+    "manager": "魚魚"
+  },
+  {
+    "round": 18,
+    "pick": 281,
+    "team_key": "458.l.40288.t.15",
+    "player_key": "458.p.10438",
+    "cost": 17,
+    "player_name": "Dylan Cease",
+    "manager": "魚魚"
+  },
+  {
+    "round": 18,
+    "pick": 282,
+    "team_key": "458.l.40288.t.15",
+    "player_key": "458.p.11384",
+    "cost": 46,
+    "player_name": "Julio Rodríguez",
+    "manager": "魚魚"
+  },
+  {
+    "round": 18,
+    "pick": 283,
+    "team_key": "458.l.40288.t.14",
+    "player_key": "458.p.12590",
+    "cost": 11,
+    "player_name": "Ronel Blanco",
+    "manager": "謙謙"
+  },
+  {
+    "round": 18,
+    "pick": 284,
+    "team_key": "458.l.40288.t.14",
+    "player_key": "458.p.10926",
+    "cost": 2,
+    "player_name": "Clarke Schmidt",
+    "manager": "謙謙"
+  },
+  {
+    "round": 18,
+    "pick": 285,
+    "team_key": "458.l.40288.t.14",
+    "player_key": "458.p.62225",
+    "cost": 1,
+    "player_name": "Ethan Salas",
+    "manager": "謙謙"
+  },
+  {
+    "round": 18,
+    "pick": 286,
+    "team_key": "458.l.40288.t.14",
+    "player_key": "458.p.11878",
+    "cost": 1,
+    "player_name": "Luisangel Acuña",
+    "manager": "謙謙"
+  },
+  {
+    "round": 18,
+    "pick": 287,
+    "team_key": "458.l.40288.t.14",
+    "player_key": "458.p.63494",
+    "cost": 1,
+    "player_name": "Jung Hoo Lee",
+    "manager": "謙謙"
+  },
+  {
+    "round": 18,
+    "pick": 288,
+    "team_key": "458.l.40288.t.14",
+    "player_key": "458.p.12161",
+    "cost": 1,
+    "player_name": "Austin Wells",
+    "manager": "謙謙"
+  },
+  {
+    "round": 19,
+    "pick": 289,
+    "team_key": "458.l.40288.t.14",
+    "player_key": "458.p.11284",
+    "cost": 11,
+    "player_name": "Nico Hoerner",
+    "manager": "謙謙"
+  },
+  {
+    "round": 19,
+    "pick": 290,
+    "team_key": "458.l.40288.t.14",
+    "player_key": "458.p.60214",
+    "cost": 3,
+    "player_name": "Zach Neto",
+    "manager": "謙謙"
+  },
+  {
+    "round": 19,
+    "pick": 291,
+    "team_key": "458.l.40288.t.14",
+    "player_key": "458.p.11531",
+    "cost": 11,
+    "player_name": "Cal Raleigh",
+    "manager": "謙謙"
+  },
+  {
+    "round": 19,
+    "pick": 292,
+    "team_key": "458.l.40288.t.14",
+    "player_key": "458.p.10504",
+    "cost": 14,
+    "player_name": "Cody Bellinger",
+    "manager": "謙謙"
+  },
+  {
+    "round": 19,
+    "pick": 293,
+    "team_key": "458.l.40288.t.14",
+    "player_key": "458.p.10839",
+    "cost": 28,
+    "player_name": "Jazz Chisholm Jr.",
+    "manager": "謙謙"
+  },
+  {
+    "round": 19,
+    "pick": 294,
+    "team_key": "458.l.40288.t.14",
+    "player_key": "458.p.9552",
+    "cost": 58,
+    "player_name": "Mookie Betts",
+    "manager": "謙謙"
+  },
+  {
+    "round": 19,
+    "pick": 295,
+    "team_key": "458.l.40288.t.13",
+    "player_key": "458.p.9112",
+    "cost": 1,
+    "player_name": "Jurickson Profar",
+    "manager": "TIMMY LIU"
+  },
+  {
+    "round": 19,
+    "pick": 296,
+    "team_key": "458.l.40288.t.13",
+    "player_key": "458.p.11343",
+    "cost": 1,
+    "player_name": "Brice Turang",
+    "manager": "TIMMY LIU"
+  },
+  {
+    "round": 19,
+    "pick": 297,
+    "team_key": "458.l.40288.t.13",
+    "player_key": "458.p.10214",
+    "cost": 1,
+    "player_name": "Edwin Díaz",
+    "manager": "TIMMY LIU"
+  },
+  {
+    "round": 19,
+    "pick": 298,
+    "team_key": "458.l.40288.t.13",
+    "player_key": "458.p.11763",
+    "cost": 21,
+    "player_name": "Tarik Skubal",
+    "manager": "TIMMY LIU"
+  },
+  {
+    "round": 19,
+    "pick": 299,
+    "team_key": "458.l.40288.t.13",
+    "player_key": "458.p.11117",
+    "cost": 16,
+    "player_name": "Ranger Suárez",
+    "manager": "TIMMY LIU"
+  },
+  {
+    "round": 19,
+    "pick": 300,
+    "team_key": "458.l.40288.t.13",
+    "player_key": "458.p.12688",
+    "cost": 11,
+    "player_name": "Spencer Steer",
+    "manager": "TIMMY LIU"
+  },
+  {
+    "round": 19,
+    "pick": 301,
+    "team_key": "458.l.40288.t.13",
+    "player_key": "458.p.12281",
+    "cost": 21,
+    "player_name": "Spencer Strider",
+    "manager": "TIMMY LIU"
+  },
+  {
+    "round": 19,
+    "pick": 302,
+    "team_key": "458.l.40288.t.13",
+    "player_key": "458.p.11116",
+    "cost": 21,
+    "player_name": "Zac Gallen",
+    "manager": "TIMMY LIU"
+  },
+  {
+    "round": 19,
+    "pick": 303,
+    "team_key": "458.l.40288.t.13",
+    "player_key": "458.p.11778",
+    "cost": 1,
+    "player_name": "Michael Busch",
+    "manager": "TIMMY LIU"
+  },
+  {
+    "round": 19,
+    "pick": 304,
+    "team_key": "458.l.40288.t.13",
+    "player_key": "458.p.9517",
+    "cost": 21,
+    "player_name": "Marcus Semien",
+    "manager": "TIMMY LIU"
+  },
+  {
+    "round": 20,
+    "pick": 305,
+    "team_key": "458.l.40288.t.12",
+    "player_key": "458.p.10141",
+    "cost": 7,
+    "player_name": "Zach Eflin",
+    "manager": "Hyper"
+  },
+  {
+    "round": 20,
+    "pick": 306,
+    "team_key": "458.l.40288.t.12",
+    "player_key": "458.p.61627",
+    "cost": 2,
+    "player_name": "Ryan Walker",
+    "manager": "Hyper"
+  },
+  {
+    "round": 20,
+    "pick": 307,
+    "team_key": "458.l.40288.t.12",
+    "player_key": "458.p.62962",
+    "cost": 1,
+    "player_name": "Walker Jenkins",
+    "manager": "Hyper"
+  },
+  {
+    "round": 20,
+    "pick": 308,
+    "team_key": "458.l.40288.t.12",
+    "player_key": "458.p.12487",
+    "cost": 1,
+    "player_name": "Emmanuel Rodriguez",
+    "manager": "Hyper"
+  },
+  {
+    "round": 20,
+    "pick": 309,
+    "team_key": "458.l.40288.t.12",
+    "player_key": "458.p.12750",
+    "cost": 2,
+    "player_name": "Justin Martinez",
+    "manager": "Hyper"
+  },
+  {
+    "round": 20,
+    "pick": 310,
+    "team_key": "458.l.40288.t.12",
+    "player_key": "458.p.10877",
+    "cost": 3,
+    "player_name": "Jake Burger",
+    "manager": "Hyper"
+  },
+  {
+    "round": 20,
+    "pick": 311,
+    "team_key": "458.l.40288.t.12",
+    "player_key": "458.p.62971",
+    "cost": 6,
+    "player_name": "Dylan Crews",
+    "manager": "Hyper"
+  },
+  {
+    "round": 20,
+    "pick": 312,
+    "team_key": "458.l.40288.t.12",
+    "player_key": "458.p.9876",
+    "cost": 11,
+    "player_name": "Brandon Nimmo",
+    "manager": "Hyper"
+  },
+  {
+    "round": 20,
+    "pick": 313,
+    "team_key": "458.l.40288.t.12",
+    "player_key": "458.p.60419",
+    "cost": 1,
+    "player_name": "Junior Caminero",
+    "manager": "Hyper"
+  },
+  {
+    "round": 20,
+    "pick": 314,
+    "team_key": "458.l.40288.t.12",
+    "player_key": "458.p.9385",
+    "cost": 11,
+    "player_name": "Marcell Ozuna",
+    "manager": "Hyper"
+  },
+  {
+    "round": 20,
+    "pick": 315,
+    "team_key": "458.l.40288.t.12",
+    "player_key": "458.p.10916",
+    "cost": 11,
+    "player_name": "Royce Lewis",
+    "manager": "Hyper"
+  },
+  {
+    "round": 20,
+    "pick": 316,
+    "team_key": "458.l.40288.t.12",
+    "player_key": "458.p.11268",
+    "cost": 16,
+    "player_name": "William Contreras",
+    "manager": "Hyper"
+  },
+  {
+    "round": 20,
+    "pick": 317,
+    "team_key": "458.l.40288.t.11",
+    "player_key": "458.p.62977",
+    "cost": 1,
+    "player_name": "Rhett Lowder",
+    "manager": "小喆"
+  },
+  {
+    "round": 20,
+    "pick": 318,
+    "team_key": "458.l.40288.t.11",
+    "player_key": "458.p.10852",
+    "cost": 1,
+    "player_name": "Tanner Houck",
+    "manager": "小喆"
+  },
+  {
+    "round": 20,
+    "pick": 319,
+    "team_key": "458.l.40288.t.11",
+    "player_key": "458.p.12096",
+    "cost": 6,
+    "player_name": "Bailey Ober",
+    "manager": "小喆"
+  },
+  {
+    "round": 20,
+    "pick": 320,
+    "team_key": "458.l.40288.t.11",
+    "player_key": "458.p.60137",
+    "cost": 6,
+    "player_name": "Tanner Bibee",
+    "manager": "小喆"
+  },
+  {
+    "round": 21,
+    "pick": 321,
+    "team_key": "458.l.40288.t.11",
+    "player_key": "458.p.63423",
+    "cost": 38,
+    "player_name": "Yoshinobu Yamamoto",
+    "manager": "小喆"
+  },
+  {
+    "round": 21,
+    "pick": 322,
+    "team_key": "458.l.40288.t.11",
+    "player_key": "458.p.9701",
+    "cost": 20,
+    "player_name": "Jacob deGrom",
+    "manager": "小喆"
+  },
+  {
+    "round": 21,
+    "pick": 323,
+    "team_key": "458.l.40288.t.11",
+    "player_key": "458.p.11855",
+    "cost": 11,
+    "player_name": "Gabriel Moreno",
+    "manager": "小喆"
+  },
+  {
+    "round": 21,
+    "pick": 324,
+    "team_key": "458.l.40288.t.11",
+    "player_key": "458.p.10944",
+    "cost": 1,
+    "player_name": "Heliot Ramos",
+    "manager": "小喆"
+  },
+  {
+    "round": 21,
+    "pick": 325,
+    "team_key": "458.l.40288.t.11",
+    "player_key": "458.p.12136",
+    "cost": 1,
+    "player_name": "Brenton Doyle",
+    "manager": "小喆"
+  },
+  {
+    "round": 21,
+    "pick": 326,
+    "team_key": "458.l.40288.t.11",
+    "player_key": "458.p.10366",
+    "cost": 20,
+    "player_name": "Teoscar Hernández",
+    "manager": "小喆"
+  },
+  {
+    "round": 21,
+    "pick": 327,
+    "team_key": "458.l.40288.t.11",
+    "player_key": "458.p.11735",
+    "cost": 21,
+    "player_name": "Jarren Duran",
+    "manager": "小喆"
+  },
+  {
+    "round": 21,
+    "pick": 328,
+    "team_key": "458.l.40288.t.10",
+    "player_key": "458.p.61918",
+    "cost": 1,
+    "player_name": "Chase Hampton",
+    "manager": "哈寶好"
+  },
+  {
+    "round": 21,
+    "pick": 329,
+    "team_key": "458.l.40288.t.10",
+    "player_key": "458.p.9329",
+    "cost": 1,
+    "player_name": "Michael Wacha",
+    "manager": "哈寶好"
+  },
+  {
+    "round": 21,
+    "pick": 330,
+    "team_key": "458.l.40288.t.10",
+    "player_key": "458.p.8758",
+    "cost": 27,
+    "player_name": "Kenley Jansen",
+    "manager": "哈寶好"
+  },
+  {
+    "round": 21,
+    "pick": 331,
+    "team_key": "458.l.40288.t.10",
+    "player_key": "458.p.10326",
+    "cost": 1,
+    "player_name": "Seth Lugo",
+    "manager": "哈寶好"
+  },
+  {
+    "round": 21,
+    "pick": 332,
+    "team_key": "458.l.40288.t.10",
+    "player_key": "458.p.12346",
+    "cost": 6,
+    "player_name": "Félix Bautista",
+    "manager": "哈寶好"
+  },
+  {
+    "round": 21,
+    "pick": 333,
+    "team_key": "458.l.40288.t.10",
+    "player_key": "458.p.11235",
+    "cost": 16,
+    "player_name": "Logan Webb",
+    "manager": "哈寶好"
+  },
+  {
+    "round": 21,
+    "pick": 334,
+    "team_key": "458.l.40288.t.10",
+    "player_key": "458.p.10610",
+    "cost": 13,
+    "player_name": "Cole Ragans",
+    "manager": "哈寶好"
+  },
+  {
+    "round": 21,
+    "pick": 335,
+    "team_key": "458.l.40288.t.10",
+    "player_key": "458.p.10929",
+    "cost": 11,
+    "player_name": "Sean Murphy",
+    "manager": "哈寶好"
+  },
+  {
+    "round": 21,
+    "pick": 336,
+    "team_key": "458.l.40288.t.10",
+    "player_key": "458.p.12449",
+    "cost": 11,
+    "player_name": "Vinnie Pasquantino",
+    "manager": "哈寶好"
+  },
+  {
+    "round": 22,
+    "pick": 337,
+    "team_key": "458.l.40288.t.10",
+    "player_key": "458.p.9015",
+    "cost": 9,
+    "player_name": "Salvador Perez",
+    "manager": "哈寶好"
+  },
+  {
+    "round": 22,
+    "pick": 338,
+    "team_key": "458.l.40288.t.10",
+    "player_key": "458.p.10917",
+    "cost": 7,
+    "player_name": "Brent Rooker",
+    "manager": "哈寶好"
+  },
+  {
+    "round": 22,
+    "pick": 339,
+    "team_key": "458.l.40288.t.9",
+    "player_key": "458.p.12687",
+    "cost": 1,
+    "player_name": "Jeremiah Estrada",
+    "manager": "YWC"
+  },
+  {
+    "round": 22,
+    "pick": 340,
+    "team_key": "458.l.40288.t.9",
+    "player_key": "458.p.11847",
+    "cost": 28,
+    "player_name": "Joe Ryan",
+    "manager": "YWC"
+  },
+  {
+    "round": 22,
+    "pick": 341,
+    "team_key": "458.l.40288.t.9",
+    "player_key": "458.p.9902",
+    "cost": 21,
+    "player_name": "Raisel Iglesias",
+    "manager": "YWC"
+  },
+  {
+    "round": 22,
+    "pick": 342,
+    "team_key": "458.l.40288.t.9",
+    "player_key": "458.p.12742",
+    "cost": 2,
+    "player_name": "Spencer Horwitz",
+    "manager": "YWC"
+  },
+  {
+    "round": 22,
+    "pick": 343,
+    "team_key": "458.l.40288.t.9",
+    "player_key": "458.p.11210",
+    "cost": 1,
+    "player_name": "Luis Rengifo",
+    "manager": "YWC"
+  },
+  {
+    "round": 22,
+    "pick": 344,
+    "team_key": "458.l.40288.t.9",
+    "player_key": "458.p.11759",
+    "cost": 2,
+    "player_name": "Michael Toglia",
+    "manager": "YWC"
+  },
+  {
+    "round": 22,
+    "pick": 345,
+    "team_key": "458.l.40288.t.9",
+    "player_key": "458.p.11221",
+    "cost": 15,
+    "player_name": "Luis Arraez",
+    "manager": "YWC"
+  },
+  {
+    "round": 22,
+    "pick": 346,
+    "team_key": "458.l.40288.t.9",
+    "player_key": "458.p.12314",
+    "cost": 8,
+    "player_name": "Steven Kwan",
+    "manager": "YWC"
+  },
+  {
+    "round": 22,
+    "pick": 347,
+    "team_key": "458.l.40288.t.9",
+    "player_key": "458.p.12435",
+    "cost": 11,
+    "player_name": "Yainer Diaz",
+    "manager": "YWC"
+  },
+  {
+    "round": 22,
+    "pick": 348,
+    "team_key": "458.l.40288.t.8",
+    "player_key": "458.p.62984",
+    "cost": 1,
+    "player_name": "Matt Shaw",
+    "manager": "Billy"
+  },
+  {
+    "round": 22,
+    "pick": 349,
+    "team_key": "458.l.40288.t.8",
+    "player_key": "458.p.63128",
+    "cost": 1,
+    "player_name": "Kristian Campbell",
+    "manager": "Billy"
+  },
+  {
+    "round": 22,
+    "pick": 350,
+    "team_key": "458.l.40288.t.8",
+    "player_key": "458.p.12369",
+    "cost": 1,
+    "player_name": "Colton Cowser",
+    "manager": "Billy"
+  },
+  {
+    "round": 22,
+    "pick": 351,
+    "team_key": "458.l.40288.t.8",
+    "player_key": "458.p.11760",
+    "cost": 20,
+    "player_name": "Riley Greene",
+    "manager": "Billy"
+  },
+  {
+    "round": 22,
+    "pick": 352,
+    "team_key": "458.l.40288.t.8",
+    "player_key": "458.p.10592",
+    "cost": 1,
+    "player_name": "Jack Flaherty",
+    "manager": "Billy"
+  },
+  {
+    "round": 23,
+    "pick": 353,
+    "team_key": "458.l.40288.t.8",
+    "player_key": "458.p.12100",
+    "cost": 2,
+    "player_name": "Otto Lopez",
+    "manager": "Billy"
+  },
+  {
+    "round": 23,
+    "pick": 354,
+    "team_key": "458.l.40288.t.8",
+    "player_key": "458.p.10951",
+    "cost": 2,
+    "player_name": "Jesús Sánchez",
+    "manager": "Billy"
+  },
+  {
+    "round": 23,
+    "pick": 355,
+    "team_key": "458.l.40288.t.8",
+    "player_key": "458.p.11826",
+    "cost": 11,
+    "player_name": "George Kirby",
+    "manager": "Billy"
+  },
+  {
+    "round": 23,
+    "pick": 356,
+    "team_key": "458.l.40288.t.8",
+    "player_key": "458.p.63640",
+    "cost": 22,
+    "player_name": "Shota Imanaga",
+    "manager": "Billy"
+  },
+  {
+    "round": 23,
+    "pick": 357,
+    "team_key": "458.l.40288.t.8",
+    "player_key": "458.p.12522",
+    "cost": 8,
+    "player_name": "Jackson Merrill",
+    "manager": "Billy"
+  },
+  {
+    "round": 23,
+    "pick": 358,
+    "team_key": "458.l.40288.t.8",
+    "player_key": "458.p.11722",
+    "cost": 21,
+    "player_name": "Corbin Carroll",
+    "manager": "Billy"
+  },
+  {
+    "round": 23,
+    "pick": 359,
+    "team_key": "458.l.40288.t.8",
+    "player_key": "458.p.1000001",
+    "cost": 20,
+    "player_name": "Shohei Ohtani (Batter)",
+    "manager": "Billy"
+  },
+  {
+    "round": 23,
+    "pick": 360,
+    "team_key": "458.l.40288.t.7",
+    "player_key": "458.p.60907",
+    "cost": 3,
+    "player_name": "Jared Jones",
+    "manager": "rawstuff"
+  },
+  {
+    "round": 23,
+    "pick": 361,
+    "team_key": "458.l.40288.t.7",
+    "player_key": "458.p.11202",
+    "cost": 6,
+    "player_name": "Justin Steele",
+    "manager": "rawstuff"
+  },
+  {
+    "round": 23,
+    "pick": 362,
+    "team_key": "458.l.40288.t.7",
+    "player_key": "458.p.12141",
+    "cost": 6,
+    "player_name": "Hunter Brown",
+    "manager": "rawstuff"
+  },
+  {
+    "round": 23,
+    "pick": 363,
+    "team_key": "458.l.40288.t.7",
+    "player_key": "458.p.60108",
+    "cost": 1,
+    "player_name": "Roman Anthony",
+    "manager": "rawstuff"
+  },
+  {
+    "round": 23,
+    "pick": 364,
+    "team_key": "458.l.40288.t.7",
+    "player_key": "458.p.12355",
+    "cost": 1,
+    "player_name": "Jordan Lawlar",
+    "manager": "rawstuff"
+  },
+  {
+    "round": 23,
+    "pick": 365,
+    "team_key": "458.l.40288.t.7",
+    "player_key": "458.p.12157",
+    "cost": 1,
+    "player_name": "Pete Crow-Armstrong",
+    "manager": "rawstuff"
+  },
+  {
+    "round": 23,
+    "pick": 366,
+    "team_key": "458.l.40288.t.7",
+    "player_key": "458.p.11732",
+    "cost": 17,
+    "player_name": "Adley Rutschman",
+    "manager": "rawstuff"
+  },
+  {
+    "round": 23,
+    "pick": 367,
+    "team_key": "458.l.40288.t.7",
+    "player_key": "458.p.10572",
+    "cost": 2,
+    "player_name": "Josh Naylor",
+    "manager": "rawstuff"
+  },
+  {
+    "round": 23,
+    "pick": 368,
+    "team_key": "458.l.40288.t.7",
+    "player_key": "458.p.12521",
+    "cost": 1,
+    "player_name": "James Wood",
+    "manager": "rawstuff"
+  },
+  {
+    "round": 24,
+    "pick": 369,
+    "team_key": "458.l.40288.t.7",
+    "player_key": "458.p.11822",
+    "cost": 16,
+    "player_name": "CJ Abrams",
+    "manager": "rawstuff"
+  },
+  {
+    "round": 24,
+    "pick": 370,
+    "team_key": "458.l.40288.t.7",
+    "player_key": "458.p.10639",
+    "cost": 26,
+    "player_name": "Fernando Tatis Jr.",
+    "manager": "rawstuff"
+  },
+  {
+    "round": 24,
+    "pick": 371,
+    "team_key": "458.l.40288.t.7",
+    "player_key": "458.p.9507",
+    "cost": 37,
+    "player_name": "José Ramírez",
+    "manager": "rawstuff"
+  },
+  {
+    "round": 24,
+    "pick": 372,
+    "team_key": "458.l.40288.t.6",
+    "player_key": "458.p.9123",
+    "cost": 1,
+    "player_name": "Jameson Taillon",
+    "manager": "Tony"
+  },
+  {
+    "round": 24,
+    "pick": 373,
+    "team_key": "458.l.40288.t.6",
+    "player_key": "458.p.10217",
+    "cost": 1,
+    "player_name": "Luke Weaver",
+    "manager": "Tony"
+  },
+  {
+    "round": 24,
+    "pick": 374,
+    "team_key": "458.l.40288.t.6",
+    "player_key": "458.p.9823",
+    "cost": 12,
+    "player_name": "Carlos Rodón",
+    "manager": "Tony"
+  },
+  {
+    "round": 24,
+    "pick": 375,
+    "team_key": "458.l.40288.t.6",
+    "player_key": "458.p.10862",
+    "cost": 6,
+    "player_name": "Hunter Greene",
+    "manager": "Tony"
+  },
+  {
+    "round": 24,
+    "pick": 376,
+    "team_key": "458.l.40288.t.6",
+    "player_key": "458.p.12375",
+    "cost": 1,
+    "player_name": "Marcelo Mayer",
+    "manager": "Tony"
+  },
+  {
+    "round": 24,
+    "pick": 377,
+    "team_key": "458.l.40288.t.6",
+    "player_key": "458.p.12430",
+    "cost": 1,
+    "player_name": "Colt Keith",
+    "manager": "Tony"
+  },
+  {
+    "round": 24,
+    "pick": 378,
+    "team_key": "458.l.40288.t.6",
+    "player_key": "458.p.11805",
+    "cost": 1,
+    "player_name": "Jasson Domínguez",
+    "manager": "Tony"
+  },
+  {
+    "round": 24,
+    "pick": 379,
+    "team_key": "458.l.40288.t.6",
+    "player_key": "458.p.11279",
+    "cost": 11,
+    "player_name": "Triston Casas",
+    "manager": "Tony"
+  },
+  {
+    "round": 24,
+    "pick": 380,
+    "team_key": "458.l.40288.t.6",
+    "player_key": "458.p.12719",
+    "cost": 1,
+    "player_name": "Lawrence Butler",
+    "manager": "Tony"
+  },
+  {
+    "round": 24,
+    "pick": 381,
+    "team_key": "458.l.40288.t.6",
+    "player_key": "458.p.10765",
+    "cost": 16,
+    "player_name": "Luis Robert Jr.",
+    "manager": "Tony"
+  },
+  {
+    "round": 24,
+    "pick": 382,
+    "team_key": "458.l.40288.t.6",
+    "player_key": "458.p.8996",
+    "cost": 34,
+    "player_name": "Jose Altuve",
+    "manager": "Tony"
+  },
+  {
+    "round": 24,
+    "pick": 383,
+    "team_key": "458.l.40288.t.6",
+    "player_key": "458.p.8658",
+    "cost": 50,
+    "player_name": "Freddie Freeman",
+    "manager": "Tony"
+  },
+  {
+    "round": 24,
+    "pick": 384,
+    "team_key": "458.l.40288.t.5",
+    "player_key": "458.p.60156",
+    "cost": 1,
+    "player_name": "Noah Schultz",
+    "manager": "wei"
+  },
+  {
+    "round": 25,
+    "pick": 385,
+    "team_key": "458.l.40288.t.5",
+    "player_key": "458.p.12422",
+    "cost": 1,
+    "player_name": "Jackson Jobe",
+    "manager": "wei"
+  },
+  {
+    "round": 25,
+    "pick": 386,
+    "team_key": "458.l.40288.t.5",
+    "player_key": "458.p.10934",
+    "cost": 4,
+    "player_name": "Shane Baz",
+    "manager": "wei"
+  },
+  {
+    "round": 25,
+    "pick": 387,
+    "team_key": "458.l.40288.t.5",
+    "player_key": "458.p.11277",
+    "cost": 6,
+    "player_name": "Grayson Rodriguez",
+    "manager": "wei"
+  },
+  {
+    "round": 25,
+    "pick": 388,
+    "team_key": "458.l.40288.t.5",
+    "player_key": "458.p.12505",
+    "cost": 11,
+    "player_name": "Mason Miller",
+    "manager": "wei"
+  },
+  {
+    "round": 25,
+    "pick": 389,
+    "team_key": "458.l.40288.t.5",
+    "player_key": "458.p.60090",
+    "cost": 1,
+    "player_name": "Jackson Holliday",
+    "manager": "wei"
+  },
+  {
+    "round": 25,
+    "pick": 390,
+    "team_key": "458.l.40288.t.5",
+    "player_key": "458.p.10922",
+    "cost": 1,
+    "player_name": "Mark Vientos",
+    "manager": "wei"
+  },
+  {
+    "round": 25,
+    "pick": 391,
+    "team_key": "458.l.40288.t.5",
+    "player_key": "458.p.12480",
+    "cost": 2,
+    "player_name": "Jackson Chourio",
+    "manager": "wei"
+  },
+  {
+    "round": 25,
+    "pick": 392,
+    "team_key": "458.l.40288.t.5",
+    "player_key": "458.p.10646",
+    "cost": 35,
+    "player_name": "Ronald Acuña Jr.",
+    "manager": "wei"
+  },
+  {
+    "round": 25,
+    "pick": 393,
+    "team_key": "458.l.40288.t.5",
+    "player_key": "458.p.10626",
+    "cost": 33,
+    "player_name": "Juan Soto",
+    "manager": "wei"
+  },
+  {
+    "round": 25,
+    "pick": 394,
+    "team_key": "458.l.40288.t.5",
+    "player_key": "458.p.12393",
+    "cost": 31,
+    "player_name": "Elly De La Cruz",
+    "manager": "wei"
+  },
+  {
+    "round": 25,
+    "pick": 395,
+    "team_key": "458.l.40288.t.5",
+    "player_key": "458.p.11771",
+    "cost": 32,
+    "player_name": "Bobby Witt Jr.",
+    "manager": "wei"
+  },
+  {
+    "round": 25,
+    "pick": 396,
+    "team_key": "458.l.40288.t.4",
+    "player_key": "458.p.60118",
+    "cost": 1,
+    "player_name": "Cade Horton",
+    "manager": "EDDIE"
+  },
+  {
+    "round": 25,
+    "pick": 397,
+    "team_key": "458.l.40288.t.4",
+    "player_key": "458.p.9879",
+    "cost": 2,
+    "player_name": "Luis Severino",
+    "manager": "EDDIE"
+  },
+  {
+    "round": 25,
+    "pick": 398,
+    "team_key": "458.l.40288.t.4",
+    "player_key": "458.p.12516",
+    "cost": 1,
+    "player_name": "Bubba Chandler",
+    "manager": "EDDIE"
+  },
+  {
+    "round": 25,
+    "pick": 399,
+    "team_key": "458.l.40288.t.4",
+    "player_key": "458.p.11057",
+    "cost": 14,
+    "player_name": "Pablo López",
+    "manager": "EDDIE"
+  },
+  {
+    "round": 25,
+    "pick": 400,
+    "team_key": "458.l.40288.t.4",
+    "player_key": "458.p.11375",
+    "cost": 1,
+    "player_name": "Xavier Edwards",
+    "manager": "EDDIE"
+  },
+  {
+    "round": 26,
+    "pick": 401,
+    "team_key": "458.l.40288.t.4",
+    "player_key": "458.p.12175",
+    "cost": 1,
+    "player_name": "Kyle Harrison",
+    "manager": "EDDIE"
+  },
+  {
+    "round": 26,
+    "pick": 402,
+    "team_key": "458.l.40288.t.4",
+    "player_key": "458.p.10148",
+    "cost": 36,
+    "player_name": "Blake Snell",
+    "manager": "EDDIE"
+  },
+  {
+    "round": 26,
+    "pick": 403,
+    "team_key": "458.l.40288.t.4",
+    "player_key": "458.p.12588",
+    "cost": 20,
+    "player_name": "Seiya Suzuki",
+    "manager": "EDDIE"
+  },
+  {
+    "round": 26,
+    "pick": 404,
+    "team_key": "458.l.40288.t.4",
+    "player_key": "458.p.11743",
+    "cost": 5,
+    "player_name": "Christopher Morel",
+    "manager": "EDDIE"
+  },
+  {
+    "round": 26,
+    "pick": 405,
+    "team_key": "458.l.40288.t.4",
+    "player_key": "458.p.10205",
+    "cost": 5,
+    "player_name": "Matt Chapman",
+    "manager": "EDDIE"
+  },
+  {
+    "round": 26,
+    "pick": 406,
+    "team_key": "458.l.40288.t.4",
+    "player_key": "458.p.10903",
+    "cost": 7,
+    "player_name": "Edward Cabrera",
+    "manager": "EDDIE"
+  },
+  {
+    "round": 26,
+    "pick": 407,
+    "team_key": "458.l.40288.t.3",
+    "player_key": "458.p.11854",
+    "cost": 21,
+    "player_name": "Alek Manoah",
+    "manager": "叫我寬哥"
+  },
+  {
+    "round": 26,
+    "pick": 408,
+    "team_key": "458.l.40288.t.3",
+    "player_key": "458.p.10597",
+    "cost": 33,
+    "player_name": "Sandy Alcantara",
+    "manager": "叫我寬哥"
+  },
+  {
+    "round": 26,
+    "pick": 409,
+    "team_key": "458.l.40288.t.3",
+    "player_key": "458.p.11731",
+    "cost": 26,
+    "player_name": "Gunnar Henderson",
+    "manager": "叫我寬哥"
+  },
+  {
+    "round": 26,
+    "pick": 410,
+    "team_key": "458.l.40288.t.3",
+    "player_key": "458.p.12056",
+    "cost": 30,
+    "player_name": "Michael Harris II",
+    "manager": "叫我寬哥"
+  },
+  {
+    "round": 26,
+    "pick": 411,
+    "team_key": "458.l.40288.t.3",
+    "player_key": "458.p.10766",
+    "cost": 37,
+    "player_name": "Bo Bichette",
+    "manager": "叫我寬哥"
+  },
+  {
+    "round": 26,
+    "pick": 412,
+    "team_key": "458.l.40288.t.3",
+    "player_key": "458.p.10420",
+    "cost": 33,
+    "player_name": "Austin Riley",
+    "manager": "叫我寬哥"
+  },
+  {
+    "round": 26,
+    "pick": 413,
+    "team_key": "458.l.40288.t.3",
+    "player_key": "458.p.10621",
+    "cost": 51,
+    "player_name": "Vladimir Guerrero Jr.",
+    "manager": "叫我寬哥"
+  },
+  {
+    "round": 26,
+    "pick": 414,
+    "team_key": "458.l.40288.t.2",
+    "player_key": "458.p.11706",
+    "cost": 10,
+    "player_name": "Cristopher Sánchez",
+    "manager": "Leo"
+  },
+  {
+    "round": 26,
+    "pick": 415,
+    "team_key": "458.l.40288.t.2",
+    "player_key": "458.p.12540",
+    "cost": 22,
+    "player_name": "Bryce Miller",
+    "manager": "Leo"
+  },
+  {
+    "round": 26,
+    "pick": 416,
+    "team_key": "458.l.40288.t.2",
+    "player_key": "458.p.11661",
+    "cost": 16,
+    "player_name": "Michael King",
+    "manager": "Leo"
+  },
+  {
+    "round": 27,
+    "pick": 417,
+    "team_key": "458.l.40288.t.2",
+    "player_key": "458.p.10236",
+    "cost": 21,
+    "player_name": "Gleyber Torres",
+    "manager": "Leo"
+  },
+  {
+    "round": 27,
+    "pick": 418,
+    "team_key": "458.l.40288.t.2",
+    "player_key": "458.p.9724",
+    "cost": 1,
+    "player_name": "Eugenio Suárez",
+    "manager": "Leo"
+  },
+  {
+    "round": 27,
+    "pick": 419,
+    "team_key": "458.l.40288.t.2",
+    "player_key": "458.p.9846",
+    "cost": 6,
+    "player_name": "Christian Walker",
+    "manager": "Leo"
+  },
+  {
+    "round": 27,
+    "pick": 420,
+    "team_key": "458.l.40288.t.2",
+    "player_key": "458.p.9861",
+    "cost": 19,
+    "player_name": "Kyle Schwarber",
+    "manager": "Leo"
+  },
+  {
+    "round": 27,
+    "pick": 421,
+    "team_key": "458.l.40288.t.1",
+    "player_key": "458.p.12561",
+    "cost": 1,
+    "player_name": "Jack Leiter",
+    "manager": "Ｋａｋｕ"
+  },
+  {
+    "round": 27,
+    "pick": 422,
+    "team_key": "458.l.40288.t.1",
+    "player_key": "458.p.60427",
+    "cost": 2,
+    "player_name": "Kumar Rocker",
+    "manager": "Ｋａｋｕ"
+  },
+  {
+    "round": 27,
+    "pick": 423,
+    "team_key": "458.l.40288.t.1",
+    "player_key": "458.p.9584",
+    "cost": 39,
+    "player_name": "Corey Seager",
+    "manager": "Ｋａｋｕ"
+  },
+  {
+    "round": 27,
+    "pick": 424,
+    "team_key": "458.l.40288.t.1",
+    "player_key": "458.p.9007",
+    "cost": 11,
+    "player_name": "Nathan Eovaldi",
+    "manager": "Ｋａｋｕ"
+  },
+  {
+    "round": 27,
+    "pick": 425,
+    "team_key": "458.l.40288.t.1",
+    "player_key": "458.p.1000002",
+    "cost": 22,
+    "player_name": "Shohei Ohtani (Pitcher)",
+    "manager": "Ｋａｋｕ"
+  },
+  {
+    "round": 27,
+    "pick": 426,
+    "team_key": "458.l.40288.t.1",
+    "player_key": "458.p.10432",
+    "cost": 6,
+    "player_name": "Tanner Scott",
+    "manager": "Ｋａｋｕ"
+  },
+  {
+    "round": 27,
+    "pick": 427,
+    "team_key": "458.l.40288.t.1",
+    "player_key": "458.p.12363",
+    "cost": 3,
+    "player_name": "Spencer Schwellenbach",
+    "manager": "Ｋａｋｕ"
+  },
+  {
+    "round": 27,
+    "pick": 428,
+    "team_key": "458.l.40288.t.1",
+    "player_key": "458.p.11628",
+    "cost": 5,
+    "player_name": "Devin Williams",
+    "manager": "Ｋａｋｕ"
+  },
+  {
+    "round": 27,
+    "pick": 429,
+    "team_key": "458.l.40288.t.1",
+    "player_key": "458.p.12563",
+    "cost": 1,
+    "player_name": "Evan Carter",
+    "manager": "Ｋａｋｕ"
+  },
+  {
+    "round": 27,
+    "pick": 430,
+    "team_key": "458.l.40288.t.1",
+    "player_key": "458.p.11850",
+    "cost": 20,
+    "player_name": "Josh Jung",
+    "manager": "Ｋａｋｕ"
+  },
+  {
+    "round": 27,
+    "pick": 431,
+    "team_key": "458.l.40288.t.1",
+    "player_key": "458.p.11127",
+    "cost": 25,
+    "player_name": "Adolis García",
+    "manager": "Ｋａｋｕ"
+  },
+  {
+    "round": 27,
+    "pick": 432,
+    "team_key": "458.l.40288.t.1",
+    "player_key": "458.p.10577",
+    "cost": 16,
+    "player_name": "Bryan Reynolds",
+    "manager": "Ｋａｋｕ"
+  }
+]

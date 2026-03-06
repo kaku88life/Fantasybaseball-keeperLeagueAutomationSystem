@@ -1,0 +1,6203 @@
+{
+  "Ｋａｋｕ": {
+    "yahoo_manager": "Ｋａｋｕ",
+    "excel_manager": "郭子睿(Rangers)",
+    "team_name": "Texas Rangers",
+    "matched": [
+      {
+        "name": "Josh Jung",
+        "yahoo_position": "3B",
+        "yahoo_selected": "3B",
+        "yahoo_team": "TEX",
+        "yahoo_status": "",
+        "contract_type": "O",
+        "salary": 20,
+        "extension_years": 0,
+        "contract_str": "$20/O",
+        "source": "keeper"
+      },
+      {
+        "name": "Jack Leiter",
+        "yahoo_position": "SP",
+        "yahoo_selected": "SP",
+        "yahoo_team": "TEX",
+        "yahoo_status": "",
+        "contract_type": "R",
+        "salary": 1,
+        "extension_years": 0,
+        "contract_str": "$1/R",
+        "source": "keeper"
+      },
+      {
+        "name": "Tanner Scott",
+        "yahoo_position": "RP",
+        "yahoo_selected": "RP",
+        "yahoo_team": "LAD",
+        "yahoo_status": "DTD",
+        "contract_type": "N",
+        "salary": 6,
+        "extension_years": 1,
+        "contract_str": "$6/N1",
+        "source": "keeper"
+      },
+      {
+        "name": "Evan Carter",
+        "yahoo_position": "LF,CF,RF",
+        "yahoo_selected": "IL",
+        "yahoo_team": "TEX",
+        "yahoo_status": "IL60",
+        "contract_type": "B",
+        "salary": 1,
+        "extension_years": 0,
+        "contract_str": "$1/B",
+        "source": "keeper"
+      },
+      {
+        "name": "Spencer Schwellenbach",
+        "yahoo_position": "SP",
+        "yahoo_selected": "IL",
+        "yahoo_team": "ATL",
+        "yahoo_status": "DTD",
+        "contract_type": "B",
+        "salary": 3,
+        "extension_years": 0,
+        "contract_str": "$3/B",
+        "source": "keeper"
+      }
+    ],
+    "draft_new": [
+      {
+        "name": "Shea Langeliers",
+        "yahoo_position": "C",
+        "yahoo_selected": "C",
+        "yahoo_team": "ATH",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 9,
+        "extension_years": 0,
+        "contract_str": "$9/A",
+        "draft_round": 5,
+        "draft_pick": 80,
+        "source": "draft"
+      },
+      {
+        "name": "Kyle Manzardo",
+        "yahoo_position": "1B",
+        "yahoo_selected": "1B",
+        "yahoo_team": "CLE",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 11,
+        "extension_years": 0,
+        "contract_str": "$11/A",
+        "draft_round": 9,
+        "draft_pick": 129,
+        "source": "draft"
+      },
+      {
+        "name": "Mookie Betts",
+        "yahoo_position": "2B,SS,RF",
+        "yahoo_selected": "2B",
+        "yahoo_team": "LAD",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 58,
+        "extension_years": 0,
+        "contract_str": "$58/A",
+        "draft_round": 19,
+        "draft_pick": 294,
+        "source": "draft"
+      },
+      {
+        "name": "Zach Neto",
+        "yahoo_position": "SS",
+        "yahoo_selected": "SS",
+        "yahoo_team": "LAA",
+        "yahoo_status": "DTD",
+        "contract_type": "A",
+        "salary": 3,
+        "extension_years": 0,
+        "contract_str": "$3/A",
+        "draft_round": 19,
+        "draft_pick": 290,
+        "source": "draft"
+      },
+      {
+        "name": "Wyatt Langford",
+        "yahoo_position": "LF,CF",
+        "yahoo_selected": "LF",
+        "yahoo_team": "TEX",
+        "yahoo_status": "DTD",
+        "contract_type": "A",
+        "salary": 35,
+        "extension_years": 0,
+        "contract_str": "$35/A",
+        "draft_round": 1,
+        "draft_pick": 13,
+        "source": "draft"
+      },
+      {
+        "name": "Jo Adell",
+        "yahoo_position": "CF,RF",
+        "yahoo_selected": "CF",
+        "yahoo_team": "LAA",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 5,
+        "extension_years": 0,
+        "contract_str": "$5/A",
+        "draft_round": 11,
+        "draft_pick": 161,
+        "source": "draft"
+      },
+      {
+        "name": "Royce Lewis",
+        "yahoo_position": "3B",
+        "yahoo_selected": "Util",
+        "yahoo_team": "MIN",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 11,
+        "extension_years": 0,
+        "contract_str": "$11/A",
+        "draft_round": 20,
+        "draft_pick": 315,
+        "source": "draft"
+      },
+      {
+        "name": "Max Muncy",
+        "yahoo_position": "3B",
+        "yahoo_selected": "BN",
+        "yahoo_team": "LAD",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 14,
+        "extension_years": 0,
+        "contract_str": "$14/A",
+        "draft_round": 6,
+        "draft_pick": 84,
+        "source": "draft"
+      },
+      {
+        "name": "Carlos Estévez",
+        "yahoo_position": "RP",
+        "yahoo_selected": "RP",
+        "yahoo_team": "KC",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 9,
+        "extension_years": 0,
+        "contract_str": "$9/A",
+        "draft_round": 5,
+        "draft_pick": 78,
+        "source": "draft"
+      },
+      {
+        "name": "Sean Manaea",
+        "yahoo_position": "SP",
+        "yahoo_selected": "P",
+        "yahoo_team": "NYM",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 4,
+        "extension_years": 0,
+        "contract_str": "$4/A",
+        "draft_round": 6,
+        "draft_pick": 95,
+        "source": "draft"
+      },
+      {
+        "name": "Shohei Ohtani (Pitcher)",
+        "yahoo_position": "SP",
+        "yahoo_selected": "P",
+        "yahoo_team": "LAD",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 22,
+        "extension_years": 0,
+        "contract_str": "$22/A",
+        "draft_round": 27,
+        "draft_pick": 425,
+        "source": "draft"
+      },
+      {
+        "name": "Jared Jones",
+        "yahoo_position": "SP",
+        "yahoo_selected": "IL",
+        "yahoo_team": "PIT",
+        "yahoo_status": "IL60",
+        "contract_type": "A",
+        "salary": 3,
+        "extension_years": 0,
+        "contract_str": "$3/A",
+        "draft_round": 23,
+        "draft_pick": 360,
+        "source": "draft"
+      },
+      {
+        "name": "Reese Olson",
+        "yahoo_position": "SP",
+        "yahoo_selected": "IL",
+        "yahoo_team": "DET",
+        "yahoo_status": "IL60",
+        "contract_type": "A",
+        "salary": 6,
+        "extension_years": 0,
+        "contract_str": "$6/A",
+        "draft_round": 11,
+        "draft_pick": 167,
+        "source": "draft"
+      },
+      {
+        "name": "Kumar Rocker",
+        "yahoo_position": "SP",
+        "yahoo_selected": "NA",
+        "yahoo_team": "TEX",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 2,
+        "extension_years": 0,
+        "contract_str": "$2/A",
+        "draft_round": 27,
+        "draft_pick": 422,
+        "source": "draft"
+      }
+    ],
+    "no_contract": [
+      {
+        "name": "Jorge Polanco",
+        "yahoo_position": "2B,3B",
+        "yahoo_selected": "IF",
+        "yahoo_team": "NYM",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Jordan Beck",
+        "yahoo_position": "LF,RF",
+        "yahoo_selected": "RF",
+        "yahoo_team": "COL",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Heriberto Hernández",
+        "yahoo_position": "LF,RF",
+        "yahoo_selected": "OF",
+        "yahoo_team": "MIA",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Isaac Collins",
+        "yahoo_position": "LF,RF",
+        "yahoo_selected": "Util",
+        "yahoo_team": "KC",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Tyler Locklear",
+        "yahoo_position": "1B",
+        "yahoo_selected": "BN",
+        "yahoo_team": "AZ",
+        "yahoo_status": "DTD",
+        "source": "unknown"
+      },
+      {
+        "name": "Jason Alexander",
+        "yahoo_position": "SP,RP",
+        "yahoo_selected": "SP",
+        "yahoo_team": "HOU",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Brandon Sproat",
+        "yahoo_position": "SP",
+        "yahoo_selected": "SP",
+        "yahoo_team": "MIL",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Jacob Misiorowski",
+        "yahoo_position": "SP,RP",
+        "yahoo_selected": "SP",
+        "yahoo_team": "MIL",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Tanner Banks",
+        "yahoo_position": "RP",
+        "yahoo_selected": "RP",
+        "yahoo_team": "PHI",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Ryan Bergert",
+        "yahoo_position": "SP",
+        "yahoo_selected": "P",
+        "yahoo_team": "KC",
+        "yahoo_status": "DTD",
+        "source": "unknown"
+      },
+      {
+        "name": "Jonah Tong",
+        "yahoo_position": "SP",
+        "yahoo_selected": "BN",
+        "yahoo_team": "NYM",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Mike Burrows",
+        "yahoo_position": "SP,RP",
+        "yahoo_selected": "BN",
+        "yahoo_team": "HOU",
+        "yahoo_status": "",
+        "source": "unknown"
+      }
+    ],
+    "dropped": [
+      {
+        "name": "Bryan Reynolds",
+        "contract_type": "N",
+        "salary": 16,
+        "contract_str": "$16/N1"
+      },
+      {
+        "name": "Shohei Ohtani",
+        "contract_type": "B",
+        "salary": 22,
+        "contract_str": "$22/B"
+      },
+      {
+        "name": "Nathan Eovaldi",
+        "contract_type": "O",
+        "salary": 11,
+        "contract_str": "$11/O"
+      },
+      {
+        "name": "Corey Seager",
+        "contract_type": "O",
+        "salary": 39,
+        "contract_str": "$39/O"
+      },
+      {
+        "name": "Devin Williams",
+        "contract_type": "B",
+        "salary": 5,
+        "contract_str": "$5/B"
+      },
+      {
+        "name": "Adolis García",
+        "contract_type": "N",
+        "salary": 25,
+        "contract_str": "$25/N1"
+      },
+      {
+        "name": "Kuma Rocker",
+        "contract_type": "R",
+        "salary": 2,
+        "contract_str": "$2/R"
+      }
+    ]
+  },
+  "Leo": {
+    "yahoo_manager": "Leo",
+    "excel_manager": "Leo",
+    "team_name": "PHI Phillies",
+    "matched": [
+      {
+        "name": "Gleyber Torres",
+        "yahoo_position": "2B",
+        "yahoo_selected": "2B",
+        "yahoo_team": "DET",
+        "yahoo_status": "DTD",
+        "contract_type": "O",
+        "salary": 21,
+        "extension_years": 0,
+        "contract_str": "$21/O",
+        "source": "keeper"
+      },
+      {
+        "name": "Eugenio Suárez",
+        "yahoo_position": "3B",
+        "yahoo_selected": "3B",
+        "yahoo_team": "CIN",
+        "yahoo_status": "",
+        "contract_type": "B",
+        "salary": 1,
+        "extension_years": 0,
+        "contract_str": "$1/B",
+        "source": "keeper"
+      },
+      {
+        "name": "Christian Walker",
+        "yahoo_position": "1B",
+        "yahoo_selected": "IF",
+        "yahoo_team": "HOU",
+        "yahoo_status": "",
+        "contract_type": "O",
+        "salary": 6,
+        "extension_years": 0,
+        "contract_str": "$6/O",
+        "source": "keeper"
+      },
+      {
+        "name": "Kyle Schwarber",
+        "yahoo_position": "LF",
+        "yahoo_selected": "LF",
+        "yahoo_team": "PHI",
+        "yahoo_status": "",
+        "contract_type": "B",
+        "salary": 19,
+        "extension_years": 0,
+        "contract_str": "$19/B",
+        "source": "keeper"
+      },
+      {
+        "name": "Cristopher Sánchez",
+        "yahoo_position": "SP",
+        "yahoo_selected": "SP",
+        "yahoo_team": "PHI",
+        "yahoo_status": "",
+        "contract_type": "B",
+        "salary": 10,
+        "extension_years": 0,
+        "contract_str": "$10/B",
+        "source": "keeper"
+      },
+      {
+        "name": "Bryce Miller",
+        "yahoo_position": "SP",
+        "yahoo_selected": "SP",
+        "yahoo_team": "SEA",
+        "yahoo_status": "",
+        "contract_type": "B",
+        "salary": 22,
+        "extension_years": 0,
+        "contract_str": "$22/B",
+        "source": "keeper"
+      },
+      {
+        "name": "Michael King",
+        "yahoo_position": "SP",
+        "yahoo_selected": "BN",
+        "yahoo_team": "SD",
+        "yahoo_status": "",
+        "contract_type": "N",
+        "salary": 16,
+        "extension_years": 3,
+        "contract_str": "$16/N3",
+        "source": "keeper"
+      }
+    ],
+    "draft_new": [
+      {
+        "name": "Bryce Harper",
+        "yahoo_position": "1B",
+        "yahoo_selected": "1B",
+        "yahoo_team": "PHI",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 54,
+        "extension_years": 0,
+        "contract_str": "$54/A",
+        "draft_round": 1,
+        "draft_pick": 9,
+        "source": "draft"
+      },
+      {
+        "name": "Otto Lopez",
+        "yahoo_position": "2B,SS",
+        "yahoo_selected": "SS",
+        "yahoo_team": "MIA",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 2,
+        "extension_years": 0,
+        "contract_str": "$2/A",
+        "draft_round": 23,
+        "draft_pick": 353,
+        "source": "draft"
+      },
+      {
+        "name": "Byron Buxton",
+        "yahoo_position": "CF",
+        "yahoo_selected": "OF",
+        "yahoo_team": "MIN",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 7,
+        "extension_years": 0,
+        "contract_str": "$7/A",
+        "draft_round": 7,
+        "draft_pick": 105,
+        "source": "draft"
+      },
+      {
+        "name": "Trea Turner",
+        "yahoo_position": "SS",
+        "yahoo_selected": "Util",
+        "yahoo_team": "PHI",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 60,
+        "extension_years": 0,
+        "contract_str": "$60/A",
+        "draft_round": 1,
+        "draft_pick": 10,
+        "source": "draft"
+      },
+      {
+        "name": "Alec Burleson",
+        "yahoo_position": "1B,LF,RF",
+        "yahoo_selected": "BN",
+        "yahoo_team": "STL",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 7,
+        "extension_years": 0,
+        "contract_str": "$7/A",
+        "draft_round": 7,
+        "draft_pick": 107,
+        "source": "draft"
+      },
+      {
+        "name": "Will Warren",
+        "yahoo_position": "SP",
+        "yahoo_selected": "SP",
+        "yahoo_team": "NYY",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 1,
+        "extension_years": 0,
+        "contract_str": "$1/A",
+        "draft_round": 13,
+        "draft_pick": 200,
+        "source": "draft"
+      },
+      {
+        "name": "Calvin Faucher",
+        "yahoo_position": "RP",
+        "yahoo_selected": "RP",
+        "yahoo_team": "MIA",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 1,
+        "extension_years": 0,
+        "contract_str": "$1/A",
+        "draft_round": 15,
+        "draft_pick": 237,
+        "source": "draft"
+      },
+      {
+        "name": "Sandy Alcantara",
+        "yahoo_position": "SP",
+        "yahoo_selected": "P",
+        "yahoo_team": "MIA",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 33,
+        "extension_years": 0,
+        "contract_str": "$33/A",
+        "draft_round": 26,
+        "draft_pick": 408,
+        "source": "draft"
+      },
+      {
+        "name": "Aaron Nola",
+        "yahoo_position": "SP",
+        "yahoo_selected": "BN",
+        "yahoo_team": "PHI",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 37,
+        "extension_years": 0,
+        "contract_str": "$37/A",
+        "draft_round": 1,
+        "draft_pick": 11,
+        "source": "draft"
+      },
+      {
+        "name": "Charlie Morton",
+        "yahoo_position": "SP,RP",
+        "yahoo_selected": "BN",
+        "yahoo_team": "ATL",
+        "yahoo_status": "NA",
+        "contract_type": "A",
+        "salary": 8,
+        "extension_years": 0,
+        "contract_str": "$8/A",
+        "draft_round": 5,
+        "draft_pick": 65,
+        "source": "draft"
+      },
+      {
+        "name": "Gerrit Cole",
+        "yahoo_position": "SP",
+        "yahoo_selected": "IL",
+        "yahoo_team": "NYY",
+        "yahoo_status": "IL60",
+        "contract_type": "A",
+        "salary": 7,
+        "extension_years": 0,
+        "contract_str": "$7/A",
+        "draft_round": 2,
+        "draft_pick": 28,
+        "source": "draft"
+      },
+      {
+        "name": "Deyvison De Los Santos",
+        "yahoo_position": "1B,3B",
+        "yahoo_selected": "NA",
+        "yahoo_team": "MIA",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 1,
+        "extension_years": 0,
+        "contract_str": "$1/A",
+        "draft_round": 16,
+        "draft_pick": 247,
+        "source": "draft"
+      }
+    ],
+    "no_contract": [
+      {
+        "name": "Dillon Dingler",
+        "yahoo_position": "C",
+        "yahoo_selected": "C",
+        "yahoo_team": "DET",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Jakob Marsee",
+        "yahoo_position": "LF,CF",
+        "yahoo_selected": "CF",
+        "yahoo_team": "MIA",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Daylen Lile",
+        "yahoo_position": "LF,RF",
+        "yahoo_selected": "RF",
+        "yahoo_team": "WSH",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Ha-Seong Kim",
+        "yahoo_position": "2B,SS",
+        "yahoo_selected": "Util",
+        "yahoo_team": "ATL",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Michael McGreevy",
+        "yahoo_position": "SP",
+        "yahoo_selected": "SP",
+        "yahoo_team": "STL",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Hogan Harris",
+        "yahoo_position": "SP,RP",
+        "yahoo_selected": "RP",
+        "yahoo_team": "ATH",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Emilio Pagán",
+        "yahoo_position": "RP",
+        "yahoo_selected": "RP",
+        "yahoo_team": "CIN",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Abner Uribe",
+        "yahoo_position": "RP",
+        "yahoo_selected": "P",
+        "yahoo_team": "MIL",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Kyle Freeland",
+        "yahoo_position": "SP",
+        "yahoo_selected": "P",
+        "yahoo_team": "COL",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Zack Littell",
+        "yahoo_position": "SP",
+        "yahoo_selected": "BN",
+        "yahoo_team": "CIN",
+        "yahoo_status": "NA",
+        "source": "unknown"
+      }
+    ],
+    "dropped": []
+  },
+  "叫我寬哥": {
+    "yahoo_manager": "叫我寬哥",
+    "excel_manager": "Hank",
+    "team_name": "blue jays",
+    "matched": [
+      {
+        "name": "Bo Bichette",
+        "yahoo_position": "SS",
+        "yahoo_selected": "SS",
+        "yahoo_team": "NYM",
+        "yahoo_status": "",
+        "contract_type": "N",
+        "salary": 37,
+        "extension_years": 2,
+        "contract_str": "$37/N2",
+        "source": "keeper"
+      },
+      {
+        "name": "Gunnar Henderson",
+        "yahoo_position": "SS",
+        "yahoo_selected": "IF",
+        "yahoo_team": "BAL",
+        "yahoo_status": "",
+        "contract_type": "N",
+        "salary": 26,
+        "extension_years": 4,
+        "contract_str": "$26/N4",
+        "source": "keeper"
+      },
+      {
+        "name": "Austin Riley",
+        "yahoo_position": "3B",
+        "yahoo_selected": "IL",
+        "yahoo_team": "ATL",
+        "yahoo_status": "DTD",
+        "contract_type": "N",
+        "salary": 33,
+        "extension_years": 3,
+        "contract_str": "$33/N3",
+        "source": "keeper"
+      },
+      {
+        "name": "Alek Manoah",
+        "yahoo_position": "SP",
+        "yahoo_selected": "IL",
+        "yahoo_team": "LAA",
+        "yahoo_status": "",
+        "contract_type": "N",
+        "salary": 21,
+        "extension_years": 2,
+        "contract_str": "$21/N2",
+        "source": "keeper"
+      }
+    ],
+    "draft_new": [
+      {
+        "name": "Austin Wells",
+        "yahoo_position": "C",
+        "yahoo_selected": "C",
+        "yahoo_team": "NYY",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 1,
+        "extension_years": 0,
+        "contract_str": "$1/A",
+        "draft_round": 18,
+        "draft_pick": 288,
+        "source": "draft"
+      },
+      {
+        "name": "Ryan O'Hearn",
+        "yahoo_position": "1B,LF,RF",
+        "yahoo_selected": "1B",
+        "yahoo_team": "PIT",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 1,
+        "extension_years": 0,
+        "contract_str": "$1/A",
+        "draft_round": 14,
+        "draft_pick": 210,
+        "source": "draft"
+      },
+      {
+        "name": "Andrés Giménez",
+        "yahoo_position": "2B,SS",
+        "yahoo_selected": "2B",
+        "yahoo_team": "TOR",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 7,
+        "extension_years": 0,
+        "contract_str": "$7/A",
+        "draft_round": 7,
+        "draft_pick": 106,
+        "source": "draft"
+      },
+      {
+        "name": "Sal Frelick",
+        "yahoo_position": "LF,CF,RF",
+        "yahoo_selected": "CF",
+        "yahoo_team": "MIL",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 1,
+        "extension_years": 0,
+        "contract_str": "$1/A",
+        "draft_round": 17,
+        "draft_pick": 258,
+        "source": "draft"
+      },
+      {
+        "name": "George Springer",
+        "yahoo_position": "LF,CF,RF",
+        "yahoo_selected": "RF",
+        "yahoo_team": "TOR",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 2,
+        "extension_years": 0,
+        "contract_str": "$2/A",
+        "draft_round": 9,
+        "draft_pick": 139,
+        "source": "draft"
+      },
+      {
+        "name": "Daulton Varsho",
+        "yahoo_position": "LF,CF",
+        "yahoo_selected": "Util",
+        "yahoo_team": "TOR",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 1,
+        "extension_years": 0,
+        "contract_str": "$1/A",
+        "draft_round": 14,
+        "draft_pick": 223,
+        "source": "draft"
+      },
+      {
+        "name": "José Soriano",
+        "yahoo_position": "SP",
+        "yahoo_selected": "SP",
+        "yahoo_team": "LAA",
+        "yahoo_status": "DTD",
+        "contract_type": "A",
+        "salary": 1,
+        "extension_years": 0,
+        "contract_str": "$1/A",
+        "draft_round": 15,
+        "draft_pick": 239,
+        "source": "draft"
+      },
+      {
+        "name": "Matt Strahm",
+        "yahoo_position": "RP",
+        "yahoo_selected": "RP",
+        "yahoo_team": "KC",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 1,
+        "extension_years": 0,
+        "contract_str": "$1/A",
+        "draft_round": 15,
+        "draft_pick": 240,
+        "source": "draft"
+      },
+      {
+        "name": "Pierce Johnson",
+        "yahoo_position": "RP",
+        "yahoo_selected": "RP",
+        "yahoo_team": "CIN",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 1,
+        "extension_years": 0,
+        "contract_str": "$1/A",
+        "draft_round": 8,
+        "draft_pick": 113,
+        "source": "draft"
+      },
+      {
+        "name": "Ryan Helsley",
+        "yahoo_position": "RP",
+        "yahoo_selected": "P",
+        "yahoo_team": "BAL",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 11,
+        "extension_years": 0,
+        "contract_str": "$11/A",
+        "draft_round": 18,
+        "draft_pick": 277,
+        "source": "draft"
+      },
+      {
+        "name": "Jeffrey Springs",
+        "yahoo_position": "SP",
+        "yahoo_selected": "BN",
+        "yahoo_team": "ATH",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 4,
+        "extension_years": 0,
+        "contract_str": "$4/A",
+        "draft_round": 10,
+        "draft_pick": 149,
+        "source": "draft"
+      },
+      {
+        "name": "Ryan Pepiot",
+        "yahoo_position": "SP",
+        "yahoo_selected": "BN",
+        "yahoo_team": "TB",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 15,
+        "extension_years": 0,
+        "contract_str": "$15/A",
+        "draft_round": 6,
+        "draft_pick": 83,
+        "source": "draft"
+      },
+      {
+        "name": "José Berríos",
+        "yahoo_position": "SP",
+        "yahoo_selected": "BN",
+        "yahoo_team": "TOR",
+        "yahoo_status": "DTD",
+        "contract_type": "A",
+        "salary": 11,
+        "extension_years": 0,
+        "contract_str": "$11/A",
+        "draft_round": 8,
+        "draft_pick": 116,
+        "source": "draft"
+      },
+      {
+        "name": "Lourdes Gurriel Jr.",
+        "yahoo_position": "LF",
+        "yahoo_selected": "IL",
+        "yahoo_team": "AZ",
+        "yahoo_status": "DTD",
+        "contract_type": "A",
+        "salary": 7,
+        "extension_years": 0,
+        "contract_str": "$7/A",
+        "draft_round": 8,
+        "draft_pick": 121,
+        "source": "draft"
+      }
+    ],
+    "no_contract": [
+      {
+        "name": "Lenyn Sosa",
+        "yahoo_position": "1B,2B,3B",
+        "yahoo_selected": "3B",
+        "yahoo_team": "CWS",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Andrew Benintendi",
+        "yahoo_position": "LF",
+        "yahoo_selected": "LF",
+        "yahoo_team": "CWS",
+        "yahoo_status": "DTD",
+        "source": "unknown"
+      },
+      {
+        "name": "Gavin Lux",
+        "yahoo_position": "2B,3B,LF",
+        "yahoo_selected": "OF",
+        "yahoo_team": "TB",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Josh Smith",
+        "yahoo_position": "1B,3B,SS,LF,RF",
+        "yahoo_selected": "Util",
+        "yahoo_team": "TEX",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Carlos Narváez",
+        "yahoo_position": "C",
+        "yahoo_selected": "BN",
+        "yahoo_team": "BOS",
+        "yahoo_status": "DTD",
+        "source": "unknown"
+      },
+      {
+        "name": "David Peterson",
+        "yahoo_position": "SP",
+        "yahoo_selected": "SP",
+        "yahoo_team": "NYM",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Dean Kremer",
+        "yahoo_position": "SP",
+        "yahoo_selected": "SP",
+        "yahoo_team": "BAL",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Eduardo Rodriguez",
+        "yahoo_position": "SP",
+        "yahoo_selected": "SP",
+        "yahoo_team": "AZ",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Caleb Thielbar",
+        "yahoo_position": "RP",
+        "yahoo_selected": "RP",
+        "yahoo_team": "CHC",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Jared Koenig",
+        "yahoo_position": "SP,RP",
+        "yahoo_selected": "P",
+        "yahoo_team": "MIL",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "JoJo Romero",
+        "yahoo_position": "RP",
+        "yahoo_selected": "P",
+        "yahoo_team": "STL",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Cristian Javier",
+        "yahoo_position": "SP",
+        "yahoo_selected": "BN",
+        "yahoo_team": "HOU",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Tyler Mahle",
+        "yahoo_position": "SP",
+        "yahoo_selected": "IL",
+        "yahoo_team": "SF",
+        "yahoo_status": "",
+        "source": "unknown"
+      }
+    ],
+    "dropped": [
+      {
+        "name": "Vladimir Guerrero Jr.",
+        "contract_type": "N",
+        "salary": 51,
+        "contract_str": "$51/N7"
+      },
+      {
+        "name": "Michael Harris II",
+        "contract_type": "N",
+        "salary": 30,
+        "contract_str": "$30/N4"
+      },
+      {
+        "name": "Sandy Alcantara",
+        "contract_type": "N",
+        "salary": 33,
+        "contract_str": "$33/N4"
+      }
+    ]
+  },
+  "EDDIE": {
+    "yahoo_manager": "EDDIE",
+    "excel_manager": "Eddie Chen",
+    "team_name": "Los Angeles Dodge ball",
+    "matched": [
+      {
+        "name": "Matt Chapman",
+        "yahoo_position": "3B",
+        "yahoo_selected": "IF",
+        "yahoo_team": "SF",
+        "yahoo_status": "",
+        "contract_type": "B",
+        "salary": 5,
+        "extension_years": 0,
+        "contract_str": "$5/B",
+        "source": "keeper"
+      },
+      {
+        "name": "Seiya Suzuki",
+        "yahoo_position": "LF,RF",
+        "yahoo_selected": "RF",
+        "yahoo_team": "CHC",
+        "yahoo_status": "",
+        "contract_type": "N",
+        "salary": 20,
+        "extension_years": 1,
+        "contract_str": "$20/N1",
+        "source": "keeper"
+      },
+      {
+        "name": "Luis Severino",
+        "yahoo_position": "SP",
+        "yahoo_selected": "SP",
+        "yahoo_team": "ATH",
+        "yahoo_status": "",
+        "contract_type": "B",
+        "salary": 2,
+        "extension_years": 0,
+        "contract_str": "$2/B",
+        "source": "keeper"
+      },
+      {
+        "name": "Cade Horton",
+        "yahoo_position": "SP",
+        "yahoo_selected": "BN",
+        "yahoo_team": "CHC",
+        "yahoo_status": "",
+        "contract_type": "R",
+        "salary": 1,
+        "extension_years": 0,
+        "contract_str": "$1/R",
+        "source": "keeper"
+      },
+      {
+        "name": "Blake Snell",
+        "yahoo_position": "SP",
+        "yahoo_selected": "BN",
+        "yahoo_team": "LAD",
+        "yahoo_status": "",
+        "contract_type": "B",
+        "salary": 36,
+        "extension_years": 0,
+        "contract_str": "$36/B",
+        "source": "keeper"
+      },
+      {
+        "name": "Bubba Chandler",
+        "yahoo_position": "SP",
+        "yahoo_selected": "BN",
+        "yahoo_team": "PIT",
+        "yahoo_status": "",
+        "contract_type": "R",
+        "salary": 1,
+        "extension_years": 0,
+        "contract_str": "$1/R",
+        "source": "keeper"
+      },
+      {
+        "name": "Pablo López",
+        "yahoo_position": "SP",
+        "yahoo_selected": "BN",
+        "yahoo_team": "MIN",
+        "yahoo_status": "DTD",
+        "contract_type": "N",
+        "salary": 14,
+        "extension_years": 1,
+        "contract_str": "$14/N1",
+        "source": "keeper"
+      }
+    ],
+    "draft_new": [
+      {
+        "name": "Will Smith",
+        "yahoo_position": "C",
+        "yahoo_selected": "C",
+        "yahoo_team": "LAD",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 23,
+        "extension_years": 0,
+        "contract_str": "$23/A",
+        "draft_round": 3,
+        "draft_pick": 48,
+        "source": "draft"
+      },
+      {
+        "name": "Josh Bell",
+        "yahoo_position": "1B",
+        "yahoo_selected": "1B",
+        "yahoo_team": "MIN",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 1,
+        "extension_years": 0,
+        "contract_str": "$1/A",
+        "draft_round": 9,
+        "draft_pick": 143,
+        "source": "draft"
+      },
+      {
+        "name": "Tommy Edman",
+        "yahoo_position": "2B,3B,SS,CF",
+        "yahoo_selected": "2B",
+        "yahoo_team": "LAD",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 28,
+        "extension_years": 0,
+        "contract_str": "$28/A",
+        "draft_round": 4,
+        "draft_pick": 63,
+        "source": "draft"
+      },
+      {
+        "name": "Xavier Edwards",
+        "yahoo_position": "2B,SS",
+        "yahoo_selected": "SS",
+        "yahoo_team": "MIA",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 1,
+        "extension_years": 0,
+        "contract_str": "$1/A",
+        "draft_round": 25,
+        "draft_pick": 400,
+        "source": "draft"
+      },
+      {
+        "name": "Jurickson Profar",
+        "yahoo_position": "LF",
+        "yahoo_selected": "OF",
+        "yahoo_team": "ATL",
+        "yahoo_status": "NA",
+        "contract_type": "A",
+        "salary": 1,
+        "extension_years": 0,
+        "contract_str": "$1/A",
+        "draft_round": 19,
+        "draft_pick": 295,
+        "source": "draft"
+      },
+      {
+        "name": "Andrés Muñoz",
+        "yahoo_position": "RP",
+        "yahoo_selected": "RP",
+        "yahoo_team": "SEA",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 20,
+        "extension_years": 0,
+        "contract_str": "$20/A",
+        "draft_round": 3,
+        "draft_pick": 36,
+        "source": "draft"
+      },
+      {
+        "name": "Alexis Díaz",
+        "yahoo_position": "RP",
+        "yahoo_selected": "P",
+        "yahoo_team": "TEX",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 22,
+        "extension_years": 0,
+        "contract_str": "$22/A",
+        "draft_round": 3,
+        "draft_pick": 43,
+        "source": "draft"
+      },
+      {
+        "name": "Kirby Yates",
+        "yahoo_position": "RP",
+        "yahoo_selected": "P",
+        "yahoo_team": "LAA",
+        "yahoo_status": "DTD",
+        "contract_type": "A",
+        "salary": 5,
+        "extension_years": 0,
+        "contract_str": "$5/A",
+        "draft_round": 2,
+        "draft_pick": 23,
+        "source": "draft"
+      },
+      {
+        "name": "Emmanuel Clase",
+        "yahoo_position": "RP",
+        "yahoo_selected": "BN",
+        "yahoo_team": "CLE",
+        "yahoo_status": "NA",
+        "contract_type": "A",
+        "salary": 29,
+        "extension_years": 0,
+        "contract_str": "$29/A",
+        "draft_round": 2,
+        "draft_pick": 19,
+        "source": "draft"
+      },
+      {
+        "name": "Justin Verlander",
+        "yahoo_position": "SP",
+        "yahoo_selected": "BN",
+        "yahoo_team": "DET",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 3,
+        "extension_years": 0,
+        "contract_str": "$3/A",
+        "draft_round": 10,
+        "draft_pick": 159,
+        "source": "draft"
+      },
+      {
+        "name": "Connor Norby",
+        "yahoo_position": "2B,3B",
+        "yahoo_selected": "IL",
+        "yahoo_team": "MIA",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 9,
+        "extension_years": 0,
+        "contract_str": "$9/A",
+        "draft_round": 8,
+        "draft_pick": 127,
+        "source": "draft"
+      },
+      {
+        "name": "Trevor Megill",
+        "yahoo_position": "RP",
+        "yahoo_selected": "IL",
+        "yahoo_team": "MIL",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 15,
+        "extension_years": 0,
+        "contract_str": "$15/A",
+        "draft_round": 5,
+        "draft_pick": 79,
+        "source": "draft"
+      },
+      {
+        "name": "Luis Garcia",
+        "yahoo_position": "SP",
+        "yahoo_selected": "IL",
+        "yahoo_team": "HOU",
+        "yahoo_status": "IL60",
+        "contract_type": "A",
+        "salary": 12,
+        "extension_years": 0,
+        "contract_str": "$12/A",
+        "draft_round": 4,
+        "draft_pick": 64,
+        "source": "draft"
+      }
+    ],
+    "no_contract": [
+      {
+        "name": "Mickey Moniak",
+        "yahoo_position": "LF,CF,RF",
+        "yahoo_selected": "CF",
+        "yahoo_team": "COL",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Addison Barger",
+        "yahoo_position": "3B,LF,RF",
+        "yahoo_selected": "Util",
+        "yahoo_team": "TOR",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Moisés Ballesteros",
+        "yahoo_position": "C",
+        "yahoo_selected": "Util",
+        "yahoo_team": "CHC",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Nolan McLean",
+        "yahoo_position": "SP",
+        "yahoo_selected": "SP",
+        "yahoo_team": "NYM",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Kyle Hendricks",
+        "yahoo_position": "SP,RP",
+        "yahoo_selected": "SP",
+        "yahoo_team": "LAA",
+        "yahoo_status": "NA",
+        "source": "unknown"
+      },
+      {
+        "name": "David Robertson",
+        "yahoo_position": "RP",
+        "yahoo_selected": "RP",
+        "yahoo_team": "PHI",
+        "yahoo_status": "NA",
+        "source": "unknown"
+      },
+      {
+        "name": "Dennis Santana",
+        "yahoo_position": "RP",
+        "yahoo_selected": "RP",
+        "yahoo_team": "PIT",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Michael Kopech",
+        "yahoo_position": "RP",
+        "yahoo_selected": "P",
+        "yahoo_team": "LAD",
+        "yahoo_status": "NA",
+        "source": "unknown"
+      },
+      {
+        "name": "Quinn Priester",
+        "yahoo_position": "SP,RP",
+        "yahoo_selected": "BN",
+        "yahoo_team": "MIL",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Mick Abel",
+        "yahoo_position": "SP",
+        "yahoo_selected": "BN",
+        "yahoo_team": "MIN",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Logan Henderson",
+        "yahoo_position": "SP",
+        "yahoo_selected": "IL",
+        "yahoo_team": "MIL",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Jhostynxon Garcia",
+        "yahoo_position": "CF,RF",
+        "yahoo_selected": "NA",
+        "yahoo_team": "PIT",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Blade Tidwell",
+        "yahoo_position": "SP",
+        "yahoo_selected": "NA",
+        "yahoo_team": "SF",
+        "yahoo_status": "",
+        "source": "unknown"
+      }
+    ],
+    "dropped": [
+      {
+        "name": "Edwardo Cabrera",
+        "contract_type": "O",
+        "salary": 7,
+        "contract_str": "$7/O"
+      },
+      {
+        "name": "Christopher Morel",
+        "contract_type": "O",
+        "salary": 5,
+        "contract_str": "$5/O"
+      },
+      {
+        "name": "Kyle Harrison",
+        "contract_type": "B",
+        "salary": 1,
+        "contract_str": "$1/B"
+      },
+      {
+        "name": "Xavier Edward",
+        "contract_type": "B",
+        "salary": 1,
+        "contract_str": "$1/B"
+      }
+    ]
+  },
+  "wei": {
+    "yahoo_manager": "wei",
+    "excel_manager": "Chih-Wei",
+    "team_name": "Atlanta Braves2",
+    "matched": [
+      {
+        "name": "Jackson Holliday",
+        "yahoo_position": "2B,SS",
+        "yahoo_selected": "2B",
+        "yahoo_team": "BAL",
+        "yahoo_status": "",
+        "contract_type": "B",
+        "salary": 1,
+        "extension_years": 0,
+        "contract_str": "$1/B",
+        "source": "keeper"
+      },
+      {
+        "name": "Mark Vientos",
+        "yahoo_position": "3B",
+        "yahoo_selected": "3B",
+        "yahoo_team": "NYM",
+        "yahoo_status": "",
+        "contract_type": "B",
+        "salary": 1,
+        "extension_years": 0,
+        "contract_str": "$1/B",
+        "source": "keeper"
+      },
+      {
+        "name": "Bobby Witt Jr.",
+        "yahoo_position": "SS",
+        "yahoo_selected": "IF",
+        "yahoo_team": "KC",
+        "yahoo_status": "",
+        "contract_type": "N",
+        "salary": 32,
+        "extension_years": 5,
+        "contract_str": "$32/N5",
+        "source": "keeper"
+      },
+      {
+        "name": "Jackson Chourio",
+        "yahoo_position": "LF,CF,RF",
+        "yahoo_selected": "CF",
+        "yahoo_team": "MIL",
+        "yahoo_status": "",
+        "contract_type": "B",
+        "salary": 2,
+        "extension_years": 0,
+        "contract_str": "$2/B",
+        "source": "keeper"
+      },
+      {
+        "name": "Juan Soto",
+        "yahoo_position": "LF,RF",
+        "yahoo_selected": "RF",
+        "yahoo_team": "NYM",
+        "yahoo_status": "",
+        "contract_type": "N",
+        "salary": 33,
+        "extension_years": 2,
+        "contract_str": "$33/N2",
+        "source": "keeper"
+      },
+      {
+        "name": "Ronald Acuña Jr.",
+        "yahoo_position": "RF",
+        "yahoo_selected": "OF",
+        "yahoo_team": "ATL",
+        "yahoo_status": "",
+        "contract_type": "N",
+        "salary": 35,
+        "extension_years": 2,
+        "contract_str": "$35/N2",
+        "source": "keeper"
+      },
+      {
+        "name": "Elly De La Cruz",
+        "yahoo_position": "SS",
+        "yahoo_selected": "Util",
+        "yahoo_team": "CIN",
+        "yahoo_status": "",
+        "contract_type": "N",
+        "salary": 31,
+        "extension_years": 6,
+        "contract_str": "$31/N6",
+        "source": "keeper"
+      },
+      {
+        "name": "Mason Miller",
+        "yahoo_position": "RP",
+        "yahoo_selected": "RP",
+        "yahoo_team": "SD",
+        "yahoo_status": "",
+        "contract_type": "B",
+        "salary": 11,
+        "extension_years": 0,
+        "contract_str": "$11/B",
+        "source": "keeper"
+      },
+      {
+        "name": "Grayson Rodriguez",
+        "yahoo_position": "SP",
+        "yahoo_selected": "IL",
+        "yahoo_team": "LAA",
+        "yahoo_status": "DTD",
+        "contract_type": "N",
+        "salary": 6,
+        "extension_years": 1,
+        "contract_str": "$6/N1",
+        "source": "keeper"
+      }
+    ],
+    "draft_new": [
+      {
+        "name": "Willson Contreras",
+        "yahoo_position": "C,1B",
+        "yahoo_selected": "Util",
+        "yahoo_team": "BOS",
+        "yahoo_status": "DTD",
+        "contract_type": "A",
+        "salary": 15,
+        "extension_years": 0,
+        "contract_str": "$15/A",
+        "draft_round": 3,
+        "draft_pick": 37,
+        "source": "draft"
+      },
+      {
+        "name": "Samuel Basallo",
+        "yahoo_position": "C,1B",
+        "yahoo_selected": "BN",
+        "yahoo_team": "BAL",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 1,
+        "extension_years": 0,
+        "contract_str": "$1/A",
+        "draft_round": 15,
+        "draft_pick": 230,
+        "source": "draft"
+      },
+      {
+        "name": "Sonny Gray",
+        "yahoo_position": "SP",
+        "yahoo_selected": "SP",
+        "yahoo_team": "BOS",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 31,
+        "extension_years": 0,
+        "contract_str": "$31/A",
+        "draft_round": 3,
+        "draft_pick": 35,
+        "source": "draft"
+      },
+      {
+        "name": "Chris Sale",
+        "yahoo_position": "SP",
+        "yahoo_selected": "SP",
+        "yahoo_team": "ATL",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 31,
+        "extension_years": 0,
+        "contract_str": "$31/A",
+        "draft_round": 1,
+        "draft_pick": 1,
+        "source": "draft"
+      },
+      {
+        "name": "Clay Holmes",
+        "yahoo_position": "SP,RP",
+        "yahoo_selected": "RP",
+        "yahoo_team": "NYM",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 12,
+        "extension_years": 0,
+        "contract_str": "$12/A",
+        "draft_round": 8,
+        "draft_pick": 124,
+        "source": "draft"
+      },
+      {
+        "name": "Kevin Gausman",
+        "yahoo_position": "SP",
+        "yahoo_selected": "BN",
+        "yahoo_team": "TOR",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 17,
+        "extension_years": 0,
+        "contract_str": "$17/A",
+        "draft_round": 5,
+        "draft_pick": 69,
+        "source": "draft"
+      },
+      {
+        "name": "Casey Mize",
+        "yahoo_position": "SP",
+        "yahoo_selected": "BN",
+        "yahoo_team": "DET",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 1,
+        "extension_years": 0,
+        "contract_str": "$1/A",
+        "draft_round": 14,
+        "draft_pick": 215,
+        "source": "draft"
+      },
+      {
+        "name": "MacKenzie Gore",
+        "yahoo_position": "SP",
+        "yahoo_selected": "BN",
+        "yahoo_team": "TEX",
+        "yahoo_status": "DTD",
+        "contract_type": "A",
+        "salary": 10,
+        "extension_years": 0,
+        "contract_str": "$10/A",
+        "draft_round": 7,
+        "draft_pick": 108,
+        "source": "draft"
+      },
+      {
+        "name": "Reynaldo López",
+        "yahoo_position": "SP",
+        "yahoo_selected": "IL",
+        "yahoo_team": "ATL",
+        "yahoo_status": "DTD",
+        "contract_type": "A",
+        "salary": 20,
+        "extension_years": 0,
+        "contract_str": "$20/A",
+        "draft_round": 6,
+        "draft_pick": 87,
+        "source": "draft"
+      }
+    ],
+    "no_contract": [
+      {
+        "name": "Agustín Ramírez",
+        "yahoo_position": "C,1B",
+        "yahoo_selected": "C",
+        "yahoo_team": "MIA",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Luke Keaschall",
+        "yahoo_position": "1B,2B,CF",
+        "yahoo_selected": "1B",
+        "yahoo_team": "MIN",
+        "yahoo_status": "DTD",
+        "source": "unknown"
+      },
+      {
+        "name": "Dylan Beavers",
+        "yahoo_position": "LF,RF",
+        "yahoo_selected": "LF",
+        "yahoo_team": "BAL",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Sal Stewart",
+        "yahoo_position": "1B,2B,3B",
+        "yahoo_selected": "BN",
+        "yahoo_team": "CIN",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Hurston Waldrep",
+        "yahoo_position": "SP",
+        "yahoo_selected": "P",
+        "yahoo_team": "ATL",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Kyle Bradish",
+        "yahoo_position": "SP",
+        "yahoo_selected": "P",
+        "yahoo_team": "BAL",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Shane Smith",
+        "yahoo_position": "SP,RP",
+        "yahoo_selected": "BN",
+        "yahoo_team": "CWS",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Luis Morales",
+        "yahoo_position": "SP",
+        "yahoo_selected": "BN",
+        "yahoo_team": "ATH",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Connelly Early",
+        "yahoo_position": "SP",
+        "yahoo_selected": "BN",
+        "yahoo_team": "BOS",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Chase Burns",
+        "yahoo_position": "SP,RP",
+        "yahoo_selected": "BN",
+        "yahoo_team": "CIN",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Trey Yesavage",
+        "yahoo_position": "SP",
+        "yahoo_selected": "BN",
+        "yahoo_team": "TOR",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Konnor Griffin",
+        "yahoo_position": "SS",
+        "yahoo_selected": "NA",
+        "yahoo_team": "PIT",
+        "yahoo_status": "NA",
+        "source": "unknown"
+      },
+      {
+        "name": "Jesús Made",
+        "yahoo_position": "3B,SS",
+        "yahoo_selected": "NA",
+        "yahoo_team": "MIL",
+        "yahoo_status": "NA",
+        "source": "unknown"
+      }
+    ],
+    "dropped": [
+      {
+        "name": "Shane Baz",
+        "contract_type": "B",
+        "salary": 4,
+        "contract_str": "$4/B"
+      },
+      {
+        "name": "Jackson Jobe",
+        "contract_type": "R",
+        "salary": 1,
+        "contract_str": "$1/R"
+      },
+      {
+        "name": "Noah Schultz",
+        "contract_type": "R",
+        "salary": 1,
+        "contract_str": "$1/R"
+      }
+    ]
+  },
+  "Tony": {
+    "yahoo_manager": "Tony",
+    "excel_manager": "Tony林芳民",
+    "team_name": "Cincinnati Reds 2025",
+    "matched": [
+      {
+        "name": "Freddie Freeman",
+        "yahoo_position": "1B",
+        "yahoo_selected": "1B",
+        "yahoo_team": "LAD",
+        "yahoo_status": "",
+        "contract_type": "O",
+        "salary": 50,
+        "extension_years": 0,
+        "contract_str": "$50/O",
+        "source": "keeper"
+      },
+      {
+        "name": "Jose Altuve",
+        "yahoo_position": "2B,LF",
+        "yahoo_selected": "LF",
+        "yahoo_team": "HOU",
+        "yahoo_status": "DTD",
+        "contract_type": "N",
+        "salary": 34,
+        "extension_years": 1,
+        "contract_str": "$34/N1",
+        "source": "keeper"
+      },
+      {
+        "name": "Jasson Domínguez",
+        "yahoo_position": "LF,CF",
+        "yahoo_selected": "CF",
+        "yahoo_team": "NYY",
+        "yahoo_status": "",
+        "contract_type": "R",
+        "salary": 1,
+        "extension_years": 0,
+        "contract_str": "$1/R",
+        "source": "keeper"
+      },
+      {
+        "name": "Lawrence Butler",
+        "yahoo_position": "CF,RF",
+        "yahoo_selected": "RF",
+        "yahoo_team": "ATH",
+        "yahoo_status": "DTD",
+        "contract_type": "B",
+        "salary": 1,
+        "extension_years": 0,
+        "contract_str": "$1/B",
+        "source": "keeper"
+      },
+      {
+        "name": "Colt Keith",
+        "yahoo_position": "1B,2B,3B",
+        "yahoo_selected": "BN",
+        "yahoo_team": "DET",
+        "yahoo_status": "",
+        "contract_type": "B",
+        "salary": 1,
+        "extension_years": 0,
+        "contract_str": "$1/B",
+        "source": "keeper"
+      },
+      {
+        "name": "Carlos Rodón",
+        "yahoo_position": "SP",
+        "yahoo_selected": "SP",
+        "yahoo_team": "NYY",
+        "yahoo_status": "DTD",
+        "contract_type": "B",
+        "salary": 12,
+        "extension_years": 0,
+        "contract_str": "$12/B",
+        "source": "keeper"
+      },
+      {
+        "name": "Luke Weaver",
+        "yahoo_position": "RP",
+        "yahoo_selected": "P",
+        "yahoo_team": "NYM",
+        "yahoo_status": "",
+        "contract_type": "B",
+        "salary": 1,
+        "extension_years": 0,
+        "contract_str": "$1/B",
+        "source": "keeper"
+      },
+      {
+        "name": "Hunter Greene",
+        "yahoo_position": "SP",
+        "yahoo_selected": "BN",
+        "yahoo_team": "CIN",
+        "yahoo_status": "",
+        "contract_type": "O",
+        "salary": 6,
+        "extension_years": 0,
+        "contract_str": "$6/O",
+        "source": "keeper"
+      },
+      {
+        "name": "Luis Robert Jr.",
+        "yahoo_position": "CF",
+        "yahoo_selected": "IL",
+        "yahoo_team": "NYM",
+        "yahoo_status": "DTD",
+        "contract_type": "N",
+        "salary": 16,
+        "extension_years": 1,
+        "contract_str": "$16/N1",
+        "source": "keeper"
+      },
+      {
+        "name": "Triston Casas",
+        "yahoo_position": "1B",
+        "yahoo_selected": "IL",
+        "yahoo_team": "BOS",
+        "yahoo_status": "IL60",
+        "contract_type": "N",
+        "salary": 11,
+        "extension_years": 1,
+        "contract_str": "$11/N1",
+        "source": "keeper"
+      }
+    ],
+    "draft_new": [
+      {
+        "name": "Ivan Herrera",
+        "yahoo_position": "C",
+        "yahoo_selected": "C",
+        "yahoo_team": "STL",
+        "yahoo_status": "DTD",
+        "contract_type": "A",
+        "salary": 5,
+        "extension_years": 0,
+        "contract_str": "$5/A",
+        "draft_round": 12,
+        "draft_pick": 181,
+        "source": "draft"
+      },
+      {
+        "name": "Matt McLain",
+        "yahoo_position": "2B,SS",
+        "yahoo_selected": "IF",
+        "yahoo_team": "CIN",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 36,
+        "extension_years": 0,
+        "contract_str": "$36/A",
+        "draft_round": 3,
+        "draft_pick": 42,
+        "source": "draft"
+      },
+      {
+        "name": "Nick Martinez",
+        "yahoo_position": "SP,RP",
+        "yahoo_selected": "SP",
+        "yahoo_team": "TB",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 4,
+        "extension_years": 0,
+        "contract_str": "$4/A",
+        "draft_round": 5,
+        "draft_pick": 71,
+        "source": "draft"
+      },
+      {
+        "name": "Brady Singer",
+        "yahoo_position": "SP",
+        "yahoo_selected": "SP",
+        "yahoo_team": "CIN",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 3,
+        "extension_years": 0,
+        "contract_str": "$3/A",
+        "draft_round": 5,
+        "draft_pick": 68,
+        "source": "draft"
+      },
+      {
+        "name": "Keegan Akin",
+        "yahoo_position": "SP,RP",
+        "yahoo_selected": "RP",
+        "yahoo_team": "BAL",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 2,
+        "extension_years": 0,
+        "contract_str": "$2/A",
+        "draft_round": 7,
+        "draft_pick": 110,
+        "source": "draft"
+      },
+      {
+        "name": "Kyle Finnegan",
+        "yahoo_position": "RP",
+        "yahoo_selected": "P",
+        "yahoo_team": "DET",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 6,
+        "extension_years": 0,
+        "contract_str": "$6/A",
+        "draft_round": 11,
+        "draft_pick": 170,
+        "source": "draft"
+      },
+      {
+        "name": "Kyle Harrison",
+        "yahoo_position": "SP,RP",
+        "yahoo_selected": "BN",
+        "yahoo_team": "MIL",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 1,
+        "extension_years": 0,
+        "contract_str": "$1/A",
+        "draft_round": 26,
+        "draft_pick": 401,
+        "source": "draft"
+      },
+      {
+        "name": "Brayan Bello",
+        "yahoo_position": "SP",
+        "yahoo_selected": "BN",
+        "yahoo_team": "BOS",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 1,
+        "extension_years": 0,
+        "contract_str": "$1/A",
+        "draft_round": 13,
+        "draft_pick": 194,
+        "source": "draft"
+      },
+      {
+        "name": "Yordan Alvarez",
+        "yahoo_position": "LF",
+        "yahoo_selected": "IL",
+        "yahoo_team": "HOU",
+        "yahoo_status": "DTD",
+        "contract_type": "A",
+        "salary": 67,
+        "extension_years": 0,
+        "contract_str": "$67/A",
+        "draft_round": 1,
+        "draft_pick": 8,
+        "source": "draft"
+      },
+      {
+        "name": "Marcelo Mayer",
+        "yahoo_position": "2B,3B,SS",
+        "yahoo_selected": "IL",
+        "yahoo_team": "BOS",
+        "yahoo_status": "IL60",
+        "contract_type": "A",
+        "salary": 1,
+        "extension_years": 0,
+        "contract_str": "$1/A",
+        "draft_round": 24,
+        "draft_pick": 376,
+        "source": "draft"
+      },
+      {
+        "name": "Quinn Mathews",
+        "yahoo_position": "SP",
+        "yahoo_selected": "NA",
+        "yahoo_team": "STL",
+        "yahoo_status": "NA",
+        "contract_type": "A",
+        "salary": 1,
+        "extension_years": 0,
+        "contract_str": "$1/A",
+        "draft_round": 16,
+        "draft_pick": 241,
+        "source": "draft"
+      }
+    ],
+    "no_contract": [
+      {
+        "name": "Caleb Durbin",
+        "yahoo_position": "2B,3B,SS",
+        "yahoo_selected": "2B",
+        "yahoo_team": "BOS",
+        "yahoo_status": "DTD",
+        "source": "unknown"
+      },
+      {
+        "name": "Nacho Alvarez Jr.",
+        "yahoo_position": "2B,3B",
+        "yahoo_selected": "3B",
+        "yahoo_team": "ATL",
+        "yahoo_status": "NA",
+        "source": "unknown"
+      },
+      {
+        "name": "Colson Montgomery",
+        "yahoo_position": "3B,SS",
+        "yahoo_selected": "SS",
+        "yahoo_team": "CWS",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Noelvi Marte",
+        "yahoo_position": "3B,RF",
+        "yahoo_selected": "OF",
+        "yahoo_team": "CIN",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Blaine Crim",
+        "yahoo_position": "1B",
+        "yahoo_selected": "Util",
+        "yahoo_team": "COL",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Brayan Rocchio",
+        "yahoo_position": "2B,SS",
+        "yahoo_selected": "Util",
+        "yahoo_team": "CLE",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Garrett Whitlock",
+        "yahoo_position": "SP,RP",
+        "yahoo_selected": "SP",
+        "yahoo_team": "BOS",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Andrew Kittredge",
+        "yahoo_position": "RP",
+        "yahoo_selected": "RP",
+        "yahoo_team": "BAL",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Michael Kelly",
+        "yahoo_position": "RP",
+        "yahoo_selected": "RP",
+        "yahoo_team": "ATH",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Aaron Ashby",
+        "yahoo_position": "RP",
+        "yahoo_selected": "P",
+        "yahoo_team": "MIL",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Randy Vásquez",
+        "yahoo_position": "SP",
+        "yahoo_selected": "BN",
+        "yahoo_team": "SD",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Kevin McGonigle",
+        "yahoo_position": "2B,SS",
+        "yahoo_selected": "NA",
+        "yahoo_team": "DET",
+        "yahoo_status": "NA",
+        "source": "unknown"
+      }
+    ],
+    "dropped": [
+      {
+        "name": "Jameson Taillon",
+        "contract_type": "B",
+        "salary": 1,
+        "contract_str": "$1/B"
+      },
+      {
+        "name": "Mayer Marcelo",
+        "contract_type": "R",
+        "salary": 1,
+        "contract_str": "$1/R"
+      }
+    ]
+  },
+  "rawstuff": {
+    "yahoo_manager": "rawstuff",
+    "excel_manager": "Issac",
+    "team_name": "Chicago Cubs",
+    "matched": [
+      {
+        "name": "Adley Rutschman",
+        "yahoo_position": "C",
+        "yahoo_selected": "C",
+        "yahoo_team": "BAL",
+        "yahoo_status": "",
+        "contract_type": "N",
+        "salary": 17,
+        "extension_years": 2,
+        "contract_str": "$17/N2",
+        "source": "keeper"
+      },
+      {
+        "name": "Josh Naylor",
+        "yahoo_position": "1B",
+        "yahoo_selected": "1B",
+        "yahoo_team": "SEA",
+        "yahoo_status": "",
+        "contract_type": "O",
+        "salary": 2,
+        "extension_years": 0,
+        "contract_str": "$2/O",
+        "source": "keeper"
+      },
+      {
+        "name": "José Ramírez",
+        "yahoo_position": "3B",
+        "yahoo_selected": "IF",
+        "yahoo_team": "CLE",
+        "yahoo_status": "",
+        "contract_type": "B",
+        "salary": 37,
+        "extension_years": 0,
+        "contract_str": "$37/B",
+        "source": "keeper"
+      },
+      {
+        "name": "James Wood",
+        "yahoo_position": "LF",
+        "yahoo_selected": "LF",
+        "yahoo_team": "WSH",
+        "yahoo_status": "",
+        "contract_type": "B",
+        "salary": 1,
+        "extension_years": 0,
+        "contract_str": "$1/B",
+        "source": "keeper"
+      },
+      {
+        "name": "Pete Crow-Armstrong",
+        "yahoo_position": "CF",
+        "yahoo_selected": "CF",
+        "yahoo_team": "CHC",
+        "yahoo_status": "",
+        "contract_type": "B",
+        "salary": 1,
+        "extension_years": 0,
+        "contract_str": "$1/B",
+        "source": "keeper"
+      },
+      {
+        "name": "Fernando Tatis Jr.",
+        "yahoo_position": "RF",
+        "yahoo_selected": "RF",
+        "yahoo_team": "SD",
+        "yahoo_status": "",
+        "contract_type": "N",
+        "salary": 26,
+        "extension_years": 2,
+        "contract_str": "$26/N2",
+        "source": "keeper"
+      },
+      {
+        "name": "CJ Abrams",
+        "yahoo_position": "SS",
+        "yahoo_selected": "Util",
+        "yahoo_team": "WSH",
+        "yahoo_status": "",
+        "contract_type": "N",
+        "salary": 16,
+        "extension_years": 2,
+        "contract_str": "$16/N2",
+        "source": "keeper"
+      },
+      {
+        "name": "Jordan Lawlar",
+        "yahoo_position": "3B,SS",
+        "yahoo_selected": "BN",
+        "yahoo_team": "AZ",
+        "yahoo_status": "",
+        "contract_type": "R",
+        "salary": 1,
+        "extension_years": 0,
+        "contract_str": "$1/R",
+        "source": "keeper"
+      },
+      {
+        "name": "Hunter Brown",
+        "yahoo_position": "SP",
+        "yahoo_selected": "BN",
+        "yahoo_team": "HOU",
+        "yahoo_status": "",
+        "contract_type": "N",
+        "salary": 6,
+        "extension_years": 1,
+        "contract_str": "$6/N1",
+        "source": "keeper"
+      },
+      {
+        "name": "Roman Anthony",
+        "yahoo_position": "LF,CF,RF",
+        "yahoo_selected": "IL",
+        "yahoo_team": "BOS",
+        "yahoo_status": "DTD",
+        "contract_type": "R",
+        "salary": 1,
+        "extension_years": 0,
+        "contract_str": "$1/R",
+        "source": "keeper"
+      }
+    ],
+    "draft_new": [
+      {
+        "name": "Matt Shaw",
+        "yahoo_position": "2B,3B,SS",
+        "yahoo_selected": "2B",
+        "yahoo_team": "CHC",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 1,
+        "extension_years": 0,
+        "contract_str": "$1/A",
+        "draft_round": 22,
+        "draft_pick": 348,
+        "source": "draft"
+      },
+      {
+        "name": "Manny Machado",
+        "yahoo_position": "3B",
+        "yahoo_selected": "3B",
+        "yahoo_team": "SD",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 36,
+        "extension_years": 0,
+        "contract_str": "$36/A",
+        "draft_round": 2,
+        "draft_pick": 26,
+        "source": "draft"
+      },
+      {
+        "name": "Ian Happ",
+        "yahoo_position": "LF",
+        "yahoo_selected": "OF",
+        "yahoo_team": "CHC",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 16,
+        "extension_years": 0,
+        "contract_str": "$16/A",
+        "draft_round": 3,
+        "draft_pick": 46,
+        "source": "draft"
+      },
+      {
+        "name": "Tyler Soderstrom",
+        "yahoo_position": "1B,LF",
+        "yahoo_selected": "Util",
+        "yahoo_team": "ATH",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 4,
+        "extension_years": 0,
+        "contract_str": "$4/A",
+        "draft_round": 9,
+        "draft_pick": 142,
+        "source": "draft"
+      },
+      {
+        "name": "Jameson Taillon",
+        "yahoo_position": "SP",
+        "yahoo_selected": "SP",
+        "yahoo_team": "CHC",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 1,
+        "extension_years": 0,
+        "contract_str": "$1/A",
+        "draft_round": 24,
+        "draft_pick": 372,
+        "source": "draft"
+      },
+      {
+        "name": "Eury Pérez",
+        "yahoo_position": "SP",
+        "yahoo_selected": "SP",
+        "yahoo_team": "MIA",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 3,
+        "extension_years": 0,
+        "contract_str": "$3/A",
+        "draft_round": 14,
+        "draft_pick": 219,
+        "source": "draft"
+      },
+      {
+        "name": "Jeff Hoffman",
+        "yahoo_position": "RP",
+        "yahoo_selected": "RP",
+        "yahoo_team": "TOR",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 17,
+        "extension_years": 0,
+        "contract_str": "$17/A",
+        "draft_round": 4,
+        "draft_pick": 58,
+        "source": "draft"
+      },
+      {
+        "name": "Devin Williams",
+        "yahoo_position": "RP",
+        "yahoo_selected": "P",
+        "yahoo_team": "NYM",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 5,
+        "extension_years": 0,
+        "contract_str": "$5/A",
+        "draft_round": 27,
+        "draft_pick": 428,
+        "source": "draft"
+      },
+      {
+        "name": "Griffin Jax",
+        "yahoo_position": "RP",
+        "yahoo_selected": "P",
+        "yahoo_team": "TB",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 15,
+        "extension_years": 0,
+        "contract_str": "$15/A",
+        "draft_round": 8,
+        "draft_pick": 126,
+        "source": "draft"
+      },
+      {
+        "name": "Matthew Boyd",
+        "yahoo_position": "SP",
+        "yahoo_selected": "BN",
+        "yahoo_team": "CHC",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 2,
+        "extension_years": 0,
+        "contract_str": "$2/A",
+        "draft_round": 4,
+        "draft_pick": 57,
+        "source": "draft"
+      },
+      {
+        "name": "Ozzie Albies",
+        "yahoo_position": "2B",
+        "yahoo_selected": "IL",
+        "yahoo_team": "ATL",
+        "yahoo_status": "DTD",
+        "contract_type": "A",
+        "salary": 24,
+        "extension_years": 0,
+        "contract_str": "$24/A",
+        "draft_round": 1,
+        "draft_pick": 5,
+        "source": "draft"
+      },
+      {
+        "name": "Zack Wheeler",
+        "yahoo_position": "SP",
+        "yahoo_selected": "IL",
+        "yahoo_team": "PHI",
+        "yahoo_status": "IL60",
+        "contract_type": "A",
+        "salary": 54,
+        "extension_years": 0,
+        "contract_str": "$54/A",
+        "draft_round": 1,
+        "draft_pick": 16,
+        "source": "draft"
+      }
+    ],
+    "no_contract": [
+      {
+        "name": "Jacob Wilson",
+        "yahoo_position": "SS",
+        "yahoo_selected": "SS",
+        "yahoo_team": "ATH",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Payton Tolle",
+        "yahoo_position": "SP",
+        "yahoo_selected": "SP",
+        "yahoo_team": "BOS",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Cam Schlittler",
+        "yahoo_position": "SP",
+        "yahoo_selected": "SP",
+        "yahoo_team": "NYY",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Riley O'Brien",
+        "yahoo_position": "RP",
+        "yahoo_selected": "RP",
+        "yahoo_team": "STL",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Brad Keller",
+        "yahoo_position": "RP",
+        "yahoo_selected": "RP",
+        "yahoo_team": "PHI",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Daniel Palencia",
+        "yahoo_position": "RP",
+        "yahoo_selected": "P",
+        "yahoo_team": "CHC",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Cade Cavalli",
+        "yahoo_position": "SP",
+        "yahoo_selected": "BN",
+        "yahoo_team": "WSH",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Grant Taylor",
+        "yahoo_position": "SP,RP",
+        "yahoo_selected": "BN",
+        "yahoo_team": "CWS",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "JJ Wetherholt",
+        "yahoo_position": "SS",
+        "yahoo_selected": "NA",
+        "yahoo_team": "STL",
+        "yahoo_status": "NA",
+        "source": "unknown"
+      },
+      {
+        "name": "Leo De Vries",
+        "yahoo_position": "SS",
+        "yahoo_selected": "NA",
+        "yahoo_team": "ATH",
+        "yahoo_status": "NA",
+        "source": "unknown"
+      }
+    ],
+    "dropped": [
+      {
+        "name": "Justin Steele",
+        "contract_type": "N",
+        "salary": 6,
+        "contract_str": "$6/N1"
+      },
+      {
+        "name": "Jared Jones",
+        "contract_type": "B",
+        "salary": 3,
+        "contract_str": "$3/B"
+      }
+    ]
+  },
+  "Billy": {
+    "yahoo_manager": "Billy",
+    "excel_manager": "Billy WU",
+    "team_name": "Detroit Tigers",
+    "matched": [
+      {
+        "name": "Riley Greene",
+        "yahoo_position": "LF,CF,RF",
+        "yahoo_selected": "LF",
+        "yahoo_team": "DET",
+        "yahoo_status": "",
+        "contract_type": "B",
+        "salary": 20,
+        "extension_years": 0,
+        "contract_str": "$20/B",
+        "source": "keeper"
+      },
+      {
+        "name": "Corbin Carroll",
+        "yahoo_position": "CF,RF",
+        "yahoo_selected": "RF",
+        "yahoo_team": "AZ",
+        "yahoo_status": "",
+        "contract_type": "N",
+        "salary": 21,
+        "extension_years": 3,
+        "contract_str": "$21/N3",
+        "source": "keeper"
+      },
+      {
+        "name": "Jackson Merrill",
+        "yahoo_position": "CF",
+        "yahoo_selected": "OF",
+        "yahoo_team": "SD",
+        "yahoo_status": "",
+        "contract_type": "B",
+        "salary": 8,
+        "extension_years": 0,
+        "contract_str": "$8/B",
+        "source": "keeper"
+      },
+      {
+        "name": "Shota Imanaga",
+        "yahoo_position": "SP",
+        "yahoo_selected": "SP",
+        "yahoo_team": "CHC",
+        "yahoo_status": "",
+        "contract_type": "B",
+        "salary": 22,
+        "extension_years": 0,
+        "contract_str": "$22/B",
+        "source": "keeper"
+      },
+      {
+        "name": "George Kirby",
+        "yahoo_position": "SP",
+        "yahoo_selected": "P",
+        "yahoo_team": "SEA",
+        "yahoo_status": "",
+        "contract_type": "N",
+        "salary": 11,
+        "extension_years": 1,
+        "contract_str": "$11/N1",
+        "source": "keeper"
+      },
+      {
+        "name": "Jack Flaherty",
+        "yahoo_position": "SP",
+        "yahoo_selected": "BN",
+        "yahoo_team": "DET",
+        "yahoo_status": "",
+        "contract_type": "B",
+        "salary": 1,
+        "extension_years": 0,
+        "contract_str": "$1/B",
+        "source": "keeper"
+      }
+    ],
+    "draft_new": [
+      {
+        "name": "Jordan Westburg",
+        "yahoo_position": "2B,3B",
+        "yahoo_selected": "2B",
+        "yahoo_team": "BAL",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 36,
+        "extension_years": 0,
+        "contract_str": "$36/A",
+        "draft_round": 2,
+        "draft_pick": 17,
+        "source": "draft"
+      },
+      {
+        "name": "Francisco Lindor",
+        "yahoo_position": "SS",
+        "yahoo_selected": "SS",
+        "yahoo_team": "NYM",
+        "yahoo_status": "DTD",
+        "contract_type": "A",
+        "salary": 51,
+        "extension_years": 0,
+        "contract_str": "$51/A",
+        "draft_round": 1,
+        "draft_pick": 4,
+        "source": "draft"
+      },
+      {
+        "name": "Shohei Ohtani (Batter)",
+        "yahoo_position": "Util",
+        "yahoo_selected": "Util",
+        "yahoo_team": "LAD",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 20,
+        "extension_years": 0,
+        "contract_str": "$20/A",
+        "draft_round": 23,
+        "draft_pick": 359,
+        "source": "draft"
+      },
+      {
+        "name": "Parker Meadows",
+        "yahoo_position": "CF",
+        "yahoo_selected": "Util",
+        "yahoo_team": "DET",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 4,
+        "extension_years": 0,
+        "contract_str": "$4/A",
+        "draft_round": 10,
+        "draft_pick": 155,
+        "source": "draft"
+      },
+      {
+        "name": "Cedric Mullins",
+        "yahoo_position": "CF",
+        "yahoo_selected": "BN",
+        "yahoo_team": "TB",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 10,
+        "extension_years": 0,
+        "contract_str": "$10/A",
+        "draft_round": 6,
+        "draft_pick": 81,
+        "source": "draft"
+      },
+      {
+        "name": "Jesús Luzardo",
+        "yahoo_position": "SP",
+        "yahoo_selected": "SP",
+        "yahoo_team": "PHI",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 5,
+        "extension_years": 0,
+        "contract_str": "$5/A",
+        "draft_round": 3,
+        "draft_pick": 39,
+        "source": "draft"
+      },
+      {
+        "name": "Yu Darvish",
+        "yahoo_position": "SP",
+        "yahoo_selected": "SP",
+        "yahoo_team": "SD",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 22,
+        "extension_years": 0,
+        "contract_str": "$22/A",
+        "draft_round": 2,
+        "draft_pick": 25,
+        "source": "draft"
+      },
+      {
+        "name": "Nick Lodolo",
+        "yahoo_position": "SP",
+        "yahoo_selected": "SP",
+        "yahoo_team": "CIN",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 11,
+        "extension_years": 0,
+        "contract_str": "$11/A",
+        "draft_round": 5,
+        "draft_pick": 66,
+        "source": "draft"
+      },
+      {
+        "name": "Cade Smith",
+        "yahoo_position": "RP",
+        "yahoo_selected": "RP",
+        "yahoo_team": "CLE",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 13,
+        "extension_years": 0,
+        "contract_str": "$13/A",
+        "draft_round": 7,
+        "draft_pick": 104,
+        "source": "draft"
+      },
+      {
+        "name": "Jhoan Duran",
+        "yahoo_position": "RP",
+        "yahoo_selected": "RP",
+        "yahoo_team": "PHI",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 12,
+        "extension_years": 0,
+        "contract_str": "$12/A",
+        "draft_round": 18,
+        "draft_pick": 278,
+        "source": "draft"
+      },
+      {
+        "name": "Spencer Arrighetti",
+        "yahoo_position": "SP",
+        "yahoo_selected": "IL",
+        "yahoo_team": "HOU",
+        "yahoo_status": "DTD",
+        "contract_type": "A",
+        "salary": 9,
+        "extension_years": 0,
+        "contract_str": "$9/A",
+        "draft_round": 8,
+        "draft_pick": 119,
+        "source": "draft"
+      }
+    ],
+    "no_contract": [
+      {
+        "name": "Drake Baldwin",
+        "yahoo_position": "C",
+        "yahoo_selected": "C",
+        "yahoo_team": "ATL",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Coby Mayo",
+        "yahoo_position": "1B,3B",
+        "yahoo_selected": "1B",
+        "yahoo_team": "BAL",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Javier Báez",
+        "yahoo_position": "2B,3B,SS,CF",
+        "yahoo_selected": "3B",
+        "yahoo_team": "DET",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Jeremiah Jackson",
+        "yahoo_position": "3B,SS,RF",
+        "yahoo_selected": "IF",
+        "yahoo_team": "BAL",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Austin Martin",
+        "yahoo_position": "2B,LF,CF",
+        "yahoo_selected": "CF",
+        "yahoo_team": "MIN",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Wenceel Pérez",
+        "yahoo_position": "CF,RF",
+        "yahoo_selected": "BN",
+        "yahoo_team": "DET",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Tony Santillan",
+        "yahoo_position": "RP",
+        "yahoo_selected": "RP",
+        "yahoo_team": "CIN",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Bryan King",
+        "yahoo_position": "RP",
+        "yahoo_selected": "P",
+        "yahoo_team": "HOU",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Tyler Kinley",
+        "yahoo_position": "RP",
+        "yahoo_selected": "P",
+        "yahoo_team": "ATL",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Bryce Elder",
+        "yahoo_position": "SP",
+        "yahoo_selected": "BN",
+        "yahoo_team": "ATL",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Matthew Liberatore",
+        "yahoo_position": "SP,RP",
+        "yahoo_selected": "BN",
+        "yahoo_team": "STL",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Kyle Stowers",
+        "yahoo_position": "LF,CF,RF",
+        "yahoo_selected": "IL",
+        "yahoo_team": "MIA",
+        "yahoo_status": "DTD",
+        "source": "unknown"
+      },
+      {
+        "name": "Kris Bubic",
+        "yahoo_position": "SP,RP",
+        "yahoo_selected": "IL",
+        "yahoo_team": "KC",
+        "yahoo_status": "IL60",
+        "source": "unknown"
+      }
+    ],
+    "dropped": [
+      {
+        "name": "Shohei Ohtani",
+        "contract_type": "N",
+        "salary": 20,
+        "contract_str": "$20/N1"
+      },
+      {
+        "name": "Jesús Sánchez",
+        "contract_type": "B",
+        "salary": 2,
+        "contract_str": "$2/B"
+      },
+      {
+        "name": "Otto Lopez",
+        "contract_type": "B",
+        "salary": 2,
+        "contract_str": "$2/B"
+      },
+      {
+        "name": "Colton Cowser",
+        "contract_type": "B",
+        "salary": 1,
+        "contract_str": "$1/B"
+      },
+      {
+        "name": "Kristian Campbell",
+        "contract_type": "R",
+        "salary": 1,
+        "contract_str": "$1/R"
+      },
+      {
+        "name": "Matt Shaw",
+        "contract_type": "R",
+        "salary": 1,
+        "contract_str": "$1/R"
+      }
+    ]
+  },
+  "YWC": {
+    "yahoo_manager": "YWC",
+    "excel_manager": "ywchiou",
+    "team_name": "Houston Astros",
+    "matched": [
+      {
+        "name": "Luis Arraez",
+        "yahoo_position": "1B,2B",
+        "yahoo_selected": "2B",
+        "yahoo_team": "SF",
+        "yahoo_status": "",
+        "contract_type": "O",
+        "salary": 15,
+        "extension_years": 0,
+        "contract_str": "$15/O",
+        "source": "keeper"
+      },
+      {
+        "name": "Steven Kwan",
+        "yahoo_position": "LF",
+        "yahoo_selected": "OF",
+        "yahoo_team": "CLE",
+        "yahoo_status": "",
+        "contract_type": "B",
+        "salary": 8,
+        "extension_years": 0,
+        "contract_str": "$8/B",
+        "source": "keeper"
+      },
+      {
+        "name": "Spencer Horwitz",
+        "yahoo_position": "1B,2B",
+        "yahoo_selected": "Util",
+        "yahoo_team": "PIT",
+        "yahoo_status": "",
+        "contract_type": "B",
+        "salary": 2,
+        "extension_years": 0,
+        "contract_str": "$2/B",
+        "source": "keeper"
+      },
+      {
+        "name": "Joe Ryan",
+        "yahoo_position": "SP",
+        "yahoo_selected": "SP",
+        "yahoo_team": "MIN",
+        "yahoo_status": "",
+        "contract_type": "B",
+        "salary": 28,
+        "extension_years": 0,
+        "contract_str": "$28/B",
+        "source": "keeper"
+      },
+      {
+        "name": "Raisel Iglesias",
+        "yahoo_position": "RP",
+        "yahoo_selected": "RP",
+        "yahoo_team": "ATL",
+        "yahoo_status": "",
+        "contract_type": "B",
+        "salary": 21,
+        "extension_years": 0,
+        "contract_str": "$21/B",
+        "source": "keeper"
+      },
+      {
+        "name": "Jeremiah Estrada",
+        "yahoo_position": "RP",
+        "yahoo_selected": "RP",
+        "yahoo_team": "SD",
+        "yahoo_status": "",
+        "contract_type": "B",
+        "salary": 1,
+        "extension_years": 0,
+        "contract_str": "$1/B",
+        "source": "keeper"
+      }
+    ],
+    "draft_new": [
+      {
+        "name": "Yainer Diaz",
+        "yahoo_position": "C,1B",
+        "yahoo_selected": "C",
+        "yahoo_team": "HOU",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 11,
+        "extension_years": 0,
+        "contract_str": "$11/A",
+        "draft_round": 22,
+        "draft_pick": 347,
+        "source": "draft"
+      },
+      {
+        "name": "Matt Olson",
+        "yahoo_position": "1B",
+        "yahoo_selected": "1B",
+        "yahoo_team": "ATL",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 57,
+        "extension_years": 0,
+        "contract_str": "$57/A",
+        "draft_round": 2,
+        "draft_pick": 20,
+        "source": "draft"
+      },
+      {
+        "name": "Jeff McNeil",
+        "yahoo_position": "2B,LF,CF,RF",
+        "yahoo_selected": "CF",
+        "yahoo_team": "ATH",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 1,
+        "extension_years": 0,
+        "contract_str": "$1/A",
+        "draft_round": 16,
+        "draft_pick": 242,
+        "source": "draft"
+      },
+      {
+        "name": "Trevor Larnach",
+        "yahoo_position": "LF,RF",
+        "yahoo_selected": "RF",
+        "yahoo_team": "MIN",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 1,
+        "extension_years": 0,
+        "contract_str": "$1/A",
+        "draft_round": 15,
+        "draft_pick": 236,
+        "source": "draft"
+      },
+      {
+        "name": "Jake Burger",
+        "yahoo_position": "1B,3B",
+        "yahoo_selected": "BN",
+        "yahoo_team": "TEX",
+        "yahoo_status": "DTD",
+        "contract_type": "A",
+        "salary": 3,
+        "extension_years": 0,
+        "contract_str": "$3/A",
+        "draft_round": 20,
+        "draft_pick": 310,
+        "source": "draft"
+      },
+      {
+        "name": "Matt Wallner",
+        "yahoo_position": "LF,RF",
+        "yahoo_selected": "BN",
+        "yahoo_team": "MIN",
+        "yahoo_status": "DTD",
+        "contract_type": "A",
+        "salary": 5,
+        "extension_years": 0,
+        "contract_str": "$5/A",
+        "draft_round": 8,
+        "draft_pick": 120,
+        "source": "draft"
+      },
+      {
+        "name": "Framber Valdez",
+        "yahoo_position": "SP",
+        "yahoo_selected": "SP",
+        "yahoo_team": "DET",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 50,
+        "extension_years": 0,
+        "contract_str": "$50/A",
+        "draft_round": 2,
+        "draft_pick": 22,
+        "source": "draft"
+      },
+      {
+        "name": "Logan Gilbert",
+        "yahoo_position": "SP",
+        "yahoo_selected": "SP",
+        "yahoo_team": "SEA",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 53,
+        "extension_years": 0,
+        "contract_str": "$53/A",
+        "draft_round": 1,
+        "draft_pick": 14,
+        "source": "draft"
+      },
+      {
+        "name": "Cole Sands",
+        "yahoo_position": "SP,RP",
+        "yahoo_selected": "SP",
+        "yahoo_team": "MIN",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 1,
+        "extension_years": 0,
+        "contract_str": "$1/A",
+        "draft_round": 16,
+        "draft_pick": 248,
+        "source": "draft"
+      },
+      {
+        "name": "Andrew Abbott",
+        "yahoo_position": "SP",
+        "yahoo_selected": "BN",
+        "yahoo_team": "CIN",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 1,
+        "extension_years": 0,
+        "contract_str": "$1/A",
+        "draft_round": 12,
+        "draft_pick": 183,
+        "source": "draft"
+      },
+      {
+        "name": "Josh Hader",
+        "yahoo_position": "RP",
+        "yahoo_selected": "IL",
+        "yahoo_team": "HOU",
+        "yahoo_status": "DTD",
+        "contract_type": "A",
+        "salary": 24,
+        "extension_years": 0,
+        "contract_str": "$24/A",
+        "draft_round": 2,
+        "draft_pick": 32,
+        "source": "draft"
+      }
+    ],
+    "no_contract": [
+      {
+        "name": "Miguel Andujar",
+        "yahoo_position": "3B,LF",
+        "yahoo_selected": "3B",
+        "yahoo_team": "SD",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Ernie Clement",
+        "yahoo_position": "1B,2B,3B,SS",
+        "yahoo_selected": "SS",
+        "yahoo_team": "TOR",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Tyler Freeman",
+        "yahoo_position": "2B,SS,CF,RF",
+        "yahoo_selected": "IF",
+        "yahoo_team": "COL",
+        "yahoo_status": "DTD",
+        "source": "unknown"
+      },
+      {
+        "name": "Harrison Bader",
+        "yahoo_position": "LF,CF,RF",
+        "yahoo_selected": "LF",
+        "yahoo_team": "SF",
+        "yahoo_status": "DTD",
+        "source": "unknown"
+      },
+      {
+        "name": "J.P. Crawford",
+        "yahoo_position": "SS",
+        "yahoo_selected": "Util",
+        "yahoo_team": "SEA",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Jake Meyers",
+        "yahoo_position": "CF",
+        "yahoo_selected": "BN",
+        "yahoo_team": "HOU",
+        "yahoo_status": "DTD",
+        "source": "unknown"
+      },
+      {
+        "name": "Joey Loperfido",
+        "yahoo_position": "LF,CF,RF",
+        "yahoo_selected": "BN",
+        "yahoo_team": "HOU",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Jose A. Ferrer",
+        "yahoo_position": "RP",
+        "yahoo_selected": "RP",
+        "yahoo_team": "SEA",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Eduard Bazardo",
+        "yahoo_position": "RP",
+        "yahoo_selected": "P",
+        "yahoo_team": "SEA",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Adrian Morejon",
+        "yahoo_position": "RP",
+        "yahoo_selected": "P",
+        "yahoo_team": "SD",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Steven Okert",
+        "yahoo_position": "RP",
+        "yahoo_selected": "P",
+        "yahoo_team": "HOU",
+        "yahoo_status": "",
+        "source": "unknown"
+      }
+    ],
+    "dropped": [
+      {
+        "name": "Yanier Diaz",
+        "contract_type": "N",
+        "salary": 11,
+        "contract_str": "$11/N2"
+      },
+      {
+        "name": "Michael Toglia",
+        "contract_type": "B",
+        "salary": 2,
+        "contract_str": "$2/B"
+      },
+      {
+        "name": "Luis Rengifo",
+        "contract_type": "B",
+        "salary": 1,
+        "contract_str": "$1/B"
+      }
+    ]
+  },
+  "哈寶好": {
+    "yahoo_manager": "哈寶好",
+    "excel_manager": "楊善合",
+    "team_name": "Kansas City Royals",
+    "matched": [
+      {
+        "name": "Salvador Perez",
+        "yahoo_position": "C,1B",
+        "yahoo_selected": "1B",
+        "yahoo_team": "KC",
+        "yahoo_status": "",
+        "contract_type": "B",
+        "salary": 9,
+        "extension_years": 0,
+        "contract_str": "$9/B",
+        "source": "keeper"
+      },
+      {
+        "name": "Vinnie Pasquantino",
+        "yahoo_position": "1B",
+        "yahoo_selected": "IF",
+        "yahoo_team": "KC",
+        "yahoo_status": "",
+        "contract_type": "N",
+        "salary": 11,
+        "extension_years": 1,
+        "contract_str": "$11/N1",
+        "source": "keeper"
+      },
+      {
+        "name": "Brent Rooker",
+        "yahoo_position": "LF,RF",
+        "yahoo_selected": "OF",
+        "yahoo_team": "ATH",
+        "yahoo_status": "",
+        "contract_type": "B",
+        "salary": 7,
+        "extension_years": 0,
+        "contract_str": "$7/B",
+        "source": "keeper"
+      },
+      {
+        "name": "Logan Webb",
+        "yahoo_position": "SP",
+        "yahoo_selected": "SP",
+        "yahoo_team": "SF",
+        "yahoo_status": "",
+        "contract_type": "N",
+        "salary": 16,
+        "extension_years": 1,
+        "contract_str": "$16/N1",
+        "source": "keeper"
+      },
+      {
+        "name": "Kenley Jansen",
+        "yahoo_position": "RP",
+        "yahoo_selected": "RP",
+        "yahoo_team": "DET",
+        "yahoo_status": "",
+        "contract_type": "O",
+        "salary": 27,
+        "extension_years": 0,
+        "contract_str": "$27/O",
+        "source": "keeper"
+      },
+      {
+        "name": "Michael Wacha",
+        "yahoo_position": "SP",
+        "yahoo_selected": "P",
+        "yahoo_team": "KC",
+        "yahoo_status": "",
+        "contract_type": "B",
+        "salary": 1,
+        "extension_years": 0,
+        "contract_str": "$1/B",
+        "source": "keeper"
+      },
+      {
+        "name": "Cole Ragans",
+        "yahoo_position": "SP",
+        "yahoo_selected": "BN",
+        "yahoo_team": "KC",
+        "yahoo_status": "",
+        "contract_type": "N",
+        "salary": 13,
+        "extension_years": 2,
+        "contract_str": "$13/N2",
+        "source": "keeper"
+      },
+      {
+        "name": "Sean Murphy",
+        "yahoo_position": "C",
+        "yahoo_selected": "IL",
+        "yahoo_team": "ATL",
+        "yahoo_status": "DTD",
+        "contract_type": "O",
+        "salary": 11,
+        "extension_years": 0,
+        "contract_str": "$11/O",
+        "source": "keeper"
+      },
+      {
+        "name": "Seth Lugo",
+        "yahoo_position": "SP",
+        "yahoo_selected": "IL",
+        "yahoo_team": "KC",
+        "yahoo_status": "DTD",
+        "contract_type": "B",
+        "salary": 1,
+        "extension_years": 0,
+        "contract_str": "$1/B",
+        "source": "keeper"
+      },
+      {
+        "name": "Félix Bautista",
+        "yahoo_position": "RP",
+        "yahoo_selected": "IL",
+        "yahoo_team": "BAL",
+        "yahoo_status": "DTD",
+        "contract_type": "O",
+        "salary": 6,
+        "extension_years": 0,
+        "contract_str": "$6/O",
+        "source": "keeper"
+      }
+    ],
+    "draft_new": [
+      {
+        "name": "J.T. Realmuto",
+        "yahoo_position": "C",
+        "yahoo_selected": "C",
+        "yahoo_team": "PHI",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 15,
+        "extension_years": 0,
+        "contract_str": "$15/A",
+        "draft_round": 4,
+        "draft_pick": 59,
+        "source": "draft"
+      },
+      {
+        "name": "Maikel Garcia",
+        "yahoo_position": "2B,3B,SS,OF",
+        "yahoo_selected": "3B",
+        "yahoo_team": "KC",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 10,
+        "extension_years": 0,
+        "contract_str": "$10/A",
+        "draft_round": 9,
+        "draft_pick": 131,
+        "source": "draft"
+      },
+      {
+        "name": "Bryson Stott",
+        "yahoo_position": "2B,SS",
+        "yahoo_selected": "SS",
+        "yahoo_team": "PHI",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 12,
+        "extension_years": 0,
+        "contract_str": "$12/A",
+        "draft_round": 3,
+        "draft_pick": 47,
+        "source": "draft"
+      },
+      {
+        "name": "Masataka Yoshida",
+        "yahoo_position": "LF",
+        "yahoo_selected": "LF",
+        "yahoo_team": "BOS",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 3,
+        "extension_years": 0,
+        "contract_str": "$3/A",
+        "draft_round": 10,
+        "draft_pick": 153,
+        "source": "draft"
+      },
+      {
+        "name": "Kerry Carpenter",
+        "yahoo_position": "LF,RF",
+        "yahoo_selected": "RF",
+        "yahoo_team": "DET",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 20,
+        "extension_years": 0,
+        "contract_str": "$20/A",
+        "draft_round": 8,
+        "draft_pick": 122,
+        "source": "draft"
+      },
+      {
+        "name": "Dansby Swanson",
+        "yahoo_position": "SS",
+        "yahoo_selected": "Util",
+        "yahoo_team": "CHC",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 12,
+        "extension_years": 0,
+        "contract_str": "$12/A",
+        "draft_round": 5,
+        "draft_pick": 76,
+        "source": "draft"
+      },
+      {
+        "name": "Brendan Donovan",
+        "yahoo_position": "2B,3B,SS,LF",
+        "yahoo_selected": "BN",
+        "yahoo_team": "SEA",
+        "yahoo_status": "DTD",
+        "contract_type": "A",
+        "salary": 1,
+        "extension_years": 0,
+        "contract_str": "$1/A",
+        "draft_round": 11,
+        "draft_pick": 169,
+        "source": "draft"
+      },
+      {
+        "name": "Max Fried",
+        "yahoo_position": "SP",
+        "yahoo_selected": "SP",
+        "yahoo_team": "NYY",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 33,
+        "extension_years": 0,
+        "contract_str": "$33/A",
+        "draft_round": 2,
+        "draft_pick": 30,
+        "source": "draft"
+      },
+      {
+        "name": "Lucas Erceg",
+        "yahoo_position": "RP",
+        "yahoo_selected": "RP",
+        "yahoo_team": "KC",
+        "yahoo_status": "DTD",
+        "contract_type": "A",
+        "salary": 6,
+        "extension_years": 0,
+        "contract_str": "$6/A",
+        "draft_round": 7,
+        "draft_pick": 101,
+        "source": "draft"
+      },
+      {
+        "name": "Aroldis Chapman",
+        "yahoo_position": "RP",
+        "yahoo_selected": "RP",
+        "yahoo_team": "BOS",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 5,
+        "extension_years": 0,
+        "contract_str": "$5/A",
+        "draft_round": 12,
+        "draft_pick": 184,
+        "source": "draft"
+      },
+      {
+        "name": "Tomoyuki Sugano",
+        "yahoo_position": "SP",
+        "yahoo_selected": "P",
+        "yahoo_team": "COL",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 18,
+        "extension_years": 0,
+        "contract_str": "$18/A",
+        "draft_round": 11,
+        "draft_pick": 174,
+        "source": "draft"
+      },
+      {
+        "name": "Yusei Kikuchi",
+        "yahoo_position": "SP",
+        "yahoo_selected": "P",
+        "yahoo_team": "LAA",
+        "yahoo_status": "DTD",
+        "contract_type": "A",
+        "salary": 11,
+        "extension_years": 0,
+        "contract_str": "$11/A",
+        "draft_round": 6,
+        "draft_pick": 94,
+        "source": "draft"
+      },
+      {
+        "name": "Roki Sasaki",
+        "yahoo_position": "SP",
+        "yahoo_selected": "IL",
+        "yahoo_team": "LAD",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 50,
+        "extension_years": 0,
+        "contract_str": "$50/A",
+        "draft_round": 1,
+        "draft_pick": 12,
+        "source": "draft"
+      }
+    ],
+    "no_contract": [
+      {
+        "name": "Adam Frazier",
+        "yahoo_position": "2B,3B,LF,RF",
+        "yahoo_selected": "2B",
+        "yahoo_team": "LAA",
+        "yahoo_status": "NA",
+        "source": "unknown"
+      },
+      {
+        "name": "Trent Grisham",
+        "yahoo_position": "CF",
+        "yahoo_selected": "CF",
+        "yahoo_team": "NYY",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Freddy Fermin",
+        "yahoo_position": "C",
+        "yahoo_selected": "Util",
+        "yahoo_team": "SD",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Carter Jensen",
+        "yahoo_position": "C",
+        "yahoo_selected": "BN",
+        "yahoo_team": "KC",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Noah Cameron",
+        "yahoo_position": "SP",
+        "yahoo_selected": "SP",
+        "yahoo_team": "KC",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Stephen Kolek",
+        "yahoo_position": "SP,RP",
+        "yahoo_selected": "SP",
+        "yahoo_team": "KC",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Sebastian Walcott",
+        "yahoo_position": "3B,SS",
+        "yahoo_selected": "NA",
+        "yahoo_team": "TEX",
+        "yahoo_status": "NA",
+        "source": "unknown"
+      },
+      {
+        "name": "Jurrangelo Cijntje",
+        "yahoo_position": "SP",
+        "yahoo_selected": "NA",
+        "yahoo_team": "STL",
+        "yahoo_status": "NA",
+        "source": "unknown"
+      }
+    ],
+    "dropped": [
+      {
+        "name": "Chase Hampton",
+        "contract_type": "R",
+        "salary": 1,
+        "contract_str": "$1/R"
+      }
+    ]
+  },
+  "小喆": {
+    "yahoo_manager": "小喆",
+    "excel_manager": "Yu-Che Chang",
+    "team_name": "Centennial Rockies",
+    "matched": [
+      {
+        "name": "Jarren Duran",
+        "yahoo_position": "LF,CF",
+        "yahoo_selected": "LF",
+        "yahoo_team": "BOS",
+        "yahoo_status": "",
+        "contract_type": "N",
+        "salary": 21,
+        "extension_years": 4,
+        "contract_str": "$21/N4",
+        "source": "keeper"
+      },
+      {
+        "name": "Heliot Ramos",
+        "yahoo_position": "LF,CF,RF",
+        "yahoo_selected": "RF",
+        "yahoo_team": "SF",
+        "yahoo_status": "",
+        "contract_type": "B",
+        "salary": 1,
+        "extension_years": 0,
+        "contract_str": "$1/B",
+        "source": "keeper"
+      },
+      {
+        "name": "Teoscar Hernández",
+        "yahoo_position": "LF,RF",
+        "yahoo_selected": "OF",
+        "yahoo_team": "LAD",
+        "yahoo_status": "",
+        "contract_type": "B",
+        "salary": 20,
+        "extension_years": 0,
+        "contract_str": "$20/B",
+        "source": "keeper"
+      },
+      {
+        "name": "Brenton Doyle",
+        "yahoo_position": "CF",
+        "yahoo_selected": "Util",
+        "yahoo_team": "COL",
+        "yahoo_status": "",
+        "contract_type": "B",
+        "salary": 1,
+        "extension_years": 0,
+        "contract_str": "$1/B",
+        "source": "keeper"
+      },
+      {
+        "name": "Gabriel Moreno",
+        "yahoo_position": "C",
+        "yahoo_selected": "Util",
+        "yahoo_team": "AZ",
+        "yahoo_status": "",
+        "contract_type": "N",
+        "salary": 11,
+        "extension_years": 1,
+        "contract_str": "$11/N1",
+        "source": "keeper"
+      },
+      {
+        "name": "Tanner Bibee",
+        "yahoo_position": "SP",
+        "yahoo_selected": "SP",
+        "yahoo_team": "CLE",
+        "yahoo_status": "",
+        "contract_type": "N",
+        "salary": 6,
+        "extension_years": 1,
+        "contract_str": "$6/N1",
+        "source": "keeper"
+      },
+      {
+        "name": "Yoshinobu Yamamoto",
+        "yahoo_position": "SP",
+        "yahoo_selected": "SP",
+        "yahoo_team": "LAD",
+        "yahoo_status": "",
+        "contract_type": "B",
+        "salary": 38,
+        "extension_years": 0,
+        "contract_str": "$38/B",
+        "source": "keeper"
+      },
+      {
+        "name": "Jacob deGrom",
+        "yahoo_position": "SP",
+        "yahoo_selected": "SP",
+        "yahoo_team": "TEX",
+        "yahoo_status": "",
+        "contract_type": "B",
+        "salary": 20,
+        "extension_years": 0,
+        "contract_str": "$20/B",
+        "source": "keeper"
+      },
+      {
+        "name": "Bailey Ober",
+        "yahoo_position": "SP",
+        "yahoo_selected": "SP",
+        "yahoo_team": "MIN",
+        "yahoo_status": "",
+        "contract_type": "N",
+        "salary": 6,
+        "extension_years": 1,
+        "contract_str": "$6/N1",
+        "source": "keeper"
+      },
+      {
+        "name": "Rhett Lowder",
+        "yahoo_position": "SP",
+        "yahoo_selected": "IL",
+        "yahoo_team": "CIN",
+        "yahoo_status": "IL60",
+        "contract_type": "R",
+        "salary": 1,
+        "extension_years": 0,
+        "contract_str": "$1/R",
+        "source": "keeper"
+      }
+    ],
+    "draft_new": [
+      {
+        "name": "Pete Alonso",
+        "yahoo_position": "1B",
+        "yahoo_selected": "1B",
+        "yahoo_team": "BAL",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 46,
+        "extension_years": 0,
+        "contract_str": "$46/A",
+        "draft_round": 1,
+        "draft_pick": 15,
+        "source": "draft"
+      },
+      {
+        "name": "Ezequiel Tovar",
+        "yahoo_position": "SS",
+        "yahoo_selected": "SS",
+        "yahoo_team": "COL",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 26,
+        "extension_years": 0,
+        "contract_str": "$26/A",
+        "draft_round": 3,
+        "draft_pick": 44,
+        "source": "draft"
+      },
+      {
+        "name": "Isaac Paredes",
+        "yahoo_position": "1B,3B",
+        "yahoo_selected": "BN",
+        "yahoo_team": "HOU",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 14,
+        "extension_years": 0,
+        "contract_str": "$14/A",
+        "draft_round": 4,
+        "draft_pick": 52,
+        "source": "draft"
+      },
+      {
+        "name": "Alex Vesia",
+        "yahoo_position": "RP",
+        "yahoo_selected": "RP",
+        "yahoo_team": "LAD",
+        "yahoo_status": "DTD",
+        "contract_type": "A",
+        "salary": 3,
+        "extension_years": 0,
+        "contract_str": "$3/A",
+        "draft_round": 14,
+        "draft_pick": 217,
+        "source": "draft"
+      },
+      {
+        "name": "Jason Adam",
+        "yahoo_position": "RP",
+        "yahoo_selected": "RP",
+        "yahoo_team": "SD",
+        "yahoo_status": "IL60",
+        "contract_type": "A",
+        "salary": 4,
+        "extension_years": 0,
+        "contract_str": "$4/A",
+        "draft_round": 13,
+        "draft_pick": 206,
+        "source": "draft"
+      },
+      {
+        "name": "Blake Treinen",
+        "yahoo_position": "RP",
+        "yahoo_selected": "P",
+        "yahoo_team": "LAD",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 2,
+        "extension_years": 0,
+        "contract_str": "$2/A",
+        "draft_round": 13,
+        "draft_pick": 205,
+        "source": "draft"
+      },
+      {
+        "name": "Tyler Glasnow",
+        "yahoo_position": "SP",
+        "yahoo_selected": "BN",
+        "yahoo_team": "LAD",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 44,
+        "extension_years": 0,
+        "contract_str": "$44/A",
+        "draft_round": 2,
+        "draft_pick": 31,
+        "source": "draft"
+      },
+      {
+        "name": "Chase Dollander",
+        "yahoo_position": "SP",
+        "yahoo_selected": "BN",
+        "yahoo_team": "COL",
+        "yahoo_status": "DTD",
+        "contract_type": "A",
+        "salary": 1,
+        "extension_years": 0,
+        "contract_str": "$1/A",
+        "draft_round": 14,
+        "draft_pick": 224,
+        "source": "draft"
+      },
+      {
+        "name": "Jonathan Aranda",
+        "yahoo_position": "1B,2B",
+        "yahoo_selected": "IL",
+        "yahoo_team": "TB",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 1,
+        "extension_years": 0,
+        "contract_str": "$1/A",
+        "draft_round": 7,
+        "draft_pick": 99,
+        "source": "draft"
+      },
+      {
+        "name": "Thairo Estrada",
+        "yahoo_position": "2B",
+        "yahoo_selected": "IL",
+        "yahoo_team": "BAL",
+        "yahoo_status": "IL60",
+        "contract_type": "A",
+        "salary": 3,
+        "extension_years": 0,
+        "contract_str": "$3/A",
+        "draft_round": 11,
+        "draft_pick": 171,
+        "source": "draft"
+      },
+      {
+        "name": "Dustin May",
+        "yahoo_position": "SP",
+        "yahoo_selected": "IL",
+        "yahoo_team": "STL",
+        "yahoo_status": "DTD",
+        "contract_type": "A",
+        "salary": 10,
+        "extension_years": 0,
+        "contract_str": "$10/A",
+        "draft_round": 4,
+        "draft_pick": 51,
+        "source": "draft"
+      }
+    ],
+    "no_contract": [
+      {
+        "name": "Kyle Teel",
+        "yahoo_position": "C",
+        "yahoo_selected": "C",
+        "yahoo_team": "CWS",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Nick Gonzales",
+        "yahoo_position": "2B,SS",
+        "yahoo_selected": "2B",
+        "yahoo_team": "PIT",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Casey Schmitt",
+        "yahoo_position": "1B,2B,3B,SS",
+        "yahoo_selected": "3B",
+        "yahoo_team": "SF",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Alex Freeland",
+        "yahoo_position": "2B,3B,SS",
+        "yahoo_selected": "IF",
+        "yahoo_team": "LAD",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Andy Pages",
+        "yahoo_position": "LF,CF,RF",
+        "yahoo_selected": "CF",
+        "yahoo_team": "LAD",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Emmet Sheehan",
+        "yahoo_position": "SP",
+        "yahoo_selected": "P",
+        "yahoo_team": "LAD",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Ben Casparius",
+        "yahoo_position": "SP,RP",
+        "yahoo_selected": "P",
+        "yahoo_team": "LAD",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Jose Quintana",
+        "yahoo_position": "SP",
+        "yahoo_selected": "BN",
+        "yahoo_team": "COL",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Joe Boyle",
+        "yahoo_position": "SP",
+        "yahoo_selected": "BN",
+        "yahoo_team": "TB",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Gavin Stone",
+        "yahoo_position": "SP",
+        "yahoo_selected": "BN",
+        "yahoo_team": "LAD",
+        "yahoo_status": "IL60",
+        "source": "unknown"
+      },
+      {
+        "name": "Zac Veen",
+        "yahoo_position": "LF,RF",
+        "yahoo_selected": "NA",
+        "yahoo_team": "COL",
+        "yahoo_status": "",
+        "source": "unknown"
+      }
+    ],
+    "dropped": [
+      {
+        "name": "Tanner Houck",
+        "contract_type": "B",
+        "salary": 1,
+        "contract_str": "$1/B"
+      }
+    ]
+  },
+  "Hyper": {
+    "yahoo_manager": "Hyper",
+    "excel_manager": "林剛",
+    "team_name": "Arizona",
+    "matched": [
+      {
+        "name": "William Contreras",
+        "yahoo_position": "C",
+        "yahoo_selected": "C",
+        "yahoo_team": "MIL",
+        "yahoo_status": "",
+        "contract_type": "N",
+        "salary": 16,
+        "extension_years": 2,
+        "contract_str": "$16/N2",
+        "source": "keeper"
+      },
+      {
+        "name": "Junior Caminero",
+        "yahoo_position": "3B",
+        "yahoo_selected": "3B",
+        "yahoo_team": "TB",
+        "yahoo_status": "",
+        "contract_type": "B",
+        "salary": 1,
+        "extension_years": 0,
+        "contract_str": "$1/B",
+        "source": "keeper"
+      },
+      {
+        "name": "Brandon Nimmo",
+        "yahoo_position": "LF,CF",
+        "yahoo_selected": "CF",
+        "yahoo_team": "TEX",
+        "yahoo_status": "",
+        "contract_type": "N",
+        "salary": 11,
+        "extension_years": 1,
+        "contract_str": "$11/N1",
+        "source": "keeper"
+      },
+      {
+        "name": "Dylan Crews",
+        "yahoo_position": "CF,RF",
+        "yahoo_selected": "RF",
+        "yahoo_team": "WSH",
+        "yahoo_status": "",
+        "contract_type": "B",
+        "salary": 6,
+        "extension_years": 0,
+        "contract_str": "$6/B",
+        "source": "keeper"
+      },
+      {
+        "name": "Marcell Ozuna",
+        "yahoo_position": "LF",
+        "yahoo_selected": "OF",
+        "yahoo_team": "PIT",
+        "yahoo_status": "",
+        "contract_type": "N",
+        "salary": 11,
+        "extension_years": 2,
+        "contract_str": "$11/N2",
+        "source": "keeper"
+      },
+      {
+        "name": "Justin Martinez",
+        "yahoo_position": "RP",
+        "yahoo_selected": "IL",
+        "yahoo_team": "AZ",
+        "yahoo_status": "DTD",
+        "contract_type": "B",
+        "salary": 2,
+        "extension_years": 0,
+        "contract_str": "$2/B",
+        "source": "keeper"
+      },
+      {
+        "name": "Walker Jenkins",
+        "yahoo_position": "CF",
+        "yahoo_selected": "NA",
+        "yahoo_team": "MIN",
+        "yahoo_status": "NA",
+        "contract_type": "R",
+        "salary": 1,
+        "extension_years": 0,
+        "contract_str": "$1/R",
+        "source": "keeper"
+      }
+    ],
+    "draft_new": [
+      {
+        "name": "Yandy Díaz",
+        "yahoo_position": "1B",
+        "yahoo_selected": "1B",
+        "yahoo_team": "TB",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 16,
+        "extension_years": 0,
+        "contract_str": "$16/A",
+        "draft_round": 6,
+        "draft_pick": 93,
+        "source": "draft"
+      },
+      {
+        "name": "Carlos Correa",
+        "yahoo_position": "3B,SS",
+        "yahoo_selected": "SS",
+        "yahoo_team": "HOU",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 8,
+        "extension_years": 0,
+        "contract_str": "$8/A",
+        "draft_round": 7,
+        "draft_pick": 102,
+        "source": "draft"
+      },
+      {
+        "name": "Luis García Jr.",
+        "yahoo_position": "2B",
+        "yahoo_selected": "IF",
+        "yahoo_team": "WSH",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 12,
+        "extension_years": 0,
+        "contract_str": "$12/A",
+        "draft_round": 4,
+        "draft_pick": 64,
+        "source": "draft"
+      },
+      {
+        "name": "Bryan Reynolds",
+        "yahoo_position": "LF,CF,RF",
+        "yahoo_selected": "Util",
+        "yahoo_team": "PIT",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 16,
+        "extension_years": 0,
+        "contract_str": "$16/A",
+        "draft_round": 27,
+        "draft_pick": 432,
+        "source": "draft"
+      },
+      {
+        "name": "Alejandro Kirk",
+        "yahoo_position": "C",
+        "yahoo_selected": "BN",
+        "yahoo_team": "TOR",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 1,
+        "extension_years": 0,
+        "contract_str": "$1/A",
+        "draft_round": 15,
+        "draft_pick": 227,
+        "source": "draft"
+      },
+      {
+        "name": "Xander Bogaerts",
+        "yahoo_position": "2B,SS",
+        "yahoo_selected": "BN",
+        "yahoo_team": "SD",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 21,
+        "extension_years": 0,
+        "contract_str": "$21/A",
+        "draft_round": 1,
+        "draft_pick": 6,
+        "source": "draft"
+      },
+      {
+        "name": "Nick Pivetta",
+        "yahoo_position": "SP",
+        "yahoo_selected": "SP",
+        "yahoo_team": "SD",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 16,
+        "extension_years": 0,
+        "contract_str": "$16/A",
+        "draft_round": 4,
+        "draft_pick": 53,
+        "source": "draft"
+      },
+      {
+        "name": "Ryan Weathers",
+        "yahoo_position": "SP",
+        "yahoo_selected": "SP",
+        "yahoo_team": "NYY",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 7,
+        "extension_years": 0,
+        "contract_str": "$7/A",
+        "draft_round": 11,
+        "draft_pick": 168,
+        "source": "draft"
+      },
+      {
+        "name": "Robbie Ray",
+        "yahoo_position": "SP",
+        "yahoo_selected": "BN",
+        "yahoo_team": "SF",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 24,
+        "extension_years": 0,
+        "contract_str": "$24/A",
+        "draft_round": 5,
+        "draft_pick": 70,
+        "source": "draft"
+      },
+      {
+        "name": "Kodai Senga",
+        "yahoo_position": "SP",
+        "yahoo_selected": "BN",
+        "yahoo_team": "NYM",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 33,
+        "extension_years": 0,
+        "contract_str": "$33/A",
+        "draft_round": 3,
+        "draft_pick": 38,
+        "source": "draft"
+      },
+      {
+        "name": "Brandon Woodruff",
+        "yahoo_position": "SP",
+        "yahoo_selected": "IL",
+        "yahoo_team": "MIL",
+        "yahoo_status": "DTD",
+        "contract_type": "A",
+        "salary": 7,
+        "extension_years": 0,
+        "contract_str": "$7/A",
+        "draft_round": 12,
+        "draft_pick": 177,
+        "source": "draft"
+      },
+      {
+        "name": "Nathan Eovaldi",
+        "yahoo_position": "SP",
+        "yahoo_selected": "IL",
+        "yahoo_team": "TEX",
+        "yahoo_status": "IL60",
+        "contract_type": "A",
+        "salary": 11,
+        "extension_years": 0,
+        "contract_str": "$11/A",
+        "draft_round": 27,
+        "draft_pick": 424,
+        "source": "draft"
+      },
+      {
+        "name": "A.J. Puk",
+        "yahoo_position": "SP,RP",
+        "yahoo_selected": "IL",
+        "yahoo_team": "AZ",
+        "yahoo_status": "DTD",
+        "contract_type": "A",
+        "salary": 12,
+        "extension_years": 0,
+        "contract_str": "$12/A",
+        "draft_round": 8,
+        "draft_pick": 117,
+        "source": "draft"
+      }
+    ],
+    "no_contract": [
+      {
+        "name": "Chase Meidroth",
+        "yahoo_position": "2B,3B,SS",
+        "yahoo_selected": "2B",
+        "yahoo_team": "CWS",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Ramón Laureano",
+        "yahoo_position": "LF,CF,RF",
+        "yahoo_selected": "LF",
+        "yahoo_team": "SD",
+        "yahoo_status": "DTD",
+        "source": "unknown"
+      },
+      {
+        "name": "Blaze Alexander",
+        "yahoo_position": "2B,3B,SS",
+        "yahoo_selected": "Util",
+        "yahoo_team": "BAL",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Trevor Rogers",
+        "yahoo_position": "SP",
+        "yahoo_selected": "SP",
+        "yahoo_team": "BAL",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Ryne Nelson",
+        "yahoo_position": "SP,RP",
+        "yahoo_selected": "SP",
+        "yahoo_team": "AZ",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Will Vest",
+        "yahoo_position": "RP",
+        "yahoo_selected": "RP",
+        "yahoo_team": "DET",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Phil Maton",
+        "yahoo_position": "RP",
+        "yahoo_selected": "RP",
+        "yahoo_team": "CHC",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Jordan Leasure",
+        "yahoo_position": "RP",
+        "yahoo_selected": "RP",
+        "yahoo_team": "CWS",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Andrew Saalfrank",
+        "yahoo_position": "RP",
+        "yahoo_selected": "P",
+        "yahoo_team": "AZ",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Victor Vodnik",
+        "yahoo_position": "RP",
+        "yahoo_selected": "P",
+        "yahoo_team": "COL",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Cade Povich",
+        "yahoo_position": "SP",
+        "yahoo_selected": "P",
+        "yahoo_team": "BAL",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Joey Cantillo",
+        "yahoo_position": "SP,RP",
+        "yahoo_selected": "BN",
+        "yahoo_team": "CLE",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Colt Emerson",
+        "yahoo_position": "SS",
+        "yahoo_selected": "NA",
+        "yahoo_team": "SEA",
+        "yahoo_status": "NA",
+        "source": "unknown"
+      }
+    ],
+    "dropped": [
+      {
+        "name": "Royce Lewis",
+        "contract_type": "N",
+        "salary": 11,
+        "contract_str": "$11/N2"
+      },
+      {
+        "name": "Zach Eflin",
+        "contract_type": "N",
+        "salary": 7,
+        "contract_str": "$7/N1"
+      },
+      {
+        "name": "Jake Burger",
+        "contract_type": "B",
+        "salary": 3,
+        "contract_str": "$3/B"
+      },
+      {
+        "name": "Ryan Walker",
+        "contract_type": "B",
+        "salary": 2,
+        "contract_str": "$2/B"
+      },
+      {
+        "name": "Emmanuel Rodriguez",
+        "contract_type": "R",
+        "salary": 1,
+        "contract_str": "$1/R"
+      }
+    ]
+  },
+  "TIMMY LIU": {
+    "yahoo_manager": "TIMMY LIU",
+    "excel_manager": "TIMMY LIU",
+    "team_name": "Boston Red Sox",
+    "matched": [
+      {
+        "name": "Michael Busch",
+        "yahoo_position": "1B",
+        "yahoo_selected": "1B",
+        "yahoo_team": "CHC",
+        "yahoo_status": "",
+        "contract_type": "B",
+        "salary": 1,
+        "extension_years": 0,
+        "contract_str": "$1/B",
+        "source": "keeper"
+      },
+      {
+        "name": "Brice Turang",
+        "yahoo_position": "2B",
+        "yahoo_selected": "2B",
+        "yahoo_team": "MIL",
+        "yahoo_status": "",
+        "contract_type": "B",
+        "salary": 1,
+        "extension_years": 0,
+        "contract_str": "$1/B",
+        "source": "keeper"
+      },
+      {
+        "name": "Spencer Steer",
+        "yahoo_position": "1B,LF",
+        "yahoo_selected": "OF",
+        "yahoo_team": "CIN",
+        "yahoo_status": "",
+        "contract_type": "N",
+        "salary": 11,
+        "extension_years": 2,
+        "contract_str": "$11/N2",
+        "source": "keeper"
+      },
+      {
+        "name": "Tarik Skubal",
+        "yahoo_position": "SP",
+        "yahoo_selected": "SP",
+        "yahoo_team": "DET",
+        "yahoo_status": "",
+        "contract_type": "N",
+        "salary": 21,
+        "extension_years": 4,
+        "contract_str": "$21/N4",
+        "source": "keeper"
+      },
+      {
+        "name": "Zac Gallen",
+        "yahoo_position": "SP",
+        "yahoo_selected": "SP",
+        "yahoo_team": "AZ",
+        "yahoo_status": "",
+        "contract_type": "N",
+        "salary": 21,
+        "extension_years": 1,
+        "contract_str": "$21/N1",
+        "source": "keeper"
+      },
+      {
+        "name": "Edwin Díaz",
+        "yahoo_position": "RP",
+        "yahoo_selected": "P",
+        "yahoo_team": "LAD",
+        "yahoo_status": "",
+        "contract_type": "N",
+        "salary": 16,
+        "extension_years": 3,
+        "contract_str": "$16/N3",
+        "source": "keeper"
+      },
+      {
+        "name": "Ranger Suárez",
+        "yahoo_position": "SP",
+        "yahoo_selected": "BN",
+        "yahoo_team": "BOS",
+        "yahoo_status": "",
+        "contract_type": "B",
+        "salary": 1,
+        "extension_years": 0,
+        "contract_str": "$1/B",
+        "source": "keeper"
+      },
+      {
+        "name": "Spencer Strider",
+        "yahoo_position": "SP",
+        "yahoo_selected": "BN",
+        "yahoo_team": "ATL",
+        "yahoo_status": "",
+        "contract_type": "N",
+        "salary": 21,
+        "extension_years": 3,
+        "contract_str": "$21/N3",
+        "source": "keeper"
+      },
+      {
+        "name": "Marcus Semien",
+        "yahoo_position": "2B",
+        "yahoo_selected": "IL",
+        "yahoo_team": "NYM",
+        "yahoo_status": "IL60",
+        "contract_type": "N",
+        "salary": 21,
+        "extension_years": 1,
+        "contract_str": "$21/N1",
+        "source": "keeper"
+      }
+    ],
+    "draft_new": [
+      {
+        "name": "Hunter Goodman",
+        "yahoo_position": "C,LF,RF",
+        "yahoo_selected": "C",
+        "yahoo_team": "COL",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 1,
+        "extension_years": 0,
+        "contract_str": "$1/A",
+        "draft_round": 13,
+        "draft_pick": 198,
+        "source": "draft"
+      },
+      {
+        "name": "Trevor Story",
+        "yahoo_position": "SS",
+        "yahoo_selected": "SS",
+        "yahoo_team": "BOS",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 4,
+        "extension_years": 0,
+        "contract_str": "$4/A",
+        "draft_round": 10,
+        "draft_pick": 151,
+        "source": "draft"
+      },
+      {
+        "name": "Rhys Hoskins",
+        "yahoo_position": "1B",
+        "yahoo_selected": "IF",
+        "yahoo_team": "CLE",
+        "yahoo_status": "NA",
+        "contract_type": "A",
+        "salary": 5,
+        "extension_years": 0,
+        "contract_str": "$5/A",
+        "draft_round": 7,
+        "draft_pick": 111,
+        "source": "draft"
+      },
+      {
+        "name": "TJ Friedl",
+        "yahoo_position": "LF,CF",
+        "yahoo_selected": "LF",
+        "yahoo_team": "CIN",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 6,
+        "extension_years": 0,
+        "contract_str": "$6/A",
+        "draft_round": 9,
+        "draft_pick": 144,
+        "source": "draft"
+      },
+      {
+        "name": "Ceddanne Rafaela",
+        "yahoo_position": "2B,SS,CF",
+        "yahoo_selected": "CF",
+        "yahoo_team": "BOS",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 10,
+        "extension_years": 0,
+        "contract_str": "$10/A",
+        "draft_round": 10,
+        "draft_pick": 154,
+        "source": "draft"
+      },
+      {
+        "name": "Andrew Vaughn",
+        "yahoo_position": "1B",
+        "yahoo_selected": "Util",
+        "yahoo_team": "MIL",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 1,
+        "extension_years": 0,
+        "contract_str": "$1/A",
+        "draft_round": 7,
+        "draft_pick": 109,
+        "source": "draft"
+      },
+      {
+        "name": "Nathaniel Lowe",
+        "yahoo_position": "1B",
+        "yahoo_selected": "Util",
+        "yahoo_team": "CIN",
+        "yahoo_status": "NA",
+        "contract_type": "A",
+        "salary": 7,
+        "extension_years": 0,
+        "contract_str": "$7/A",
+        "draft_round": 8,
+        "draft_pick": 123,
+        "source": "draft"
+      },
+      {
+        "name": "Wilyer Abreu",
+        "yahoo_position": "LF,CF,RF",
+        "yahoo_selected": "BN",
+        "yahoo_team": "BOS",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 4,
+        "extension_years": 0,
+        "contract_str": "$4/A",
+        "draft_round": 10,
+        "draft_pick": 152,
+        "source": "draft"
+      },
+      {
+        "name": "Walker Buehler",
+        "yahoo_position": "SP",
+        "yahoo_selected": "SP",
+        "yahoo_team": "SD",
+        "yahoo_status": "NA",
+        "contract_type": "A",
+        "salary": 20,
+        "extension_years": 0,
+        "contract_str": "$20/A",
+        "draft_round": 11,
+        "draft_pick": 162,
+        "source": "draft"
+      },
+      {
+        "name": "Bryan Abreu",
+        "yahoo_position": "RP",
+        "yahoo_selected": "RP",
+        "yahoo_team": "HOU",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 19,
+        "extension_years": 0,
+        "contract_str": "$19/A",
+        "draft_round": 11,
+        "draft_pick": 173,
+        "source": "draft"
+      },
+      {
+        "name": "David Bednar",
+        "yahoo_position": "RP",
+        "yahoo_selected": "RP",
+        "yahoo_team": "NYY",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 7,
+        "extension_years": 0,
+        "contract_str": "$7/A",
+        "draft_round": 7,
+        "draft_pick": 112,
+        "source": "draft"
+      },
+      {
+        "name": "Chris Martin",
+        "yahoo_position": "RP",
+        "yahoo_selected": "P",
+        "yahoo_team": "TEX",
+        "yahoo_status": "DTD",
+        "contract_type": "A",
+        "salary": 10,
+        "extension_years": 0,
+        "contract_str": "$10/A",
+        "draft_round": 10,
+        "draft_pick": 156,
+        "source": "draft"
+      },
+      {
+        "name": "Merrill Kelly",
+        "yahoo_position": "SP",
+        "yahoo_selected": "P",
+        "yahoo_team": "AZ",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 3,
+        "extension_years": 0,
+        "contract_str": "$3/A",
+        "draft_round": 13,
+        "draft_pick": 203,
+        "source": "draft"
+      },
+      {
+        "name": "Kyle Tucker",
+        "yahoo_position": "RF",
+        "yahoo_selected": "IL",
+        "yahoo_team": "LAD",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 61,
+        "extension_years": 0,
+        "contract_str": "$61/A",
+        "draft_round": 1,
+        "draft_pick": 3,
+        "source": "draft"
+      },
+      {
+        "name": "Travis Bazzana",
+        "yahoo_position": "2B",
+        "yahoo_selected": "NA",
+        "yahoo_team": "CLE",
+        "yahoo_status": "NA",
+        "contract_type": "A",
+        "salary": 6,
+        "extension_years": 0,
+        "contract_str": "$6/A",
+        "draft_round": 10,
+        "draft_pick": 158,
+        "source": "draft"
+      }
+    ],
+    "no_contract": [
+      {
+        "name": "Brett Baty",
+        "yahoo_position": "2B,3B",
+        "yahoo_selected": "3B",
+        "yahoo_team": "NYM",
+        "yahoo_status": "DTD",
+        "source": "unknown"
+      },
+      {
+        "name": "José Caballero",
+        "yahoo_position": "2B,3B,SS,LF,RF",
+        "yahoo_selected": "RF",
+        "yahoo_team": "NYY",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Geraldo Perdomo",
+        "yahoo_position": "SS",
+        "yahoo_selected": "BN",
+        "yahoo_team": "AZ",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Miguel Vargas",
+        "yahoo_position": "1B,3B,LF",
+        "yahoo_selected": "BN",
+        "yahoo_team": "CWS",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Eric Lauer",
+        "yahoo_position": "SP,RP",
+        "yahoo_selected": "SP",
+        "yahoo_team": "TOR",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Ian Seymour",
+        "yahoo_position": "SP,RP",
+        "yahoo_selected": "RP",
+        "yahoo_team": "TB",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Carson Whisenhunt",
+        "yahoo_position": "SP",
+        "yahoo_selected": "IL",
+        "yahoo_team": "SF",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Ryan Gusto",
+        "yahoo_position": "SP,RP",
+        "yahoo_selected": "IL",
+        "yahoo_team": "MIA",
+        "yahoo_status": "DTD",
+        "source": "unknown"
+      }
+    ],
+    "dropped": [
+      {
+        "name": "Jurickson Profar",
+        "contract_type": "B",
+        "salary": 1,
+        "contract_str": "$1/B"
+      }
+    ]
+  },
+  "謙謙": {
+    "yahoo_manager": "謙謙",
+    "excel_manager": "Javier",
+    "team_name": "New York Yankees",
+    "matched": [
+      {
+        "name": "Cal Raleigh",
+        "yahoo_position": "C",
+        "yahoo_selected": "C",
+        "yahoo_team": "SEA",
+        "yahoo_status": "",
+        "contract_type": "N",
+        "salary": 11,
+        "extension_years": 1,
+        "contract_str": "$11/N1",
+        "source": "keeper"
+      },
+      {
+        "name": "Nico Hoerner",
+        "yahoo_position": "2B,SS",
+        "yahoo_selected": "2B",
+        "yahoo_team": "CHC",
+        "yahoo_status": "",
+        "contract_type": "N",
+        "salary": 11,
+        "extension_years": 1,
+        "contract_str": "$11/N1",
+        "source": "keeper"
+      },
+      {
+        "name": "Cody Bellinger",
+        "yahoo_position": "1B,LF,CF,RF",
+        "yahoo_selected": "LF",
+        "yahoo_team": "NYY",
+        "yahoo_status": "",
+        "contract_type": "N",
+        "salary": 14,
+        "extension_years": 1,
+        "contract_str": "$14/N1",
+        "source": "keeper"
+      },
+      {
+        "name": "Jazz Chisholm Jr.",
+        "yahoo_position": "2B,3B,CF",
+        "yahoo_selected": "CF",
+        "yahoo_team": "NYY",
+        "yahoo_status": "",
+        "contract_type": "B",
+        "salary": 28,
+        "extension_years": 0,
+        "contract_str": "$28/B",
+        "source": "keeper"
+      },
+      {
+        "name": "Jung Hoo Lee",
+        "yahoo_position": "CF",
+        "yahoo_selected": "BN",
+        "yahoo_team": "SF",
+        "yahoo_status": "",
+        "contract_type": "B",
+        "salary": 5,
+        "extension_years": 0,
+        "contract_str": "$5/B",
+        "source": "keeper"
+      }
+    ],
+    "draft_new": [
+      {
+        "name": "Vladimir Guerrero Jr.",
+        "yahoo_position": "1B,3B",
+        "yahoo_selected": "3B",
+        "yahoo_team": "TOR",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 51,
+        "extension_years": 0,
+        "contract_str": "$51/A",
+        "draft_round": 26,
+        "draft_pick": 413,
+        "source": "draft"
+      },
+      {
+        "name": "Anthony Volpe",
+        "yahoo_position": "SS",
+        "yahoo_selected": "IF",
+        "yahoo_team": "NYY",
+        "yahoo_status": "DTD",
+        "contract_type": "A",
+        "salary": 3,
+        "extension_years": 0,
+        "contract_str": "$3/A",
+        "draft_round": 17,
+        "draft_pick": 269,
+        "source": "draft"
+      },
+      {
+        "name": "Giancarlo Stanton",
+        "yahoo_position": "LF,RF",
+        "yahoo_selected": "RF",
+        "yahoo_team": "NYY",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 3,
+        "extension_years": 0,
+        "contract_str": "$3/A",
+        "draft_round": 14,
+        "draft_pick": 212,
+        "source": "draft"
+      },
+      {
+        "name": "Aaron Judge",
+        "yahoo_position": "LF,CF,RF",
+        "yahoo_selected": "OF",
+        "yahoo_team": "NYY",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 72,
+        "extension_years": 0,
+        "contract_str": "$72/A",
+        "draft_round": 1,
+        "draft_pick": 2,
+        "source": "draft"
+      },
+      {
+        "name": "Christian Yelich",
+        "yahoo_position": "LF",
+        "yahoo_selected": "Util",
+        "yahoo_team": "MIL",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 30,
+        "extension_years": 0,
+        "contract_str": "$30/A",
+        "draft_round": 3,
+        "draft_pick": 41,
+        "source": "draft"
+      },
+      {
+        "name": "Jeremy Peña",
+        "yahoo_position": "SS",
+        "yahoo_selected": "BN",
+        "yahoo_team": "HOU",
+        "yahoo_status": "DTD",
+        "contract_type": "A",
+        "salary": 10,
+        "extension_years": 0,
+        "contract_str": "$10/A",
+        "draft_round": 6,
+        "draft_pick": 96,
+        "source": "draft"
+      },
+      {
+        "name": "Orion Kerkering",
+        "yahoo_position": "RP",
+        "yahoo_selected": "P",
+        "yahoo_team": "PHI",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 4,
+        "extension_years": 0,
+        "contract_str": "$4/A",
+        "draft_round": 10,
+        "draft_pick": 147,
+        "source": "draft"
+      },
+      {
+        "name": "Corey Seager",
+        "yahoo_position": "SS",
+        "yahoo_selected": "IL",
+        "yahoo_team": "TEX",
+        "yahoo_status": "DTD",
+        "contract_type": "A",
+        "salary": 39,
+        "extension_years": 0,
+        "contract_str": "$39/A",
+        "draft_round": 27,
+        "draft_pick": 423,
+        "source": "draft"
+      },
+      {
+        "name": "Corbin Burnes",
+        "yahoo_position": "SP",
+        "yahoo_selected": "IL",
+        "yahoo_team": "AZ",
+        "yahoo_status": "DTD",
+        "contract_type": "A",
+        "salary": 49,
+        "extension_years": 0,
+        "contract_str": "$49/A",
+        "draft_round": 2,
+        "draft_pick": 21,
+        "source": "draft"
+      },
+      {
+        "name": "Spencer Jones",
+        "yahoo_position": "CF",
+        "yahoo_selected": "NA",
+        "yahoo_team": "NYY",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 9,
+        "extension_years": 0,
+        "contract_str": "$9/A",
+        "draft_round": 17,
+        "draft_pick": 272,
+        "source": "draft"
+      }
+    ],
+    "no_contract": [
+      {
+        "name": "Ben Rice",
+        "yahoo_position": "C,1B",
+        "yahoo_selected": "1B",
+        "yahoo_team": "NYY",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Romy Gonzalez",
+        "yahoo_position": "1B,2B,3B,SS",
+        "yahoo_selected": "SS",
+        "yahoo_team": "BOS",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Zach Cole",
+        "yahoo_position": "LF,CF,RF",
+        "yahoo_selected": "Util",
+        "yahoo_team": "HOU",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Shawn Armstrong",
+        "yahoo_position": "SP,RP",
+        "yahoo_selected": "SP",
+        "yahoo_team": "CLE",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Mike Vasil",
+        "yahoo_position": "SP,RP",
+        "yahoo_selected": "SP",
+        "yahoo_team": "CWS",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Michael Lorenzen (Pitcher)",
+        "yahoo_position": "SP,RP",
+        "yahoo_selected": "SP",
+        "yahoo_team": "COL",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Logan Allen",
+        "yahoo_position": "SP",
+        "yahoo_selected": "SP",
+        "yahoo_team": "CLE",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Greg Weissert",
+        "yahoo_position": "RP",
+        "yahoo_selected": "RP",
+        "yahoo_team": "BOS",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Gabe Speier",
+        "yahoo_position": "RP",
+        "yahoo_selected": "RP",
+        "yahoo_team": "SEA",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Tyler Rogers",
+        "yahoo_position": "RP",
+        "yahoo_selected": "RP",
+        "yahoo_team": "TOR",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Hoby Milner",
+        "yahoo_position": "RP",
+        "yahoo_selected": "P",
+        "yahoo_team": "CHC",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Tim Hill",
+        "yahoo_position": "RP",
+        "yahoo_selected": "P",
+        "yahoo_team": "NYY",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Nabil Crismatt",
+        "yahoo_position": "SP,RP",
+        "yahoo_selected": "BN",
+        "yahoo_team": "TEX",
+        "yahoo_status": "NA",
+        "source": "unknown"
+      },
+      {
+        "name": "Taijuan Walker",
+        "yahoo_position": "SP,RP",
+        "yahoo_selected": "BN",
+        "yahoo_team": "PHI",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Colin Rea",
+        "yahoo_position": "SP,RP",
+        "yahoo_selected": "BN",
+        "yahoo_team": "CHC",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Martín Pérez",
+        "yahoo_position": "SP",
+        "yahoo_selected": "IL",
+        "yahoo_team": "ATL",
+        "yahoo_status": "NA",
+        "source": "unknown"
+      },
+      {
+        "name": "Max Clark",
+        "yahoo_position": "CF",
+        "yahoo_selected": "NA",
+        "yahoo_team": "DET",
+        "yahoo_status": "NA",
+        "source": "unknown"
+      }
+    ],
+    "dropped": [
+      {
+        "name": "Clarke Schmidt",
+        "contract_type": "B",
+        "salary": 2,
+        "contract_str": "$2/B"
+      },
+      {
+        "name": "Mookie Betts",
+        "contract_type": "O",
+        "salary": 58,
+        "contract_str": "$58/O"
+      },
+      {
+        "name": "Ronel Blanco",
+        "contract_type": "B",
+        "salary": 11,
+        "contract_str": "$11/B"
+      },
+      {
+        "name": "Zach Neto",
+        "contract_type": "B",
+        "salary": 3,
+        "contract_str": "$3/B"
+      },
+      {
+        "name": "Austin Wells",
+        "contract_type": "B",
+        "salary": 1,
+        "contract_str": "$1/B"
+      },
+      {
+        "name": "Luisangel Acuña",
+        "contract_type": "R",
+        "salary": 1,
+        "contract_str": "$1/R"
+      },
+      {
+        "name": "Ethan Salas",
+        "contract_type": "R",
+        "salary": 1,
+        "contract_str": "$1/R"
+      }
+    ]
+  },
+  "魚魚": {
+    "yahoo_manager": "魚魚",
+    "excel_manager": "James Chen",
+    "team_name": "Seattle Mariners",
+    "matched": [
+      {
+        "name": "Ketel Marte",
+        "yahoo_position": "2B",
+        "yahoo_selected": "2B",
+        "yahoo_team": "AZ",
+        "yahoo_status": "",
+        "contract_type": "B",
+        "salary": 18,
+        "extension_years": 0,
+        "contract_str": "$18/B",
+        "source": "keeper"
+      },
+      {
+        "name": "Julio Rodríguez",
+        "yahoo_position": "CF",
+        "yahoo_selected": "CF",
+        "yahoo_team": "SEA",
+        "yahoo_status": "",
+        "contract_type": "N",
+        "salary": 46,
+        "extension_years": 2,
+        "contract_str": "$46/N2",
+        "source": "keeper"
+      },
+      {
+        "name": "Oneil Cruz",
+        "yahoo_position": "SS,CF",
+        "yahoo_selected": "OF",
+        "yahoo_team": "PIT",
+        "yahoo_status": "",
+        "contract_type": "N",
+        "salary": 15,
+        "extension_years": 1,
+        "contract_str": "$15/N1",
+        "source": "keeper"
+      },
+      {
+        "name": "Alec Bohm",
+        "yahoo_position": "1B,3B",
+        "yahoo_selected": "Util",
+        "yahoo_team": "PHI",
+        "yahoo_status": "",
+        "contract_type": "B",
+        "salary": 11,
+        "extension_years": 0,
+        "contract_str": "$11/B",
+        "source": "keeper"
+      },
+      {
+        "name": "Paul Skenes",
+        "yahoo_position": "SP",
+        "yahoo_selected": "SP",
+        "yahoo_team": "PIT",
+        "yahoo_status": "",
+        "contract_type": "B",
+        "salary": 15,
+        "extension_years": 0,
+        "contract_str": "$15/B",
+        "source": "keeper"
+      },
+      {
+        "name": "Bryan Woo",
+        "yahoo_position": "SP",
+        "yahoo_selected": "SP",
+        "yahoo_team": "SEA",
+        "yahoo_status": "",
+        "contract_type": "B",
+        "salary": 15,
+        "extension_years": 0,
+        "contract_str": "$15/B",
+        "source": "keeper"
+      },
+      {
+        "name": "Dylan Cease",
+        "yahoo_position": "SP",
+        "yahoo_selected": "SP",
+        "yahoo_team": "TOR",
+        "yahoo_status": "",
+        "contract_type": "N",
+        "salary": 17,
+        "extension_years": 1,
+        "contract_str": "$17/N1",
+        "source": "keeper"
+      },
+      {
+        "name": "Shane McClanahan",
+        "yahoo_position": "SP",
+        "yahoo_selected": "IL",
+        "yahoo_team": "TB",
+        "yahoo_status": "IL60",
+        "contract_type": "N",
+        "salary": 18,
+        "extension_years": 1,
+        "contract_str": "$18/N1",
+        "source": "keeper"
+      }
+    ],
+    "draft_new": [
+      {
+        "name": "Spencer Torkelson",
+        "yahoo_position": "1B",
+        "yahoo_selected": "1B",
+        "yahoo_team": "DET",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 1,
+        "extension_years": 0,
+        "contract_str": "$1/A",
+        "draft_round": 10,
+        "draft_pick": 146,
+        "source": "draft"
+      },
+      {
+        "name": "Ryan McMahon",
+        "yahoo_position": "3B",
+        "yahoo_selected": "3B",
+        "yahoo_team": "NYY",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 1,
+        "extension_years": 0,
+        "contract_str": "$1/A",
+        "draft_round": 7,
+        "draft_pick": 100,
+        "source": "draft"
+      },
+      {
+        "name": "Randy Arozarena",
+        "yahoo_position": "LF,CF",
+        "yahoo_selected": "LF",
+        "yahoo_team": "SEA",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 15,
+        "extension_years": 0,
+        "contract_str": "$15/A",
+        "draft_round": 3,
+        "draft_pick": 34,
+        "source": "draft"
+      },
+      {
+        "name": "Mike Trout",
+        "yahoo_position": "CF,RF",
+        "yahoo_selected": "RF",
+        "yahoo_team": "LAA",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 32,
+        "extension_years": 0,
+        "contract_str": "$32/A",
+        "draft_round": 2,
+        "draft_pick": 27,
+        "source": "draft"
+      },
+      {
+        "name": "Nick Castellanos",
+        "yahoo_position": "RF",
+        "yahoo_selected": "BN",
+        "yahoo_team": "SD",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 15,
+        "extension_years": 0,
+        "contract_str": "$15/A",
+        "draft_round": 4,
+        "draft_pick": 54,
+        "source": "draft"
+      },
+      {
+        "name": "Kristian Campbell",
+        "yahoo_position": "2B,CF",
+        "yahoo_selected": "BN",
+        "yahoo_team": "BOS",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 1,
+        "extension_years": 0,
+        "contract_str": "$1/A",
+        "draft_round": 22,
+        "draft_pick": 349,
+        "source": "draft"
+      },
+      {
+        "name": "Luis Castillo",
+        "yahoo_position": "SP",
+        "yahoo_selected": "SP",
+        "yahoo_team": "SEA",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 24,
+        "extension_years": 0,
+        "contract_str": "$24/A",
+        "draft_round": 1,
+        "draft_pick": 7,
+        "source": "draft"
+      },
+      {
+        "name": "Robert Garcia",
+        "yahoo_position": "RP",
+        "yahoo_selected": "RP",
+        "yahoo_team": "TEX",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 1,
+        "extension_years": 0,
+        "contract_str": "$1/A",
+        "draft_round": 15,
+        "draft_pick": 235,
+        "source": "draft"
+      },
+      {
+        "name": "Ryan Walker",
+        "yahoo_position": "RP",
+        "yahoo_selected": "RP",
+        "yahoo_team": "SF",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 2,
+        "extension_years": 0,
+        "contract_str": "$2/A",
+        "draft_round": 20,
+        "draft_pick": 306,
+        "source": "draft"
+      },
+      {
+        "name": "Camilo Doval",
+        "yahoo_position": "RP",
+        "yahoo_selected": "P",
+        "yahoo_team": "NYY",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 2,
+        "extension_years": 0,
+        "contract_str": "$2/A",
+        "draft_round": 4,
+        "draft_pick": 55,
+        "source": "draft"
+      },
+      {
+        "name": "Gavin Williams",
+        "yahoo_position": "SP",
+        "yahoo_selected": "BN",
+        "yahoo_team": "CLE",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 9,
+        "extension_years": 0,
+        "contract_str": "$9/A",
+        "draft_round": 9,
+        "draft_pick": 132,
+        "source": "draft"
+      },
+      {
+        "name": "Mitch Keller",
+        "yahoo_position": "SP",
+        "yahoo_selected": "BN",
+        "yahoo_team": "PIT",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 1,
+        "extension_years": 0,
+        "contract_str": "$1/A",
+        "draft_round": 11,
+        "draft_pick": 165,
+        "source": "draft"
+      },
+      {
+        "name": "Tyler O'Neill",
+        "yahoo_position": "LF,RF",
+        "yahoo_selected": "IL",
+        "yahoo_team": "BAL",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 9,
+        "extension_years": 0,
+        "contract_str": "$9/A",
+        "draft_round": 3,
+        "draft_pick": 33,
+        "source": "draft"
+      },
+      {
+        "name": "Edward Cabrera",
+        "yahoo_position": "SP",
+        "yahoo_selected": "IL",
+        "yahoo_team": "CHC",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 7,
+        "extension_years": 0,
+        "contract_str": "$7/A",
+        "draft_round": 26,
+        "draft_pick": 406,
+        "source": "draft"
+      },
+      {
+        "name": "Andrew Painter",
+        "yahoo_position": "SP",
+        "yahoo_selected": "NA",
+        "yahoo_team": "PHI",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 1,
+        "extension_years": 0,
+        "contract_str": "$1/A",
+        "draft_round": 6,
+        "draft_pick": 82,
+        "source": "draft"
+      }
+    ],
+    "no_contract": [
+      {
+        "name": "Carson Kelly",
+        "yahoo_position": "C",
+        "yahoo_selected": "C",
+        "yahoo_team": "CHC",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Cole Young",
+        "yahoo_position": "2B,SS",
+        "yahoo_selected": "SS",
+        "yahoo_team": "SEA",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Jac Caglianone",
+        "yahoo_position": "1B,RF",
+        "yahoo_selected": "IF",
+        "yahoo_team": "KC",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Nick Kurtz",
+        "yahoo_position": "1B",
+        "yahoo_selected": "Util",
+        "yahoo_team": "ATH",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Reid Detmers",
+        "yahoo_position": "SP,RP",
+        "yahoo_selected": "RP",
+        "yahoo_team": "LAA",
+        "yahoo_status": "IL60",
+        "source": "unknown"
+      },
+      {
+        "name": "Matt Brash",
+        "yahoo_position": "RP",
+        "yahoo_selected": "P",
+        "yahoo_team": "SEA",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Gregory Soto",
+        "yahoo_position": "RP",
+        "yahoo_selected": "P",
+        "yahoo_team": "PIT",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Lucas Giolito",
+        "yahoo_position": "SP",
+        "yahoo_selected": "BN",
+        "yahoo_team": "BOS",
+        "yahoo_status": "NA",
+        "source": "unknown"
+      },
+      {
+        "name": "Bryce Eldridge",
+        "yahoo_position": "1B",
+        "yahoo_selected": "NA",
+        "yahoo_team": "SF",
+        "yahoo_status": "DTD",
+        "source": "unknown"
+      }
+    ],
+    "dropped": [
+      {
+        "name": "Jhoan Duran",
+        "contract_type": "N",
+        "salary": 12,
+        "contract_str": "$12/N1"
+      },
+      {
+        "name": "Ryan Helsley",
+        "contract_type": "N",
+        "salary": 11,
+        "contract_str": "$11/N1"
+      },
+      {
+        "name": "Spencer Jones",
+        "contract_type": "R",
+        "salary": 9,
+        "contract_str": "$9/R"
+      }
+    ]
+  },
+  "Ponpon": {
+    "yahoo_manager": "Ponpon",
+    "excel_manager": "Ponpon",
+    "team_name": "Tampa Bay Rays",
+    "matched": [
+      {
+        "name": "Willy Adames",
+        "yahoo_position": "SS",
+        "yahoo_selected": "SS",
+        "yahoo_team": "SF",
+        "yahoo_status": "",
+        "contract_type": "B",
+        "salary": 10,
+        "extension_years": 0,
+        "contract_str": "$10/B",
+        "source": "keeper"
+      },
+      {
+        "name": "Carson Williams",
+        "yahoo_position": "SS",
+        "yahoo_selected": "IF",
+        "yahoo_team": "TB",
+        "yahoo_status": "",
+        "contract_type": "R",
+        "salary": 1,
+        "extension_years": 0,
+        "contract_str": "$1/R",
+        "source": "keeper"
+      },
+      {
+        "name": "Anthony Santander",
+        "yahoo_position": "LF,RF",
+        "yahoo_selected": "Util",
+        "yahoo_team": "TOR",
+        "yahoo_status": "DTD",
+        "contract_type": "O",
+        "salary": 9,
+        "extension_years": 0,
+        "contract_str": "$9/O",
+        "source": "keeper"
+      },
+      {
+        "name": "Luis Gil",
+        "yahoo_position": "SP",
+        "yahoo_selected": "SP",
+        "yahoo_team": "NYY",
+        "yahoo_status": "",
+        "contract_type": "B",
+        "salary": 3,
+        "extension_years": 0,
+        "contract_str": "$3/B",
+        "source": "keeper"
+      },
+      {
+        "name": "Robert Suarez",
+        "yahoo_position": "RP",
+        "yahoo_selected": "RP",
+        "yahoo_team": "ATL",
+        "yahoo_status": "",
+        "contract_type": "B",
+        "salary": 10,
+        "extension_years": 0,
+        "contract_str": "$10/B",
+        "source": "keeper"
+      },
+      {
+        "name": "Pete Fairbanks",
+        "yahoo_position": "RP",
+        "yahoo_selected": "RP",
+        "yahoo_team": "MIA",
+        "yahoo_status": "",
+        "contract_type": "O",
+        "salary": 7,
+        "extension_years": 0,
+        "contract_str": "$7/O",
+        "source": "keeper"
+      },
+      {
+        "name": "Garrett Crochet",
+        "yahoo_position": "SP",
+        "yahoo_selected": "BN",
+        "yahoo_team": "BOS",
+        "yahoo_status": "",
+        "contract_type": "B",
+        "salary": 9,
+        "extension_years": 0,
+        "contract_str": "$9/B",
+        "source": "keeper"
+      },
+      {
+        "name": "Drew Rasmussen",
+        "yahoo_position": "SP,RP",
+        "yahoo_selected": "BN",
+        "yahoo_team": "TB",
+        "yahoo_status": "",
+        "contract_type": "B",
+        "salary": 1,
+        "extension_years": 0,
+        "contract_str": "$1/B",
+        "source": "keeper"
+      },
+      {
+        "name": "Shane Bieber",
+        "yahoo_position": "SP",
+        "yahoo_selected": "BN",
+        "yahoo_team": "TOR",
+        "yahoo_status": "",
+        "contract_type": "B",
+        "salary": 1,
+        "extension_years": 0,
+        "contract_str": "$1/B",
+        "source": "keeper"
+      }
+    ],
+    "draft_new": [
+      {
+        "name": "Patrick Bailey",
+        "yahoo_position": "C",
+        "yahoo_selected": "C",
+        "yahoo_team": "SF",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 1,
+        "extension_years": 0,
+        "contract_str": "$1/A",
+        "draft_round": 16,
+        "draft_pick": 249,
+        "source": "draft"
+      },
+      {
+        "name": "Rafael Devers",
+        "yahoo_position": "1B,3B",
+        "yahoo_selected": "1B",
+        "yahoo_team": "SF",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 51,
+        "extension_years": 0,
+        "contract_str": "$51/A",
+        "draft_round": 2,
+        "draft_pick": 18,
+        "source": "draft"
+      },
+      {
+        "name": "Brandon Lowe",
+        "yahoo_position": "1B,2B",
+        "yahoo_selected": "2B",
+        "yahoo_team": "PIT",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 12,
+        "extension_years": 0,
+        "contract_str": "$12/A",
+        "draft_round": 4,
+        "draft_pick": 61,
+        "source": "draft"
+      },
+      {
+        "name": "Alex Bregman",
+        "yahoo_position": "3B",
+        "yahoo_selected": "3B",
+        "yahoo_team": "CHC",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 35,
+        "extension_years": 0,
+        "contract_str": "$35/A",
+        "draft_round": 3,
+        "draft_pick": 45,
+        "source": "draft"
+      },
+      {
+        "name": "Taylor Ward",
+        "yahoo_position": "LF",
+        "yahoo_selected": "LF",
+        "yahoo_team": "BAL",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 11,
+        "extension_years": 0,
+        "contract_str": "$11/A",
+        "draft_round": 8,
+        "draft_pick": 118,
+        "source": "draft"
+      },
+      {
+        "name": "Michael Harris II",
+        "yahoo_position": "CF",
+        "yahoo_selected": "CF",
+        "yahoo_team": "ATL",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 30,
+        "extension_years": 0,
+        "contract_str": "$30/A",
+        "draft_round": 26,
+        "draft_pick": 410,
+        "source": "draft"
+      },
+      {
+        "name": "Josh Lowe",
+        "yahoo_position": "LF,CF,RF",
+        "yahoo_selected": "RF",
+        "yahoo_team": "LAA",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 8,
+        "extension_years": 0,
+        "contract_str": "$8/A",
+        "draft_round": 5,
+        "draft_pick": 77,
+        "source": "draft"
+      },
+      {
+        "name": "Chandler Simpson",
+        "yahoo_position": "LF,CF",
+        "yahoo_selected": "OF",
+        "yahoo_team": "TB",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 1,
+        "extension_years": 0,
+        "contract_str": "$1/A",
+        "draft_round": 10,
+        "draft_pick": 157,
+        "source": "draft"
+      },
+      {
+        "name": "Cam Smith",
+        "yahoo_position": "3B,RF",
+        "yahoo_selected": "Util",
+        "yahoo_team": "HOU",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 10,
+        "extension_years": 0,
+        "contract_str": "$10/A",
+        "draft_round": 3,
+        "draft_pick": 40,
+        "source": "draft"
+      },
+      {
+        "name": "Adolis García",
+        "yahoo_position": "RF",
+        "yahoo_selected": "BN",
+        "yahoo_team": "PHI",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 25,
+        "extension_years": 0,
+        "contract_str": "$25/A",
+        "draft_round": 27,
+        "draft_pick": 431,
+        "source": "draft"
+      },
+      {
+        "name": "Brandon Pfaadt",
+        "yahoo_position": "SP",
+        "yahoo_selected": "SP",
+        "yahoo_team": "AZ",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 13,
+        "extension_years": 0,
+        "contract_str": "$13/A",
+        "draft_round": 6,
+        "draft_pick": 86,
+        "source": "draft"
+      },
+      {
+        "name": "Freddy Peralta",
+        "yahoo_position": "SP",
+        "yahoo_selected": "SP",
+        "yahoo_team": "NYM",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 28,
+        "extension_years": 0,
+        "contract_str": "$28/A",
+        "draft_round": 2,
+        "draft_pick": 29,
+        "source": "draft"
+      },
+      {
+        "name": "Edwin Uceta",
+        "yahoo_position": "RP",
+        "yahoo_selected": "RP",
+        "yahoo_team": "TB",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 10,
+        "extension_years": 0,
+        "contract_str": "$10/A",
+        "draft_round": 8,
+        "draft_pick": 125,
+        "source": "draft"
+      },
+      {
+        "name": "Hunter Gaddis",
+        "yahoo_position": "RP",
+        "yahoo_selected": "P",
+        "yahoo_team": "CLE",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 11,
+        "extension_years": 0,
+        "contract_str": "$11/A",
+        "draft_round": 12,
+        "draft_pick": 188,
+        "source": "draft"
+      },
+      {
+        "name": "Shane Baz",
+        "yahoo_position": "SP",
+        "yahoo_selected": "BN",
+        "yahoo_team": "BAL",
+        "yahoo_status": "",
+        "contract_type": "A",
+        "salary": 4,
+        "extension_years": 0,
+        "contract_str": "$4/A",
+        "draft_round": 25,
+        "draft_pick": 386,
+        "source": "draft"
+      },
+      {
+        "name": "Jackson Jobe",
+        "yahoo_position": "SP,RP",
+        "yahoo_selected": "IL",
+        "yahoo_team": "DET",
+        "yahoo_status": "IL60",
+        "contract_type": "A",
+        "salary": 1,
+        "extension_years": 0,
+        "contract_str": "$1/A",
+        "draft_round": 25,
+        "draft_pick": 385,
+        "source": "draft"
+      }
+    ],
+    "no_contract": [
+      {
+        "name": "Clayton Kershaw",
+        "yahoo_position": "SP",
+        "yahoo_selected": "SP",
+        "yahoo_team": "LAD",
+        "yahoo_status": "NA",
+        "source": "unknown"
+      },
+      {
+        "name": "Seranthony Domínguez",
+        "yahoo_position": "RP",
+        "yahoo_selected": "P",
+        "yahoo_team": "CWS",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Ronny Henriquez",
+        "yahoo_position": "RP",
+        "yahoo_selected": "P",
+        "yahoo_team": "MIA",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Lance McCullers Jr.",
+        "yahoo_position": "SP",
+        "yahoo_selected": "IL",
+        "yahoo_team": "HOU",
+        "yahoo_status": "",
+        "source": "unknown"
+      },
+      {
+        "name": "Chen-Wei Lin",
+        "yahoo_position": "SP",
+        "yahoo_selected": "NA",
+        "yahoo_team": "STL",
+        "yahoo_status": "NA",
+        "source": "unknown"
+      }
+    ],
+    "dropped": [
+      {
+        "name": "Anthony Volpe",
+        "contract_type": "B",
+        "salary": 3,
+        "contract_str": "$3/B"
+      },
+      {
+        "name": "Taj Bradley",
+        "contract_type": "B",
+        "salary": 1,
+        "contract_str": "$1/B"
+      },
+      {
+        "name": "Heston Kjerstad",
+        "contract_type": "R",
+        "salary": 3,
+        "contract_str": "$3/R"
+      }
+    ]
+  }
+}

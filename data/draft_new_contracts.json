@@ -1,0 +1,1617 @@
+{
+  "stayed_on_team": [
+    {
+      "player": "Shea Langeliers",
+      "team": "Ｋａｋｕ",
+      "draft_cost": 9,
+      "contract_type": "A",
+      "salary": 9,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Kyle Manzardo",
+      "team": "Ｋａｋｕ",
+      "draft_cost": 11,
+      "contract_type": "A",
+      "salary": 11,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Wyatt Langford",
+      "team": "Ｋａｋｕ",
+      "draft_cost": 35,
+      "contract_type": "A",
+      "salary": 35,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Max Muncy",
+      "team": "Ｋａｋｕ",
+      "draft_cost": 14,
+      "contract_type": "A",
+      "salary": 14,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Sean Manaea",
+      "team": "Ｋａｋｕ",
+      "draft_cost": 4,
+      "contract_type": "A",
+      "salary": 4,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Shohei Ohtani (Pitcher)",
+      "team": "Ｋａｋｕ",
+      "draft_cost": 22,
+      "contract_type": "A",
+      "salary": 22,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Reese Olson",
+      "team": "Ｋａｋｕ",
+      "draft_cost": 6,
+      "contract_type": "A",
+      "salary": 6,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Kumar Rocker",
+      "team": "Ｋａｋｕ",
+      "draft_cost": 2,
+      "contract_type": "A",
+      "salary": 2,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Bryce Harper",
+      "team": "Leo",
+      "draft_cost": 54,
+      "contract_type": "A",
+      "salary": 54,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Byron Buxton",
+      "team": "Leo",
+      "draft_cost": 7,
+      "contract_type": "A",
+      "salary": 7,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Trea Turner",
+      "team": "Leo",
+      "draft_cost": 60,
+      "contract_type": "A",
+      "salary": 60,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Alec Burleson",
+      "team": "Leo",
+      "draft_cost": 7,
+      "contract_type": "A",
+      "salary": 7,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Will Warren",
+      "team": "Leo",
+      "draft_cost": 1,
+      "contract_type": "A",
+      "salary": 1,
+      "reason": "same_team_history"
+    },
+    {
+      "player": "Calvin Faucher",
+      "team": "Leo",
+      "draft_cost": 1,
+      "contract_type": "A",
+      "salary": 1,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Sandy Alcantara",
+      "team": "Leo",
+      "draft_cost": 33,
+      "contract_type": "A",
+      "salary": 33,
+      "reason": "same_team_history"
+    },
+    {
+      "player": "Aaron Nola",
+      "team": "Leo",
+      "draft_cost": 37,
+      "contract_type": "A",
+      "salary": 37,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Charlie Morton",
+      "team": "Leo",
+      "draft_cost": 8,
+      "contract_type": "A",
+      "salary": 8,
+      "reason": "same_team_history"
+    },
+    {
+      "player": "Gerrit Cole",
+      "team": "Leo",
+      "draft_cost": 7,
+      "contract_type": "A",
+      "salary": 7,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Deyvison De Los Santos",
+      "team": "Leo",
+      "draft_cost": 1,
+      "contract_type": "A",
+      "salary": 1,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Austin Wells",
+      "team": "叫我寬哥",
+      "draft_cost": 1,
+      "contract_type": "A",
+      "salary": 1,
+      "reason": "same_team_history"
+    },
+    {
+      "player": "Ryan O'Hearn",
+      "team": "叫我寬哥",
+      "draft_cost": 1,
+      "contract_type": "A",
+      "salary": 1,
+      "reason": "same_team_history"
+    },
+    {
+      "player": "Andrés Giménez",
+      "team": "叫我寬哥",
+      "draft_cost": 7,
+      "contract_type": "A",
+      "salary": 7,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Sal Frelick",
+      "team": "叫我寬哥",
+      "draft_cost": 1,
+      "contract_type": "A",
+      "salary": 1,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "George Springer",
+      "team": "叫我寬哥",
+      "draft_cost": 2,
+      "contract_type": "A",
+      "salary": 2,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Daulton Varsho",
+      "team": "叫我寬哥",
+      "draft_cost": 1,
+      "contract_type": "A",
+      "salary": 1,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "José Soriano",
+      "team": "叫我寬哥",
+      "draft_cost": 1,
+      "contract_type": "A",
+      "salary": 1,
+      "reason": "same_team_history"
+    },
+    {
+      "player": "Matt Strahm",
+      "team": "叫我寬哥",
+      "draft_cost": 1,
+      "contract_type": "A",
+      "salary": 1,
+      "reason": "same_team_history"
+    },
+    {
+      "player": "Pierce Johnson",
+      "team": "叫我寬哥",
+      "draft_cost": 1,
+      "contract_type": "A",
+      "salary": 1,
+      "reason": "same_team_history"
+    },
+    {
+      "player": "Ryan Helsley",
+      "team": "叫我寬哥",
+      "draft_cost": 11,
+      "contract_type": "A",
+      "salary": 11,
+      "reason": "same_team_history"
+    },
+    {
+      "player": "Jeffrey Springs",
+      "team": "叫我寬哥",
+      "draft_cost": 4,
+      "contract_type": "A",
+      "salary": 4,
+      "reason": "same_team_history"
+    },
+    {
+      "player": "Ryan Pepiot",
+      "team": "叫我寬哥",
+      "draft_cost": 15,
+      "contract_type": "A",
+      "salary": 15,
+      "reason": "same_team_history"
+    },
+    {
+      "player": "José Berríos",
+      "team": "叫我寬哥",
+      "draft_cost": 11,
+      "contract_type": "A",
+      "salary": 11,
+      "reason": "same_team_history"
+    },
+    {
+      "player": "Lourdes Gurriel Jr.",
+      "team": "叫我寬哥",
+      "draft_cost": 7,
+      "contract_type": "A",
+      "salary": 7,
+      "reason": "same_team_history"
+    },
+    {
+      "player": "Will Smith",
+      "team": "EDDIE",
+      "draft_cost": 23,
+      "contract_type": "A",
+      "salary": 23,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Josh Bell",
+      "team": "EDDIE",
+      "draft_cost": 1,
+      "contract_type": "A",
+      "salary": 1,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Tommy Edman",
+      "team": "EDDIE",
+      "draft_cost": 28,
+      "contract_type": "A",
+      "salary": 28,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Xavier Edwards",
+      "team": "EDDIE",
+      "draft_cost": 1,
+      "contract_type": "A",
+      "salary": 1,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Jurickson Profar",
+      "team": "EDDIE",
+      "draft_cost": 1,
+      "contract_type": "A",
+      "salary": 1,
+      "reason": "same_team_history"
+    },
+    {
+      "player": "Andrés Muñoz",
+      "team": "EDDIE",
+      "draft_cost": 20,
+      "contract_type": "A",
+      "salary": 20,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Alexis Díaz",
+      "team": "EDDIE",
+      "draft_cost": 22,
+      "contract_type": "A",
+      "salary": 22,
+      "reason": "same_team_history"
+    },
+    {
+      "player": "Kirby Yates",
+      "team": "EDDIE",
+      "draft_cost": 5,
+      "contract_type": "A",
+      "salary": 5,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Emmanuel Clase",
+      "team": "EDDIE",
+      "draft_cost": 29,
+      "contract_type": "A",
+      "salary": 29,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Justin Verlander",
+      "team": "EDDIE",
+      "draft_cost": 3,
+      "contract_type": "A",
+      "salary": 3,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Connor Norby",
+      "team": "EDDIE",
+      "draft_cost": 9,
+      "contract_type": "A",
+      "salary": 9,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Trevor Megill",
+      "team": "EDDIE",
+      "draft_cost": 15,
+      "contract_type": "A",
+      "salary": 15,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Luis Garcia",
+      "team": "EDDIE",
+      "draft_cost": 0,
+      "contract_type": "A",
+      "salary": 0,
+      "reason": "same_team_history"
+    },
+    {
+      "player": "Willson Contreras",
+      "team": "wei",
+      "draft_cost": 15,
+      "contract_type": "A",
+      "salary": 15,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Samuel Basallo",
+      "team": "wei",
+      "draft_cost": 1,
+      "contract_type": "A",
+      "salary": 1,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Sonny Gray",
+      "team": "wei",
+      "draft_cost": 31,
+      "contract_type": "A",
+      "salary": 31,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Chris Sale",
+      "team": "wei",
+      "draft_cost": 31,
+      "contract_type": "A",
+      "salary": 31,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Clay Holmes",
+      "team": "wei",
+      "draft_cost": 12,
+      "contract_type": "A",
+      "salary": 12,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Kevin Gausman",
+      "team": "wei",
+      "draft_cost": 17,
+      "contract_type": "A",
+      "salary": 17,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Casey Mize",
+      "team": "wei",
+      "draft_cost": 1,
+      "contract_type": "A",
+      "salary": 1,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "MacKenzie Gore",
+      "team": "wei",
+      "draft_cost": 10,
+      "contract_type": "A",
+      "salary": 10,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Reynaldo López",
+      "team": "wei",
+      "draft_cost": 20,
+      "contract_type": "A",
+      "salary": 20,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Ivan Herrera",
+      "team": "Tony",
+      "draft_cost": 5,
+      "contract_type": "A",
+      "salary": 5,
+      "reason": "same_team_history"
+    },
+    {
+      "player": "Matt McLain",
+      "team": "Tony",
+      "draft_cost": 36,
+      "contract_type": "A",
+      "salary": 36,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Nick Martinez",
+      "team": "Tony",
+      "draft_cost": 4,
+      "contract_type": "A",
+      "salary": 4,
+      "reason": "same_team_history"
+    },
+    {
+      "player": "Brady Singer",
+      "team": "Tony",
+      "draft_cost": 3,
+      "contract_type": "A",
+      "salary": 3,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Keegan Akin",
+      "team": "Tony",
+      "draft_cost": 2,
+      "contract_type": "A",
+      "salary": 2,
+      "reason": "same_team_history"
+    },
+    {
+      "player": "Kyle Finnegan",
+      "team": "Tony",
+      "draft_cost": 6,
+      "contract_type": "A",
+      "salary": 6,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Brayan Bello",
+      "team": "Tony",
+      "draft_cost": 1,
+      "contract_type": "A",
+      "salary": 1,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Yordan Alvarez",
+      "team": "Tony",
+      "draft_cost": 67,
+      "contract_type": "A",
+      "salary": 67,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Marcelo Mayer",
+      "team": "Tony",
+      "draft_cost": 1,
+      "contract_type": "A",
+      "salary": 1,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Quinn Mathews",
+      "team": "Tony",
+      "draft_cost": 1,
+      "contract_type": "A",
+      "salary": 1,
+      "reason": "same_team_history"
+    },
+    {
+      "player": "Matt Shaw",
+      "team": "rawstuff",
+      "draft_cost": 1,
+      "contract_type": "A",
+      "salary": 1,
+      "reason": "same_team_history"
+    },
+    {
+      "player": "Manny Machado",
+      "team": "rawstuff",
+      "draft_cost": 36,
+      "contract_type": "A",
+      "salary": 36,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Ian Happ",
+      "team": "rawstuff",
+      "draft_cost": 16,
+      "contract_type": "A",
+      "salary": 16,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Tyler Soderstrom",
+      "team": "rawstuff",
+      "draft_cost": 4,
+      "contract_type": "A",
+      "salary": 4,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Jameson Taillon",
+      "team": "rawstuff",
+      "draft_cost": 1,
+      "contract_type": "A",
+      "salary": 1,
+      "reason": "same_team_history"
+    },
+    {
+      "player": "Eury Pérez",
+      "team": "rawstuff",
+      "draft_cost": 3,
+      "contract_type": "A",
+      "salary": 3,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Jeff Hoffman",
+      "team": "rawstuff",
+      "draft_cost": 17,
+      "contract_type": "A",
+      "salary": 17,
+      "reason": "same_team_history"
+    },
+    {
+      "player": "Devin Williams",
+      "team": "rawstuff",
+      "draft_cost": 5,
+      "contract_type": "A",
+      "salary": 5,
+      "reason": "same_team_history"
+    },
+    {
+      "player": "Griffin Jax",
+      "team": "rawstuff",
+      "draft_cost": 15,
+      "contract_type": "A",
+      "salary": 15,
+      "reason": "same_team_history"
+    },
+    {
+      "player": "Matthew Boyd",
+      "team": "rawstuff",
+      "draft_cost": 2,
+      "contract_type": "A",
+      "salary": 2,
+      "reason": "same_team_history"
+    },
+    {
+      "player": "Ozzie Albies",
+      "team": "rawstuff",
+      "draft_cost": 24,
+      "contract_type": "A",
+      "salary": 24,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Zack Wheeler",
+      "team": "rawstuff",
+      "draft_cost": 54,
+      "contract_type": "A",
+      "salary": 54,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Jordan Westburg",
+      "team": "Billy",
+      "draft_cost": 36,
+      "contract_type": "A",
+      "salary": 36,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Francisco Lindor",
+      "team": "Billy",
+      "draft_cost": 51,
+      "contract_type": "A",
+      "salary": 51,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Shohei Ohtani (Batter)",
+      "team": "Billy",
+      "draft_cost": 20,
+      "contract_type": "A",
+      "salary": 20,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Parker Meadows",
+      "team": "Billy",
+      "draft_cost": 4,
+      "contract_type": "A",
+      "salary": 4,
+      "reason": "same_team_history"
+    },
+    {
+      "player": "Cedric Mullins",
+      "team": "Billy",
+      "draft_cost": 10,
+      "contract_type": "A",
+      "salary": 10,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Jesús Luzardo",
+      "team": "Billy",
+      "draft_cost": 5,
+      "contract_type": "A",
+      "salary": 5,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Yu Darvish",
+      "team": "Billy",
+      "draft_cost": 22,
+      "contract_type": "A",
+      "salary": 22,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Nick Lodolo",
+      "team": "Billy",
+      "draft_cost": 11,
+      "contract_type": "A",
+      "salary": 11,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Cade Smith",
+      "team": "Billy",
+      "draft_cost": 13,
+      "contract_type": "A",
+      "salary": 13,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Jhoan Duran",
+      "team": "Billy",
+      "draft_cost": 12,
+      "contract_type": "A",
+      "salary": 12,
+      "reason": "same_team_history"
+    },
+    {
+      "player": "Spencer Arrighetti",
+      "team": "Billy",
+      "draft_cost": 9,
+      "contract_type": "A",
+      "salary": 9,
+      "reason": "same_team_history"
+    },
+    {
+      "player": "Yainer Diaz",
+      "team": "YWC",
+      "draft_cost": 11,
+      "contract_type": "A",
+      "salary": 11,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Matt Olson",
+      "team": "YWC",
+      "draft_cost": 57,
+      "contract_type": "A",
+      "salary": 57,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Jeff McNeil",
+      "team": "YWC",
+      "draft_cost": 1,
+      "contract_type": "A",
+      "salary": 1,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Trevor Larnach",
+      "team": "YWC",
+      "draft_cost": 1,
+      "contract_type": "A",
+      "salary": 1,
+      "reason": "same_team_history"
+    },
+    {
+      "player": "Jake Burger",
+      "team": "YWC",
+      "draft_cost": 3,
+      "contract_type": "A",
+      "salary": 3,
+      "reason": "same_team_history"
+    },
+    {
+      "player": "Matt Wallner",
+      "team": "YWC",
+      "draft_cost": 5,
+      "contract_type": "A",
+      "salary": 5,
+      "reason": "same_team_history"
+    },
+    {
+      "player": "Framber Valdez",
+      "team": "YWC",
+      "draft_cost": 50,
+      "contract_type": "A",
+      "salary": 50,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Logan Gilbert",
+      "team": "YWC",
+      "draft_cost": 53,
+      "contract_type": "A",
+      "salary": 53,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Cole Sands",
+      "team": "YWC",
+      "draft_cost": 1,
+      "contract_type": "A",
+      "salary": 1,
+      "reason": "same_team_history"
+    },
+    {
+      "player": "Andrew Abbott",
+      "team": "YWC",
+      "draft_cost": 1,
+      "contract_type": "A",
+      "salary": 1,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Josh Hader",
+      "team": "YWC",
+      "draft_cost": 24,
+      "contract_type": "A",
+      "salary": 24,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "J.T. Realmuto",
+      "team": "哈寶好",
+      "draft_cost": 15,
+      "contract_type": "A",
+      "salary": 15,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Maikel Garcia",
+      "team": "哈寶好",
+      "draft_cost": 10,
+      "contract_type": "A",
+      "salary": 10,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Bryson Stott",
+      "team": "哈寶好",
+      "draft_cost": 12,
+      "contract_type": "A",
+      "salary": 12,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Masataka Yoshida",
+      "team": "哈寶好",
+      "draft_cost": 3,
+      "contract_type": "A",
+      "salary": 3,
+      "reason": "same_team_history"
+    },
+    {
+      "player": "Kerry Carpenter",
+      "team": "哈寶好",
+      "draft_cost": 20,
+      "contract_type": "A",
+      "salary": 20,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Dansby Swanson",
+      "team": "哈寶好",
+      "draft_cost": 12,
+      "contract_type": "A",
+      "salary": 12,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Brendan Donovan",
+      "team": "哈寶好",
+      "draft_cost": 1,
+      "contract_type": "A",
+      "salary": 1,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Max Fried",
+      "team": "哈寶好",
+      "draft_cost": 33,
+      "contract_type": "A",
+      "salary": 33,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Lucas Erceg",
+      "team": "哈寶好",
+      "draft_cost": 6,
+      "contract_type": "A",
+      "salary": 6,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Aroldis Chapman",
+      "team": "哈寶好",
+      "draft_cost": 5,
+      "contract_type": "A",
+      "salary": 5,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Tomoyuki Sugano",
+      "team": "哈寶好",
+      "draft_cost": 18,
+      "contract_type": "A",
+      "salary": 18,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Yusei Kikuchi",
+      "team": "哈寶好",
+      "draft_cost": 11,
+      "contract_type": "A",
+      "salary": 11,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Roki Sasaki",
+      "team": "哈寶好",
+      "draft_cost": 50,
+      "contract_type": "A",
+      "salary": 50,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Pete Alonso",
+      "team": "小喆",
+      "draft_cost": 46,
+      "contract_type": "A",
+      "salary": 46,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Ezequiel Tovar",
+      "team": "小喆",
+      "draft_cost": 26,
+      "contract_type": "A",
+      "salary": 26,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Isaac Paredes",
+      "team": "小喆",
+      "draft_cost": 14,
+      "contract_type": "A",
+      "salary": 14,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Alex Vesia",
+      "team": "小喆",
+      "draft_cost": 3,
+      "contract_type": "A",
+      "salary": 3,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Jason Adam",
+      "team": "小喆",
+      "draft_cost": 4,
+      "contract_type": "A",
+      "salary": 4,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Blake Treinen",
+      "team": "小喆",
+      "draft_cost": 2,
+      "contract_type": "A",
+      "salary": 2,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Tyler Glasnow",
+      "team": "小喆",
+      "draft_cost": 44,
+      "contract_type": "A",
+      "salary": 44,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Chase Dollander",
+      "team": "小喆",
+      "draft_cost": 1,
+      "contract_type": "A",
+      "salary": 1,
+      "reason": "same_team_history"
+    },
+    {
+      "player": "Jonathan Aranda",
+      "team": "小喆",
+      "draft_cost": 1,
+      "contract_type": "A",
+      "salary": 1,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Thairo Estrada",
+      "team": "小喆",
+      "draft_cost": 3,
+      "contract_type": "A",
+      "salary": 3,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Dustin May",
+      "team": "小喆",
+      "draft_cost": 10,
+      "contract_type": "A",
+      "salary": 10,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Yandy Díaz",
+      "team": "Hyper",
+      "draft_cost": 16,
+      "contract_type": "A",
+      "salary": 16,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Carlos Correa",
+      "team": "Hyper",
+      "draft_cost": 8,
+      "contract_type": "A",
+      "salary": 8,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Luis García Jr.",
+      "team": "Hyper",
+      "draft_cost": 12,
+      "contract_type": "A",
+      "salary": 12,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Bryan Reynolds",
+      "team": "Hyper",
+      "draft_cost": 16,
+      "contract_type": "A",
+      "salary": 16,
+      "reason": "same_team_history"
+    },
+    {
+      "player": "Alejandro Kirk",
+      "team": "Hyper",
+      "draft_cost": 1,
+      "contract_type": "A",
+      "salary": 1,
+      "reason": "same_team_history"
+    },
+    {
+      "player": "Xander Bogaerts",
+      "team": "Hyper",
+      "draft_cost": 21,
+      "contract_type": "A",
+      "salary": 21,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Nick Pivetta",
+      "team": "Hyper",
+      "draft_cost": 16,
+      "contract_type": "A",
+      "salary": 16,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Ryan Weathers",
+      "team": "Hyper",
+      "draft_cost": 7,
+      "contract_type": "A",
+      "salary": 7,
+      "reason": "same_team_history"
+    },
+    {
+      "player": "Robbie Ray",
+      "team": "Hyper",
+      "draft_cost": 24,
+      "contract_type": "A",
+      "salary": 24,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Kodai Senga",
+      "team": "Hyper",
+      "draft_cost": 33,
+      "contract_type": "A",
+      "salary": 33,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Brandon Woodruff",
+      "team": "Hyper",
+      "draft_cost": 7,
+      "contract_type": "A",
+      "salary": 7,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Nathan Eovaldi",
+      "team": "Hyper",
+      "draft_cost": 11,
+      "contract_type": "A",
+      "salary": 11,
+      "reason": "same_team_history"
+    },
+    {
+      "player": "A.J. Puk",
+      "team": "Hyper",
+      "draft_cost": 12,
+      "contract_type": "A",
+      "salary": 12,
+      "reason": "same_team_history"
+    },
+    {
+      "player": "Hunter Goodman",
+      "team": "TIMMY LIU",
+      "draft_cost": 1,
+      "contract_type": "A",
+      "salary": 1,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Trevor Story",
+      "team": "TIMMY LIU",
+      "draft_cost": 4,
+      "contract_type": "A",
+      "salary": 4,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Rhys Hoskins",
+      "team": "TIMMY LIU",
+      "draft_cost": 5,
+      "contract_type": "A",
+      "salary": 5,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "TJ Friedl",
+      "team": "TIMMY LIU",
+      "draft_cost": 6,
+      "contract_type": "A",
+      "salary": 6,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Ceddanne Rafaela",
+      "team": "TIMMY LIU",
+      "draft_cost": 10,
+      "contract_type": "A",
+      "salary": 10,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Andrew Vaughn",
+      "team": "TIMMY LIU",
+      "draft_cost": 1,
+      "contract_type": "A",
+      "salary": 1,
+      "reason": "same_team_history"
+    },
+    {
+      "player": "Nathaniel Lowe",
+      "team": "TIMMY LIU",
+      "draft_cost": 7,
+      "contract_type": "A",
+      "salary": 7,
+      "reason": "same_team_history"
+    },
+    {
+      "player": "Wilyer Abreu",
+      "team": "TIMMY LIU",
+      "draft_cost": 4,
+      "contract_type": "A",
+      "salary": 4,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Walker Buehler",
+      "team": "TIMMY LIU",
+      "draft_cost": 20,
+      "contract_type": "A",
+      "salary": 20,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Bryan Abreu",
+      "team": "TIMMY LIU",
+      "draft_cost": 19,
+      "contract_type": "A",
+      "salary": 19,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "David Bednar",
+      "team": "TIMMY LIU",
+      "draft_cost": 7,
+      "contract_type": "A",
+      "salary": 7,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Chris Martin",
+      "team": "TIMMY LIU",
+      "draft_cost": 10,
+      "contract_type": "A",
+      "salary": 10,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Merrill Kelly",
+      "team": "TIMMY LIU",
+      "draft_cost": 3,
+      "contract_type": "A",
+      "salary": 3,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Kyle Tucker",
+      "team": "TIMMY LIU",
+      "draft_cost": 61,
+      "contract_type": "A",
+      "salary": 61,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Travis Bazzana",
+      "team": "TIMMY LIU",
+      "draft_cost": 6,
+      "contract_type": "A",
+      "salary": 6,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Vladimir Guerrero Jr.",
+      "team": "謙謙",
+      "draft_cost": 51,
+      "contract_type": "A",
+      "salary": 51,
+      "reason": "same_team_history"
+    },
+    {
+      "player": "Anthony Volpe",
+      "team": "謙謙",
+      "draft_cost": 3,
+      "contract_type": "A",
+      "salary": 3,
+      "reason": "same_team_history"
+    },
+    {
+      "player": "Giancarlo Stanton",
+      "team": "謙謙",
+      "draft_cost": 3,
+      "contract_type": "A",
+      "salary": 3,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Aaron Judge",
+      "team": "謙謙",
+      "draft_cost": 72,
+      "contract_type": "A",
+      "salary": 72,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Christian Yelich",
+      "team": "謙謙",
+      "draft_cost": 30,
+      "contract_type": "A",
+      "salary": 30,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Jeremy Peña",
+      "team": "謙謙",
+      "draft_cost": 10,
+      "contract_type": "A",
+      "salary": 10,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Orion Kerkering",
+      "team": "謙謙",
+      "draft_cost": 4,
+      "contract_type": "A",
+      "salary": 4,
+      "reason": "same_team_history"
+    },
+    {
+      "player": "Corey Seager",
+      "team": "謙謙",
+      "draft_cost": 39,
+      "contract_type": "A",
+      "salary": 39,
+      "reason": "same_team_history"
+    },
+    {
+      "player": "Corbin Burnes",
+      "team": "謙謙",
+      "draft_cost": 49,
+      "contract_type": "A",
+      "salary": 49,
+      "reason": "same_team_history"
+    },
+    {
+      "player": "Spencer Jones",
+      "team": "謙謙",
+      "draft_cost": 9,
+      "contract_type": "A",
+      "salary": 9,
+      "reason": "same_team_history"
+    },
+    {
+      "player": "Spencer Torkelson",
+      "team": "魚魚",
+      "draft_cost": 1,
+      "contract_type": "A",
+      "salary": 1,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Ryan McMahon",
+      "team": "魚魚",
+      "draft_cost": 1,
+      "contract_type": "A",
+      "salary": 1,
+      "reason": "same_team_history"
+    },
+    {
+      "player": "Randy Arozarena",
+      "team": "魚魚",
+      "draft_cost": 15,
+      "contract_type": "A",
+      "salary": 15,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Mike Trout",
+      "team": "魚魚",
+      "draft_cost": 32,
+      "contract_type": "A",
+      "salary": 32,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Nick Castellanos",
+      "team": "魚魚",
+      "draft_cost": 15,
+      "contract_type": "A",
+      "salary": 15,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Kristian Campbell",
+      "team": "魚魚",
+      "draft_cost": 1,
+      "contract_type": "A",
+      "salary": 1,
+      "reason": "same_team_history"
+    },
+    {
+      "player": "Luis Castillo",
+      "team": "魚魚",
+      "draft_cost": 24,
+      "contract_type": "A",
+      "salary": 24,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Robert Garcia",
+      "team": "魚魚",
+      "draft_cost": 1,
+      "contract_type": "A",
+      "salary": 1,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Ryan Walker",
+      "team": "魚魚",
+      "draft_cost": 2,
+      "contract_type": "A",
+      "salary": 2,
+      "reason": "same_team_history"
+    },
+    {
+      "player": "Camilo Doval",
+      "team": "魚魚",
+      "draft_cost": 2,
+      "contract_type": "A",
+      "salary": 2,
+      "reason": "same_team_history"
+    },
+    {
+      "player": "Gavin Williams",
+      "team": "魚魚",
+      "draft_cost": 9,
+      "contract_type": "A",
+      "salary": 9,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Mitch Keller",
+      "team": "魚魚",
+      "draft_cost": 1,
+      "contract_type": "A",
+      "salary": 1,
+      "reason": "same_team_history"
+    },
+    {
+      "player": "Tyler O'Neill",
+      "team": "魚魚",
+      "draft_cost": 9,
+      "contract_type": "A",
+      "salary": 9,
+      "reason": "same_team_history"
+    },
+    {
+      "player": "Edward Cabrera",
+      "team": "魚魚",
+      "draft_cost": 7,
+      "contract_type": "A",
+      "salary": 7,
+      "reason": "same_team_history"
+    },
+    {
+      "player": "Andrew Painter",
+      "team": "魚魚",
+      "draft_cost": 1,
+      "contract_type": "A",
+      "salary": 1,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Patrick Bailey",
+      "team": "Ponpon",
+      "draft_cost": 1,
+      "contract_type": "A",
+      "salary": 1,
+      "reason": "same_team_history"
+    },
+    {
+      "player": "Rafael Devers",
+      "team": "Ponpon",
+      "draft_cost": 51,
+      "contract_type": "A",
+      "salary": 51,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Brandon Lowe",
+      "team": "Ponpon",
+      "draft_cost": 12,
+      "contract_type": "A",
+      "salary": 12,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Alex Bregman",
+      "team": "Ponpon",
+      "draft_cost": 35,
+      "contract_type": "A",
+      "salary": 35,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Taylor Ward",
+      "team": "Ponpon",
+      "draft_cost": 11,
+      "contract_type": "A",
+      "salary": 11,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Michael Harris II",
+      "team": "Ponpon",
+      "draft_cost": 30,
+      "contract_type": "A",
+      "salary": 30,
+      "reason": "same_team_history"
+    },
+    {
+      "player": "Josh Lowe",
+      "team": "Ponpon",
+      "draft_cost": 8,
+      "contract_type": "A",
+      "salary": 8,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Chandler Simpson",
+      "team": "Ponpon",
+      "draft_cost": 1,
+      "contract_type": "A",
+      "salary": 1,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Adolis García",
+      "team": "Ponpon",
+      "draft_cost": 25,
+      "contract_type": "A",
+      "salary": 25,
+      "reason": "same_team_history"
+    },
+    {
+      "player": "Brandon Pfaadt",
+      "team": "Ponpon",
+      "draft_cost": 13,
+      "contract_type": "A",
+      "salary": 13,
+      "reason": "same_team_history"
+    },
+    {
+      "player": "Freddy Peralta",
+      "team": "Ponpon",
+      "draft_cost": 28,
+      "contract_type": "A",
+      "salary": 28,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Edwin Uceta",
+      "team": "Ponpon",
+      "draft_cost": 10,
+      "contract_type": "A",
+      "salary": 10,
+      "reason": "same_team_history"
+    },
+    {
+      "player": "Hunter Gaddis",
+      "team": "Ponpon",
+      "draft_cost": 11,
+      "contract_type": "A",
+      "salary": 11,
+      "reason": "no_transactions"
+    },
+    {
+      "player": "Shane Baz",
+      "team": "Ponpon",
+      "draft_cost": 4,
+      "contract_type": "A",
+      "salary": 4,
+      "reason": "same_team_history"
+    },
+    {
+      "player": "Jackson Jobe",
+      "team": "Ponpon",
+      "draft_cost": 1,
+      "contract_type": "A",
+      "salary": 1,
+      "reason": "same_team_history"
+    }
+  ],
+  "traded": [
+    {
+      "player": "Mookie Betts",
+      "team": "Ｋａｋｕ",
+      "draft_cost": 58,
+      "from_team": "魚魚",
+      "contract_type": "A",
+      "salary": 58,
+      "reason": "trade_inherit"
+    },
+    {
+      "player": "Zach Neto",
+      "team": "Ｋａｋｕ",
+      "draft_cost": 3,
+      "from_team": "魚魚",
+      "contract_type": "A",
+      "salary": 3,
+      "reason": "trade_inherit"
+    },
+    {
+      "player": "Jo Adell",
+      "team": "Ｋａｋｕ",
+      "draft_cost": 5,
+      "from_team": "Billy",
+      "contract_type": "A",
+      "salary": 5,
+      "reason": "trade_inherit"
+    },
+    {
+      "player": "Royce Lewis",
+      "team": "Ｋａｋｕ",
+      "draft_cost": 11,
+      "from_team": "TIMMY LIU",
+      "contract_type": "A",
+      "salary": 11,
+      "reason": "trade_inherit"
+    },
+    {
+      "player": "Carlos Estévez",
+      "team": "Ｋａｋｕ",
+      "draft_cost": 9,
+      "from_team": "魚魚",
+      "contract_type": "A",
+      "salary": 9,
+      "reason": "trade_inherit"
+    },
+    {
+      "player": "Jared Jones",
+      "team": "Ｋａｋｕ",
+      "draft_cost": 3,
+      "from_team": "Billy",
+      "contract_type": "A",
+      "salary": 3,
+      "reason": "trade_inherit"
+    }
+  ],
+  "faab_pickup": [
+    {
+      "player": "Otto Lopez",
+      "team": "Leo",
+      "draft_cost": 2,
+      "faab_bid": 1,
+      "salary": 1,
+      "contract_type": "A",
+      "reason": "faab_pickup"
+    },
+    {
+      "player": "Kyle Harrison",
+      "team": "Tony",
+      "draft_cost": 1,
+      "faab_bid": 1,
+      "salary": 1,
+      "contract_type": "A",
+      "reason": "faab_pickup"
+    },
+    {
+      "player": "Cam Smith",
+      "team": "Ponpon",
+      "draft_cost": 10,
+      "faab_bid": 2,
+      "salary": 2,
+      "contract_type": "A",
+      "reason": "faab_pickup"
+    }
+  ]
+}

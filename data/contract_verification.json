@@ -1,0 +1,1746 @@
+{
+  "draft_wrong_team": [
+    {
+      "type": "draft_wrong_team",
+      "player": "Mookie Betts",
+      "current_team": "Ｋａｋｕ",
+      "drafted_by": "魚魚",
+      "draft_cost": 58,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Zach Neto",
+      "current_team": "Ｋａｋｕ",
+      "drafted_by": "魚魚",
+      "draft_cost": 3,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Jo Adell",
+      "current_team": "Ｋａｋｕ",
+      "drafted_by": "wei",
+      "draft_cost": 5,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Royce Lewis",
+      "current_team": "Ｋａｋｕ",
+      "drafted_by": "TIMMY LIU",
+      "draft_cost": 11,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Carlos Estévez",
+      "current_team": "Ｋａｋｕ",
+      "drafted_by": "魚魚",
+      "draft_cost": 9,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Jared Jones",
+      "current_team": "Ｋａｋｕ",
+      "drafted_by": "Billy",
+      "draft_cost": 3,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Bryce Harper",
+      "current_team": "Leo",
+      "drafted_by": "叫我寬哥",
+      "draft_cost": 54,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Otto Lopez",
+      "current_team": "Leo",
+      "drafted_by": "YWC",
+      "draft_cost": 2,
+      "faab_cost": 1
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Byron Buxton",
+      "current_team": "Leo",
+      "drafted_by": "叫我寬哥",
+      "draft_cost": 7,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Trea Turner",
+      "current_team": "Leo",
+      "drafted_by": "叫我寬哥",
+      "draft_cost": 60,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Alec Burleson",
+      "current_team": "Leo",
+      "drafted_by": "叫我寬哥",
+      "draft_cost": 7,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Will Warren",
+      "current_team": "Leo",
+      "drafted_by": "魚魚",
+      "draft_cost": 1,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Calvin Faucher",
+      "current_team": "Leo",
+      "drafted_by": "叫我寬哥",
+      "draft_cost": 1,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Sandy Alcantara",
+      "current_team": "Leo",
+      "drafted_by": "EDDIE",
+      "draft_cost": 33,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Aaron Nola",
+      "current_team": "Leo",
+      "drafted_by": "叫我寬哥",
+      "draft_cost": 37,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Charlie Morton",
+      "current_team": "Leo",
+      "drafted_by": "wei",
+      "draft_cost": 8,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Gerrit Cole",
+      "current_team": "Leo",
+      "drafted_by": "叫我寬哥",
+      "draft_cost": 7,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Deyvison De Los Santos",
+      "current_team": "Leo",
+      "drafted_by": "叫我寬哥",
+      "draft_cost": 1,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Austin Wells",
+      "current_team": "叫我寬哥",
+      "drafted_by": "魚魚",
+      "draft_cost": 1,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Ryan O'Hearn",
+      "current_team": "叫我寬哥",
+      "drafted_by": "小喆",
+      "draft_cost": 1,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Andrés Giménez",
+      "current_team": "叫我寬哥",
+      "drafted_by": "EDDIE",
+      "draft_cost": 7,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Sal Frelick",
+      "current_team": "叫我寬哥",
+      "drafted_by": "EDDIE",
+      "draft_cost": 1,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "George Springer",
+      "current_team": "叫我寬哥",
+      "drafted_by": "EDDIE",
+      "draft_cost": 2,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Daulton Varsho",
+      "current_team": "叫我寬哥",
+      "drafted_by": "EDDIE",
+      "draft_cost": 1,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "José Soriano",
+      "current_team": "叫我寬哥",
+      "drafted_by": "哈寶好",
+      "draft_cost": 1,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Pierce Johnson",
+      "current_team": "叫我寬哥",
+      "drafted_by": "Tony",
+      "draft_cost": 1,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Ryan Helsley",
+      "current_team": "叫我寬哥",
+      "drafted_by": "Ponpon",
+      "draft_cost": 11,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Jeffrey Springs",
+      "current_team": "叫我寬哥",
+      "drafted_by": "TIMMY LIU",
+      "draft_cost": 4,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "José Berríos",
+      "current_team": "叫我寬哥",
+      "drafted_by": "魚魚",
+      "draft_cost": 11,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Lourdes Gurriel Jr.",
+      "current_team": "叫我寬哥",
+      "drafted_by": "小喆",
+      "draft_cost": 7,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Will Smith",
+      "current_team": "EDDIE",
+      "drafted_by": "wei",
+      "draft_cost": 23,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Josh Bell",
+      "current_team": "EDDIE",
+      "drafted_by": "wei",
+      "draft_cost": 1,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Tommy Edman",
+      "current_team": "EDDIE",
+      "drafted_by": "wei",
+      "draft_cost": 28,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Xavier Edwards",
+      "current_team": "EDDIE",
+      "drafted_by": "wei",
+      "draft_cost": 1,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Jurickson Profar",
+      "current_team": "EDDIE",
+      "drafted_by": "謙謙",
+      "draft_cost": 1,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Andrés Muñoz",
+      "current_team": "EDDIE",
+      "drafted_by": "wei",
+      "draft_cost": 20,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Alexis Díaz",
+      "current_team": "EDDIE",
+      "drafted_by": "rawstuff",
+      "draft_cost": 22,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Kirby Yates",
+      "current_team": "EDDIE",
+      "drafted_by": "wei",
+      "draft_cost": 5,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Emmanuel Clase",
+      "current_team": "EDDIE",
+      "drafted_by": "wei",
+      "draft_cost": 29,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Justin Verlander",
+      "current_team": "EDDIE",
+      "drafted_by": "wei",
+      "draft_cost": 3,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Connor Norby",
+      "current_team": "EDDIE",
+      "drafted_by": "wei",
+      "draft_cost": 9,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Trevor Megill",
+      "current_team": "EDDIE",
+      "drafted_by": "wei",
+      "draft_cost": 15,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Willson Contreras",
+      "current_team": "wei",
+      "drafted_by": "Tony",
+      "draft_cost": 15,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Samuel Basallo",
+      "current_team": "wei",
+      "drafted_by": "Tony",
+      "draft_cost": 1,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Sonny Gray",
+      "current_team": "wei",
+      "drafted_by": "Tony",
+      "draft_cost": 31,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Chris Sale",
+      "current_team": "wei",
+      "drafted_by": "Tony",
+      "draft_cost": 31,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Clay Holmes",
+      "current_team": "wei",
+      "drafted_by": "Tony",
+      "draft_cost": 12,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Kevin Gausman",
+      "current_team": "wei",
+      "drafted_by": "Tony",
+      "draft_cost": 17,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Casey Mize",
+      "current_team": "wei",
+      "drafted_by": "Tony",
+      "draft_cost": 1,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "MacKenzie Gore",
+      "current_team": "wei",
+      "drafted_by": "Tony",
+      "draft_cost": 10,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Reynaldo López",
+      "current_team": "wei",
+      "drafted_by": "Tony",
+      "draft_cost": 20,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Ivan Herrera",
+      "current_team": "Tony",
+      "drafted_by": "YWC",
+      "draft_cost": 5,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Matt McLain",
+      "current_team": "Tony",
+      "drafted_by": "rawstuff",
+      "draft_cost": 36,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Nick Martinez",
+      "current_team": "Tony",
+      "drafted_by": "rawstuff",
+      "draft_cost": 4,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Brady Singer",
+      "current_team": "Tony",
+      "drafted_by": "rawstuff",
+      "draft_cost": 3,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Keegan Akin",
+      "current_team": "Tony",
+      "drafted_by": "YWC",
+      "draft_cost": 2,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Kyle Finnegan",
+      "current_team": "Tony",
+      "drafted_by": "rawstuff",
+      "draft_cost": 6,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Kyle Harrison",
+      "current_team": "Tony",
+      "drafted_by": "wei",
+      "draft_cost": 1,
+      "faab_cost": 1
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Brayan Bello",
+      "current_team": "Tony",
+      "drafted_by": "rawstuff",
+      "draft_cost": 1,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Yordan Alvarez",
+      "current_team": "Tony",
+      "drafted_by": "rawstuff",
+      "draft_cost": 67,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Marcelo Mayer",
+      "current_team": "Tony",
+      "drafted_by": "rawstuff",
+      "draft_cost": 1,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Quinn Mathews",
+      "current_team": "Tony",
+      "drafted_by": "EDDIE",
+      "draft_cost": 1,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Matt Shaw",
+      "current_team": "rawstuff",
+      "drafted_by": "YWC",
+      "draft_cost": 1,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Manny Machado",
+      "current_team": "rawstuff",
+      "drafted_by": "Billy",
+      "draft_cost": 36,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Ian Happ",
+      "current_team": "rawstuff",
+      "drafted_by": "Billy",
+      "draft_cost": 16,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Tyler Soderstrom",
+      "current_team": "rawstuff",
+      "drafted_by": "Billy",
+      "draft_cost": 4,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Eury Pérez",
+      "current_team": "rawstuff",
+      "drafted_by": "Billy",
+      "draft_cost": 3,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Jeff Hoffman",
+      "current_team": "rawstuff",
+      "drafted_by": "Ｋａｋｕ",
+      "draft_cost": 17,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Devin Williams",
+      "current_team": "rawstuff",
+      "drafted_by": "Ｋａｋｕ",
+      "draft_cost": 5,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Griffin Jax",
+      "current_team": "rawstuff",
+      "drafted_by": "wei",
+      "draft_cost": 15,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Matthew Boyd",
+      "current_team": "rawstuff",
+      "drafted_by": "Ｋａｋｕ",
+      "draft_cost": 2,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Ozzie Albies",
+      "current_team": "rawstuff",
+      "drafted_by": "Billy",
+      "draft_cost": 24,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Zack Wheeler",
+      "current_team": "rawstuff",
+      "drafted_by": "Billy",
+      "draft_cost": 54,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Jordan Westburg",
+      "current_team": "Billy",
+      "drafted_by": "YWC",
+      "draft_cost": 36,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Francisco Lindor",
+      "current_team": "Billy",
+      "drafted_by": "YWC",
+      "draft_cost": 51,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Shohei Ohtani (Batter)",
+      "current_team": "Billy",
+      "drafted_by": "YWC",
+      "draft_cost": 20,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Parker Meadows",
+      "current_team": "Billy",
+      "drafted_by": "rawstuff",
+      "draft_cost": 4,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Cedric Mullins",
+      "current_team": "Billy",
+      "drafted_by": "YWC",
+      "draft_cost": 10,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Jesús Luzardo",
+      "current_team": "Billy",
+      "drafted_by": "YWC",
+      "draft_cost": 5,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Yu Darvish",
+      "current_team": "Billy",
+      "drafted_by": "YWC",
+      "draft_cost": 22,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Nick Lodolo",
+      "current_team": "Billy",
+      "drafted_by": "YWC",
+      "draft_cost": 11,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Cade Smith",
+      "current_team": "Billy",
+      "drafted_by": "YWC",
+      "draft_cost": 13,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Jhoan Duran",
+      "current_team": "Billy",
+      "drafted_by": "Ponpon",
+      "draft_cost": 12,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Yainer Diaz",
+      "current_team": "YWC",
+      "drafted_by": "哈寶好",
+      "draft_cost": 11,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Matt Olson",
+      "current_team": "YWC",
+      "drafted_by": "哈寶好",
+      "draft_cost": 57,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Jeff McNeil",
+      "current_team": "YWC",
+      "drafted_by": "哈寶好",
+      "draft_cost": 1,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Trevor Larnach",
+      "current_team": "YWC",
+      "drafted_by": "哈寶好",
+      "draft_cost": 1,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Jake Burger",
+      "current_team": "YWC",
+      "drafted_by": "TIMMY LIU",
+      "draft_cost": 3,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Matt Wallner",
+      "current_team": "YWC",
+      "drafted_by": "Tony",
+      "draft_cost": 5,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Framber Valdez",
+      "current_team": "YWC",
+      "drafted_by": "哈寶好",
+      "draft_cost": 50,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Logan Gilbert",
+      "current_team": "YWC",
+      "drafted_by": "哈寶好",
+      "draft_cost": 53,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Cole Sands",
+      "current_team": "YWC",
+      "drafted_by": "EDDIE",
+      "draft_cost": 1,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Andrew Abbott",
+      "current_team": "YWC",
+      "drafted_by": "哈寶好",
+      "draft_cost": 1,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Josh Hader",
+      "current_team": "YWC",
+      "drafted_by": "哈寶好",
+      "draft_cost": 24,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "J.T. Realmuto",
+      "current_team": "哈寶好",
+      "drafted_by": "小喆",
+      "draft_cost": 15,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Maikel Garcia",
+      "current_team": "哈寶好",
+      "drafted_by": "小喆",
+      "draft_cost": 10,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Bryson Stott",
+      "current_team": "哈寶好",
+      "drafted_by": "小喆",
+      "draft_cost": 12,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Masataka Yoshida",
+      "current_team": "哈寶好",
+      "drafted_by": "小喆",
+      "draft_cost": 3,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Kerry Carpenter",
+      "current_team": "哈寶好",
+      "drafted_by": "小喆",
+      "draft_cost": 20,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Dansby Swanson",
+      "current_team": "哈寶好",
+      "drafted_by": "小喆",
+      "draft_cost": 12,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Brendan Donovan",
+      "current_team": "哈寶好",
+      "drafted_by": "小喆",
+      "draft_cost": 1,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Max Fried",
+      "current_team": "哈寶好",
+      "drafted_by": "小喆",
+      "draft_cost": 33,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Lucas Erceg",
+      "current_team": "哈寶好",
+      "drafted_by": "小喆",
+      "draft_cost": 6,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Aroldis Chapman",
+      "current_team": "哈寶好",
+      "drafted_by": "小喆",
+      "draft_cost": 5,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Tomoyuki Sugano",
+      "current_team": "哈寶好",
+      "drafted_by": "小喆",
+      "draft_cost": 18,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Yusei Kikuchi",
+      "current_team": "哈寶好",
+      "drafted_by": "小喆",
+      "draft_cost": 11,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Roki Sasaki",
+      "current_team": "哈寶好",
+      "drafted_by": "小喆",
+      "draft_cost": 50,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Pete Alonso",
+      "current_team": "小喆",
+      "drafted_by": "Hyper",
+      "draft_cost": 46,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Ezequiel Tovar",
+      "current_team": "小喆",
+      "drafted_by": "Hyper",
+      "draft_cost": 26,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Isaac Paredes",
+      "current_team": "小喆",
+      "drafted_by": "Hyper",
+      "draft_cost": 14,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Alex Vesia",
+      "current_team": "小喆",
+      "drafted_by": "Hyper",
+      "draft_cost": 3,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Jason Adam",
+      "current_team": "小喆",
+      "drafted_by": "Hyper",
+      "draft_cost": 4,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Blake Treinen",
+      "current_team": "小喆",
+      "drafted_by": "Hyper",
+      "draft_cost": 2,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Tyler Glasnow",
+      "current_team": "小喆",
+      "drafted_by": "Hyper",
+      "draft_cost": 44,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Chase Dollander",
+      "current_team": "小喆",
+      "drafted_by": "Tony",
+      "draft_cost": 1,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Jonathan Aranda",
+      "current_team": "小喆",
+      "drafted_by": "Hyper",
+      "draft_cost": 1,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Thairo Estrada",
+      "current_team": "小喆",
+      "drafted_by": "Hyper",
+      "draft_cost": 3,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Dustin May",
+      "current_team": "小喆",
+      "drafted_by": "Hyper",
+      "draft_cost": 10,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Yandy Díaz",
+      "current_team": "Hyper",
+      "drafted_by": "TIMMY LIU",
+      "draft_cost": 16,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Carlos Correa",
+      "current_team": "Hyper",
+      "drafted_by": "TIMMY LIU",
+      "draft_cost": 8,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Luis García Jr.",
+      "current_team": "Hyper",
+      "drafted_by": "TIMMY LIU",
+      "draft_cost": 12,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Bryan Reynolds",
+      "current_team": "Hyper",
+      "drafted_by": "Ｋａｋｕ",
+      "draft_cost": 16,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Alejandro Kirk",
+      "current_team": "Hyper",
+      "drafted_by": "叫我寬哥",
+      "draft_cost": 1,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Xander Bogaerts",
+      "current_team": "Hyper",
+      "drafted_by": "TIMMY LIU",
+      "draft_cost": 21,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Nick Pivetta",
+      "current_team": "Hyper",
+      "drafted_by": "TIMMY LIU",
+      "draft_cost": 16,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Ryan Weathers",
+      "current_team": "Hyper",
+      "drafted_by": "Ponpon",
+      "draft_cost": 7,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Robbie Ray",
+      "current_team": "Hyper",
+      "drafted_by": "TIMMY LIU",
+      "draft_cost": 24,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Kodai Senga",
+      "current_team": "Hyper",
+      "drafted_by": "TIMMY LIU",
+      "draft_cost": 33,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Brandon Woodruff",
+      "current_team": "Hyper",
+      "drafted_by": "TIMMY LIU",
+      "draft_cost": 7,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Nathan Eovaldi",
+      "current_team": "Hyper",
+      "drafted_by": "Ｋａｋｕ",
+      "draft_cost": 11,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "A.J. Puk",
+      "current_team": "Hyper",
+      "drafted_by": "TIMMY LIU",
+      "draft_cost": 12,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Hunter Goodman",
+      "current_team": "TIMMY LIU",
+      "drafted_by": "謙謙",
+      "draft_cost": 1,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Trevor Story",
+      "current_team": "TIMMY LIU",
+      "drafted_by": "謙謙",
+      "draft_cost": 4,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Rhys Hoskins",
+      "current_team": "TIMMY LIU",
+      "drafted_by": "謙謙",
+      "draft_cost": 5,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "TJ Friedl",
+      "current_team": "TIMMY LIU",
+      "drafted_by": "謙謙",
+      "draft_cost": 6,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Ceddanne Rafaela",
+      "current_team": "TIMMY LIU",
+      "drafted_by": "謙謙",
+      "draft_cost": 10,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Andrew Vaughn",
+      "current_team": "TIMMY LIU",
+      "drafted_by": "Leo",
+      "draft_cost": 1,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Nathaniel Lowe",
+      "current_team": "TIMMY LIU",
+      "drafted_by": "Billy",
+      "draft_cost": 7,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Wilyer Abreu",
+      "current_team": "TIMMY LIU",
+      "drafted_by": "謙謙",
+      "draft_cost": 4,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Walker Buehler",
+      "current_team": "TIMMY LIU",
+      "drafted_by": "謙謙",
+      "draft_cost": 20,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Bryan Abreu",
+      "current_team": "TIMMY LIU",
+      "drafted_by": "謙謙",
+      "draft_cost": 19,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "David Bednar",
+      "current_team": "TIMMY LIU",
+      "drafted_by": "謙謙",
+      "draft_cost": 7,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Chris Martin",
+      "current_team": "TIMMY LIU",
+      "drafted_by": "謙謙",
+      "draft_cost": 10,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Merrill Kelly",
+      "current_team": "TIMMY LIU",
+      "drafted_by": "謙謙",
+      "draft_cost": 3,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Kyle Tucker",
+      "current_team": "TIMMY LIU",
+      "drafted_by": "謙謙",
+      "draft_cost": 61,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Travis Bazzana",
+      "current_team": "TIMMY LIU",
+      "drafted_by": "謙謙",
+      "draft_cost": 6,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Vladimir Guerrero Jr.",
+      "current_team": "謙謙",
+      "drafted_by": "EDDIE",
+      "draft_cost": 51,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Anthony Volpe",
+      "current_team": "謙謙",
+      "drafted_by": "Leo",
+      "draft_cost": 3,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Giancarlo Stanton",
+      "current_team": "謙謙",
+      "drafted_by": "魚魚",
+      "draft_cost": 3,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Aaron Judge",
+      "current_team": "謙謙",
+      "drafted_by": "魚魚",
+      "draft_cost": 72,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Christian Yelich",
+      "current_team": "謙謙",
+      "drafted_by": "魚魚",
+      "draft_cost": 30,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Jeremy Peña",
+      "current_team": "謙謙",
+      "drafted_by": "魚魚",
+      "draft_cost": 10,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Orion Kerkering",
+      "current_team": "謙謙",
+      "drafted_by": "Hyper",
+      "draft_cost": 4,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Corey Seager",
+      "current_team": "謙謙",
+      "drafted_by": "Ｋａｋｕ",
+      "draft_cost": 39,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Corbin Burnes",
+      "current_team": "謙謙",
+      "drafted_by": "TIMMY LIU",
+      "draft_cost": 49,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Spencer Jones",
+      "current_team": "謙謙",
+      "drafted_by": "Ponpon",
+      "draft_cost": 9,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Spencer Torkelson",
+      "current_team": "魚魚",
+      "drafted_by": "Ponpon",
+      "draft_cost": 1,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Ryan McMahon",
+      "current_team": "魚魚",
+      "drafted_by": "rawstuff",
+      "draft_cost": 1,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Randy Arozarena",
+      "current_team": "魚魚",
+      "drafted_by": "Ponpon",
+      "draft_cost": 15,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Mike Trout",
+      "current_team": "魚魚",
+      "drafted_by": "Ponpon",
+      "draft_cost": 32,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Nick Castellanos",
+      "current_team": "魚魚",
+      "drafted_by": "Ponpon",
+      "draft_cost": 15,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Kristian Campbell",
+      "current_team": "魚魚",
+      "drafted_by": "YWC",
+      "draft_cost": 1,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Luis Castillo",
+      "current_team": "魚魚",
+      "drafted_by": "Ponpon",
+      "draft_cost": 24,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Robert Garcia",
+      "current_team": "魚魚",
+      "drafted_by": "Ponpon",
+      "draft_cost": 1,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Ryan Walker",
+      "current_team": "魚魚",
+      "drafted_by": "TIMMY LIU",
+      "draft_cost": 2,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Camilo Doval",
+      "current_team": "魚魚",
+      "drafted_by": "wei",
+      "draft_cost": 2,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Gavin Williams",
+      "current_team": "魚魚",
+      "drafted_by": "Ponpon",
+      "draft_cost": 9,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Mitch Keller",
+      "current_team": "魚魚",
+      "drafted_by": "YWC",
+      "draft_cost": 1,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Tyler O'Neill",
+      "current_team": "魚魚",
+      "drafted_by": "YWC",
+      "draft_cost": 9,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Edward Cabrera",
+      "current_team": "魚魚",
+      "drafted_by": "wei",
+      "draft_cost": 7,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Andrew Painter",
+      "current_team": "魚魚",
+      "drafted_by": "Ponpon",
+      "draft_cost": 1,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Patrick Bailey",
+      "current_team": "Ponpon",
+      "drafted_by": "叫我寬哥",
+      "draft_cost": 1,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Rafael Devers",
+      "current_team": "Ponpon",
+      "drafted_by": "Leo",
+      "draft_cost": 51,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Brandon Lowe",
+      "current_team": "Ponpon",
+      "drafted_by": "Leo",
+      "draft_cost": 12,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Alex Bregman",
+      "current_team": "Ponpon",
+      "drafted_by": "Leo",
+      "draft_cost": 35,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Taylor Ward",
+      "current_team": "Ponpon",
+      "drafted_by": "Leo",
+      "draft_cost": 11,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Michael Harris II",
+      "current_team": "Ponpon",
+      "drafted_by": "EDDIE",
+      "draft_cost": 30,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Josh Lowe",
+      "current_team": "Ponpon",
+      "drafted_by": "Leo",
+      "draft_cost": 8,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Chandler Simpson",
+      "current_team": "Ponpon",
+      "drafted_by": "Leo",
+      "draft_cost": 1,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Cam Smith",
+      "current_team": "Ponpon",
+      "drafted_by": "哈寶好",
+      "draft_cost": 10,
+      "faab_cost": 2
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Adolis García",
+      "current_team": "Ponpon",
+      "drafted_by": "Ｋａｋｕ",
+      "draft_cost": 25,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Brandon Pfaadt",
+      "current_team": "Ponpon",
+      "drafted_by": "TIMMY LIU",
+      "draft_cost": 13,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Freddy Peralta",
+      "current_team": "Ponpon",
+      "drafted_by": "Leo",
+      "draft_cost": 28,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Edwin Uceta",
+      "current_team": "Ponpon",
+      "drafted_by": "Leo",
+      "draft_cost": 10,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Hunter Gaddis",
+      "current_team": "Ponpon",
+      "drafted_by": "Leo",
+      "draft_cost": 11,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Shane Baz",
+      "current_team": "Ponpon",
+      "drafted_by": "Tony",
+      "draft_cost": 4,
+      "faab_cost": 0
+    },
+    {
+      "type": "draft_wrong_team",
+      "player": "Jackson Jobe",
+      "current_team": "Ponpon",
+      "drafted_by": "Tony",
+      "draft_cost": 1,
+      "faab_cost": 0
+    }
+  ],
+  "keeper_dropped_readded": [],
+  "keeper_moved_team": [
+    {
+      "type": "keeper_moved_team",
+      "player": "Bryan Reynolds",
+      "original_team": "Ｋａｋｕ",
+      "original_contract": "$16/N1",
+      "new_team": "Hyper",
+      "faab_cost": null,
+      "current_category": "draft_new"
+    },
+    {
+      "type": "keeper_moved_team",
+      "player": "Nathan Eovaldi",
+      "original_team": "Ｋａｋｕ",
+      "original_contract": "$11/O",
+      "new_team": "Hyper",
+      "faab_cost": 1,
+      "current_category": "draft_new"
+    },
+    {
+      "type": "keeper_moved_team",
+      "player": "Corey Seager",
+      "original_team": "Ｋａｋｕ",
+      "original_contract": "$39/O",
+      "new_team": "謙謙",
+      "faab_cost": null,
+      "current_category": "draft_new"
+    },
+    {
+      "type": "keeper_moved_team",
+      "player": "Devin Williams",
+      "original_team": "Ｋａｋｕ",
+      "original_contract": "$5/B",
+      "new_team": "rawstuff",
+      "faab_cost": 1,
+      "current_category": "draft_new"
+    },
+    {
+      "type": "keeper_moved_team",
+      "player": "Adolis García",
+      "original_team": "Ｋａｋｕ",
+      "original_contract": "$25/N1",
+      "new_team": "Ponpon",
+      "faab_cost": 2,
+      "current_category": "draft_new"
+    },
+    {
+      "type": "keeper_moved_team",
+      "player": "Vladimir Guerrero Jr.",
+      "original_team": "叫我寬哥",
+      "original_contract": "$51/N7",
+      "new_team": "謙謙",
+      "faab_cost": null,
+      "current_category": "draft_new"
+    },
+    {
+      "type": "keeper_moved_team",
+      "player": "Michael Harris II",
+      "original_team": "叫我寬哥",
+      "original_contract": "$30/N4",
+      "new_team": "Ponpon",
+      "faab_cost": 1,
+      "current_category": "draft_new"
+    },
+    {
+      "type": "keeper_moved_team",
+      "player": "Sandy Alcantara",
+      "original_team": "叫我寬哥",
+      "original_contract": "$33/N4",
+      "new_team": "Leo",
+      "faab_cost": null,
+      "current_category": "draft_new"
+    },
+    {
+      "type": "keeper_moved_team",
+      "player": "Kyle Harrison",
+      "original_team": "EDDIE",
+      "original_contract": "$1/B",
+      "new_team": "Tony",
+      "faab_cost": 1,
+      "current_category": "draft_new"
+    },
+    {
+      "type": "keeper_moved_team",
+      "player": "Shane Baz",
+      "original_team": "wei",
+      "original_contract": "$4/B",
+      "new_team": "Ponpon",
+      "faab_cost": 1,
+      "current_category": "draft_new"
+    },
+    {
+      "type": "keeper_moved_team",
+      "player": "Jackson Jobe",
+      "original_team": "wei",
+      "original_contract": "$1/R",
+      "new_team": "Ponpon",
+      "faab_cost": 1,
+      "current_category": "draft_new"
+    },
+    {
+      "type": "keeper_moved_team",
+      "player": "Jameson Taillon",
+      "original_team": "Tony",
+      "original_contract": "$1/B",
+      "new_team": "rawstuff",
+      "faab_cost": 1,
+      "current_category": "draft_new"
+    },
+    {
+      "type": "keeper_moved_team",
+      "player": "Jared Jones",
+      "original_team": "rawstuff",
+      "original_contract": "$3/B",
+      "new_team": "Ｋａｋｕ",
+      "faab_cost": null,
+      "current_category": "draft_new"
+    },
+    {
+      "type": "keeper_moved_team",
+      "player": "Otto Lopez",
+      "original_team": "Billy",
+      "original_contract": "$2/B",
+      "new_team": "Leo",
+      "faab_cost": 1,
+      "current_category": "draft_new"
+    },
+    {
+      "type": "keeper_moved_team",
+      "player": "Kristian Campbell",
+      "original_team": "Billy",
+      "original_contract": "$1/R",
+      "new_team": "魚魚",
+      "faab_cost": 3,
+      "current_category": "draft_new"
+    },
+    {
+      "type": "keeper_moved_team",
+      "player": "Matt Shaw",
+      "original_team": "Billy",
+      "original_contract": "$1/R",
+      "new_team": "rawstuff",
+      "faab_cost": null,
+      "current_category": "draft_new"
+    },
+    {
+      "type": "keeper_moved_team",
+      "player": "Royce Lewis",
+      "original_team": "Hyper",
+      "original_contract": "$11/N2",
+      "new_team": "Ｋａｋｕ",
+      "faab_cost": null,
+      "current_category": "draft_new"
+    },
+    {
+      "type": "keeper_moved_team",
+      "player": "Jake Burger",
+      "original_team": "Hyper",
+      "original_contract": "$3/B",
+      "new_team": "YWC",
+      "faab_cost": 1,
+      "current_category": "draft_new"
+    },
+    {
+      "type": "keeper_moved_team",
+      "player": "Ryan Walker",
+      "original_team": "Hyper",
+      "original_contract": "$2/B",
+      "new_team": "魚魚",
+      "faab_cost": 1,
+      "current_category": "draft_new"
+    },
+    {
+      "type": "keeper_moved_team",
+      "player": "Jurickson Profar",
+      "original_team": "TIMMY LIU",
+      "original_contract": "$1/B",
+      "new_team": "EDDIE",
+      "faab_cost": 3,
+      "current_category": "draft_new"
+    },
+    {
+      "type": "keeper_moved_team",
+      "player": "Mookie Betts",
+      "original_team": "謙謙",
+      "original_contract": "$58/O",
+      "new_team": "Ｋａｋｕ",
+      "faab_cost": null,
+      "current_category": "draft_new"
+    },
+    {
+      "type": "keeper_moved_team",
+      "player": "Zach Neto",
+      "original_team": "謙謙",
+      "original_contract": "$3/B",
+      "new_team": "Ｋａｋｕ",
+      "faab_cost": null,
+      "current_category": "draft_new"
+    },
+    {
+      "type": "keeper_moved_team",
+      "player": "Austin Wells",
+      "original_team": "謙謙",
+      "original_contract": "$1/B",
+      "new_team": "叫我寬哥",
+      "faab_cost": 5,
+      "current_category": "draft_new"
+    },
+    {
+      "type": "keeper_moved_team",
+      "player": "Jhoan Duran",
+      "original_team": "魚魚",
+      "original_contract": "$12/N1",
+      "new_team": "Billy",
+      "faab_cost": null,
+      "current_category": "draft_new"
+    },
+    {
+      "type": "keeper_moved_team",
+      "player": "Ryan Helsley",
+      "original_team": "魚魚",
+      "original_contract": "$11/N1",
+      "new_team": "叫我寬哥",
+      "faab_cost": null,
+      "current_category": "draft_new"
+    },
+    {
+      "type": "keeper_moved_team",
+      "player": "Spencer Jones",
+      "original_team": "魚魚",
+      "original_contract": "$9/R",
+      "new_team": "謙謙",
+      "faab_cost": 1,
+      "current_category": "draft_new"
+    },
+    {
+      "type": "keeper_moved_team",
+      "player": "Anthony Volpe",
+      "original_team": "Ponpon",
+      "original_contract": "$3/B",
+      "new_team": "謙謙",
+      "faab_cost": 1,
+      "current_category": "draft_new"
+    }
+  ]
+}

@@ -1,0 +1,4114 @@
+{
+  "458.l.40288.t.1": {
+    "manager": "Ｋａｋｕ",
+    "team_name": "Texas Rangers",
+    "team_key": "458.l.40288.t.1",
+    "players": [
+      {
+        "name": "Shea Langeliers",
+        "player_key": "458.p.11728",
+        "position": "C",
+        "team": "ATH",
+        "selected_position": "C",
+        "status": ""
+      },
+      {
+        "name": "Kyle Manzardo",
+        "player_key": "458.p.60411",
+        "position": "1B",
+        "team": "CLE",
+        "selected_position": "1B",
+        "status": ""
+      },
+      {
+        "name": "Mookie Betts",
+        "player_key": "458.p.9552",
+        "position": "2B,SS,RF",
+        "team": "LAD",
+        "selected_position": "2B",
+        "status": ""
+      },
+      {
+        "name": "Josh Jung",
+        "player_key": "458.p.11850",
+        "position": "3B",
+        "team": "TEX",
+        "selected_position": "3B",
+        "status": ""
+      },
+      {
+        "name": "Zach Neto",
+        "player_key": "458.p.60214",
+        "position": "SS",
+        "team": "LAA",
+        "selected_position": "SS",
+        "status": "DTD"
+      },
+      {
+        "name": "Jorge Polanco",
+        "player_key": "458.p.9750",
+        "position": "2B,3B",
+        "team": "NYM",
+        "selected_position": "IF",
+        "status": ""
+      },
+      {
+        "name": "Wyatt Langford",
+        "player_key": "458.p.62973",
+        "position": "LF,CF",
+        "team": "TEX",
+        "selected_position": "LF",
+        "status": "DTD"
+      },
+      {
+        "name": "Jo Adell",
+        "player_key": "458.p.10893",
+        "position": "CF,RF",
+        "team": "LAA",
+        "selected_position": "CF",
+        "status": ""
+      },
+      {
+        "name": "Jordan Beck",
+        "player_key": "458.p.60147",
+        "position": "LF,RF",
+        "team": "COL",
+        "selected_position": "RF",
+        "status": ""
+      },
+      {
+        "name": "Heriberto Hernández",
+        "player_key": "458.p.12557",
+        "position": "LF,RF",
+        "team": "MIA",
+        "selected_position": "OF",
+        "status": ""
+      },
+      {
+        "name": "Royce Lewis",
+        "player_key": "458.p.10916",
+        "position": "3B",
+        "team": "MIN",
+        "selected_position": "Util",
+        "status": ""
+      },
+      {
+        "name": "Isaac Collins",
+        "player_key": "458.p.61866",
+        "position": "LF,RF",
+        "team": "KC",
+        "selected_position": "Util",
+        "status": ""
+      },
+      {
+        "name": "Tyler Locklear",
+        "player_key": "458.p.60581",
+        "position": "1B",
+        "team": "AZ",
+        "selected_position": "BN",
+        "status": "DTD"
+      },
+      {
+        "name": "Max Muncy",
+        "player_key": "458.p.9606",
+        "position": "3B",
+        "team": "LAD",
+        "selected_position": "BN",
+        "status": ""
+      },
+      {
+        "name": "Jack Leiter",
+        "player_key": "458.p.12561",
+        "position": "SP",
+        "team": "TEX",
+        "selected_position": "SP",
+        "status": ""
+      },
+      {
+        "name": "Jason Alexander",
+        "player_key": "458.p.12628",
+        "position": "SP,RP",
+        "team": "HOU",
+        "selected_position": "SP",
+        "status": ""
+      },
+      {
+        "name": "Brandon Sproat",
+        "player_key": "458.p.63017",
+        "position": "SP",
+        "team": "MIL",
+        "selected_position": "SP",
+        "status": ""
+      },
+      {
+        "name": "Jacob Misiorowski",
+        "player_key": "458.p.60254",
+        "position": "SP,RP",
+        "team": "MIL",
+        "selected_position": "SP",
+        "status": ""
+      },
+      {
+        "name": "Carlos Estévez",
+        "player_key": "458.p.10274",
+        "position": "RP",
+        "team": "KC",
+        "selected_position": "RP",
+        "status": ""
+      },
+      {
+        "name": "Tanner Banks",
+        "player_key": "458.p.12593",
+        "position": "RP",
+        "team": "PHI",
+        "selected_position": "RP",
+        "status": ""
+      },
+      {
+        "name": "Tanner Scott",
+        "player_key": "458.p.10432",
+        "position": "RP",
+        "team": "LAD",
+        "selected_position": "RP",
+        "status": "DTD"
+      },
+      {
+        "name": "Sean Manaea",
+        "player_key": "458.p.9582",
+        "position": "SP",
+        "team": "NYM",
+        "selected_position": "P",
+        "status": ""
+      },
+      {
+        "name": "Shohei Ohtani (Pitcher)",
+        "player_key": "458.p.1000002",
+        "position": "SP",
+        "team": "LAD",
+        "selected_position": "P",
+        "status": ""
+      },
+      {
+        "name": "Ryan Bergert",
+        "player_key": "458.p.60356",
+        "position": "SP",
+        "team": "KC",
+        "selected_position": "P",
+        "status": "DTD"
+      },
+      {
+        "name": "Jonah Tong",
+        "player_key": "458.p.64978",
+        "position": "SP",
+        "team": "NYM",
+        "selected_position": "BN",
+        "status": ""
+      },
+      {
+        "name": "Mike Burrows",
+        "player_key": "458.p.12519",
+        "position": "SP,RP",
+        "team": "HOU",
+        "selected_position": "BN",
+        "status": ""
+      },
+      {
+        "name": "Evan Carter",
+        "player_key": "458.p.12563",
+        "position": "LF,CF,RF",
+        "team": "TEX",
+        "selected_position": "IL",
+        "status": "IL60"
+      },
+      {
+        "name": "Spencer Schwellenbach",
+        "player_key": "458.p.12363",
+        "position": "SP",
+        "team": "ATL",
+        "selected_position": "IL",
+        "status": "DTD"
+      },
+      {
+        "name": "Jared Jones",
+        "player_key": "458.p.60907",
+        "position": "SP",
+        "team": "PIT",
+        "selected_position": "IL",
+        "status": "IL60"
+      },
+      {
+        "name": "Reese Olson",
+        "player_key": "458.p.12429",
+        "position": "SP",
+        "team": "DET",
+        "selected_position": "IL",
+        "status": "IL60"
+      },
+      {
+        "name": "Kumar Rocker",
+        "player_key": "458.p.60427",
+        "position": "SP",
+        "team": "TEX",
+        "selected_position": "NA",
+        "status": ""
+      }
+    ]
+  },
+  "458.l.40288.t.2": {
+    "manager": "Leo",
+    "team_name": "PHI Phillies",
+    "team_key": "458.l.40288.t.2",
+    "players": [
+      {
+        "name": "Dillon Dingler",
+        "player_key": "458.p.11928",
+        "position": "C",
+        "team": "DET",
+        "selected_position": "C",
+        "status": ""
+      },
+      {
+        "name": "Bryce Harper",
+        "player_key": "458.p.8875",
+        "position": "1B",
+        "team": "PHI",
+        "selected_position": "1B",
+        "status": ""
+      },
+      {
+        "name": "Gleyber Torres",
+        "player_key": "458.p.10236",
+        "position": "2B",
+        "team": "DET",
+        "selected_position": "2B",
+        "status": "DTD"
+      },
+      {
+        "name": "Eugenio Suárez",
+        "player_key": "458.p.9724",
+        "position": "3B",
+        "team": "CIN",
+        "selected_position": "3B",
+        "status": ""
+      },
+      {
+        "name": "Otto Lopez",
+        "player_key": "458.p.12100",
+        "position": "2B,SS",
+        "team": "MIA",
+        "selected_position": "SS",
+        "status": ""
+      },
+      {
+        "name": "Christian Walker",
+        "player_key": "458.p.9846",
+        "position": "1B",
+        "team": "HOU",
+        "selected_position": "IF",
+        "status": ""
+      },
+      {
+        "name": "Kyle Schwarber",
+        "player_key": "458.p.9861",
+        "position": "LF",
+        "team": "PHI",
+        "selected_position": "LF",
+        "status": ""
+      },
+      {
+        "name": "Jakob Marsee",
+        "player_key": "458.p.62119",
+        "position": "LF,CF",
+        "team": "MIA",
+        "selected_position": "CF",
+        "status": ""
+      },
+      {
+        "name": "Daylen Lile",
+        "player_key": "458.p.12582",
+        "position": "LF,RF",
+        "team": "WSH",
+        "selected_position": "RF",
+        "status": ""
+      },
+      {
+        "name": "Byron Buxton",
+        "player_key": "458.p.9590",
+        "position": "CF",
+        "team": "MIN",
+        "selected_position": "OF",
+        "status": ""
+      },
+      {
+        "name": "Trea Turner",
+        "player_key": "458.p.10056",
+        "position": "SS",
+        "team": "PHI",
+        "selected_position": "Util",
+        "status": ""
+      },
+      {
+        "name": "Ha-Seong Kim",
+        "player_key": "458.p.12116",
+        "position": "2B,SS",
+        "team": "ATL",
+        "selected_position": "Util",
+        "status": ""
+      },
+      {
+        "name": "Alec Burleson",
+        "player_key": "458.p.12550",
+        "position": "1B,LF,RF",
+        "team": "STL",
+        "selected_position": "BN",
+        "status": ""
+      },
+      {
+        "name": "Michael McGreevy",
+        "player_key": "458.p.12549",
+        "position": "SP",
+        "team": "STL",
+        "selected_position": "SP",
+        "status": ""
+      },
+      {
+        "name": "Will Warren",
+        "player_key": "458.p.60295",
+        "position": "SP",
+        "team": "NYY",
+        "selected_position": "SP",
+        "status": ""
+      },
+      {
+        "name": "Cristopher Sánchez",
+        "player_key": "458.p.11706",
+        "position": "SP",
+        "team": "PHI",
+        "selected_position": "SP",
+        "status": ""
+      },
+      {
+        "name": "Bryce Miller",
+        "player_key": "458.p.12540",
+        "position": "SP",
+        "team": "SEA",
+        "selected_position": "SP",
+        "status": ""
+      },
+      {
+        "name": "Hogan Harris",
+        "player_key": "458.p.12718",
+        "position": "SP,RP",
+        "team": "ATH",
+        "selected_position": "RP",
+        "status": ""
+      },
+      {
+        "name": "Calvin Faucher",
+        "player_key": "458.p.12311",
+        "position": "RP",
+        "team": "MIA",
+        "selected_position": "RP",
+        "status": ""
+      },
+      {
+        "name": "Emilio Pagán",
+        "player_key": "458.p.10691",
+        "position": "RP",
+        "team": "CIN",
+        "selected_position": "RP",
+        "status": ""
+      },
+      {
+        "name": "Sandy Alcantara",
+        "player_key": "458.p.10597",
+        "position": "SP",
+        "team": "MIA",
+        "selected_position": "P",
+        "status": ""
+      },
+      {
+        "name": "Abner Uribe",
+        "player_key": "458.p.12746",
+        "position": "RP",
+        "team": "MIL",
+        "selected_position": "P",
+        "status": ""
+      },
+      {
+        "name": "Kyle Freeland",
+        "player_key": "458.p.9863",
+        "position": "SP",
+        "team": "COL",
+        "selected_position": "P",
+        "status": ""
+      },
+      {
+        "name": "Michael King",
+        "player_key": "458.p.11661",
+        "position": "SP",
+        "team": "SD",
+        "selected_position": "BN",
+        "status": ""
+      },
+      {
+        "name": "Zack Littell",
+        "player_key": "458.p.11035",
+        "position": "SP",
+        "team": "CIN",
+        "selected_position": "BN",
+        "status": "NA"
+      },
+      {
+        "name": "Aaron Nola",
+        "player_key": "458.p.9882",
+        "position": "SP",
+        "team": "PHI",
+        "selected_position": "BN",
+        "status": ""
+      },
+      {
+        "name": "Charlie Morton",
+        "player_key": "458.p.8270",
+        "position": "SP,RP",
+        "team": "ATL",
+        "selected_position": "BN",
+        "status": "NA"
+      },
+      {
+        "name": "Gerrit Cole",
+        "player_key": "458.p.9121",
+        "position": "SP",
+        "team": "NYY",
+        "selected_position": "IL",
+        "status": "IL60"
+      },
+      {
+        "name": "Deyvison De Los Santos",
+        "player_key": "458.p.60057",
+        "position": "1B,3B",
+        "team": "MIA",
+        "selected_position": "NA",
+        "status": ""
+      }
+    ]
+  },
+  "458.l.40288.t.3": {
+    "manager": "叫我寬哥",
+    "team_name": "blue jays",
+    "team_key": "458.l.40288.t.3",
+    "players": [
+      {
+        "name": "Austin Wells",
+        "player_key": "458.p.12161",
+        "position": "C",
+        "team": "NYY",
+        "selected_position": "C",
+        "status": ""
+      },
+      {
+        "name": "Ryan O'Hearn",
+        "player_key": "458.p.10485",
+        "position": "1B,LF,RF",
+        "team": "PIT",
+        "selected_position": "1B",
+        "status": ""
+      },
+      {
+        "name": "Andrés Giménez",
+        "player_key": "458.p.10919",
+        "position": "2B,SS",
+        "team": "TOR",
+        "selected_position": "2B",
+        "status": ""
+      },
+      {
+        "name": "Lenyn Sosa",
+        "player_key": "458.p.12420",
+        "position": "1B,2B,3B",
+        "team": "CWS",
+        "selected_position": "3B",
+        "status": ""
+      },
+      {
+        "name": "Bo Bichette",
+        "player_key": "458.p.10766",
+        "position": "SS",
+        "team": "NYM",
+        "selected_position": "SS",
+        "status": ""
+      },
+      {
+        "name": "Gunnar Henderson",
+        "player_key": "458.p.11731",
+        "position": "SS",
+        "team": "BAL",
+        "selected_position": "IF",
+        "status": ""
+      },
+      {
+        "name": "Andrew Benintendi",
+        "player_key": "458.p.10159",
+        "position": "LF",
+        "team": "CWS",
+        "selected_position": "LF",
+        "status": "DTD"
+      },
+      {
+        "name": "Sal Frelick",
+        "player_key": "458.p.12476",
+        "position": "LF,CF,RF",
+        "team": "MIL",
+        "selected_position": "CF",
+        "status": ""
+      },
+      {
+        "name": "George Springer",
+        "player_key": "458.p.9339",
+        "position": "LF,CF,RF",
+        "team": "TOR",
+        "selected_position": "RF",
+        "status": ""
+      },
+      {
+        "name": "Gavin Lux",
+        "player_key": "458.p.10511",
+        "position": "2B,3B,LF",
+        "team": "TB",
+        "selected_position": "OF",
+        "status": ""
+      },
+      {
+        "name": "Daulton Varsho",
+        "player_key": "458.p.10843",
+        "position": "LF,CF",
+        "team": "TOR",
+        "selected_position": "Util",
+        "status": ""
+      },
+      {
+        "name": "Josh Smith",
+        "player_key": "458.p.12562",
+        "position": "1B,3B,SS,LF,RF",
+        "team": "TEX",
+        "selected_position": "Util",
+        "status": ""
+      },
+      {
+        "name": "Carlos Narváez",
+        "player_key": "458.p.60536",
+        "position": "C",
+        "team": "BOS",
+        "selected_position": "BN",
+        "status": "DTD"
+      },
+      {
+        "name": "David Peterson",
+        "player_key": "458.p.10921",
+        "position": "SP",
+        "team": "NYM",
+        "selected_position": "SP",
+        "status": ""
+      },
+      {
+        "name": "José Soriano",
+        "player_key": "458.p.11327",
+        "position": "SP",
+        "team": "LAA",
+        "selected_position": "SP",
+        "status": "DTD"
+      },
+      {
+        "name": "Dean Kremer",
+        "player_key": "458.p.11428",
+        "position": "SP",
+        "team": "BAL",
+        "selected_position": "SP",
+        "status": ""
+      },
+      {
+        "name": "Eduardo Rodriguez",
+        "player_key": "458.p.9546",
+        "position": "SP",
+        "team": "AZ",
+        "selected_position": "SP",
+        "status": ""
+      },
+      {
+        "name": "Matt Strahm",
+        "player_key": "458.p.10355",
+        "position": "RP",
+        "team": "KC",
+        "selected_position": "RP",
+        "status": ""
+      },
+      {
+        "name": "Caleb Thielbar",
+        "player_key": "458.p.9402",
+        "position": "RP",
+        "team": "CHC",
+        "selected_position": "RP",
+        "status": ""
+      },
+      {
+        "name": "Pierce Johnson",
+        "player_key": "458.p.9559",
+        "position": "RP",
+        "team": "CIN",
+        "selected_position": "RP",
+        "status": ""
+      },
+      {
+        "name": "Jared Koenig",
+        "player_key": "458.p.12630",
+        "position": "SP,RP",
+        "team": "MIL",
+        "selected_position": "P",
+        "status": ""
+      },
+      {
+        "name": "JoJo Romero",
+        "player_key": "458.p.10931",
+        "position": "RP",
+        "team": "STL",
+        "selected_position": "P",
+        "status": ""
+      },
+      {
+        "name": "Ryan Helsley",
+        "player_key": "458.p.10946",
+        "position": "RP",
+        "team": "BAL",
+        "selected_position": "P",
+        "status": ""
+      },
+      {
+        "name": "Jeffrey Springs",
+        "player_key": "458.p.11121",
+        "position": "SP",
+        "team": "ATH",
+        "selected_position": "BN",
+        "status": ""
+      },
+      {
+        "name": "Ryan Pepiot",
+        "player_key": "458.p.12036",
+        "position": "SP",
+        "team": "TB",
+        "selected_position": "BN",
+        "status": ""
+      },
+      {
+        "name": "José Berríos",
+        "player_key": "458.p.9872",
+        "position": "SP",
+        "team": "TOR",
+        "selected_position": "BN",
+        "status": "DTD"
+      },
+      {
+        "name": "Cristian Javier",
+        "player_key": "458.p.11315",
+        "position": "SP",
+        "team": "HOU",
+        "selected_position": "BN",
+        "status": ""
+      },
+      {
+        "name": "Lourdes Gurriel Jr.",
+        "player_key": "458.p.10616",
+        "position": "LF",
+        "team": "AZ",
+        "selected_position": "IL",
+        "status": "DTD"
+      },
+      {
+        "name": "Austin Riley",
+        "player_key": "458.p.10420",
+        "position": "3B",
+        "team": "ATL",
+        "selected_position": "IL",
+        "status": "DTD"
+      },
+      {
+        "name": "Tyler Mahle",
+        "player_key": "458.p.10455",
+        "position": "SP",
+        "team": "SF",
+        "selected_position": "IL",
+        "status": ""
+      },
+      {
+        "name": "Alek Manoah",
+        "player_key": "458.p.11854",
+        "position": "SP",
+        "team": "LAA",
+        "selected_position": "IL",
+        "status": ""
+      }
+    ]
+  },
+  "458.l.40288.t.4": {
+    "manager": "EDDIE",
+    "team_name": "Los Angeles Dodge ball",
+    "team_key": "458.l.40288.t.4",
+    "players": [
+      {
+        "name": "Will Smith",
+        "player_key": "458.p.10642",
+        "position": "C",
+        "team": "LAD",
+        "selected_position": "C",
+        "status": ""
+      },
+      {
+        "name": "Josh Bell",
+        "player_key": "458.p.9883",
+        "position": "1B",
+        "team": "MIN",
+        "selected_position": "1B",
+        "status": ""
+      },
+      {
+        "name": "Tommy Edman",
+        "player_key": "458.p.11596",
+        "position": "2B,3B,SS,CF",
+        "team": "LAD",
+        "selected_position": "2B",
+        "status": ""
+      },
+      {
+        "name": "Xavier Edwards",
+        "player_key": "458.p.11375",
+        "position": "2B,SS",
+        "team": "MIA",
+        "selected_position": "SS",
+        "status": ""
+      },
+      {
+        "name": "Matt Chapman",
+        "player_key": "458.p.10205",
+        "position": "3B",
+        "team": "SF",
+        "selected_position": "IF",
+        "status": ""
+      },
+      {
+        "name": "Mickey Moniak",
+        "player_key": "458.p.10557",
+        "position": "LF,CF,RF",
+        "team": "COL",
+        "selected_position": "CF",
+        "status": ""
+      },
+      {
+        "name": "Seiya Suzuki",
+        "player_key": "458.p.12588",
+        "position": "LF,RF",
+        "team": "CHC",
+        "selected_position": "RF",
+        "status": ""
+      },
+      {
+        "name": "Jurickson Profar",
+        "player_key": "458.p.9112",
+        "position": "LF",
+        "team": "ATL",
+        "selected_position": "OF",
+        "status": "NA"
+      },
+      {
+        "name": "Addison Barger",
+        "player_key": "458.p.12741",
+        "position": "3B,LF,RF",
+        "team": "TOR",
+        "selected_position": "Util",
+        "status": ""
+      },
+      {
+        "name": "Moisés Ballesteros",
+        "player_key": "458.p.60120",
+        "position": "C",
+        "team": "CHC",
+        "selected_position": "Util",
+        "status": ""
+      },
+      {
+        "name": "Nolan McLean",
+        "player_key": "458.p.62935",
+        "position": "SP",
+        "team": "NYM",
+        "selected_position": "SP",
+        "status": ""
+      },
+      {
+        "name": "Luis Severino",
+        "player_key": "458.p.9879",
+        "position": "SP",
+        "team": "ATH",
+        "selected_position": "SP",
+        "status": ""
+      },
+      {
+        "name": "Kyle Hendricks",
+        "player_key": "458.p.9758",
+        "position": "SP,RP",
+        "team": "LAA",
+        "selected_position": "SP",
+        "status": "NA"
+      },
+      {
+        "name": "David Robertson",
+        "player_key": "458.p.8287",
+        "position": "RP",
+        "team": "PHI",
+        "selected_position": "RP",
+        "status": "NA"
+      },
+      {
+        "name": "Andrés Muñoz",
+        "player_key": "458.p.11526",
+        "position": "RP",
+        "team": "SEA",
+        "selected_position": "RP",
+        "status": ""
+      },
+      {
+        "name": "Dennis Santana",
+        "player_key": "458.p.10901",
+        "position": "RP",
+        "team": "PIT",
+        "selected_position": "RP",
+        "status": ""
+      },
+      {
+        "name": "Alexis Díaz",
+        "player_key": "458.p.12301",
+        "position": "RP",
+        "team": "TEX",
+        "selected_position": "P",
+        "status": ""
+      },
+      {
+        "name": "Michael Kopech",
+        "player_key": "458.p.10412",
+        "position": "RP",
+        "team": "LAD",
+        "selected_position": "P",
+        "status": "NA"
+      },
+      {
+        "name": "Kirby Yates",
+        "player_key": "458.p.9727",
+        "position": "RP",
+        "team": "LAA",
+        "selected_position": "P",
+        "status": "DTD"
+      },
+      {
+        "name": "Cade Horton",
+        "player_key": "458.p.60118",
+        "position": "SP",
+        "team": "CHC",
+        "selected_position": "BN",
+        "status": ""
+      },
+      {
+        "name": "Emmanuel Clase",
+        "player_key": "458.p.11625",
+        "position": "RP",
+        "team": "CLE",
+        "selected_position": "BN",
+        "status": "NA"
+      },
+      {
+        "name": "Quinn Priester",
+        "player_key": "458.p.11820",
+        "position": "SP,RP",
+        "team": "MIL",
+        "selected_position": "BN",
+        "status": ""
+      },
+      {
+        "name": "Justin Verlander",
+        "player_key": "458.p.7590",
+        "position": "SP",
+        "team": "DET",
+        "selected_position": "BN",
+        "status": ""
+      },
+      {
+        "name": "Blake Snell",
+        "player_key": "458.p.10148",
+        "position": "SP",
+        "team": "LAD",
+        "selected_position": "BN",
+        "status": ""
+      },
+      {
+        "name": "Mick Abel",
+        "player_key": "458.p.12166",
+        "position": "SP",
+        "team": "MIN",
+        "selected_position": "BN",
+        "status": ""
+      },
+      {
+        "name": "Bubba Chandler",
+        "player_key": "458.p.12516",
+        "position": "SP",
+        "team": "PIT",
+        "selected_position": "BN",
+        "status": ""
+      },
+      {
+        "name": "Pablo López",
+        "player_key": "458.p.11057",
+        "position": "SP",
+        "team": "MIN",
+        "selected_position": "BN",
+        "status": "DTD"
+      },
+      {
+        "name": "Connor Norby",
+        "player_key": "458.p.12370",
+        "position": "2B,3B",
+        "team": "MIA",
+        "selected_position": "IL",
+        "status": ""
+      },
+      {
+        "name": "Trevor Megill",
+        "player_key": "458.p.11717",
+        "position": "RP",
+        "team": "MIL",
+        "selected_position": "IL",
+        "status": ""
+      },
+      {
+        "name": "Logan Henderson",
+        "player_key": "458.p.60262",
+        "position": "SP",
+        "team": "MIL",
+        "selected_position": "IL",
+        "status": ""
+      },
+      {
+        "name": "Luis Garcia",
+        "player_key": "458.p.11903",
+        "position": "SP",
+        "team": "HOU",
+        "selected_position": "IL",
+        "status": "IL60"
+      },
+      {
+        "name": "Jhostynxon Garcia",
+        "player_key": "458.p.62404",
+        "position": "CF,RF",
+        "team": "PIT",
+        "selected_position": "NA",
+        "status": ""
+      },
+      {
+        "name": "Blade Tidwell",
+        "player_key": "458.p.60280",
+        "position": "SP",
+        "team": "SF",
+        "selected_position": "NA",
+        "status": ""
+      }
+    ]
+  },
+  "458.l.40288.t.5": {
+    "manager": "wei",
+    "team_name": "Atlanta Braves2",
+    "team_key": "458.l.40288.t.5",
+    "players": [
+      {
+        "name": "Agustín Ramírez",
+        "player_key": "458.p.61818",
+        "position": "C,1B",
+        "team": "MIA",
+        "selected_position": "C",
+        "status": ""
+      },
+      {
+        "name": "Luke Keaschall",
+        "player_key": "458.p.63023",
+        "position": "1B,2B,CF",
+        "team": "MIN",
+        "selected_position": "1B",
+        "status": "DTD"
+      },
+      {
+        "name": "Jackson Holliday",
+        "player_key": "458.p.60090",
+        "position": "2B,SS",
+        "team": "BAL",
+        "selected_position": "2B",
+        "status": ""
+      },
+      {
+        "name": "Mark Vientos",
+        "player_key": "458.p.10922",
+        "position": "3B",
+        "team": "NYM",
+        "selected_position": "3B",
+        "status": ""
+      },
+      {
+        "name": "Bobby Witt Jr.",
+        "player_key": "458.p.11771",
+        "position": "SS",
+        "team": "KC",
+        "selected_position": "IF",
+        "status": ""
+      },
+      {
+        "name": "Dylan Beavers",
+        "player_key": "458.p.60091",
+        "position": "LF,RF",
+        "team": "BAL",
+        "selected_position": "LF",
+        "status": ""
+      },
+      {
+        "name": "Jackson Chourio",
+        "player_key": "458.p.12480",
+        "position": "LF,CF,RF",
+        "team": "MIL",
+        "selected_position": "CF",
+        "status": ""
+      },
+      {
+        "name": "Juan Soto",
+        "player_key": "458.p.10626",
+        "position": "LF,RF",
+        "team": "NYM",
+        "selected_position": "RF",
+        "status": ""
+      },
+      {
+        "name": "Ronald Acuña Jr.",
+        "player_key": "458.p.10646",
+        "position": "RF",
+        "team": "ATL",
+        "selected_position": "OF",
+        "status": ""
+      },
+      {
+        "name": "Elly De La Cruz",
+        "player_key": "458.p.12393",
+        "position": "SS",
+        "team": "CIN",
+        "selected_position": "Util",
+        "status": ""
+      },
+      {
+        "name": "Willson Contreras",
+        "player_key": "458.p.10166",
+        "position": "C,1B",
+        "team": "BOS",
+        "selected_position": "Util",
+        "status": "DTD"
+      },
+      {
+        "name": "Sal Stewart",
+        "player_key": "458.p.60129",
+        "position": "1B,2B,3B",
+        "team": "CIN",
+        "selected_position": "BN",
+        "status": ""
+      },
+      {
+        "name": "Samuel Basallo",
+        "player_key": "458.p.60092",
+        "position": "C,1B",
+        "team": "BAL",
+        "selected_position": "BN",
+        "status": ""
+      },
+      {
+        "name": "Sonny Gray",
+        "player_key": "458.p.9459",
+        "position": "SP",
+        "team": "BOS",
+        "selected_position": "SP",
+        "status": ""
+      },
+      {
+        "name": "Chris Sale",
+        "player_key": "458.p.8780",
+        "position": "SP",
+        "team": "ATL",
+        "selected_position": "SP",
+        "status": ""
+      },
+      {
+        "name": "Mason Miller",
+        "player_key": "458.p.12505",
+        "position": "RP",
+        "team": "SD",
+        "selected_position": "RP",
+        "status": ""
+      },
+      {
+        "name": "Clay Holmes",
+        "player_key": "458.p.10569",
+        "position": "SP,RP",
+        "team": "NYM",
+        "selected_position": "RP",
+        "status": ""
+      },
+      {
+        "name": "Hurston Waldrep",
+        "player_key": "458.p.62958",
+        "position": "SP",
+        "team": "ATL",
+        "selected_position": "P",
+        "status": ""
+      },
+      {
+        "name": "Kyle Bradish",
+        "player_key": "458.p.12345",
+        "position": "SP",
+        "team": "BAL",
+        "selected_position": "P",
+        "status": ""
+      },
+      {
+        "name": "Kevin Gausman",
+        "player_key": "458.p.9334",
+        "position": "SP",
+        "team": "TOR",
+        "selected_position": "BN",
+        "status": ""
+      },
+      {
+        "name": "Shane Smith",
+        "player_key": "458.p.63967",
+        "position": "SP,RP",
+        "team": "CWS",
+        "selected_position": "BN",
+        "status": ""
+      },
+      {
+        "name": "Luis Morales",
+        "player_key": "458.p.63613",
+        "position": "SP",
+        "team": "ATH",
+        "selected_position": "BN",
+        "status": ""
+      },
+      {
+        "name": "Casey Mize",
+        "player_key": "458.p.11083",
+        "position": "SP",
+        "team": "DET",
+        "selected_position": "BN",
+        "status": ""
+      },
+      {
+        "name": "Connelly Early",
+        "player_key": "458.p.63143",
+        "position": "SP",
+        "team": "BOS",
+        "selected_position": "BN",
+        "status": ""
+      },
+      {
+        "name": "Chase Burns",
+        "player_key": "458.p.64316",
+        "position": "SP,RP",
+        "team": "CIN",
+        "selected_position": "BN",
+        "status": ""
+      },
+      {
+        "name": "MacKenzie Gore",
+        "player_key": "458.p.10940",
+        "position": "SP",
+        "team": "TEX",
+        "selected_position": "BN",
+        "status": "DTD"
+      },
+      {
+        "name": "Trey Yesavage",
+        "player_key": "458.p.64320",
+        "position": "SP",
+        "team": "TOR",
+        "selected_position": "BN",
+        "status": ""
+      },
+      {
+        "name": "Reynaldo López",
+        "player_key": "458.p.10152",
+        "position": "SP",
+        "team": "ATL",
+        "selected_position": "IL",
+        "status": "DTD"
+      },
+      {
+        "name": "Grayson Rodriguez",
+        "player_key": "458.p.11277",
+        "position": "SP",
+        "team": "LAA",
+        "selected_position": "IL",
+        "status": "DTD"
+      },
+      {
+        "name": "Konnor Griffin",
+        "player_key": "458.p.64318",
+        "position": "SS",
+        "team": "PIT",
+        "selected_position": "NA",
+        "status": "NA"
+      },
+      {
+        "name": "Jesús Made",
+        "player_key": "458.p.64897",
+        "position": "3B,SS",
+        "team": "MIL",
+        "selected_position": "NA",
+        "status": "NA"
+      }
+    ]
+  },
+  "458.l.40288.t.6": {
+    "manager": "Tony",
+    "team_name": "Cincinnati Reds 2025",
+    "team_key": "458.l.40288.t.6",
+    "players": [
+      {
+        "name": "Ivan Herrera",
+        "player_key": "458.p.11836",
+        "position": "C",
+        "team": "STL",
+        "selected_position": "C",
+        "status": "DTD"
+      },
+      {
+        "name": "Freddie Freeman",
+        "player_key": "458.p.8658",
+        "position": "1B",
+        "team": "LAD",
+        "selected_position": "1B",
+        "status": ""
+      },
+      {
+        "name": "Caleb Durbin",
+        "player_key": "458.p.61788",
+        "position": "2B,3B,SS",
+        "team": "BOS",
+        "selected_position": "2B",
+        "status": "DTD"
+      },
+      {
+        "name": "Nacho Alvarez Jr.",
+        "player_key": "458.p.62057",
+        "position": "2B,3B",
+        "team": "ATL",
+        "selected_position": "3B",
+        "status": "NA"
+      },
+      {
+        "name": "Colson Montgomery",
+        "player_key": "458.p.12413",
+        "position": "3B,SS",
+        "team": "CWS",
+        "selected_position": "SS",
+        "status": ""
+      },
+      {
+        "name": "Matt McLain",
+        "player_key": "458.p.12390",
+        "position": "2B,SS",
+        "team": "CIN",
+        "selected_position": "IF",
+        "status": ""
+      },
+      {
+        "name": "Jose Altuve",
+        "player_key": "458.p.8996",
+        "position": "2B,LF",
+        "team": "HOU",
+        "selected_position": "LF",
+        "status": "DTD"
+      },
+      {
+        "name": "Jasson Domínguez",
+        "player_key": "458.p.11805",
+        "position": "LF,CF",
+        "team": "NYY",
+        "selected_position": "CF",
+        "status": ""
+      },
+      {
+        "name": "Lawrence Butler",
+        "player_key": "458.p.12719",
+        "position": "CF,RF",
+        "team": "ATH",
+        "selected_position": "RF",
+        "status": "DTD"
+      },
+      {
+        "name": "Noelvi Marte",
+        "player_key": "458.p.11529",
+        "position": "3B,RF",
+        "team": "CIN",
+        "selected_position": "OF",
+        "status": ""
+      },
+      {
+        "name": "Blaine Crim",
+        "player_key": "458.p.61593",
+        "position": "1B",
+        "team": "COL",
+        "selected_position": "Util",
+        "status": ""
+      },
+      {
+        "name": "Brayan Rocchio",
+        "player_key": "458.p.11448",
+        "position": "2B,SS",
+        "team": "CLE",
+        "selected_position": "Util",
+        "status": ""
+      },
+      {
+        "name": "Colt Keith",
+        "player_key": "458.p.12430",
+        "position": "1B,2B,3B",
+        "team": "DET",
+        "selected_position": "BN",
+        "status": ""
+      },
+      {
+        "name": "Garrett Whitlock",
+        "player_key": "458.p.11358",
+        "position": "SP,RP",
+        "team": "BOS",
+        "selected_position": "SP",
+        "status": ""
+      },
+      {
+        "name": "Carlos Rodón",
+        "player_key": "458.p.9823",
+        "position": "SP",
+        "team": "NYY",
+        "selected_position": "SP",
+        "status": "DTD"
+      },
+      {
+        "name": "Nick Martinez",
+        "player_key": "458.p.9651",
+        "position": "SP,RP",
+        "team": "TB",
+        "selected_position": "SP",
+        "status": ""
+      },
+      {
+        "name": "Brady Singer",
+        "player_key": "458.p.11323",
+        "position": "SP",
+        "team": "CIN",
+        "selected_position": "SP",
+        "status": ""
+      },
+      {
+        "name": "Andrew Kittredge",
+        "player_key": "458.p.10763",
+        "position": "RP",
+        "team": "BAL",
+        "selected_position": "RP",
+        "status": ""
+      },
+      {
+        "name": "Michael Kelly",
+        "player_key": "458.p.12636",
+        "position": "RP",
+        "team": "ATH",
+        "selected_position": "RP",
+        "status": ""
+      },
+      {
+        "name": "Keegan Akin",
+        "player_key": "458.p.10431",
+        "position": "SP,RP",
+        "team": "BAL",
+        "selected_position": "RP",
+        "status": ""
+      },
+      {
+        "name": "Luke Weaver",
+        "player_key": "458.p.10217",
+        "position": "RP",
+        "team": "NYM",
+        "selected_position": "P",
+        "status": ""
+      },
+      {
+        "name": "Kyle Finnegan",
+        "player_key": "458.p.11709",
+        "position": "RP",
+        "team": "DET",
+        "selected_position": "P",
+        "status": ""
+      },
+      {
+        "name": "Aaron Ashby",
+        "player_key": "458.p.11489",
+        "position": "RP",
+        "team": "MIL",
+        "selected_position": "P",
+        "status": ""
+      },
+      {
+        "name": "Kyle Harrison",
+        "player_key": "458.p.12175",
+        "position": "SP,RP",
+        "team": "MIL",
+        "selected_position": "BN",
+        "status": ""
+      },
+      {
+        "name": "Brayan Bello",
+        "player_key": "458.p.12330",
+        "position": "SP",
+        "team": "BOS",
+        "selected_position": "BN",
+        "status": ""
+      },
+      {
+        "name": "Hunter Greene",
+        "player_key": "458.p.10862",
+        "position": "SP",
+        "team": "CIN",
+        "selected_position": "BN",
+        "status": ""
+      },
+      {
+        "name": "Randy Vásquez",
+        "player_key": "458.p.12500",
+        "position": "SP",
+        "team": "SD",
+        "selected_position": "BN",
+        "status": ""
+      },
+      {
+        "name": "Yordan Alvarez",
+        "player_key": "458.p.10883",
+        "position": "LF",
+        "team": "HOU",
+        "selected_position": "IL",
+        "status": "DTD"
+      },
+      {
+        "name": "Luis Robert Jr.",
+        "player_key": "458.p.10765",
+        "position": "CF",
+        "team": "NYM",
+        "selected_position": "IL",
+        "status": "DTD"
+      },
+      {
+        "name": "Marcelo Mayer",
+        "player_key": "458.p.12375",
+        "position": "2B,3B,SS",
+        "team": "BOS",
+        "selected_position": "IL",
+        "status": "IL60"
+      },
+      {
+        "name": "Triston Casas",
+        "player_key": "458.p.11279",
+        "position": "1B",
+        "team": "BOS",
+        "selected_position": "IL",
+        "status": "IL60"
+      },
+      {
+        "name": "Kevin McGonigle",
+        "player_key": "458.p.62955",
+        "position": "2B,SS",
+        "team": "DET",
+        "selected_position": "NA",
+        "status": "NA"
+      },
+      {
+        "name": "Quinn Mathews",
+        "player_key": "458.p.62874",
+        "position": "SP",
+        "team": "STL",
+        "selected_position": "NA",
+        "status": "NA"
+      }
+    ]
+  },
+  "458.l.40288.t.7": {
+    "manager": "rawstuff",
+    "team_name": "Chicago Cubs",
+    "team_key": "458.l.40288.t.7",
+    "players": [
+      {
+        "name": "Adley Rutschman",
+        "player_key": "458.p.11732",
+        "position": "C",
+        "team": "BAL",
+        "selected_position": "C",
+        "status": ""
+      },
+      {
+        "name": "Josh Naylor",
+        "player_key": "458.p.10572",
+        "position": "1B",
+        "team": "SEA",
+        "selected_position": "1B",
+        "status": ""
+      },
+      {
+        "name": "Matt Shaw",
+        "player_key": "458.p.62984",
+        "position": "2B,3B,SS",
+        "team": "CHC",
+        "selected_position": "2B",
+        "status": ""
+      },
+      {
+        "name": "Manny Machado",
+        "player_key": "458.p.9111",
+        "position": "3B",
+        "team": "SD",
+        "selected_position": "3B",
+        "status": ""
+      },
+      {
+        "name": "Jacob Wilson",
+        "player_key": "458.p.62976",
+        "position": "SS",
+        "team": "ATH",
+        "selected_position": "SS",
+        "status": ""
+      },
+      {
+        "name": "José Ramírez",
+        "player_key": "458.p.9507",
+        "position": "3B",
+        "team": "CLE",
+        "selected_position": "IF",
+        "status": ""
+      },
+      {
+        "name": "James Wood",
+        "player_key": "458.p.12521",
+        "position": "LF",
+        "team": "WSH",
+        "selected_position": "LF",
+        "status": ""
+      },
+      {
+        "name": "Pete Crow-Armstrong",
+        "player_key": "458.p.12157",
+        "position": "CF",
+        "team": "CHC",
+        "selected_position": "CF",
+        "status": ""
+      },
+      {
+        "name": "Fernando Tatis Jr.",
+        "player_key": "458.p.10639",
+        "position": "RF",
+        "team": "SD",
+        "selected_position": "RF",
+        "status": ""
+      },
+      {
+        "name": "Ian Happ",
+        "player_key": "458.p.10440",
+        "position": "LF",
+        "team": "CHC",
+        "selected_position": "OF",
+        "status": ""
+      },
+      {
+        "name": "Tyler Soderstrom",
+        "player_key": "458.p.12005",
+        "position": "1B,LF",
+        "team": "ATH",
+        "selected_position": "Util",
+        "status": ""
+      },
+      {
+        "name": "CJ Abrams",
+        "player_key": "458.p.11822",
+        "position": "SS",
+        "team": "WSH",
+        "selected_position": "Util",
+        "status": ""
+      },
+      {
+        "name": "Jordan Lawlar",
+        "player_key": "458.p.12355",
+        "position": "3B,SS",
+        "team": "AZ",
+        "selected_position": "BN",
+        "status": ""
+      },
+      {
+        "name": "Payton Tolle",
+        "player_key": "458.p.64394",
+        "position": "SP",
+        "team": "BOS",
+        "selected_position": "SP",
+        "status": ""
+      },
+      {
+        "name": "Cam Schlittler",
+        "player_key": "458.p.64985",
+        "position": "SP",
+        "team": "NYY",
+        "selected_position": "SP",
+        "status": ""
+      },
+      {
+        "name": "Jameson Taillon",
+        "player_key": "458.p.9123",
+        "position": "SP",
+        "team": "CHC",
+        "selected_position": "SP",
+        "status": ""
+      },
+      {
+        "name": "Eury Pérez",
+        "player_key": "458.p.12468",
+        "position": "SP",
+        "team": "MIA",
+        "selected_position": "SP",
+        "status": ""
+      },
+      {
+        "name": "Jeff Hoffman",
+        "player_key": "458.p.9896",
+        "position": "RP",
+        "team": "TOR",
+        "selected_position": "RP",
+        "status": ""
+      },
+      {
+        "name": "Riley O'Brien",
+        "player_key": "458.p.11846",
+        "position": "RP",
+        "team": "STL",
+        "selected_position": "RP",
+        "status": ""
+      },
+      {
+        "name": "Brad Keller",
+        "player_key": "458.p.10418",
+        "position": "RP",
+        "team": "PHI",
+        "selected_position": "RP",
+        "status": ""
+      },
+      {
+        "name": "Devin Williams",
+        "player_key": "458.p.11628",
+        "position": "RP",
+        "team": "NYM",
+        "selected_position": "P",
+        "status": ""
+      },
+      {
+        "name": "Griffin Jax",
+        "player_key": "458.p.12203",
+        "position": "RP",
+        "team": "TB",
+        "selected_position": "P",
+        "status": ""
+      },
+      {
+        "name": "Daniel Palencia",
+        "player_key": "458.p.60121",
+        "position": "RP",
+        "team": "CHC",
+        "selected_position": "P",
+        "status": ""
+      },
+      {
+        "name": "Hunter Brown",
+        "player_key": "458.p.12141",
+        "position": "SP",
+        "team": "HOU",
+        "selected_position": "BN",
+        "status": ""
+      },
+      {
+        "name": "Matthew Boyd",
+        "player_key": "458.p.10011",
+        "position": "SP",
+        "team": "CHC",
+        "selected_position": "BN",
+        "status": ""
+      },
+      {
+        "name": "Cade Cavalli",
+        "player_key": "458.p.12007",
+        "position": "SP",
+        "team": "WSH",
+        "selected_position": "BN",
+        "status": ""
+      },
+      {
+        "name": "Grant Taylor",
+        "player_key": "458.p.63027",
+        "position": "SP,RP",
+        "team": "CWS",
+        "selected_position": "BN",
+        "status": ""
+      },
+      {
+        "name": "Ozzie Albies",
+        "player_key": "458.p.10237",
+        "position": "2B",
+        "team": "ATL",
+        "selected_position": "IL",
+        "status": "DTD"
+      },
+      {
+        "name": "Roman Anthony",
+        "player_key": "458.p.60108",
+        "position": "LF,CF,RF",
+        "team": "BOS",
+        "selected_position": "IL",
+        "status": "DTD"
+      },
+      {
+        "name": "Zack Wheeler",
+        "player_key": "458.p.9124",
+        "position": "SP",
+        "team": "PHI",
+        "selected_position": "IL",
+        "status": "IL60"
+      },
+      {
+        "name": "JJ Wetherholt",
+        "player_key": "458.p.64317",
+        "position": "SS",
+        "team": "STL",
+        "selected_position": "NA",
+        "status": "NA"
+      },
+      {
+        "name": "Leo De Vries",
+        "player_key": "458.p.64101",
+        "position": "SS",
+        "team": "ATH",
+        "selected_position": "NA",
+        "status": "NA"
+      }
+    ]
+  },
+  "458.l.40288.t.8": {
+    "manager": "Billy",
+    "team_name": "Detroit Tigers",
+    "team_key": "458.l.40288.t.8",
+    "players": [
+      {
+        "name": "Drake Baldwin",
+        "player_key": "458.p.60077",
+        "position": "C",
+        "team": "ATL",
+        "selected_position": "C",
+        "status": ""
+      },
+      {
+        "name": "Coby Mayo",
+        "player_key": "458.p.12372",
+        "position": "1B,3B",
+        "team": "BAL",
+        "selected_position": "1B",
+        "status": ""
+      },
+      {
+        "name": "Jordan Westburg",
+        "player_key": "458.p.12122",
+        "position": "2B,3B",
+        "team": "BAL",
+        "selected_position": "2B",
+        "status": ""
+      },
+      {
+        "name": "Javier Báez",
+        "player_key": "458.p.9557",
+        "position": "2B,3B,SS,CF",
+        "team": "DET",
+        "selected_position": "3B",
+        "status": ""
+      },
+      {
+        "name": "Francisco Lindor",
+        "player_key": "458.p.9116",
+        "position": "SS",
+        "team": "NYM",
+        "selected_position": "SS",
+        "status": "DTD"
+      },
+      {
+        "name": "Jeremiah Jackson",
+        "player_key": "458.p.11325",
+        "position": "3B,SS,RF",
+        "team": "BAL",
+        "selected_position": "IF",
+        "status": ""
+      },
+      {
+        "name": "Riley Greene",
+        "player_key": "458.p.11760",
+        "position": "LF,CF,RF",
+        "team": "DET",
+        "selected_position": "LF",
+        "status": ""
+      },
+      {
+        "name": "Austin Martin",
+        "player_key": "458.p.12026",
+        "position": "2B,LF,CF",
+        "team": "MIN",
+        "selected_position": "CF",
+        "status": ""
+      },
+      {
+        "name": "Corbin Carroll",
+        "player_key": "458.p.11722",
+        "position": "CF,RF",
+        "team": "AZ",
+        "selected_position": "RF",
+        "status": ""
+      },
+      {
+        "name": "Jackson Merrill",
+        "player_key": "458.p.12522",
+        "position": "CF",
+        "team": "SD",
+        "selected_position": "OF",
+        "status": ""
+      },
+      {
+        "name": "Shohei Ohtani (Batter)",
+        "player_key": "458.p.1000001",
+        "position": "Util",
+        "team": "LAD",
+        "selected_position": "Util",
+        "status": ""
+      },
+      {
+        "name": "Parker Meadows",
+        "player_key": "458.p.11310",
+        "position": "CF",
+        "team": "DET",
+        "selected_position": "Util",
+        "status": ""
+      },
+      {
+        "name": "Cedric Mullins",
+        "player_key": "458.p.10849",
+        "position": "CF",
+        "team": "TB",
+        "selected_position": "BN",
+        "status": ""
+      },
+      {
+        "name": "Wenceel Pérez",
+        "player_key": "458.p.11761",
+        "position": "CF,RF",
+        "team": "DET",
+        "selected_position": "BN",
+        "status": ""
+      },
+      {
+        "name": "Jesús Luzardo",
+        "player_key": "458.p.10627",
+        "position": "SP",
+        "team": "PHI",
+        "selected_position": "SP",
+        "status": ""
+      },
+      {
+        "name": "Shota Imanaga",
+        "player_key": "458.p.63640",
+        "position": "SP",
+        "team": "CHC",
+        "selected_position": "SP",
+        "status": ""
+      },
+      {
+        "name": "Yu Darvish",
+        "player_key": "458.p.9095",
+        "position": "SP",
+        "team": "SD",
+        "selected_position": "SP",
+        "status": ""
+      },
+      {
+        "name": "Nick Lodolo",
+        "player_key": "458.p.11750",
+        "position": "SP",
+        "team": "CIN",
+        "selected_position": "SP",
+        "status": ""
+      },
+      {
+        "name": "Cade Smith",
+        "player_key": "458.p.60016",
+        "position": "RP",
+        "team": "CLE",
+        "selected_position": "RP",
+        "status": ""
+      },
+      {
+        "name": "Jhoan Duran",
+        "player_key": "458.p.11495",
+        "position": "RP",
+        "team": "PHI",
+        "selected_position": "RP",
+        "status": ""
+      },
+      {
+        "name": "Tony Santillan",
+        "player_key": "458.p.10864",
+        "position": "RP",
+        "team": "CIN",
+        "selected_position": "RP",
+        "status": ""
+      },
+      {
+        "name": "Bryan King",
+        "player_key": "458.p.64014",
+        "position": "RP",
+        "team": "HOU",
+        "selected_position": "P",
+        "status": ""
+      },
+      {
+        "name": "George Kirby",
+        "player_key": "458.p.11826",
+        "position": "SP",
+        "team": "SEA",
+        "selected_position": "P",
+        "status": ""
+      },
+      {
+        "name": "Tyler Kinley",
+        "player_key": "458.p.10985",
+        "position": "RP",
+        "team": "ATL",
+        "selected_position": "P",
+        "status": ""
+      },
+      {
+        "name": "Jack Flaherty",
+        "player_key": "458.p.10592",
+        "position": "SP",
+        "team": "DET",
+        "selected_position": "BN",
+        "status": ""
+      },
+      {
+        "name": "Bryce Elder",
+        "player_key": "458.p.12120",
+        "position": "SP",
+        "team": "ATL",
+        "selected_position": "BN",
+        "status": ""
+      },
+      {
+        "name": "Matthew Liberatore",
+        "player_key": "458.p.11397",
+        "position": "SP,RP",
+        "team": "STL",
+        "selected_position": "BN",
+        "status": ""
+      },
+      {
+        "name": "Kyle Stowers",
+        "player_key": "458.p.11733",
+        "position": "LF,CF,RF",
+        "team": "MIA",
+        "selected_position": "IL",
+        "status": "DTD"
+      },
+      {
+        "name": "Kris Bubic",
+        "player_key": "458.p.11319",
+        "position": "SP,RP",
+        "team": "KC",
+        "selected_position": "IL",
+        "status": "IL60"
+      },
+      {
+        "name": "Spencer Arrighetti",
+        "player_key": "458.p.60188",
+        "position": "SP",
+        "team": "HOU",
+        "selected_position": "IL",
+        "status": "DTD"
+      }
+    ]
+  },
+  "458.l.40288.t.9": {
+    "manager": "YWC",
+    "team_name": "Houston Astros",
+    "team_key": "458.l.40288.t.9",
+    "players": [
+      {
+        "name": "Yainer Diaz",
+        "player_key": "458.p.12435",
+        "position": "C,1B",
+        "team": "HOU",
+        "selected_position": "C",
+        "status": ""
+      },
+      {
+        "name": "Matt Olson",
+        "player_key": "458.p.9605",
+        "position": "1B",
+        "team": "ATL",
+        "selected_position": "1B",
+        "status": ""
+      },
+      {
+        "name": "Luis Arraez",
+        "player_key": "458.p.11221",
+        "position": "1B,2B",
+        "team": "SF",
+        "selected_position": "2B",
+        "status": ""
+      },
+      {
+        "name": "Miguel Andujar",
+        "player_key": "458.p.10544",
+        "position": "3B,LF",
+        "team": "SD",
+        "selected_position": "3B",
+        "status": ""
+      },
+      {
+        "name": "Ernie Clement",
+        "player_key": "458.p.11892",
+        "position": "1B,2B,3B,SS",
+        "team": "TOR",
+        "selected_position": "SS",
+        "status": ""
+      },
+      {
+        "name": "Tyler Freeman",
+        "player_key": "458.p.11754",
+        "position": "2B,SS,CF,RF",
+        "team": "COL",
+        "selected_position": "IF",
+        "status": "DTD"
+      },
+      {
+        "name": "Harrison Bader",
+        "player_key": "458.p.10591",
+        "position": "LF,CF,RF",
+        "team": "SF",
+        "selected_position": "LF",
+        "status": "DTD"
+      },
+      {
+        "name": "Jeff McNeil",
+        "player_key": "458.p.11118",
+        "position": "2B,LF,CF,RF",
+        "team": "ATH",
+        "selected_position": "CF",
+        "status": ""
+      },
+      {
+        "name": "Trevor Larnach",
+        "player_key": "458.p.11347",
+        "position": "LF,RF",
+        "team": "MIN",
+        "selected_position": "RF",
+        "status": ""
+      },
+      {
+        "name": "Steven Kwan",
+        "player_key": "458.p.12314",
+        "position": "LF",
+        "team": "CLE",
+        "selected_position": "OF",
+        "status": ""
+      },
+      {
+        "name": "Spencer Horwitz",
+        "player_key": "458.p.12742",
+        "position": "1B,2B",
+        "team": "PIT",
+        "selected_position": "Util",
+        "status": ""
+      },
+      {
+        "name": "J.P. Crawford",
+        "player_key": "458.p.9610",
+        "position": "SS",
+        "team": "SEA",
+        "selected_position": "Util",
+        "status": ""
+      },
+      {
+        "name": "Jake Meyers",
+        "player_key": "458.p.11913",
+        "position": "CF",
+        "team": "HOU",
+        "selected_position": "BN",
+        "status": "DTD"
+      },
+      {
+        "name": "Jake Burger",
+        "player_key": "458.p.10877",
+        "position": "1B,3B",
+        "team": "TEX",
+        "selected_position": "BN",
+        "status": "DTD"
+      },
+      {
+        "name": "Matt Wallner",
+        "player_key": "458.p.11795",
+        "position": "LF,RF",
+        "team": "MIN",
+        "selected_position": "BN",
+        "status": "DTD"
+      },
+      {
+        "name": "Joey Loperfido",
+        "player_key": "458.p.63561",
+        "position": "LF,CF,RF",
+        "team": "HOU",
+        "selected_position": "BN",
+        "status": ""
+      },
+      {
+        "name": "Framber Valdez",
+        "player_key": "458.p.11138",
+        "position": "SP",
+        "team": "DET",
+        "selected_position": "SP",
+        "status": ""
+      },
+      {
+        "name": "Joe Ryan",
+        "player_key": "458.p.11847",
+        "position": "SP",
+        "team": "MIN",
+        "selected_position": "SP",
+        "status": ""
+      },
+      {
+        "name": "Logan Gilbert",
+        "player_key": "458.p.11381",
+        "position": "SP",
+        "team": "SEA",
+        "selected_position": "SP",
+        "status": ""
+      },
+      {
+        "name": "Cole Sands",
+        "player_key": "458.p.12156",
+        "position": "SP,RP",
+        "team": "MIN",
+        "selected_position": "SP",
+        "status": ""
+      },
+      {
+        "name": "Raisel Iglesias",
+        "player_key": "458.p.9902",
+        "position": "RP",
+        "team": "ATL",
+        "selected_position": "RP",
+        "status": ""
+      },
+      {
+        "name": "Jose A. Ferrer",
+        "player_key": "458.p.12723",
+        "position": "RP",
+        "team": "SEA",
+        "selected_position": "RP",
+        "status": ""
+      },
+      {
+        "name": "Jeremiah Estrada",
+        "player_key": "458.p.12687",
+        "position": "RP",
+        "team": "SD",
+        "selected_position": "RP",
+        "status": ""
+      },
+      {
+        "name": "Eduard Bazardo",
+        "player_key": "458.p.12092",
+        "position": "RP",
+        "team": "SEA",
+        "selected_position": "P",
+        "status": ""
+      },
+      {
+        "name": "Adrian Morejon",
+        "player_key": "458.p.10574",
+        "position": "RP",
+        "team": "SD",
+        "selected_position": "P",
+        "status": ""
+      },
+      {
+        "name": "Steven Okert",
+        "player_key": "458.p.10109",
+        "position": "RP",
+        "team": "HOU",
+        "selected_position": "P",
+        "status": ""
+      },
+      {
+        "name": "Andrew Abbott",
+        "player_key": "458.p.12395",
+        "position": "SP",
+        "team": "CIN",
+        "selected_position": "BN",
+        "status": ""
+      },
+      {
+        "name": "Josh Hader",
+        "player_key": "458.p.10131",
+        "position": "RP",
+        "team": "HOU",
+        "selected_position": "IL",
+        "status": "DTD"
+      }
+    ]
+  },
+  "458.l.40288.t.10": {
+    "manager": "哈寶好",
+    "team_name": "Kansas City Royals",
+    "team_key": "458.l.40288.t.10",
+    "players": [
+      {
+        "name": "J.T. Realmuto",
+        "player_key": "458.p.9718",
+        "position": "C",
+        "team": "PHI",
+        "selected_position": "C",
+        "status": ""
+      },
+      {
+        "name": "Salvador Perez",
+        "player_key": "458.p.9015",
+        "position": "C,1B",
+        "team": "KC",
+        "selected_position": "1B",
+        "status": ""
+      },
+      {
+        "name": "Adam Frazier",
+        "player_key": "458.p.10322",
+        "position": "2B,3B,LF,RF",
+        "team": "LAA",
+        "selected_position": "2B",
+        "status": "NA"
+      },
+      {
+        "name": "Maikel Garcia",
+        "player_key": "458.p.12336",
+        "position": "2B,3B,SS,OF",
+        "team": "KC",
+        "selected_position": "3B",
+        "status": ""
+      },
+      {
+        "name": "Bryson Stott",
+        "player_key": "458.p.11817",
+        "position": "2B,SS",
+        "team": "PHI",
+        "selected_position": "SS",
+        "status": ""
+      },
+      {
+        "name": "Vinnie Pasquantino",
+        "player_key": "458.p.12449",
+        "position": "1B",
+        "team": "KC",
+        "selected_position": "IF",
+        "status": ""
+      },
+      {
+        "name": "Masataka Yoshida",
+        "player_key": "458.p.12763",
+        "position": "LF",
+        "team": "BOS",
+        "selected_position": "LF",
+        "status": ""
+      },
+      {
+        "name": "Trent Grisham",
+        "player_key": "458.p.10522",
+        "position": "CF",
+        "team": "NYY",
+        "selected_position": "CF",
+        "status": ""
+      },
+      {
+        "name": "Kerry Carpenter",
+        "player_key": "458.p.12667",
+        "position": "LF,RF",
+        "team": "DET",
+        "selected_position": "RF",
+        "status": ""
+      },
+      {
+        "name": "Brent Rooker",
+        "player_key": "458.p.10917",
+        "position": "LF,RF",
+        "team": "ATH",
+        "selected_position": "OF",
+        "status": ""
+      },
+      {
+        "name": "Freddy Fermin",
+        "player_key": "458.p.12013",
+        "position": "C",
+        "team": "SD",
+        "selected_position": "Util",
+        "status": ""
+      },
+      {
+        "name": "Dansby Swanson",
+        "player_key": "458.p.10234",
+        "position": "SS",
+        "team": "CHC",
+        "selected_position": "Util",
+        "status": ""
+      },
+      {
+        "name": "Brendan Donovan",
+        "player_key": "458.p.12351",
+        "position": "2B,3B,SS,LF",
+        "team": "SEA",
+        "selected_position": "BN",
+        "status": "DTD"
+      },
+      {
+        "name": "Carter Jensen",
+        "player_key": "458.p.12451",
+        "position": "C",
+        "team": "KC",
+        "selected_position": "BN",
+        "status": ""
+      },
+      {
+        "name": "Noah Cameron",
+        "player_key": "458.p.60211",
+        "position": "SP",
+        "team": "KC",
+        "selected_position": "SP",
+        "status": ""
+      },
+      {
+        "name": "Max Fried",
+        "player_key": "458.p.9620",
+        "position": "SP",
+        "team": "NYY",
+        "selected_position": "SP",
+        "status": ""
+      },
+      {
+        "name": "Stephen Kolek",
+        "player_key": "458.p.60645",
+        "position": "SP,RP",
+        "team": "KC",
+        "selected_position": "SP",
+        "status": ""
+      },
+      {
+        "name": "Logan Webb",
+        "player_key": "458.p.11235",
+        "position": "SP",
+        "team": "SF",
+        "selected_position": "SP",
+        "status": ""
+      },
+      {
+        "name": "Lucas Erceg",
+        "player_key": "458.p.10659",
+        "position": "RP",
+        "team": "KC",
+        "selected_position": "RP",
+        "status": "DTD"
+      },
+      {
+        "name": "Kenley Jansen",
+        "player_key": "458.p.8758",
+        "position": "RP",
+        "team": "DET",
+        "selected_position": "RP",
+        "status": ""
+      },
+      {
+        "name": "Aroldis Chapman",
+        "player_key": "458.p.8616",
+        "position": "RP",
+        "team": "BOS",
+        "selected_position": "RP",
+        "status": ""
+      },
+      {
+        "name": "Michael Wacha",
+        "player_key": "458.p.9329",
+        "position": "SP",
+        "team": "KC",
+        "selected_position": "P",
+        "status": ""
+      },
+      {
+        "name": "Tomoyuki Sugano",
+        "player_key": "458.p.64895",
+        "position": "SP",
+        "team": "COL",
+        "selected_position": "P",
+        "status": ""
+      },
+      {
+        "name": "Yusei Kikuchi",
+        "player_key": "458.p.11263",
+        "position": "SP",
+        "team": "LAA",
+        "selected_position": "P",
+        "status": "DTD"
+      },
+      {
+        "name": "Cole Ragans",
+        "player_key": "458.p.10610",
+        "position": "SP",
+        "team": "KC",
+        "selected_position": "BN",
+        "status": ""
+      },
+      {
+        "name": "Sean Murphy",
+        "player_key": "458.p.10929",
+        "position": "C",
+        "team": "ATL",
+        "selected_position": "IL",
+        "status": "DTD"
+      },
+      {
+        "name": "Seth Lugo",
+        "player_key": "458.p.10326",
+        "position": "SP",
+        "team": "KC",
+        "selected_position": "IL",
+        "status": "DTD"
+      },
+      {
+        "name": "Félix Bautista",
+        "player_key": "458.p.12346",
+        "position": "RP",
+        "team": "BAL",
+        "selected_position": "IL",
+        "status": "DTD"
+      },
+      {
+        "name": "Roki Sasaki",
+        "player_key": "458.p.64803",
+        "position": "SP",
+        "team": "LAD",
+        "selected_position": "IL",
+        "status": ""
+      },
+      {
+        "name": "Sebastian Walcott",
+        "player_key": "458.p.63633",
+        "position": "3B,SS",
+        "team": "TEX",
+        "selected_position": "NA",
+        "status": "NA"
+      },
+      {
+        "name": "Jurrangelo Cijntje",
+        "player_key": "458.p.64350",
+        "position": "SP",
+        "team": "STL",
+        "selected_position": "NA",
+        "status": "NA"
+      }
+    ]
+  },
+  "458.l.40288.t.11": {
+    "manager": "小喆",
+    "team_name": "Centennial Rockies",
+    "team_key": "458.l.40288.t.11",
+    "players": [
+      {
+        "name": "Kyle Teel",
+        "player_key": "458.p.62979",
+        "position": "C",
+        "team": "CWS",
+        "selected_position": "C",
+        "status": ""
+      },
+      {
+        "name": "Pete Alonso",
+        "player_key": "458.p.10918",
+        "position": "1B",
+        "team": "BAL",
+        "selected_position": "1B",
+        "status": ""
+      },
+      {
+        "name": "Nick Gonzales",
+        "player_key": "458.p.12049",
+        "position": "2B,SS",
+        "team": "PIT",
+        "selected_position": "2B",
+        "status": ""
+      },
+      {
+        "name": "Casey Schmitt",
+        "player_key": "458.p.12544",
+        "position": "1B,2B,3B,SS",
+        "team": "SF",
+        "selected_position": "3B",
+        "status": ""
+      },
+      {
+        "name": "Ezequiel Tovar",
+        "player_key": "458.p.12322",
+        "position": "SS",
+        "team": "COL",
+        "selected_position": "SS",
+        "status": ""
+      },
+      {
+        "name": "Alex Freeland",
+        "player_key": "458.p.62354",
+        "position": "2B,3B,SS",
+        "team": "LAD",
+        "selected_position": "IF",
+        "status": ""
+      },
+      {
+        "name": "Jarren Duran",
+        "player_key": "458.p.11735",
+        "position": "LF,CF",
+        "team": "BOS",
+        "selected_position": "LF",
+        "status": ""
+      },
+      {
+        "name": "Andy Pages",
+        "player_key": "458.p.12148",
+        "position": "LF,CF,RF",
+        "team": "LAD",
+        "selected_position": "CF",
+        "status": ""
+      },
+      {
+        "name": "Heliot Ramos",
+        "player_key": "458.p.10944",
+        "position": "LF,CF,RF",
+        "team": "SF",
+        "selected_position": "RF",
+        "status": ""
+      },
+      {
+        "name": "Teoscar Hernández",
+        "player_key": "458.p.10366",
+        "position": "LF,RF",
+        "team": "LAD",
+        "selected_position": "OF",
+        "status": ""
+      },
+      {
+        "name": "Brenton Doyle",
+        "player_key": "458.p.12136",
+        "position": "CF",
+        "team": "COL",
+        "selected_position": "Util",
+        "status": ""
+      },
+      {
+        "name": "Gabriel Moreno",
+        "player_key": "458.p.11855",
+        "position": "C",
+        "team": "AZ",
+        "selected_position": "Util",
+        "status": ""
+      },
+      {
+        "name": "Isaac Paredes",
+        "player_key": "458.p.10881",
+        "position": "1B,3B",
+        "team": "HOU",
+        "selected_position": "BN",
+        "status": ""
+      },
+      {
+        "name": "Tanner Bibee",
+        "player_key": "458.p.60137",
+        "position": "SP",
+        "team": "CLE",
+        "selected_position": "SP",
+        "status": ""
+      },
+      {
+        "name": "Yoshinobu Yamamoto",
+        "player_key": "458.p.63423",
+        "position": "SP",
+        "team": "LAD",
+        "selected_position": "SP",
+        "status": ""
+      },
+      {
+        "name": "Jacob deGrom",
+        "player_key": "458.p.9701",
+        "position": "SP",
+        "team": "TEX",
+        "selected_position": "SP",
+        "status": ""
+      },
+      {
+        "name": "Bailey Ober",
+        "player_key": "458.p.12096",
+        "position": "SP",
+        "team": "MIN",
+        "selected_position": "SP",
+        "status": ""
+      },
+      {
+        "name": "Alex Vesia",
+        "player_key": "458.p.11920",
+        "position": "RP",
+        "team": "LAD",
+        "selected_position": "RP",
+        "status": "DTD"
+      },
+      {
+        "name": "Jason Adam",
+        "player_key": "458.p.11009",
+        "position": "RP",
+        "team": "SD",
+        "selected_position": "RP",
+        "status": "IL60"
+      },
+      {
+        "name": "Emmet Sheehan",
+        "player_key": "458.p.60238",
+        "position": "SP",
+        "team": "LAD",
+        "selected_position": "P",
+        "status": ""
+      },
+      {
+        "name": "Ben Casparius",
+        "player_key": "458.p.64785",
+        "position": "SP,RP",
+        "team": "LAD",
+        "selected_position": "P",
+        "status": ""
+      },
+      {
+        "name": "Blake Treinen",
+        "player_key": "458.p.9672",
+        "position": "RP",
+        "team": "LAD",
+        "selected_position": "P",
+        "status": ""
+      },
+      {
+        "name": "Tyler Glasnow",
+        "player_key": "458.p.9616",
+        "position": "SP",
+        "team": "LAD",
+        "selected_position": "BN",
+        "status": ""
+      },
+      {
+        "name": "Jose Quintana",
+        "player_key": "458.p.9176",
+        "position": "SP",
+        "team": "COL",
+        "selected_position": "BN",
+        "status": ""
+      },
+      {
+        "name": "Chase Dollander",
+        "player_key": "458.p.62975",
+        "position": "SP",
+        "team": "COL",
+        "selected_position": "BN",
+        "status": "DTD"
+      },
+      {
+        "name": "Joe Boyle",
+        "player_key": "458.p.60134",
+        "position": "SP",
+        "team": "TB",
+        "selected_position": "BN",
+        "status": ""
+      },
+      {
+        "name": "Gavin Stone",
+        "player_key": "458.p.60231",
+        "position": "SP",
+        "team": "LAD",
+        "selected_position": "BN",
+        "status": "IL60"
+      },
+      {
+        "name": "Jonathan Aranda",
+        "player_key": "458.p.12309",
+        "position": "1B,2B",
+        "team": "TB",
+        "selected_position": "IL",
+        "status": ""
+      },
+      {
+        "name": "Thairo Estrada",
+        "player_key": "458.p.10923",
+        "position": "2B",
+        "team": "BAL",
+        "selected_position": "IL",
+        "status": "IL60"
+      },
+      {
+        "name": "Dustin May",
+        "player_key": "458.p.10898",
+        "position": "SP",
+        "team": "STL",
+        "selected_position": "IL",
+        "status": "DTD"
+      },
+      {
+        "name": "Rhett Lowder",
+        "player_key": "458.p.62977",
+        "position": "SP",
+        "team": "CIN",
+        "selected_position": "IL",
+        "status": "IL60"
+      },
+      {
+        "name": "Zac Veen",
+        "player_key": "458.p.12133",
+        "position": "LF,RF",
+        "team": "COL",
+        "selected_position": "NA",
+        "status": ""
+      }
+    ]
+  },
+  "458.l.40288.t.12": {
+    "manager": "Hyper",
+    "team_name": "Arizona",
+    "team_key": "458.l.40288.t.12",
+    "players": [
+      {
+        "name": "William Contreras",
+        "player_key": "458.p.11268",
+        "position": "C",
+        "team": "MIL",
+        "selected_position": "C",
+        "status": ""
+      },
+      {
+        "name": "Yandy Díaz",
+        "player_key": "458.p.10465",
+        "position": "1B",
+        "team": "TB",
+        "selected_position": "1B",
+        "status": ""
+      },
+      {
+        "name": "Chase Meidroth",
+        "player_key": "458.p.62504",
+        "position": "2B,3B,SS",
+        "team": "CWS",
+        "selected_position": "2B",
+        "status": ""
+      },
+      {
+        "name": "Junior Caminero",
+        "player_key": "458.p.60419",
+        "position": "3B",
+        "team": "TB",
+        "selected_position": "3B",
+        "status": ""
+      },
+      {
+        "name": "Carlos Correa",
+        "player_key": "458.p.9573",
+        "position": "3B,SS",
+        "team": "HOU",
+        "selected_position": "SS",
+        "status": ""
+      },
+      {
+        "name": "Luis García Jr.",
+        "player_key": "458.p.10964",
+        "position": "2B",
+        "team": "WSH",
+        "selected_position": "IF",
+        "status": ""
+      },
+      {
+        "name": "Ramón Laureano",
+        "player_key": "458.p.11124",
+        "position": "LF,CF,RF",
+        "team": "SD",
+        "selected_position": "LF",
+        "status": "DTD"
+      },
+      {
+        "name": "Brandon Nimmo",
+        "player_key": "458.p.9876",
+        "position": "LF,CF",
+        "team": "TEX",
+        "selected_position": "CF",
+        "status": ""
+      },
+      {
+        "name": "Dylan Crews",
+        "player_key": "458.p.62971",
+        "position": "CF,RF",
+        "team": "WSH",
+        "selected_position": "RF",
+        "status": ""
+      },
+      {
+        "name": "Marcell Ozuna",
+        "player_key": "458.p.9385",
+        "position": "LF",
+        "team": "PIT",
+        "selected_position": "OF",
+        "status": ""
+      },
+      {
+        "name": "Bryan Reynolds",
+        "player_key": "458.p.10577",
+        "position": "LF,CF,RF",
+        "team": "PIT",
+        "selected_position": "Util",
+        "status": ""
+      },
+      {
+        "name": "Blaze Alexander",
+        "player_key": "458.p.11415",
+        "position": "2B,3B,SS",
+        "team": "BAL",
+        "selected_position": "Util",
+        "status": ""
+      },
+      {
+        "name": "Alejandro Kirk",
+        "player_key": "458.p.11853",
+        "position": "C",
+        "team": "TOR",
+        "selected_position": "BN",
+        "status": ""
+      },
+      {
+        "name": "Xander Bogaerts",
+        "player_key": "458.p.9319",
+        "position": "2B,SS",
+        "team": "SD",
+        "selected_position": "BN",
+        "status": ""
+      },
+      {
+        "name": "Trevor Rogers",
+        "player_key": "458.p.10909",
+        "position": "SP",
+        "team": "BAL",
+        "selected_position": "SP",
+        "status": ""
+      },
+      {
+        "name": "Nick Pivetta",
+        "player_key": "458.p.10683",
+        "position": "SP",
+        "team": "SD",
+        "selected_position": "SP",
+        "status": ""
+      },
+      {
+        "name": "Ryan Weathers",
+        "player_key": "458.p.11379",
+        "position": "SP",
+        "team": "NYY",
+        "selected_position": "SP",
+        "status": ""
+      },
+      {
+        "name": "Ryne Nelson",
+        "player_key": "458.p.12356",
+        "position": "SP,RP",
+        "team": "AZ",
+        "selected_position": "SP",
+        "status": ""
+      },
+      {
+        "name": "Will Vest",
+        "player_key": "458.p.12110",
+        "position": "RP",
+        "team": "DET",
+        "selected_position": "RP",
+        "status": ""
+      },
+      {
+        "name": "Phil Maton",
+        "player_key": "458.p.10729",
+        "position": "RP",
+        "team": "CHC",
+        "selected_position": "RP",
+        "status": ""
+      },
+      {
+        "name": "Jordan Leasure",
+        "player_key": "458.p.62085",
+        "position": "RP",
+        "team": "CWS",
+        "selected_position": "RP",
+        "status": ""
+      },
+      {
+        "name": "Andrew Saalfrank",
+        "player_key": "458.p.61757",
+        "position": "RP",
+        "team": "AZ",
+        "selected_position": "P",
+        "status": ""
+      },
+      {
+        "name": "Victor Vodnik",
+        "player_key": "458.p.12368",
+        "position": "RP",
+        "team": "COL",
+        "selected_position": "P",
+        "status": ""
+      },
+      {
+        "name": "Cade Povich",
+        "player_key": "458.p.60658",
+        "position": "SP",
+        "team": "BAL",
+        "selected_position": "P",
+        "status": ""
+      },
+      {
+        "name": "Joey Cantillo",
+        "player_key": "458.p.11823",
+        "position": "SP,RP",
+        "team": "CLE",
+        "selected_position": "BN",
+        "status": ""
+      },
+      {
+        "name": "Robbie Ray",
+        "player_key": "458.p.9691",
+        "position": "SP",
+        "team": "SF",
+        "selected_position": "BN",
+        "status": ""
+      },
+      {
+        "name": "Kodai Senga",
+        "player_key": "458.p.12776",
+        "position": "SP",
+        "team": "NYM",
+        "selected_position": "BN",
+        "status": ""
+      },
+      {
+        "name": "Brandon Woodruff",
+        "player_key": "458.p.10730",
+        "position": "SP",
+        "team": "MIL",
+        "selected_position": "IL",
+        "status": "DTD"
+      },
+      {
+        "name": "Nathan Eovaldi",
+        "player_key": "458.p.9007",
+        "position": "SP",
+        "team": "TEX",
+        "selected_position": "IL",
+        "status": "IL60"
+      },
+      {
+        "name": "Justin Martinez",
+        "player_key": "458.p.12750",
+        "position": "RP",
+        "team": "AZ",
+        "selected_position": "IL",
+        "status": "DTD"
+      },
+      {
+        "name": "A.J. Puk",
+        "player_key": "458.p.10548",
+        "position": "SP,RP",
+        "team": "AZ",
+        "selected_position": "IL",
+        "status": "DTD"
+      },
+      {
+        "name": "Colt Emerson",
+        "player_key": "458.p.62954",
+        "position": "SS",
+        "team": "SEA",
+        "selected_position": "NA",
+        "status": "NA"
+      },
+      {
+        "name": "Walker Jenkins",
+        "player_key": "458.p.62962",
+        "position": "CF",
+        "team": "MIN",
+        "selected_position": "NA",
+        "status": "NA"
+      }
+    ]
+  },
+  "458.l.40288.t.13": {
+    "manager": "TIMMY LIU",
+    "team_name": "Boston Red Sox",
+    "team_key": "458.l.40288.t.13",
+    "players": [
+      {
+        "name": "Hunter Goodman",
+        "player_key": "458.p.12409",
+        "position": "C,LF,RF",
+        "team": "COL",
+        "selected_position": "C",
+        "status": ""
+      },
+      {
+        "name": "Michael Busch",
+        "player_key": "458.p.11778",
+        "position": "1B",
+        "team": "CHC",
+        "selected_position": "1B",
+        "status": ""
+      },
+      {
+        "name": "Brice Turang",
+        "player_key": "458.p.11343",
+        "position": "2B",
+        "team": "MIL",
+        "selected_position": "2B",
+        "status": ""
+      },
+      {
+        "name": "Brett Baty",
+        "player_key": "458.p.11796",
+        "position": "2B,3B",
+        "team": "NYM",
+        "selected_position": "3B",
+        "status": "DTD"
+      },
+      {
+        "name": "Trevor Story",
+        "player_key": "458.p.9571",
+        "position": "SS",
+        "team": "BOS",
+        "selected_position": "SS",
+        "status": ""
+      },
+      {
+        "name": "Rhys Hoskins",
+        "player_key": "458.p.10556",
+        "position": "1B",
+        "team": "CLE",
+        "selected_position": "IF",
+        "status": "NA"
+      },
+      {
+        "name": "TJ Friedl",
+        "player_key": "458.p.11290",
+        "position": "LF,CF",
+        "team": "CIN",
+        "selected_position": "LF",
+        "status": ""
+      },
+      {
+        "name": "Ceddanne Rafaela",
+        "player_key": "458.p.12730",
+        "position": "2B,SS,CF",
+        "team": "BOS",
+        "selected_position": "CF",
+        "status": ""
+      },
+      {
+        "name": "José Caballero",
+        "player_key": "458.p.60776",
+        "position": "2B,3B,SS,LF,RF",
+        "team": "NYY",
+        "selected_position": "RF",
+        "status": ""
+      },
+      {
+        "name": "Spencer Steer",
+        "player_key": "458.p.12688",
+        "position": "1B,LF",
+        "team": "CIN",
+        "selected_position": "OF",
+        "status": ""
+      },
+      {
+        "name": "Andrew Vaughn",
+        "player_key": "458.p.11866",
+        "position": "1B",
+        "team": "MIL",
+        "selected_position": "Util",
+        "status": ""
+      },
+      {
+        "name": "Nathaniel Lowe",
+        "player_key": "458.p.11090",
+        "position": "1B",
+        "team": "CIN",
+        "selected_position": "Util",
+        "status": "NA"
+      },
+      {
+        "name": "Geraldo Perdomo",
+        "player_key": "458.p.11417",
+        "position": "SS",
+        "team": "AZ",
+        "selected_position": "BN",
+        "status": ""
+      },
+      {
+        "name": "Wilyer Abreu",
+        "player_key": "458.p.12731",
+        "position": "LF,CF,RF",
+        "team": "BOS",
+        "selected_position": "BN",
+        "status": ""
+      },
+      {
+        "name": "Miguel Vargas",
+        "player_key": "458.p.11781",
+        "position": "1B,3B,LF",
+        "team": "CWS",
+        "selected_position": "BN",
+        "status": ""
+      },
+      {
+        "name": "Eric Lauer",
+        "player_key": "458.p.10576",
+        "position": "SP,RP",
+        "team": "TOR",
+        "selected_position": "SP",
+        "status": ""
+      },
+      {
+        "name": "Tarik Skubal",
+        "player_key": "458.p.11763",
+        "position": "SP",
+        "team": "DET",
+        "selected_position": "SP",
+        "status": ""
+      },
+      {
+        "name": "Walker Buehler",
+        "player_key": "458.p.10509",
+        "position": "SP",
+        "team": "SD",
+        "selected_position": "SP",
+        "status": "NA"
+      },
+      {
+        "name": "Zac Gallen",
+        "player_key": "458.p.11116",
+        "position": "SP",
+        "team": "AZ",
+        "selected_position": "SP",
+        "status": ""
+      },
+      {
+        "name": "Bryan Abreu",
+        "player_key": "458.p.11208",
+        "position": "RP",
+        "team": "HOU",
+        "selected_position": "RP",
+        "status": ""
+      },
+      {
+        "name": "Ian Seymour",
+        "player_key": "458.p.60418",
+        "position": "SP,RP",
+        "team": "TB",
+        "selected_position": "RP",
+        "status": ""
+      },
+      {
+        "name": "David Bednar",
+        "player_key": "458.p.11645",
+        "position": "RP",
+        "team": "NYY",
+        "selected_position": "RP",
+        "status": ""
+      },
+      {
+        "name": "Chris Martin",
+        "player_key": "458.p.9684",
+        "position": "RP",
+        "team": "TEX",
+        "selected_position": "P",
+        "status": "DTD"
+      },
+      {
+        "name": "Merrill Kelly",
+        "player_key": "458.p.11251",
+        "position": "SP",
+        "team": "AZ",
+        "selected_position": "P",
+        "status": ""
+      },
+      {
+        "name": "Edwin Díaz",
+        "player_key": "458.p.10214",
+        "position": "RP",
+        "team": "LAD",
+        "selected_position": "P",
+        "status": ""
+      },
+      {
+        "name": "Ranger Suárez",
+        "player_key": "458.p.11117",
+        "position": "SP",
+        "team": "BOS",
+        "selected_position": "BN",
+        "status": ""
+      },
+      {
+        "name": "Spencer Strider",
+        "player_key": "458.p.12281",
+        "position": "SP",
+        "team": "ATL",
+        "selected_position": "BN",
+        "status": ""
+      },
+      {
+        "name": "Kyle Tucker",
+        "player_key": "458.p.10480",
+        "position": "RF",
+        "team": "LAD",
+        "selected_position": "IL",
+        "status": ""
+      },
+      {
+        "name": "Marcus Semien",
+        "player_key": "458.p.9517",
+        "position": "2B",
+        "team": "NYM",
+        "selected_position": "IL",
+        "status": "IL60"
+      },
+      {
+        "name": "Carson Whisenhunt",
+        "player_key": "458.p.60381",
+        "position": "SP",
+        "team": "SF",
+        "selected_position": "IL",
+        "status": ""
+      },
+      {
+        "name": "Ryan Gusto",
+        "player_key": "458.p.63918",
+        "position": "SP,RP",
+        "team": "MIA",
+        "selected_position": "IL",
+        "status": "DTD"
+      },
+      {
+        "name": "Travis Bazzana",
+        "player_key": "458.p.64311",
+        "position": "2B",
+        "team": "CLE",
+        "selected_position": "NA",
+        "status": "NA"
+      }
+    ]
+  },
+  "458.l.40288.t.14": {
+    "manager": "謙謙",
+    "team_name": "New York Yankees",
+    "team_key": "458.l.40288.t.14",
+    "players": [
+      {
+        "name": "Cal Raleigh",
+        "player_key": "458.p.11531",
+        "position": "C",
+        "team": "SEA",
+        "selected_position": "C",
+        "status": ""
+      },
+      {
+        "name": "Ben Rice",
+        "player_key": "458.p.62137",
+        "position": "C,1B",
+        "team": "NYY",
+        "selected_position": "1B",
+        "status": ""
+      },
+      {
+        "name": "Nico Hoerner",
+        "player_key": "458.p.11284",
+        "position": "2B,SS",
+        "team": "CHC",
+        "selected_position": "2B",
+        "status": ""
+      },
+      {
+        "name": "Vladimir Guerrero Jr.",
+        "player_key": "458.p.10621",
+        "position": "1B,3B",
+        "team": "TOR",
+        "selected_position": "3B",
+        "status": ""
+      },
+      {
+        "name": "Romy Gonzalez",
+        "player_key": "458.p.12262",
+        "position": "1B,2B,3B,SS",
+        "team": "BOS",
+        "selected_position": "SS",
+        "status": ""
+      },
+      {
+        "name": "Anthony Volpe",
+        "player_key": "458.p.11809",
+        "position": "SS",
+        "team": "NYY",
+        "selected_position": "IF",
+        "status": "DTD"
+      },
+      {
+        "name": "Cody Bellinger",
+        "player_key": "458.p.10504",
+        "position": "1B,LF,CF,RF",
+        "team": "NYY",
+        "selected_position": "LF",
+        "status": ""
+      },
+      {
+        "name": "Jazz Chisholm Jr.",
+        "player_key": "458.p.10839",
+        "position": "2B,3B,CF",
+        "team": "NYY",
+        "selected_position": "CF",
+        "status": ""
+      },
+      {
+        "name": "Giancarlo Stanton",
+        "player_key": "458.p.8634",
+        "position": "LF,RF",
+        "team": "NYY",
+        "selected_position": "RF",
+        "status": ""
+      },
+      {
+        "name": "Aaron Judge",
+        "player_key": "458.p.9877",
+        "position": "LF,CF,RF",
+        "team": "NYY",
+        "selected_position": "OF",
+        "status": ""
+      },
+      {
+        "name": "Zach Cole",
+        "player_key": "458.p.62421",
+        "position": "LF,CF,RF",
+        "team": "HOU",
+        "selected_position": "Util",
+        "status": ""
+      },
+      {
+        "name": "Christian Yelich",
+        "player_key": "458.p.9320",
+        "position": "LF",
+        "team": "MIL",
+        "selected_position": "Util",
+        "status": ""
+      },
+      {
+        "name": "Jeremy Peña",
+        "player_key": "458.p.11768",
+        "position": "SS",
+        "team": "HOU",
+        "selected_position": "BN",
+        "status": "DTD"
+      },
+      {
+        "name": "Jung Hoo Lee",
+        "player_key": "458.p.63494",
+        "position": "CF",
+        "team": "SF",
+        "selected_position": "BN",
+        "status": ""
+      },
+      {
+        "name": "Shawn Armstrong",
+        "player_key": "458.p.10047",
+        "position": "SP,RP",
+        "team": "CLE",
+        "selected_position": "SP",
+        "status": ""
+      },
+      {
+        "name": "Mike Vasil",
+        "player_key": "458.p.60281",
+        "position": "SP,RP",
+        "team": "CWS",
+        "selected_position": "SP",
+        "status": ""
+      },
+      {
+        "name": "Michael Lorenzen (Pitcher)",
+        "player_key": "458.p.9949",
+        "position": "SP,RP",
+        "team": "COL",
+        "selected_position": "SP",
+        "status": ""
+      },
+      {
+        "name": "Logan Allen",
+        "player_key": "458.p.60139",
+        "position": "SP",
+        "team": "CLE",
+        "selected_position": "SP",
+        "status": ""
+      },
+      {
+        "name": "Greg Weissert",
+        "player_key": "458.p.12685",
+        "position": "RP",
+        "team": "BOS",
+        "selected_position": "RP",
+        "status": ""
+      },
+      {
+        "name": "Gabe Speier",
+        "player_key": "458.p.11653",
+        "position": "RP",
+        "team": "SEA",
+        "selected_position": "RP",
+        "status": ""
+      },
+      {
+        "name": "Tyler Rogers",
+        "player_key": "458.p.11644",
+        "position": "RP",
+        "team": "TOR",
+        "selected_position": "RP",
+        "status": ""
+      },
+      {
+        "name": "Hoby Milner",
+        "player_key": "458.p.10736",
+        "position": "RP",
+        "team": "CHC",
+        "selected_position": "P",
+        "status": ""
+      },
+      {
+        "name": "Tim Hill",
+        "player_key": "458.p.10986",
+        "position": "RP",
+        "team": "NYY",
+        "selected_position": "P",
+        "status": ""
+      },
+      {
+        "name": "Orion Kerkering",
+        "player_key": "458.p.60329",
+        "position": "RP",
+        "team": "PHI",
+        "selected_position": "P",
+        "status": ""
+      },
+      {
+        "name": "Nabil Crismatt",
+        "player_key": "458.p.12020",
+        "position": "SP,RP",
+        "team": "TEX",
+        "selected_position": "BN",
+        "status": "NA"
+      },
+      {
+        "name": "Taijuan Walker",
+        "player_key": "458.p.9321",
+        "position": "SP,RP",
+        "team": "PHI",
+        "selected_position": "BN",
+        "status": ""
+      },
+      {
+        "name": "Colin Rea",
+        "player_key": "458.p.10048",
+        "position": "SP,RP",
+        "team": "CHC",
+        "selected_position": "BN",
+        "status": ""
+      },
+      {
+        "name": "Corey Seager",
+        "player_key": "458.p.9584",
+        "position": "SS",
+        "team": "TEX",
+        "selected_position": "IL",
+        "status": "DTD"
+      },
+      {
+        "name": "Martín Pérez",
+        "player_key": "458.p.8652",
+        "position": "SP",
+        "team": "ATL",
+        "selected_position": "IL",
+        "status": "NA"
+      },
+      {
+        "name": "Corbin Burnes",
+        "player_key": "458.p.10910",
+        "position": "SP",
+        "team": "AZ",
+        "selected_position": "IL",
+        "status": "DTD"
+      },
+      {
+        "name": "Max Clark",
+        "player_key": "458.p.62974",
+        "position": "CF",
+        "team": "DET",
+        "selected_position": "NA",
+        "status": "NA"
+      },
+      {
+        "name": "Spencer Jones",
+        "player_key": "458.p.60294",
+        "position": "CF",
+        "team": "NYY",
+        "selected_position": "NA",
+        "status": ""
+      }
+    ]
+  },
+  "458.l.40288.t.15": {
+    "manager": "魚魚",
+    "team_name": "Seattle Mariners",
+    "team_key": "458.l.40288.t.15",
+    "players": [
+      {
+        "name": "Carson Kelly",
+        "player_key": "458.p.10395",
+        "position": "C",
+        "team": "CHC",
+        "selected_position": "C",
+        "status": ""
+      },
+      {
+        "name": "Spencer Torkelson",
+        "player_key": "458.p.11914",
+        "position": "1B",
+        "team": "DET",
+        "selected_position": "1B",
+        "status": ""
+      },
+      {
+        "name": "Ketel Marte",
+        "player_key": "458.p.10036",
+        "position": "2B",
+        "team": "AZ",
+        "selected_position": "2B",
+        "status": ""
+      },
+      {
+        "name": "Ryan McMahon",
+        "player_key": "458.p.10175",
+        "position": "3B",
+        "team": "NYY",
+        "selected_position": "3B",
+        "status": ""
+      },
+      {
+        "name": "Cole Young",
+        "player_key": "458.p.60580",
+        "position": "2B,SS",
+        "team": "SEA",
+        "selected_position": "SS",
+        "status": ""
+      },
+      {
+        "name": "Jac Caglianone",
+        "player_key": "458.p.64312",
+        "position": "1B,RF",
+        "team": "KC",
+        "selected_position": "IF",
+        "status": ""
+      },
+      {
+        "name": "Randy Arozarena",
+        "player_key": "458.p.11104",
+        "position": "LF,CF",
+        "team": "SEA",
+        "selected_position": "LF",
+        "status": ""
+      },
+      {
+        "name": "Julio Rodríguez",
+        "player_key": "458.p.11384",
+        "position": "CF",
+        "team": "SEA",
+        "selected_position": "CF",
+        "status": ""
+      },
+      {
+        "name": "Mike Trout",
+        "player_key": "458.p.8861",
+        "position": "CF,RF",
+        "team": "LAA",
+        "selected_position": "RF",
+        "status": ""
+      },
+      {
+        "name": "Oneil Cruz",
+        "player_key": "458.p.11370",
+        "position": "SS,CF",
+        "team": "PIT",
+        "selected_position": "OF",
+        "status": ""
+      },
+      {
+        "name": "Alec Bohm",
+        "player_key": "458.p.11365",
+        "position": "1B,3B",
+        "team": "PHI",
+        "selected_position": "Util",
+        "status": ""
+      },
+      {
+        "name": "Nick Kurtz",
+        "player_key": "458.p.64313",
+        "position": "1B",
+        "team": "ATH",
+        "selected_position": "Util",
+        "status": ""
+      },
+      {
+        "name": "Nick Castellanos",
+        "player_key": "458.p.9108",
+        "position": "RF",
+        "team": "SD",
+        "selected_position": "BN",
+        "status": ""
+      },
+      {
+        "name": "Kristian Campbell",
+        "player_key": "458.p.63128",
+        "position": "2B,CF",
+        "team": "BOS",
+        "selected_position": "BN",
+        "status": ""
+      },
+      {
+        "name": "Paul Skenes",
+        "player_key": "458.p.62972",
+        "position": "SP",
+        "team": "PIT",
+        "selected_position": "SP",
+        "status": ""
+      },
+      {
+        "name": "Bryan Woo",
+        "player_key": "458.p.60584",
+        "position": "SP",
+        "team": "SEA",
+        "selected_position": "SP",
+        "status": ""
+      },
+      {
+        "name": "Luis Castillo",
+        "player_key": "458.p.10514",
+        "position": "SP",
+        "team": "SEA",
+        "selected_position": "SP",
+        "status": ""
+      },
+      {
+        "name": "Dylan Cease",
+        "player_key": "458.p.10438",
+        "position": "SP",
+        "team": "TOR",
+        "selected_position": "SP",
+        "status": ""
+      },
+      {
+        "name": "Robert Garcia",
+        "player_key": "458.p.60615",
+        "position": "RP",
+        "team": "TEX",
+        "selected_position": "RP",
+        "status": ""
+      },
+      {
+        "name": "Reid Detmers",
+        "player_key": "458.p.11926",
+        "position": "SP,RP",
+        "team": "LAA",
+        "selected_position": "RP",
+        "status": "IL60"
+      },
+      {
+        "name": "Ryan Walker",
+        "player_key": "458.p.61627",
+        "position": "RP",
+        "team": "SF",
+        "selected_position": "RP",
+        "status": ""
+      },
+      {
+        "name": "Matt Brash",
+        "player_key": "458.p.12278",
+        "position": "RP",
+        "team": "SEA",
+        "selected_position": "P",
+        "status": ""
+      },
+      {
+        "name": "Gregory Soto",
+        "player_key": "458.p.10882",
+        "position": "RP",
+        "team": "PIT",
+        "selected_position": "P",
+        "status": ""
+      },
+      {
+        "name": "Camilo Doval",
+        "player_key": "458.p.11536",
+        "position": "RP",
+        "team": "NYY",
+        "selected_position": "P",
+        "status": ""
+      },
+      {
+        "name": "Gavin Williams",
+        "player_key": "458.p.12401",
+        "position": "SP",
+        "team": "CLE",
+        "selected_position": "BN",
+        "status": ""
+      },
+      {
+        "name": "Lucas Giolito",
+        "player_key": "458.p.9640",
+        "position": "SP",
+        "team": "BOS",
+        "selected_position": "BN",
+        "status": "NA"
+      },
+      {
+        "name": "Mitch Keller",
+        "player_key": "458.p.10565",
+        "position": "SP",
+        "team": "PIT",
+        "selected_position": "BN",
+        "status": ""
+      },
+      {
+        "name": "Tyler O'Neill",
+        "player_key": "458.p.10215",
+        "position": "LF,RF",
+        "team": "BAL",
+        "selected_position": "IL",
+        "status": ""
+      },
+      {
+        "name": "Edward Cabrera",
+        "player_key": "458.p.10903",
+        "position": "SP",
+        "team": "CHC",
+        "selected_position": "IL",
+        "status": ""
+      },
+      {
+        "name": "Shane McClanahan",
+        "player_key": "458.p.11398",
+        "position": "SP",
+        "team": "TB",
+        "selected_position": "IL",
+        "status": "IL60"
+      },
+      {
+        "name": "Bryce Eldridge",
+        "player_key": "458.p.62957",
+        "position": "1B",
+        "team": "SF",
+        "selected_position": "NA",
+        "status": "DTD"
+      },
+      {
+        "name": "Andrew Painter",
+        "player_key": "458.p.60592",
+        "position": "SP",
+        "team": "PHI",
+        "selected_position": "NA",
+        "status": ""
+      }
+    ]
+  },
+  "458.l.40288.t.16": {
+    "manager": "Ponpon",
+    "team_name": "Tampa Bay Rays",
+    "team_key": "458.l.40288.t.16",
+    "players": [
+      {
+        "name": "Patrick Bailey",
+        "player_key": "458.p.12054",
+        "position": "C",
+        "team": "SF",
+        "selected_position": "C",
+        "status": ""
+      },
+      {
+        "name": "Rafael Devers",
+        "player_key": "458.p.10235",
+        "position": "1B,3B",
+        "team": "SF",
+        "selected_position": "1B",
+        "status": ""
+      },
+      {
+        "name": "Brandon Lowe",
+        "player_key": "458.p.11125",
+        "position": "1B,2B",
+        "team": "PIT",
+        "selected_position": "2B",
+        "status": ""
+      },
+      {
+        "name": "Alex Bregman",
+        "player_key": "458.p.10183",
+        "position": "3B",
+        "team": "CHC",
+        "selected_position": "3B",
+        "status": ""
+      },
+      {
+        "name": "Willy Adames",
+        "player_key": "458.p.9893",
+        "position": "SS",
+        "team": "SF",
+        "selected_position": "SS",
+        "status": ""
+      },
+      {
+        "name": "Carson Williams",
+        "player_key": "458.p.12556",
+        "position": "SS",
+        "team": "TB",
+        "selected_position": "IF",
+        "status": ""
+      },
+      {
+        "name": "Taylor Ward",
+        "player_key": "458.p.10496",
+        "position": "LF",
+        "team": "BAL",
+        "selected_position": "LF",
+        "status": ""
+      },
+      {
+        "name": "Michael Harris II",
+        "player_key": "458.p.12056",
+        "position": "CF",
+        "team": "ATL",
+        "selected_position": "CF",
+        "status": ""
+      },
+      {
+        "name": "Josh Lowe",
+        "player_key": "458.p.10601",
+        "position": "LF,CF,RF",
+        "team": "LAA",
+        "selected_position": "RF",
+        "status": ""
+      },
+      {
+        "name": "Chandler Simpson",
+        "player_key": "458.p.60420",
+        "position": "LF,CF",
+        "team": "TB",
+        "selected_position": "OF",
+        "status": ""
+      },
+      {
+        "name": "Anthony Santander",
+        "player_key": "458.p.10666",
+        "position": "LF,RF",
+        "team": "TOR",
+        "selected_position": "Util",
+        "status": "DTD"
+      },
+      {
+        "name": "Cam Smith",
+        "player_key": "458.p.64330",
+        "position": "3B,RF",
+        "team": "HOU",
+        "selected_position": "Util",
+        "status": ""
+      },
+      {
+        "name": "Adolis García",
+        "player_key": "458.p.11127",
+        "position": "RF",
+        "team": "PHI",
+        "selected_position": "BN",
+        "status": ""
+      },
+      {
+        "name": "Clayton Kershaw",
+        "player_key": "458.p.8180",
+        "position": "SP",
+        "team": "LAD",
+        "selected_position": "SP",
+        "status": "NA"
+      },
+      {
+        "name": "Brandon Pfaadt",
+        "player_key": "458.p.60056",
+        "position": "SP",
+        "team": "AZ",
+        "selected_position": "SP",
+        "status": ""
+      },
+      {
+        "name": "Luis Gil",
+        "player_key": "458.p.11689",
+        "position": "SP",
+        "team": "NYY",
+        "selected_position": "SP",
+        "status": ""
+      },
+      {
+        "name": "Freddy Peralta",
+        "player_key": "458.p.11014",
+        "position": "SP",
+        "team": "NYM",
+        "selected_position": "SP",
+        "status": ""
+      },
+      {
+        "name": "Robert Suarez",
+        "player_key": "458.p.12354",
+        "position": "RP",
+        "team": "ATL",
+        "selected_position": "RP",
+        "status": ""
+      },
+      {
+        "name": "Pete Fairbanks",
+        "player_key": "458.p.11597",
+        "position": "RP",
+        "team": "MIA",
+        "selected_position": "RP",
+        "status": ""
+      },
+      {
+        "name": "Edwin Uceta",
+        "player_key": "458.p.11482",
+        "position": "RP",
+        "team": "TB",
+        "selected_position": "RP",
+        "status": ""
+      },
+      {
+        "name": "Hunter Gaddis",
+        "player_key": "458.p.12665",
+        "position": "RP",
+        "team": "CLE",
+        "selected_position": "P",
+        "status": ""
+      },
+      {
+        "name": "Seranthony Domínguez",
+        "player_key": "458.p.11011",
+        "position": "RP",
+        "team": "CWS",
+        "selected_position": "P",
+        "status": ""
+      },
+      {
+        "name": "Ronny Henriquez",
+        "player_key": "458.p.12328",
+        "position": "RP",
+        "team": "MIA",
+        "selected_position": "P",
+        "status": ""
+      },
+      {
+        "name": "Garrett Crochet",
+        "player_key": "458.p.12046",
+        "position": "SP",
+        "team": "BOS",
+        "selected_position": "BN",
+        "status": ""
+      },
+      {
+        "name": "Drew Rasmussen",
+        "player_key": "458.p.11789",
+        "position": "SP,RP",
+        "team": "TB",
+        "selected_position": "BN",
+        "status": ""
+      },
+      {
+        "name": "Shane Bieber",
+        "player_key": "458.p.10867",
+        "position": "SP",
+        "team": "TOR",
+        "selected_position": "BN",
+        "status": ""
+      },
+      {
+        "name": "Shane Baz",
+        "player_key": "458.p.10934",
+        "position": "SP",
+        "team": "BAL",
+        "selected_position": "BN",
+        "status": ""
+      },
+      {
+        "name": "Lance McCullers Jr.",
+        "player_key": "458.p.9575",
+        "position": "SP",
+        "team": "HOU",
+        "selected_position": "IL",
+        "status": ""
+      },
+      {
+        "name": "Jackson Jobe",
+        "player_key": "458.p.12422",
+        "position": "SP,RP",
+        "team": "DET",
+        "selected_position": "IL",
+        "status": "IL60"
+      },
+      {
+        "name": "Chen-Wei Lin",
+        "player_key": "458.p.63094",
+        "position": "SP",
+        "team": "STL",
+        "selected_position": "NA",
+        "status": "NA"
+      }
+    ]
+  }
+}
