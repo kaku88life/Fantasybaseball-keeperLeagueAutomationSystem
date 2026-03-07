@@ -125,6 +125,8 @@ def _infer_keep_action(transition, player) -> str:
     action_lower = transition.action.lower()
     if "release" in action_lower:
         return "release"
+    if "rookie" in action_lower or "bench rookie" in action_lower:
+        return "rookie"
     if "activate" in action_lower:
         return "activate"
     if "extension" in action_lower or "extend" in action_lower:
@@ -358,7 +360,7 @@ def _validate_selections(year: int, team_id: int, selections_db: list[dict]) -> 
         next_salary = transition.next_contract.salary
         next_type = transition.next_contract.contract_type.value
 
-        if next_type == "R" and action == "keep":
+        if next_type == "R" and (action == "keep" or action == "rookie"):
             bench_count += 1
             keeper_cost += next_salary
         elif action == "activate":

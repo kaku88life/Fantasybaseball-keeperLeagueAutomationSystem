@@ -55,6 +55,9 @@ export function getKeeperCategory(
   // O contract = FA, cannot keep
   if (contractType === "O") return "none";
 
+  // A contract designated as rookie -> bench
+  if (contractType === "A" && action === "rookie") return "bench";
+
   // R contract kept on bench
   if (contractType === "R" && action === "keep") return "bench";
 
@@ -104,7 +107,7 @@ export function validateSelections(
       keeperCost += nextSalary;
     } else if (category === "bench") {
       benchCount++;
-      // R bench keepers don't count toward salary cap
+      keeperCost += nextSalary;
     }
 
     // O contract cannot be kept
@@ -202,6 +205,7 @@ export function getActionLabel(
   switch (contractType) {
     case "A":
       if (keepAction === "keep") return "留用 → B 約 (薪資不變)";
+      if (keepAction === "rookie") return "指定為 R 約 (板凳新秀)";
       break;
     case "B":
       if (keepAction === "keep") return "留用 → O 約 (薪資不變，最後一年)";
@@ -219,7 +223,7 @@ export function getActionLabel(
     case "O":
       return "O 約到期 → 自由球員";
     case "R":
-      if (keepAction === "keep") return "板凳留用 (不計薪資)";
+      if (keepAction === "keep") return "板凳留用 (保持 R 約)";
       if (keepAction === "activate") return "啟用 → A 約 (進入正規合約)";
       break;
   }
@@ -242,6 +246,7 @@ export function getNextContractDisplay(
   switch (contractType) {
     case "A":
       if (action === "keep") return `$${currentSalary}/B`;
+      if (action === "rookie") return `$${currentSalary}/R`;
       break;
     case "B":
       if (action === "keep") return `$${currentSalary}/O`;
