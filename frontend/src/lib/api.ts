@@ -158,6 +158,42 @@ export async function approveSubmission(
   });
 }
 
+export async function getSubmissionDetail(
+  year: number,
+  teamId: number,
+): Promise<import("@/types").SubmissionDetail> {
+  return request(`/api/commissioner/submissions/${year}/${teamId}`);
+}
+
+export async function unlockSubmission(
+  year: number,
+  teamId: number,
+): Promise<{ message: string }> {
+  return request(`/api/commissioner/unlock/${year}/${teamId}`, {
+    method: "POST",
+  });
+}
+
+export async function getUsers(): Promise<import("@/types").UserWithTeam[]> {
+  return request("/api/commissioner/users");
+}
+
+export async function assignTeam(
+  userId: number,
+  teamId: number,
+): Promise<{ message: string }> {
+  return request("/api/commissioner/assign-team", {
+    method: "POST",
+    body: JSON.stringify({ user_id: userId, team_id: teamId }),
+  });
+}
+
+export async function setCommissioner(userId: number): Promise<{ message: string }> {
+  return request(`/api/commissioner/set-commissioner/${userId}`, {
+    method: "POST",
+  });
+}
+
 export async function importExcel(file: File, year: number): Promise<{
   year: number;
   teams_count: number;

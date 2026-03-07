@@ -11,6 +11,7 @@ from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 
 from api.database import (
     approve_submission,
+    delete_submission,
     get_all_submissions,
     get_all_teams,
     get_team_by_id,
@@ -240,3 +241,22 @@ async def set_commissioner(
         conn.close()
 
     return {"message": f"User {target['yahoo_nickname']} is now commissioner"}
+
+
+@router.post("/unlock/{year}/{team_id}")
+async def unlock_submission(
+    year: int,
+    team_id: int,
+    user: dict = Depends(get_current_commissioner),
+):
+    """Unlock a team's submission so they can re-edit. Keeper selections are preserved."""
+    from api.database import get_submission
+
+    sub = get_submission(year, team_id)
+    if not sub:
+        raise HTTPException(status_code=404, detail="No submission found")
+
+    delete_submission(year, team_id)
+    team = get_team_by_id(team_id)
+    manager = team["manager_name"] if team else f"team {team_id}"
+    return {"message": f"Submission unlocked for {manager}", "year": year, "team_id": team_id}

@@ -380,3 +380,16 @@ def approve_submission(year: int, team_id: int, approved: bool, notes: str = "")
         conn.commit()
     finally:
         conn.close()
+
+
+def delete_submission(year: int, team_id: int):
+    """Delete a submission record (unlock). Keeper selections are preserved."""
+    conn = get_db()
+    try:
+        conn.execute(
+            "DELETE FROM keeper_submissions WHERE year = ? AND team_id = ?",
+            (year, team_id),
+        )
+        conn.commit()
+    finally:
+        conn.close()

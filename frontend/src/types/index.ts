@@ -134,6 +134,32 @@ export interface SubmissionStatus {
   commissioner_notes: string;
 }
 
+// Commissioner - Submission detail
+export interface SubmissionDetail {
+  team_id: number;
+  manager_name: string;
+  team_name: string;
+  submitted_at: string;
+  selections: KeeperSelection[];
+  validation_result: ValidationResult | null;
+  is_valid: boolean;
+  commissioner_approved: boolean;
+  commissioner_notes: string;
+}
+
+// Commissioner - User with team info
+export interface UserWithTeam {
+  id: number;
+  yahoo_guid: string;
+  yahoo_nickname: string;
+  yahoo_email: string;
+  team_id: number | null;
+  is_commissioner: number;
+  last_login: string;
+  manager_name: string | null;
+  team_name: string | null;
+}
+
 // League settings
 export interface LeagueSettings {
   league_name: string;
