@@ -4,9 +4,7 @@
 # Excel parsing
 openpyxl>=3.1.0
 
-# Yahoo Fantasy API
-yahoo_oauth>=2.0
-yahoo_fantasy_api>=3.3.0
+# Yahoo Fantasy API (direct HTTP via requests)
 requests>=2.31.0
 
 # Environment variables
