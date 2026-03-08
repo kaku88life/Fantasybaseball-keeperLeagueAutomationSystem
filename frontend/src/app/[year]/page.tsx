@@ -230,7 +230,7 @@ function SeasonEndTab({
                   球員人數 <span className="text-gray-400">Players</span>:
                 </span>
                 <span>
-                  {t.active_keepers} 活躍{" "}
+                  {t.active_keepers}{" "}
                   <span className="text-gray-400">Active</span>
                   {t.bench_keepers > 0 && (
                     <>

@@ -73,7 +73,7 @@ export default function RulesPage() {
           <h2 className="mb-1 text-lg font-semibold">留用規則</h2>
           <p className="mb-3 text-xs text-gray-400">Keeper Rules</p>
           <dl className="grid grid-cols-2 gap-y-2 text-sm">
-            <dt className="text-gray-500">活躍留用人數</dt>
+            <dt className="text-gray-500">留用人數</dt>
             <dd>
               {settings.keeper_active_min} ~ {settings.keeper_active_max} 人
               (A/B/N/O)
@@ -85,7 +85,7 @@ export default function RulesPage() {
           </dl>
           <div className="mt-3 rounded bg-amber-50 p-3 text-xs text-amber-800">
             留用者 = 你要帶到下一季的球員。每隊最少留{" "}
-            {settings.keeper_active_min} 位活躍球員，最多{" "}
+            {settings.keeper_active_min} 位球員，最多{" "}
             {settings.keeper_active_max} 位，外加最多{" "}
             {settings.keeper_bench_max} 位板凳新秀 (R)。
           </div>

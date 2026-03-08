@@ -120,18 +120,18 @@ export function validateSelections(
   if (activeCount < KEEPER_ACTIVE_MIN) {
     if (totalSelections >= totalPlayers) {
       errors.push(
-        `活躍留用人數不足: ${activeCount} 人（最少 ${KEEPER_ACTIVE_MIN} 人）`,
+        `留用人數不足: ${activeCount} 人（最少 ${KEEPER_ACTIVE_MIN} 人）`,
       );
     } else {
       warnings.push(
-        `目前活躍留用: ${activeCount} 人（最少 ${KEEPER_ACTIVE_MIN} 人，尚未全部選擇）`,
+        `目前留用: ${activeCount} 人（最少 ${KEEPER_ACTIVE_MIN} 人，尚未全部選擇）`,
       );
     }
   }
 
   if (activeCount > KEEPER_ACTIVE_MAX) {
     errors.push(
-      `活躍留用人數超標: ${activeCount} 人（最多 ${KEEPER_ACTIVE_MAX} 人）`,
+      `留用人數超標: ${activeCount} 人（最多 ${KEEPER_ACTIVE_MAX} 人）`,
     );
   }
 
