@@ -47,9 +47,13 @@ _default_origins = [
 _extra = os.getenv("ALLOWED_ORIGINS", "")
 _extra_origins = [o.strip() for o in _extra.split(",") if o.strip()] if _extra else []
 _frontend_url = os.getenv("FRONTEND_URL", "")
+# Ensure FRONTEND_URL has https:// prefix
+if _frontend_url and not _frontend_url.startswith("http"):
+    _frontend_url = f"https://{_frontend_url}"
 _all_origins = list(dict.fromkeys(
     _extra_origins + ([_frontend_url] if _frontend_url else []) + _default_origins
 ))
+print(f"[CORS] Allowed origins: {_all_origins}")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=_all_origins,
@@ -64,6 +68,11 @@ app.include_router(league.router, prefix="/api/league", tags=["league"])
 app.include_router(teams.router, prefix="/api/teams", tags=["teams"])
 app.include_router(commissioner.router, prefix="/api/commissioner", tags=["commissioner"])
 app.include_router(validation.router, prefix="/api/validate", tags=["validation"])
+
+
+@app.get("/")
+async def root():
+    return {"status": "ok", "service": "keeper-league-api", "docs": "/docs"}
 
 
 @app.get("/api/health")
