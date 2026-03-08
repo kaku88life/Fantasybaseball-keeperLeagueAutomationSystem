@@ -19,7 +19,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 load_dotenv(project_root / ".env")
 
-from api.database import init_db
+from api.database import init_db, seed_if_empty
 from api.routers import auth, commissioner, league, players, teams, validation
 
 
@@ -27,6 +27,7 @@ from api.routers import auth, commissioner, league, players, teams, validation
 async def lifespan(app: FastAPI):
     """Startup / shutdown events."""
     await init_db()
+    seed_if_empty()
     yield
 
 

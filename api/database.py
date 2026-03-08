@@ -1,104 +1,136 @@
 """
-Fantasy Baseball Keeper League - SQLite Database Setup
+Fantasy Baseball Keeper League - PostgreSQL Database Setup
 """
 from __future__ import annotations
 
 import json
 import os
-import sqlite3
-from pathlib import Path
 from typing import Optional
 
-DATABASE_PATH = os.getenv(
-    "DATABASE_PATH",
-    str(Path(__file__).resolve().parent.parent / "data" / "keeper_league.db"),
+import psycopg2
+import psycopg2.extras
+
+DATABASE_URL = os.getenv(
+    "DATABASE_URL",
+    "postgresql://localhost:5432/keeper_league",
 )
 
-SCHEMA_SQL = """
-CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    yahoo_guid TEXT UNIQUE NOT NULL,
-    yahoo_nickname TEXT,
-    yahoo_email TEXT,
-    team_id INTEGER REFERENCES teams(id),
-    is_commissioner INTEGER DEFAULT 0,
-    created_at TEXT DEFAULT (datetime('now')),
-    last_login TEXT
-);
+SCHEMA_STATEMENTS = [
+    """
+    CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        yahoo_guid TEXT UNIQUE NOT NULL,
+        yahoo_nickname TEXT,
+        yahoo_email TEXT,
+        team_id INTEGER,
+        is_commissioner INTEGER DEFAULT 0,
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        last_login TIMESTAMPTZ
+    )
+    """,
+    """
+    CREATE TABLE IF NOT EXISTS teams (
+        id SERIAL PRIMARY KEY,
+        manager_name TEXT NOT NULL UNIQUE,
+        team_name TEXT,
+        yahoo_team_id TEXT,
+        trade_compensation INTEGER DEFAULT 0,
+        faab_adjustment INTEGER DEFAULT 0
+    )
+    """,
+    """
+    CREATE TABLE IF NOT EXISTS league_snapshots (
+        id SERIAL PRIMARY KEY,
+        year INTEGER NOT NULL UNIQUE,
+        imported_at TIMESTAMPTZ DEFAULT NOW(),
+        imported_by INTEGER,
+        source_file TEXT,
+        data TEXT NOT NULL
+    )
+    """,
+    """
+    CREATE TABLE IF NOT EXISTS keeper_selections (
+        id SERIAL PRIMARY KEY,
+        year INTEGER NOT NULL,
+        team_id INTEGER NOT NULL,
+        player_name TEXT NOT NULL,
+        current_contract TEXT NOT NULL,
+        action TEXT NOT NULL,
+        extension_years INTEGER DEFAULT 0,
+        next_contract TEXT,
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        updated_at TIMESTAMPTZ DEFAULT NOW(),
+        UNIQUE(year, team_id, player_name)
+    )
+    """,
+    """
+    CREATE TABLE IF NOT EXISTS keeper_submissions (
+        id SERIAL PRIMARY KEY,
+        year INTEGER NOT NULL,
+        team_id INTEGER NOT NULL,
+        submitted_at TIMESTAMPTZ DEFAULT NOW(),
+        submitted_by INTEGER,
+        selections TEXT NOT NULL,
+        validation_result TEXT,
+        is_valid INTEGER DEFAULT 0,
+        commissioner_approved INTEGER DEFAULT 0,
+        commissioner_notes TEXT,
+        UNIQUE(year, team_id)
+    )
+    """,
+]
 
-CREATE TABLE IF NOT EXISTS teams (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    manager_name TEXT NOT NULL,
-    team_name TEXT,
-    yahoo_team_id TEXT,
-    trade_compensation INTEGER DEFAULT 0,
-    faab_adjustment INTEGER DEFAULT 0,
-    UNIQUE(manager_name)
-);
 
-CREATE TABLE IF NOT EXISTS league_snapshots (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    year INTEGER NOT NULL UNIQUE,
-    imported_at TEXT DEFAULT (datetime('now')),
-    imported_by INTEGER REFERENCES users(id),
-    source_file TEXT,
-    data TEXT NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS keeper_selections (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    year INTEGER NOT NULL,
-    team_id INTEGER NOT NULL REFERENCES teams(id),
-    player_name TEXT NOT NULL,
-    current_contract TEXT NOT NULL,
-    action TEXT NOT NULL,
-    extension_years INTEGER DEFAULT 0,
-    next_contract TEXT,
-    created_at TEXT DEFAULT (datetime('now')),
-    updated_at TEXT DEFAULT (datetime('now')),
-    UNIQUE(year, team_id, player_name)
-);
-
-CREATE TABLE IF NOT EXISTS keeper_submissions (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    year INTEGER NOT NULL,
-    team_id INTEGER NOT NULL REFERENCES teams(id),
-    submitted_at TEXT DEFAULT (datetime('now')),
-    submitted_by INTEGER REFERENCES users(id),
-    selections TEXT NOT NULL,
-    validation_result TEXT,
-    is_valid INTEGER DEFAULT 0,
-    commissioner_approved INTEGER DEFAULT 0,
-    commissioner_notes TEXT,
-    UNIQUE(year, team_id)
-);
-"""
-
-
-def get_db() -> sqlite3.Connection:
-    """Get a synchronous database connection."""
-    Path(DATABASE_PATH).parent.mkdir(parents=True, exist_ok=True)
-    conn = sqlite3.connect(DATABASE_PATH)
-    conn.row_factory = sqlite3.Row
-    conn.execute("PRAGMA journal_mode=WAL")
-    conn.execute("PRAGMA foreign_keys=ON")
+def get_db() -> psycopg2.extensions.connection:
+    """Get a database connection with RealDictCursor."""
+    conn = psycopg2.connect(DATABASE_URL)
     return conn
+
+
+def _fetchone(conn, query: str, params: tuple = ()) -> Optional[dict]:
+    """Execute query and return one row as dict, or None."""
+    with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+        cur.execute(query, params)
+        row = cur.fetchone()
+        return dict(row) if row else None
+
+
+def _fetchall(conn, query: str, params: tuple = ()) -> list[dict]:
+    """Execute query and return all rows as list of dicts."""
+    with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+        cur.execute(query, params)
+        return [dict(row) for row in cur.fetchall()]
 
 
 async def init_db():
     """Initialize the database schema."""
     conn = get_db()
     try:
-        conn.executescript(SCHEMA_SQL)
-        # Migration: add trade_compensation and faab_adjustment columns to existing DBs
-        for col in ("trade_compensation", "faab_adjustment"):
-            try:
-                conn.execute(f"ALTER TABLE teams ADD COLUMN {col} INTEGER DEFAULT 0")
-            except sqlite3.OperationalError:
-                pass  # Column already exists
+        with conn.cursor() as cur:
+            for stmt in SCHEMA_STATEMENTS:
+                cur.execute(stmt)
         conn.commit()
     finally:
         conn.close()
+
+
+def seed_if_empty():
+    """Auto-seed 2026 contract data if DB has no league snapshots."""
+    conn = get_db()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("SELECT COUNT(*) FROM league_snapshots")
+            count = cur.fetchone()[0]
+        if count > 0:
+            print(f"[Seed] League data already present ({count} snapshots). Skipping.")
+            return
+    finally:
+        conn.close()
+
+    print("[Seed] No league data found. Loading 2026 contracts...")
+    from scripts.load_2026_contracts import load_contracts
+    load_contracts()
+    print("[Seed] Contract data loaded successfully.")
 
 
 # ========== Users ==========
@@ -106,10 +138,7 @@ async def init_db():
 def get_user_by_guid(yahoo_guid: str) -> Optional[dict]:
     conn = get_db()
     try:
-        row = conn.execute(
-            "SELECT * FROM users WHERE yahoo_guid = ?", (yahoo_guid,)
-        ).fetchone()
-        return dict(row) if row else None
+        return _fetchone(conn, "SELECT * FROM users WHERE yahoo_guid = %s", (yahoo_guid,))
     finally:
         conn.close()
 
@@ -117,10 +146,7 @@ def get_user_by_guid(yahoo_guid: str) -> Optional[dict]:
 def get_user_by_id(user_id: int) -> Optional[dict]:
     conn = get_db()
     try:
-        row = conn.execute(
-            "SELECT * FROM users WHERE id = ?", (user_id,)
-        ).fetchone()
-        return dict(row) if row else None
+        return _fetchone(conn, "SELECT * FROM users WHERE id = %s", (user_id,))
     finally:
         conn.close()
 
@@ -134,16 +160,17 @@ def upsert_user(
 ) -> dict:
     conn = get_db()
     try:
-        conn.execute(
-            """INSERT INTO users (yahoo_guid, yahoo_nickname, yahoo_email, team_id, is_commissioner, last_login)
-               VALUES (?, ?, ?, ?, ?, datetime('now'))
-               ON CONFLICT(yahoo_guid) DO UPDATE SET
-                   yahoo_nickname = excluded.yahoo_nickname,
-                   yahoo_email = COALESCE(excluded.yahoo_email, yahoo_email),
-                   team_id = COALESCE(excluded.team_id, team_id),
-                   last_login = datetime('now')""",
-            (yahoo_guid, yahoo_nickname, yahoo_email, team_id, int(is_commissioner)),
-        )
+        with conn.cursor() as cur:
+            cur.execute(
+                """INSERT INTO users (yahoo_guid, yahoo_nickname, yahoo_email, team_id, is_commissioner, last_login)
+                   VALUES (%s, %s, %s, %s, %s, NOW())
+                   ON CONFLICT(yahoo_guid) DO UPDATE SET
+                       yahoo_nickname = EXCLUDED.yahoo_nickname,
+                       yahoo_email = COALESCE(EXCLUDED.yahoo_email, users.yahoo_email),
+                       team_id = COALESCE(EXCLUDED.team_id, users.team_id),
+                       last_login = NOW()""",
+                (yahoo_guid, yahoo_nickname, yahoo_email, team_id, int(is_commissioner)),
+            )
         conn.commit()
         return get_user_by_guid(yahoo_guid)
     finally:
@@ -155,8 +182,7 @@ def upsert_user(
 def get_all_teams() -> list[dict]:
     conn = get_db()
     try:
-        rows = conn.execute("SELECT * FROM teams ORDER BY id").fetchall()
-        return [dict(r) for r in rows]
+        return _fetchall(conn, "SELECT * FROM teams ORDER BY id")
     finally:
         conn.close()
 
@@ -164,8 +190,7 @@ def get_all_teams() -> list[dict]:
 def get_team_by_id(team_id: int) -> Optional[dict]:
     conn = get_db()
     try:
-        row = conn.execute("SELECT * FROM teams WHERE id = ?", (team_id,)).fetchone()
-        return dict(row) if row else None
+        return _fetchone(conn, "SELECT * FROM teams WHERE id = %s", (team_id,))
     finally:
         conn.close()
 
@@ -173,10 +198,9 @@ def get_team_by_id(team_id: int) -> Optional[dict]:
 def get_team_by_manager(manager_name: str) -> Optional[dict]:
     conn = get_db()
     try:
-        row = conn.execute(
-            "SELECT * FROM teams WHERE manager_name = ?", (manager_name,)
-        ).fetchone()
-        return dict(row) if row else None
+        return _fetchone(
+            conn, "SELECT * FROM teams WHERE manager_name = %s", (manager_name,)
+        )
     finally:
         conn.close()
 
@@ -184,14 +208,15 @@ def get_team_by_manager(manager_name: str) -> Optional[dict]:
 def upsert_team(manager_name: str, team_name: str = "", yahoo_team_id: str = "") -> dict:
     conn = get_db()
     try:
-        conn.execute(
-            """INSERT INTO teams (manager_name, team_name, yahoo_team_id)
-               VALUES (?, ?, ?)
-               ON CONFLICT(manager_name) DO UPDATE SET
-                   team_name = COALESCE(NULLIF(excluded.team_name, ''), team_name),
-                   yahoo_team_id = COALESCE(NULLIF(excluded.yahoo_team_id, ''), yahoo_team_id)""",
-            (manager_name, team_name, yahoo_team_id),
-        )
+        with conn.cursor() as cur:
+            cur.execute(
+                """INSERT INTO teams (manager_name, team_name, yahoo_team_id)
+                   VALUES (%s, %s, %s)
+                   ON CONFLICT(manager_name) DO UPDATE SET
+                       team_name = COALESCE(NULLIF(EXCLUDED.team_name, ''), teams.team_name),
+                       yahoo_team_id = COALESCE(NULLIF(EXCLUDED.yahoo_team_id, ''), teams.yahoo_team_id)""",
+                (manager_name, team_name, yahoo_team_id),
+            )
         conn.commit()
         return get_team_by_manager(manager_name)
     finally:
@@ -201,11 +226,12 @@ def upsert_team(manager_name: str, team_name: str = "", yahoo_team_id: str = "")
 def update_team_adjustments(team_id: int, trade_compensation: int, faab_adjustment: int):
     conn = get_db()
     try:
-        conn.execute(
-            """UPDATE teams SET trade_compensation = ?, faab_adjustment = ?
-               WHERE id = ?""",
-            (trade_compensation, faab_adjustment, team_id),
-        )
+        with conn.cursor() as cur:
+            cur.execute(
+                """UPDATE teams SET trade_compensation = %s, faab_adjustment = %s
+                   WHERE id = %s""",
+                (trade_compensation, faab_adjustment, team_id),
+            )
         conn.commit()
     finally:
         conn.close()
@@ -216,9 +242,7 @@ def update_team_adjustments(team_id: int, trade_compensation: int, faab_adjustme
 def get_snapshot_years() -> list[int]:
     conn = get_db()
     try:
-        rows = conn.execute(
-            "SELECT year FROM league_snapshots ORDER BY year"
-        ).fetchall()
+        rows = _fetchall(conn, "SELECT year FROM league_snapshots ORDER BY year")
         return [r["year"] for r in rows]
     finally:
         conn.close()
@@ -227,12 +251,11 @@ def get_snapshot_years() -> list[int]:
 def get_snapshot(year: int) -> Optional[dict]:
     conn = get_db()
     try:
-        row = conn.execute(
-            "SELECT * FROM league_snapshots WHERE year = ?", (year,)
-        ).fetchone()
-        if not row:
+        result = _fetchone(
+            conn, "SELECT * FROM league_snapshots WHERE year = %s", (year,)
+        )
+        if not result:
             return None
-        result = dict(row)
         result["data"] = json.loads(result["data"])
         return result
     finally:
@@ -242,16 +265,17 @@ def get_snapshot(year: int) -> Optional[dict]:
 def save_snapshot(year: int, data: dict, source_file: str = "", imported_by: Optional[int] = None):
     conn = get_db()
     try:
-        conn.execute(
-            """INSERT INTO league_snapshots (year, data, source_file, imported_by)
-               VALUES (?, ?, ?, ?)
-               ON CONFLICT(year) DO UPDATE SET
-                   data = excluded.data,
-                   source_file = excluded.source_file,
-                   imported_by = excluded.imported_by,
-                   imported_at = datetime('now')""",
-            (year, json.dumps(data, ensure_ascii=False), source_file, imported_by),
-        )
+        with conn.cursor() as cur:
+            cur.execute(
+                """INSERT INTO league_snapshots (year, data, source_file, imported_by)
+                   VALUES (%s, %s, %s, %s)
+                   ON CONFLICT(year) DO UPDATE SET
+                       data = EXCLUDED.data,
+                       source_file = EXCLUDED.source_file,
+                       imported_by = EXCLUDED.imported_by,
+                       imported_at = NOW()""",
+                (year, json.dumps(data, ensure_ascii=False), source_file, imported_by),
+            )
         conn.commit()
     finally:
         conn.close()
@@ -262,13 +286,13 @@ def save_snapshot(year: int, data: dict, source_file: str = "", imported_by: Opt
 def get_keeper_selections(year: int, team_id: int) -> list[dict]:
     conn = get_db()
     try:
-        rows = conn.execute(
+        return _fetchall(
+            conn,
             """SELECT * FROM keeper_selections
-               WHERE year = ? AND team_id = ?
+               WHERE year = %s AND team_id = %s
                ORDER BY player_name""",
             (year, team_id),
-        ).fetchall()
-        return [dict(r) for r in rows]
+        )
     finally:
         conn.close()
 
@@ -284,18 +308,19 @@ def upsert_keeper_selection(
 ):
     conn = get_db()
     try:
-        conn.execute(
-            """INSERT INTO keeper_selections
-               (year, team_id, player_name, current_contract, action, extension_years, next_contract)
-               VALUES (?, ?, ?, ?, ?, ?, ?)
-               ON CONFLICT(year, team_id, player_name) DO UPDATE SET
-                   current_contract = excluded.current_contract,
-                   action = excluded.action,
-                   extension_years = excluded.extension_years,
-                   next_contract = excluded.next_contract,
-                   updated_at = datetime('now')""",
-            (year, team_id, player_name, current_contract, action, extension_years, next_contract),
-        )
+        with conn.cursor() as cur:
+            cur.execute(
+                """INSERT INTO keeper_selections
+                   (year, team_id, player_name, current_contract, action, extension_years, next_contract)
+                   VALUES (%s, %s, %s, %s, %s, %s, %s)
+                   ON CONFLICT(year, team_id, player_name) DO UPDATE SET
+                       current_contract = EXCLUDED.current_contract,
+                       action = EXCLUDED.action,
+                       extension_years = EXCLUDED.extension_years,
+                       next_contract = EXCLUDED.next_contract,
+                       updated_at = NOW()""",
+                (year, team_id, player_name, current_contract, action, extension_years, next_contract),
+            )
         conn.commit()
     finally:
         conn.close()
@@ -304,10 +329,11 @@ def upsert_keeper_selection(
 def delete_keeper_selections(year: int, team_id: int):
     conn = get_db()
     try:
-        conn.execute(
-            "DELETE FROM keeper_selections WHERE year = ? AND team_id = ?",
-            (year, team_id),
-        )
+        with conn.cursor() as cur:
+            cur.execute(
+                "DELETE FROM keeper_selections WHERE year = %s AND team_id = %s",
+                (year, team_id),
+            )
         conn.commit()
     finally:
         conn.close()
@@ -318,13 +344,13 @@ def delete_keeper_selections(year: int, team_id: int):
 def get_submission(year: int, team_id: int) -> Optional[dict]:
     conn = get_db()
     try:
-        row = conn.execute(
-            "SELECT * FROM keeper_submissions WHERE year = ? AND team_id = ?",
+        result = _fetchone(
+            conn,
+            "SELECT * FROM keeper_submissions WHERE year = %s AND team_id = %s",
             (year, team_id),
-        ).fetchone()
-        if not row:
+        )
+        if not result:
             return None
-        result = dict(row)
         result["selections"] = json.loads(result["selections"])
         if result["validation_result"]:
             result["validation_result"] = json.loads(result["validation_result"])
@@ -336,22 +362,20 @@ def get_submission(year: int, team_id: int) -> Optional[dict]:
 def get_all_submissions(year: int) -> list[dict]:
     conn = get_db()
     try:
-        rows = conn.execute(
+        rows = _fetchall(
+            conn,
             """SELECT ks.*, t.manager_name, t.team_name
                FROM keeper_submissions ks
                JOIN teams t ON ks.team_id = t.id
-               WHERE ks.year = ?
+               WHERE ks.year = %s
                ORDER BY t.manager_name""",
             (year,),
-        ).fetchall()
-        results = []
-        for row in rows:
-            r = dict(row)
+        )
+        for r in rows:
             r["selections"] = json.loads(r["selections"])
             if r["validation_result"]:
                 r["validation_result"] = json.loads(r["validation_result"])
-            results.append(r)
-        return results
+        return rows
     finally:
         conn.close()
 
@@ -366,24 +390,25 @@ def upsert_submission(
 ):
     conn = get_db()
     try:
-        conn.execute(
-            """INSERT INTO keeper_submissions
-               (year, team_id, submitted_by, selections, validation_result, is_valid)
-               VALUES (?, ?, ?, ?, ?, ?)
-               ON CONFLICT(year, team_id) DO UPDATE SET
-                   submitted_at = datetime('now'),
-                   submitted_by = excluded.submitted_by,
-                   selections = excluded.selections,
-                   validation_result = excluded.validation_result,
-                   is_valid = excluded.is_valid,
-                   commissioner_approved = 0""",
-            (
-                year, team_id, submitted_by,
-                json.dumps(selections, ensure_ascii=False),
-                json.dumps(validation_result, ensure_ascii=False),
-                int(is_valid),
-            ),
-        )
+        with conn.cursor() as cur:
+            cur.execute(
+                """INSERT INTO keeper_submissions
+                   (year, team_id, submitted_by, selections, validation_result, is_valid)
+                   VALUES (%s, %s, %s, %s, %s, %s)
+                   ON CONFLICT(year, team_id) DO UPDATE SET
+                       submitted_at = NOW(),
+                       submitted_by = EXCLUDED.submitted_by,
+                       selections = EXCLUDED.selections,
+                       validation_result = EXCLUDED.validation_result,
+                       is_valid = EXCLUDED.is_valid,
+                       commissioner_approved = 0""",
+                (
+                    year, team_id, submitted_by,
+                    json.dumps(selections, ensure_ascii=False),
+                    json.dumps(validation_result, ensure_ascii=False),
+                    int(is_valid),
+                ),
+            )
         conn.commit()
     finally:
         conn.close()
@@ -392,12 +417,13 @@ def upsert_submission(
 def approve_submission(year: int, team_id: int, approved: bool, notes: str = ""):
     conn = get_db()
     try:
-        conn.execute(
-            """UPDATE keeper_submissions
-               SET commissioner_approved = ?, commissioner_notes = ?
-               WHERE year = ? AND team_id = ?""",
-            (int(approved), notes, year, team_id),
-        )
+        with conn.cursor() as cur:
+            cur.execute(
+                """UPDATE keeper_submissions
+                   SET commissioner_approved = %s, commissioner_notes = %s
+                   WHERE year = %s AND team_id = %s""",
+                (int(approved), notes, year, team_id),
+            )
         conn.commit()
     finally:
         conn.close()
@@ -407,10 +433,11 @@ def delete_submission(year: int, team_id: int):
     """Delete a submission record (unlock). Keeper selections are preserved."""
     conn = get_db()
     try:
-        conn.execute(
-            "DELETE FROM keeper_submissions WHERE year = ? AND team_id = ?",
-            (year, team_id),
-        )
+        with conn.cursor() as cur:
+            cur.execute(
+                "DELETE FROM keeper_submissions WHERE year = %s AND team_id = %s",
+                (year, team_id),
+            )
         conn.commit()
     finally:
         conn.close()

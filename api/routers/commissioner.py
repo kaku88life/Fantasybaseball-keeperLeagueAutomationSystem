@@ -188,10 +188,11 @@ async def assign_user_to_team(
 
     conn = get_db()
     try:
-        conn.execute(
-            "UPDATE users SET team_id = ? WHERE id = ?",
-            (body.team_id, body.user_id),
-        )
+        with conn.cursor() as cur:
+            cur.execute(
+                "UPDATE users SET team_id = %s WHERE id = %s",
+                (body.team_id, body.user_id),
+            )
         conn.commit()
     finally:
         conn.close()
@@ -208,15 +209,17 @@ async def list_users(user: dict = Depends(get_current_commissioner)):
 
     conn = get_db()
     try:
-        rows = conn.execute(
+        from api.database import _fetchall
+        rows = _fetchall(
+            conn,
             """SELECT u.id, u.yahoo_guid, u.yahoo_nickname, u.yahoo_email,
                       u.team_id, u.is_commissioner, u.last_login,
                       t.manager_name, t.team_name
                FROM users u
                LEFT JOIN teams t ON u.team_id = t.id
                ORDER BY u.yahoo_nickname""",
-        ).fetchall()
-        return [dict(r) for r in rows]
+        )
+        return rows
     finally:
         conn.close()
 
@@ -235,9 +238,10 @@ async def set_commissioner(
 
     conn = get_db()
     try:
-        conn.execute(
-            "UPDATE users SET is_commissioner = 1 WHERE id = ?", (user_id,)
-        )
+        with conn.cursor() as cur:
+            cur.execute(
+                "UPDATE users SET is_commissioner = 1 WHERE id = %s", (user_id,)
+            )
         conn.commit()
     finally:
         conn.close()
