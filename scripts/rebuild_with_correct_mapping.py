@@ -210,8 +210,8 @@ def main():
             player_name = p["name"]
             pk = p.get("player_key", "")
             norm = normalize_name(player_name)
-            position = p.get("display_position", "")
-            mlb_team = p.get("editorial_team_abbr", "")
+            position = p.get("position", "") or p.get("display_position", "")
+            mlb_team = p.get("team", "") or p.get("editorial_team_abbr", "")
 
             player_entry = {
                 "name": player_name,

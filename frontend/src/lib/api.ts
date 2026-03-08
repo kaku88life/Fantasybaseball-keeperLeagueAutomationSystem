@@ -231,6 +231,17 @@ export async function importExcel(file: File, year: number): Promise<{
   return res.json();
 }
 
+// ========== Player Stats (MLB Stats API) ==========
+
+export async function getPlayerStats(
+  name: string,
+  position: string = "",
+): Promise<import("@/types").PlayerStats> {
+  const params = new URLSearchParams({ name });
+  if (position) params.set("position", position);
+  return request(`/api/players/stats?${params.toString()}`);
+}
+
 // ========== Validation ==========
 
 export async function validateKeeperList(

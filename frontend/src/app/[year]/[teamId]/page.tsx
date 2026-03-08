@@ -12,6 +12,7 @@ import {
 } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import ContractBadge from "@/components/ContractBadge";
+import PlayerStatsModal from "@/components/PlayerStatsModal";
 import {
   getActionLabel,
   validateSelections,
@@ -42,6 +43,11 @@ export default function KeeperSelectionPage() {
   const [saveStatus, setSaveStatus] = useState<
     "idle" | "saving" | "saved" | "error"
   >("idle");
+  const [statsPlayer, setStatsPlayer] = useState<{
+    name: string;
+    position: string;
+  } | null>(null);
+  const [positionFilter, setPositionFilter] = useState<string>("ALL");
 
   const isOwnTeam = user?.team_id === teamId;
   const canEdit = !!(isOwnTeam || user?.is_commissioner) && !isSubmitted;
@@ -349,7 +355,7 @@ export default function KeeperSelectionPage() {
               </div>
             )}
             <div className="rounded bg-blue-50 p-3">
-              <p className="text-xs text-gray-500">活躍留用 Active Keepers</p>
+              <p className="text-xs text-gray-500">目前已留用球員名單 Active Keepers</p>
               <p className="text-lg font-bold">
                 {fin.active_keeper_count}
                 <span className="text-sm font-normal text-gray-400">
@@ -358,7 +364,7 @@ export default function KeeperSelectionPage() {
               </p>
             </div>
             <div className="rounded bg-gray-50 p-3">
-              <p className="text-xs text-gray-500">板凳新秀 Bench Rookie (R)</p>
+              <p className="text-xs text-gray-500">農場新秀名單 Rookie (R)</p>
               <p className="text-lg font-bold">
                 {fin.bench_keeper_count}
                 <span className="text-sm font-normal text-gray-400">/2</span>
@@ -393,8 +399,15 @@ export default function KeeperSelectionPage() {
       )}
 
       {/* Active Players Table */}
-      <div className="mb-2 text-sm font-semibold text-gray-600">
-        活躍球員 Active Players ({activePlayers.length})
+      <div className="mb-2 flex flex-wrap items-center gap-2">
+        <span className="text-sm font-semibold text-gray-600">
+          球員名單 Active Players ({activePlayers.length})
+        </span>
+        <PositionFilter
+          players={activePlayers}
+          value={positionFilter}
+          onChange={setPositionFilter}
+        />
       </div>
       <PlayerTable
         players={activePlayers}
@@ -403,13 +416,15 @@ export default function KeeperSelectionPage() {
         canEdit={canEdit}
         getNextContract={getNextContract}
         updateSelection={updateSelection}
+        onPlayerClick={(name, pos) => setStatsPlayer({ name, position: pos })}
+        positionFilter={positionFilter}
       />
 
       {/* Bench Players (R contracts) */}
       {benchPlayers.length > 0 && (
         <>
           <div className="mb-2 mt-6 text-sm font-semibold text-gray-600">
-            板凳新秀 Bench Rookie / R 約 ({benchPlayers.length})
+            農場新秀名單 Rookie / R 約 ({benchPlayers.length})
           </div>
           <PlayerTable
             players={benchPlayers}
@@ -418,6 +433,7 @@ export default function KeeperSelectionPage() {
             canEdit={canEdit}
             getNextContract={getNextContract}
             updateSelection={updateSelection}
+            onPlayerClick={(name, pos) => setStatsPlayer({ name, position: pos })}
           />
         </>
       )}
@@ -490,6 +506,15 @@ export default function KeeperSelectionPage() {
           </span>
         </div>
       )}
+
+      {/* Player Stats Modal */}
+      {statsPlayer && (
+        <PlayerStatsModal
+          playerName={statsPlayer.name}
+          position={statsPlayer.position}
+          onClose={() => setStatsPlayer(null)}
+        />
+      )}
     </div>
   );
 }
@@ -503,6 +528,8 @@ function PlayerTable({
   canEdit,
   getNextContract,
   updateSelection,
+  onPlayerClick,
+  positionFilter = "ALL",
 }: {
   players: import("@/types").Player[];
   options: PlayerKeeperOptions[];
@@ -510,7 +537,30 @@ function PlayerTable({
   canEdit: boolean;
   getNextContract: (name: string) => string | null;
   updateSelection: (name: string, action: string, ext: number) => void;
+  onPlayerClick: (name: string, position: string) => void;
+  positionFilter?: string;
 }) {
+  const filteredPlayers = useMemo(() => {
+    if (positionFilter === "ALL") return players;
+    return players.filter((p) => {
+      const positions = p.position.split(",").map((s) => s.trim());
+      if (positionFilter === "IF") {
+        return positions.some((pos) =>
+          ["C", "1B", "2B", "3B", "SS"].includes(pos),
+        );
+      }
+      if (positionFilter === "OF") {
+        return positions.some((pos) =>
+          ["LF", "CF", "RF", "OF"].includes(pos),
+        );
+      }
+      if (positionFilter === "P") {
+        return positions.some((pos) => ["SP", "RP", "P"].includes(pos));
+      }
+      return positions.includes(positionFilter);
+    });
+  }, [players, positionFilter]);
+
   return (
     <div className="overflow-x-auto rounded-lg border bg-white">
       <table className="w-full text-sm">
@@ -537,7 +587,17 @@ function PlayerTable({
           </tr>
         </thead>
         <tbody>
-          {players.map((player) => {
+          {filteredPlayers.length === 0 && (
+            <tr>
+              <td
+                colSpan={6}
+                className="px-3 py-4 text-center text-sm text-gray-400"
+              >
+                沒有符合條件的球員 No players match this filter
+              </td>
+            </tr>
+          )}
+          {filteredPlayers.map((player) => {
             const playerOpts = options.find(
               (o) => o.player.name === player.name,
             );
@@ -562,7 +622,15 @@ function PlayerTable({
                 <td className="px-3 py-2">
                   <span className="text-xs">{player.position}</span>
                 </td>
-                <td className="px-3 py-2 font-medium">{player.name}</td>
+                <td className="px-3 py-2 font-medium">
+                  <button
+                    type="button"
+                    onClick={() => onPlayerClick(player.name, player.position)}
+                    className="text-left text-blue-600 hover:text-blue-800 hover:underline"
+                  >
+                    {player.name}
+                  </button>
+                </td>
                 <td className="px-3 py-2 text-right">
                   ${player.contract.salary}
                 </td>
@@ -653,6 +721,85 @@ function PlayerTable({
           })}
         </tbody>
       </table>
+    </div>
+  );
+}
+
+// Position filter button group
+const POSITION_GROUPS = [
+  { label: "全部", value: "ALL" },
+  { label: "C", value: "C" },
+  { label: "1B", value: "1B" },
+  { label: "2B", value: "2B" },
+  { label: "3B", value: "3B" },
+  { label: "SS", value: "SS" },
+  { label: "IF", value: "IF" },
+  { label: "OF", value: "OF" },
+  { label: "SP", value: "SP" },
+  { label: "RP", value: "RP" },
+  { label: "P", value: "P" },
+] as const;
+
+function PositionFilter({
+  players,
+  value,
+  onChange,
+}: {
+  players: import("@/types").Player[];
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  // Count players per position group
+  const counts = useMemo(() => {
+    const map: Record<string, number> = { ALL: players.length };
+    for (const p of players) {
+      const positions = p.position.split(",").map((s) => s.trim());
+      for (const pos of positions) {
+        if (!pos) continue;
+        map[pos] = (map[pos] || 0) + 1;
+        // Aggregate groups
+        if (["C", "1B", "2B", "3B", "SS"].includes(pos)) {
+          map["IF"] = (map["IF"] || 0) + 1;
+        }
+        if (["LF", "CF", "RF", "OF"].includes(pos)) {
+          map["OF"] = (map["OF"] || 0) + 1;
+        }
+        if (["SP", "RP", "P"].includes(pos)) {
+          map["P"] = (map["P"] || 0) + 1;
+        }
+      }
+    }
+    return map;
+  }, [players]);
+
+  return (
+    <div className="ml-auto flex flex-wrap gap-1">
+      {POSITION_GROUPS.map((pg) => {
+        const count = counts[pg.value] || 0;
+        if (pg.value !== "ALL" && count === 0) return null;
+        const isActive = value === pg.value;
+        return (
+          <button
+            key={pg.value}
+            type="button"
+            onClick={() => onChange(pg.value)}
+            className={`rounded px-2 py-0.5 text-xs font-medium transition-colors ${
+              isActive
+                ? "bg-indigo-600 text-white"
+                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+            }`}
+          >
+            {pg.label}
+            {pg.value !== "ALL" && (
+              <span
+                className={`ml-1 ${isActive ? "text-indigo-200" : "text-gray-400"}`}
+              >
+                {count}
+              </span>
+            )}
+          </button>
+        );
+      })}
     </div>
   );
 }

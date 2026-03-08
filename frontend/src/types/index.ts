@@ -189,6 +189,52 @@ export interface LeagueSettings {
   roster_positions: Record<string, string[]>;
 }
 
+// Player MLB Stats (from MLB Stats API)
+export interface HittingSeason {
+  season: string;
+  team: string;
+  games: number;
+  at_bats: number;
+  hits: number;
+  home_runs: number;
+  rbi: number;
+  runs: number;
+  stolen_bases: number;
+  avg: string;
+  obp: string;
+  slg: string;
+  ops: string;
+}
+
+export interface PitchingSeason {
+  season: string;
+  team: string;
+  games: number;
+  games_started: number;
+  wins: number;
+  losses: number;
+  era: string;
+  innings_pitched: string;
+  strikeouts: number;
+  walks: number;
+  whip: string;
+  saves: number;
+  holds: number;
+}
+
+export interface PlayerStats {
+  mlb_id: number;
+  name: string;
+  primary_position: string;
+  current_team: string;
+  birth_date: string;
+  age: number | null;
+  bat_side: string;
+  pitch_hand: string;
+  hitting: HittingSeason[];
+  pitching: PitchingSeason[];
+}
+
 // DB team record
 export interface DBTeam {
   id: number;

@@ -20,7 +20,7 @@ from fastapi.middleware.cors import CORSMiddleware
 load_dotenv(project_root / ".env")
 
 from api.database import init_db
-from api.routers import auth, commissioner, league, teams, validation
+from api.routers import auth, commissioner, league, players, teams, validation
 
 
 @asynccontextmanager
@@ -68,6 +68,7 @@ app.include_router(league.router, prefix="/api/league", tags=["league"])
 app.include_router(teams.router, prefix="/api/teams", tags=["teams"])
 app.include_router(commissioner.router, prefix="/api/commissioner", tags=["commissioner"])
 app.include_router(validation.router, prefix="/api/validate", tags=["validation"])
+app.include_router(players.router, prefix="/api/players", tags=["players"])
 
 
 @app.get("/")
