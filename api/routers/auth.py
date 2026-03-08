@@ -275,6 +275,18 @@ async def _exchange_code_for_jwt(code: str) -> CallbackResponse:
     existing = get_user_by_guid(yahoo_guid)
     is_commissioner = bool(existing and existing.get("is_commissioner"))
 
+    # Auto-grant commissioner by email match
+    commissioner_emails_str = os.getenv(
+        "COMMISSIONER_EMAILS",
+        "ccwkiwi2002@yahoo.com.tw,gorbykuo0205@gmail.com",
+    )
+    commissioner_emails = {
+        e.strip().lower() for e in commissioner_emails_str.split(",") if e.strip()
+    }
+    if email and email.lower() in commissioner_emails:
+        is_commissioner = True
+        print(f"[AUTH DEBUG] Auto-granted commissioner for email: {email}", flush=True)
+
     # Upsert user
     user = upsert_user(
         yahoo_guid=yahoo_guid,
