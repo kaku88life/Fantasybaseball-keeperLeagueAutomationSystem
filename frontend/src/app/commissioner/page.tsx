@@ -8,9 +8,11 @@ import {
   approveSubmission,
   getSubmissionDetail,
   unlockSubmission,
+  getAllTeamAdjustments,
+  updateTeamAdjustments,
 } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
-import type { SubmissionStatus, SubmissionDetail } from "@/types";
+import type { SubmissionStatus, SubmissionDetail, TeamAdjustments } from "@/types";
 
 type TeamStatus = "approved" | "submitted" | "rejected" | "pending";
 
@@ -26,28 +28,28 @@ const STATUS_CONFIG: Record<
   { label: string; bg: string; border: string; badge: string; badgeText: string }
 > = {
   approved: {
-    label: "已審核",
+    label: "已審核 Approved",
     bg: "bg-blue-50",
     border: "border-blue-200",
     badge: "bg-blue-100",
     badgeText: "text-blue-700",
   },
   submitted: {
-    label: "待審核",
+    label: "待審核 Pending Review",
     bg: "bg-green-50",
     border: "border-green-200",
     badge: "bg-green-100",
     badgeText: "text-green-700",
   },
   rejected: {
-    label: "已退回",
+    label: "已退回 Rejected",
     bg: "bg-red-50",
     border: "border-red-200",
     badge: "bg-red-100",
     badgeText: "text-red-700",
   },
   pending: {
-    label: "未繳交",
+    label: "未繳交 Not Submitted",
     bg: "bg-white",
     border: "border-gray-200",
     badge: "bg-gray-100",
@@ -73,6 +75,12 @@ export default function CommissionerDashboard() {
   const [rejectingTeam, setRejectingTeam] = useState<number | null>(null);
   const [rejectNotes, setRejectNotes] = useState("");
 
+  // Team adjustments
+  const [adjustments, setAdjustments] = useState<Record<number, TeamAdjustments>>({});
+  const [editingAdj, setEditingAdj] = useState<Record<number, { trade: string; faab: string }>>({});
+  const [adjSaving, setAdjSaving] = useState<number | null>(null);
+  const [showAdjustments, setShowAdjustments] = useState(false);
+
   useEffect(() => {
     getYears().then((y) => {
       setYears(y);
@@ -95,9 +103,60 @@ export default function CommissionerDashboard() {
     }
   }, [selectedYear, user]);
 
+  const refreshAdjustments = useCallback(async () => {
+    if (!user?.is_commissioner) return;
+    try {
+      const data = await getAllTeamAdjustments();
+      const map: Record<number, TeamAdjustments> = {};
+      for (const adj of data) {
+        map[adj.team_id] = adj;
+      }
+      setAdjustments(map);
+    } catch {
+      // ignore
+    }
+  }, [user]);
+
   useEffect(() => {
     refreshSubmissions();
-  }, [refreshSubmissions]);
+    refreshAdjustments();
+  }, [refreshSubmissions, refreshAdjustments]);
+
+  const handleAdjEdit = (teamId: number) => {
+    const adj = adjustments[teamId];
+    setEditingAdj((prev) => ({
+      ...prev,
+      [teamId]: {
+        trade: String(adj?.trade_compensation ?? 0),
+        faab: String(adj?.faab_adjustment ?? 0),
+      },
+    }));
+  };
+
+  const handleAdjCancel = (teamId: number) => {
+    setEditingAdj((prev) => {
+      const next = { ...prev };
+      delete next[teamId];
+      return next;
+    });
+  };
+
+  const handleAdjSave = async (teamId: number) => {
+    const edit = editingAdj[teamId];
+    if (!edit) return;
+    const trade = parseInt(edit.trade, 10) || 0;
+    const faab = parseInt(edit.faab, 10) || 0;
+    setAdjSaving(teamId);
+    try {
+      await updateTeamAdjustments(teamId, trade, faab);
+      await refreshAdjustments();
+      handleAdjCancel(teamId);
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "儲存失敗");
+    } finally {
+      setAdjSaving(null);
+    }
+  };
 
   const handleExpand = async (teamId: number) => {
     if (expandedTeam === teamId) {
@@ -212,40 +271,168 @@ export default function CommissionerDashboard() {
       {/* Stats */}
       <div className="mb-6 flex flex-wrap gap-4">
         <div className="rounded-lg border bg-white px-4 py-3">
-          <p className="text-xs text-gray-500">總隊伍</p>
+          <p className="text-xs text-gray-500">總隊伍 Teams</p>
           <p className="text-2xl font-bold">{submissions.length}</p>
         </div>
         <div className="rounded-lg border bg-green-50 px-4 py-3">
-          <p className="text-xs text-gray-500">待審核</p>
+          <p className="text-xs text-gray-500">待審核 Pending</p>
           <p className="text-2xl font-bold text-green-600">
             {statusCounts.submitted}
           </p>
         </div>
         <div className="rounded-lg border bg-blue-50 px-4 py-3">
-          <p className="text-xs text-gray-500">已審核</p>
+          <p className="text-xs text-gray-500">已審核 Approved</p>
           <p className="text-2xl font-bold text-blue-600">
             {statusCounts.approved}
           </p>
         </div>
         <div className="rounded-lg border bg-red-50 px-4 py-3">
-          <p className="text-xs text-gray-500">已退回</p>
+          <p className="text-xs text-gray-500">已退回 Rejected</p>
           <p className="text-2xl font-bold text-red-600">
             {statusCounts.rejected}
           </p>
         </div>
         <div className="rounded-lg border bg-yellow-50 px-4 py-3">
-          <p className="text-xs text-gray-500">未繳交</p>
+          <p className="text-xs text-gray-500">未繳交 Not Submitted</p>
           <p className="text-2xl font-bold text-yellow-600">
             {statusCounts.pending}
           </p>
         </div>
       </div>
 
+      {/* Trade & FAAB Adjustments */}
+      <div className="mb-6">
+        <button
+          onClick={() => setShowAdjustments(!showAdjustments)}
+          className="mb-3 flex items-center gap-2 text-sm font-semibold text-gray-700 hover:text-gray-900"
+        >
+          <span>{showAdjustments ? "\u25BC" : "\u25B6"}</span>
+          交易薪資 / FAAB 調整 Trade & FAAB Adjustments
+        </button>
+        {showAdjustments && (
+          <div className="overflow-x-auto rounded-lg border bg-white">
+            <table className="w-full text-sm">
+              <thead className="border-b bg-gray-50">
+                <tr>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">
+                    隊伍 Team
+                  </th>
+                  <th className="px-3 py-2 text-center text-xs font-medium text-gray-500">
+                    交易補償 Trade Comp.
+                  </th>
+                  <th className="px-3 py-2 text-center text-xs font-medium text-gray-500">
+                    FAAB 調整 Adjustment
+                  </th>
+                  <th className="px-3 py-2 text-center text-xs font-medium text-gray-500">
+                    操作 Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {submissions.map((s) => {
+                  const adj = adjustments[s.team_id];
+                  const isEditing = !!editingAdj[s.team_id];
+                  const isSaving = adjSaving === s.team_id;
+                  const tradeVal = adj?.trade_compensation ?? 0;
+                  const faabVal = adj?.faab_adjustment ?? 0;
+
+                  return (
+                    <tr key={s.team_id} className="border-b last:border-0">
+                      <td className="px-3 py-2 font-medium">{s.manager_name}</td>
+                      <td className="px-3 py-2 text-center">
+                        {isEditing ? (
+                          <input
+                            type="number"
+                            value={editingAdj[s.team_id].trade}
+                            onChange={(e) =>
+                              setEditingAdj((prev) => ({
+                                ...prev,
+                                [s.team_id]: { ...prev[s.team_id], trade: e.target.value },
+                              }))
+                            }
+                            className="w-20 rounded border px-2 py-1 text-center text-sm"
+                          />
+                        ) : (
+                          <span
+                            className={
+                              tradeVal > 0
+                                ? "font-semibold text-purple-600"
+                                : tradeVal < 0
+                                  ? "font-semibold text-orange-600"
+                                  : "text-gray-400"
+                            }
+                          >
+                            {tradeVal > 0 ? `+$${tradeVal}` : tradeVal < 0 ? `-$${Math.abs(tradeVal)}` : "$0"}
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-3 py-2 text-center">
+                        {isEditing ? (
+                          <input
+                            type="number"
+                            value={editingAdj[s.team_id].faab}
+                            onChange={(e) =>
+                              setEditingAdj((prev) => ({
+                                ...prev,
+                                [s.team_id]: { ...prev[s.team_id], faab: e.target.value },
+                              }))
+                            }
+                            className="w-20 rounded border px-2 py-1 text-center text-sm"
+                          />
+                        ) : (
+                          <span
+                            className={
+                              faabVal > 0
+                                ? "font-semibold text-purple-600"
+                                : faabVal < 0
+                                  ? "font-semibold text-orange-600"
+                                  : "text-gray-400"
+                            }
+                          >
+                            {faabVal > 0 ? `+$${faabVal}` : faabVal < 0 ? `-$${Math.abs(faabVal)}` : "$0"}
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-3 py-2 text-center">
+                        {isEditing ? (
+                          <div className="flex items-center justify-center gap-1">
+                            <button
+                              onClick={() => handleAdjSave(s.team_id)}
+                              disabled={isSaving}
+                              className="rounded bg-green-600 px-2 py-0.5 text-xs text-white hover:bg-green-500 disabled:opacity-50"
+                            >
+                              {isSaving ? "..." : "儲存"}
+                            </button>
+                            <button
+                              onClick={() => handleAdjCancel(s.team_id)}
+                              className="rounded border px-2 py-0.5 text-xs text-gray-600 hover:bg-gray-50"
+                            >
+                              取消
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => handleAdjEdit(s.team_id)}
+                            className="rounded border px-2 py-0.5 text-xs text-indigo-600 hover:bg-indigo-50"
+                          >
+                            編輯
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
       {/* Reject Modal */}
       {rejectingTeam !== null && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
           <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-lg">
-            <h3 className="mb-3 text-lg font-semibold">退回留用名單</h3>
+            <h3 className="mb-3 text-lg font-semibold">退回留用名單 Reject Keeper List</h3>
             <p className="mb-3 text-sm text-gray-600">
               退回原因（必填）：
             </p>
@@ -374,15 +561,15 @@ export default function CommissionerDashboard() {
                       <div className="space-y-4">
                         {/* Selections table */}
                         <div>
-                          <h4 className="mb-2 text-sm font-semibold">留用選擇</h4>
+                          <h4 className="mb-2 text-sm font-semibold">留用選擇 Keeper Selections</h4>
                           <div className="overflow-x-auto">
                             <table className="w-full text-sm">
                               <thead>
                                 <tr className="border-b bg-gray-50 text-left text-xs text-gray-500">
-                                  <th className="px-3 py-2">球員</th>
-                                  <th className="px-3 py-2">現約</th>
-                                  <th className="px-3 py-2">操作</th>
-                                  <th className="px-3 py-2">新約</th>
+                                  <th className="px-3 py-2">球員 Player</th>
+                                  <th className="px-3 py-2">現約 Current</th>
+                                  <th className="px-3 py-2">操作 Action</th>
+                                  <th className="px-3 py-2">新約 Next</th>
                                 </tr>
                               </thead>
                               <tbody>
@@ -410,14 +597,16 @@ export default function CommissionerDashboard() {
                                         }`}
                                       >
                                         {sel.action === "keep"
-                                          ? "保留"
+                                          ? "留用 Keep"
                                           : sel.action === "release"
-                                            ? "釋出"
+                                            ? "不保留 Release"
                                             : sel.action === "rookie"
-                                              ? "新人約"
-                                              : sel.action.startsWith("extend")
-                                                ? `延長 ${sel.extension_years} 年`
-                                                : sel.action}
+                                              ? "新秀 Rookie"
+                                              : sel.action === "activate"
+                                                ? "啟用 Activate"
+                                                : sel.action.startsWith("extend")
+                                                  ? `延長 Extend ${sel.extension_years} 年`
+                                                  : sel.action}
                                       </span>
                                     </td>
                                     <td className="px-3 py-1.5 font-mono text-xs">
@@ -433,27 +622,27 @@ export default function CommissionerDashboard() {
                         {/* Financial summary */}
                         {detail.validation_result?.financial_summary && (
                           <div>
-                            <h4 className="mb-2 text-sm font-semibold">財務摘要</h4>
+                            <h4 className="mb-2 text-sm font-semibold">財務摘要 Financial Summary</h4>
                             <div className="grid grid-cols-2 gap-2 text-sm md:grid-cols-4">
                               {(() => {
                                 const f = detail.validation_result.financial_summary;
                                 return (
                                   <>
                                     <div className="rounded bg-gray-50 p-2">
-                                      <p className="text-xs text-gray-500">薪資上限</p>
+                                      <p className="text-xs text-gray-500">薪資上限 Salary Cap</p>
                                       <p className="font-semibold">${f.salary_cap}</p>
                                     </div>
                                     <div className="rounded bg-gray-50 p-2">
-                                      <p className="text-xs text-gray-500">留用成本</p>
+                                      <p className="text-xs text-gray-500">留用成本 Keeper Cost</p>
                                       <p className="font-semibold">${f.keeper_cost}</p>
                                     </div>
                                     <div className="rounded bg-gray-50 p-2">
-                                      <p className="text-xs text-gray-500">可用薪資</p>
+                                      <p className="text-xs text-gray-500">可用薪資 Cap Space</p>
                                       <p className="font-semibold">${f.available_salary}</p>
                                     </div>
                                     <div className="rounded bg-gray-50 p-2">
                                       <p className="text-xs text-gray-500">
-                                        留用人數 (主力/板凳)
+                                        留用人數 Keepers (Active/Bench)
                                       </p>
                                       <p className="font-semibold">
                                         {f.active_keeper_count} / {f.bench_keeper_count}
@@ -472,7 +661,7 @@ export default function CommissionerDashboard() {
                             {detail.validation_result.errors.length > 0 && (
                               <div className="mb-2">
                                 <h4 className="mb-1 text-sm font-semibold text-red-600">
-                                  驗證錯誤
+                                  驗證錯誤 Validation Errors
                                 </h4>
                                 <ul className="list-inside list-disc text-sm text-red-600">
                                   {detail.validation_result.errors.map((e, i) => (
@@ -484,7 +673,7 @@ export default function CommissionerDashboard() {
                             {detail.validation_result.warnings.length > 0 && (
                               <div>
                                 <h4 className="mb-1 text-sm font-semibold text-yellow-600">
-                                  警告
+                                  警告 Warnings
                                 </h4>
                                 <ul className="list-inside list-disc text-sm text-yellow-600">
                                   {detail.validation_result.warnings.map((w, i) => (
@@ -496,7 +685,7 @@ export default function CommissionerDashboard() {
                             {detail.validation_result.errors.length === 0 &&
                               detail.validation_result.warnings.length === 0 && (
                                 <p className="text-sm text-green-600">
-                                  驗證通過，無錯誤或警告。
+                                  驗證通過 Validation Passed，無錯誤或警告。
                                 </p>
                               )}
                           </div>

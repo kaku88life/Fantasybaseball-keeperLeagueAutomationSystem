@@ -17,6 +17,7 @@ from api.database import (
     get_team_by_id,
     get_user_by_id,
     save_snapshot,
+    update_team_adjustments,
     upsert_team,
 )
 from api.dependencies import get_current_commissioner
@@ -25,6 +26,7 @@ from api.schemas import (
     AssignTeamRequest,
     ImportExcelResponse,
     SubmissionStatusSchema,
+    TeamAdjustmentsRequest,
 )
 from api.serializers import league_state_to_dict
 
@@ -260,3 +262,57 @@ async def unlock_submission(
     team = get_team_by_id(team_id)
     manager = team["manager_name"] if team else f"team {team_id}"
     return {"message": f"Submission unlocked for {manager}", "year": year, "team_id": team_id}
+
+
+@router.get("/team-adjustments/{team_id}")
+async def get_team_adjustments(
+    team_id: int,
+    user: dict = Depends(get_current_commissioner),
+):
+    """Get trade compensation and FAAB adjustment for a team."""
+    team = get_team_by_id(team_id)
+    if not team:
+        raise HTTPException(status_code=404, detail="Team not found")
+    return {
+        "team_id": team_id,
+        "manager_name": team["manager_name"],
+        "trade_compensation": team.get("trade_compensation", 0) or 0,
+        "faab_adjustment": team.get("faab_adjustment", 0) or 0,
+    }
+
+
+@router.get("/all-team-adjustments")
+async def get_all_team_adjustments(
+    user: dict = Depends(get_current_commissioner),
+):
+    """Get trade compensation and FAAB adjustments for all teams."""
+    teams = get_all_teams()
+    return [
+        {
+            "team_id": t["id"],
+            "manager_name": t["manager_name"],
+            "trade_compensation": t.get("trade_compensation", 0) or 0,
+            "faab_adjustment": t.get("faab_adjustment", 0) or 0,
+        }
+        for t in teams
+    ]
+
+
+@router.put("/team-adjustments/{team_id}")
+async def update_team_adjustments_endpoint(
+    team_id: int,
+    body: TeamAdjustmentsRequest,
+    user: dict = Depends(get_current_commissioner),
+):
+    """Update trade compensation and FAAB adjustment for a team. Commissioner only."""
+    team = get_team_by_id(team_id)
+    if not team:
+        raise HTTPException(status_code=404, detail="Team not found")
+
+    update_team_adjustments(team_id, body.trade_compensation, body.faab_adjustment)
+    return {
+        "message": f"Adjustments updated for {team['manager_name']}",
+        "team_id": team_id,
+        "trade_compensation": body.trade_compensation,
+        "faab_adjustment": body.faab_adjustment,
+    }

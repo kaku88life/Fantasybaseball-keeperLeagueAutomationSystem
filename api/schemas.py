@@ -118,6 +118,7 @@ class FinancialSummary(BaseModel):
     buyout_salary_cost: int = 0
     available_salary: int = 0
     faab_budget: int = 0
+    faab_adjustment: int = 0
     buyout_faab_cost: int = 0
     available_faab: int = 0
     active_keeper_count: int = 0
@@ -165,6 +166,11 @@ class ApproveRequest(BaseModel):
 class AssignTeamRequest(BaseModel):
     user_id: int
     team_id: int
+
+
+class TeamAdjustmentsRequest(BaseModel):
+    trade_compensation: int = 0
+    faab_adjustment: int = 0
 
 
 # ========== Auth ==========

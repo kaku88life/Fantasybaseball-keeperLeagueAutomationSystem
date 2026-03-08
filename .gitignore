@@ -9,6 +9,10 @@ venv/
 
 # Environment
 .env
+.env.local
+.env.production
+frontend/.env.local
+frontend/.env.production
 oauth2.json
 
 # IDE

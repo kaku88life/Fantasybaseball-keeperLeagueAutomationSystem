@@ -49,6 +49,13 @@ def _get_team_from_snapshot(year: int, team_id: int):
     manager_name = db_team["manager_name"]
     for t in ls.teams:
         if t.manager_name == manager_name:
+            # Apply DB-stored commissioner adjustments
+            db_trade_comp = db_team.get("trade_compensation", 0) or 0
+            db_faab_adj = db_team.get("faab_adjustment", 0) or 0
+            if db_trade_comp != 0:
+                t.trade_compensation = db_trade_comp
+            if db_faab_adj != 0:
+                t.faab_budget = t.faab_budget + db_faab_adj
             return t, db_team
 
     raise HTTPException(
@@ -129,6 +136,12 @@ def _infer_keep_action(transition, player) -> str:
         return "rookie"
     if "activate" in action_lower:
         return "activate"
+    # N contract mandatory auto-transitions contain "extension" in text
+    # but should be treated as "keep", not "extend"
+    if transition.is_mandatory:
+        if "expires" in action_lower or "fa" in action_lower:
+            return "fa"
+        return "keep"
     if "extension" in action_lower or "extend" in action_lower:
         return "extend"
     if "expires" in action_lower or "fa" in action_lower:
@@ -413,6 +426,8 @@ def _validate_selections(year: int, team_id: int, selections_db: list[dict]) -> 
     if available_salary < 20 and available_salary >= 0:
         warnings.append(f"Low remaining salary cap: ${available_salary}")
 
+    faab_adj = db_team.get("faab_adjustment", 0) or 0
+
     financial = FinancialSummary(
         salary_cap=salary_cap,
         ranking_bonus=ranking_bonus,
@@ -421,6 +436,7 @@ def _validate_selections(year: int, team_id: int, selections_db: list[dict]) -> 
         buyout_salary_cost=buyout_salary_cost,
         available_salary=available_salary,
         faab_budget=faab_budget,
+        faab_adjustment=faab_adj,
         buyout_faab_cost=buyout_faab_cost,
         available_faab=available_faab,
         active_keeper_count=active_count,

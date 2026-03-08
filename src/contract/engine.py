@@ -511,8 +511,8 @@ def generate_keeper_options(player: Player) -> list[ContractTransition]:
     if ct.contract_type == ContractType.B:
         # Keep as O (1 year option)
         options.append(evaluate_next_contract(player, keep_action="keep"))
-        # Extend N+O (1-5 years of extension)
-        for n in range(1, 6):
+        # Extend N+O (1-10 years of extension)
+        for n in range(1, 11):
             options.append(
                 evaluate_next_contract(player, keep_action="extend", extension_years=n)
             )

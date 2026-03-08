@@ -92,10 +92,19 @@ export interface FinancialSummary {
   buyout_salary_cost: number;
   available_salary: number;
   faab_budget: number;
+  faab_adjustment: number;
   buyout_faab_cost: number;
   available_faab: number;
   active_keeper_count: number;
   bench_keeper_count: number;
+}
+
+// Commissioner - Team adjustments
+export interface TeamAdjustments {
+  team_id: number;
+  manager_name: string;
+  trade_compensation: number;
+  faab_adjustment: number;
 }
 
 export interface ValidationResult {

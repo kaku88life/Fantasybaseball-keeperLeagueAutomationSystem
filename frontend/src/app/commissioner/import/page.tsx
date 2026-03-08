@@ -42,11 +42,11 @@ export default function ImportExcelPage() {
 
   return (
     <div className="mx-auto max-w-lg">
-      <h1 className="mb-6 text-2xl font-bold">匯入 Excel</h1>
+      <h1 className="mb-6 text-2xl font-bold">匯入 Excel Import</h1>
 
       <div className="space-y-4 rounded-lg border bg-white p-6">
         <div>
-          <label className="mb-1 block text-sm font-medium">年份</label>
+          <label className="mb-1 block text-sm font-medium">年份 Year</label>
           <input
             type="number"
             value={year}

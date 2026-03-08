@@ -211,7 +211,7 @@ export default function KeeperSelectionPage() {
           href={`/${year}`}
           className="mt-4 inline-block text-sm text-indigo-600 hover:underline"
         >
-          返回聯盟總覽
+          返回聯盟總覽 Back to Overview
         </Link>
       </div>
     );
@@ -252,7 +252,7 @@ export default function KeeperSelectionPage() {
         <div className="flex items-center gap-3">
           {isSubmitted && (
             <span className="rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-800">
-              已繳交
+              已繳交 Submitted
             </span>
           )}
           {saveStatus === "saving" && (
@@ -271,36 +271,36 @@ export default function KeeperSelectionPage() {
       {fin && (
         <div className="mb-6 rounded-lg border bg-white p-4">
           <h2 className="mb-3 text-sm font-semibold text-gray-700">
-            財務摘要
+            財務摘要 <span className="font-normal text-gray-400">Financial Summary</span>
           </h2>
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-5">
             <div className="rounded bg-gray-50 p-3">
-              <p className="text-xs text-gray-500">薪資上限</p>
+              <p className="text-xs text-gray-500">薪資上限 Salary Cap</p>
               <p className="text-lg font-bold">${fin.salary_cap}</p>
             </div>
             {fin.ranking_bonus > 0 && (
               <div className="rounded bg-yellow-50 p-3">
-                <p className="text-xs text-gray-500">排名獎勵</p>
+                <p className="text-xs text-gray-500">排名獎勵 Ranking Bonus</p>
                 <p className="text-lg font-bold text-yellow-600">
                   +${fin.ranking_bonus}
                 </p>
               </div>
             )}
-            {fin.trade_compensation > 0 && (
-              <div className="rounded bg-purple-50 p-3">
-                <p className="text-xs text-gray-500">交易補償</p>
-                <p className="text-lg font-bold text-purple-600">
-                  +${fin.trade_compensation}
+            {fin.trade_compensation !== 0 && (
+              <div className={`rounded p-3 ${fin.trade_compensation > 0 ? "bg-purple-50" : "bg-orange-50"}`}>
+                <p className="text-xs text-gray-500">交易補償 Trade Comp.</p>
+                <p className={`text-lg font-bold ${fin.trade_compensation > 0 ? "text-purple-600" : "text-orange-600"}`}>
+                  {fin.trade_compensation > 0 ? "+" : ""}${fin.trade_compensation}
                 </p>
               </div>
             )}
             <div className="rounded bg-gray-50 p-3">
-              <p className="text-xs text-gray-500">留用成本</p>
+              <p className="text-xs text-gray-500">留用成本 Keeper Cost</p>
               <p className="text-lg font-bold">${fin.keeper_cost}</p>
             </div>
             {fin.buyout_salary_cost > 0 && (
               <div className="rounded bg-red-50 p-3">
-                <p className="text-xs text-gray-500">買斷成本</p>
+                <p className="text-xs text-gray-500">買斷成本 Buyout Cost</p>
                 <p className="text-lg font-bold text-red-600">
                   -${fin.buyout_salary_cost}
                 </p>
@@ -315,7 +315,7 @@ export default function KeeperSelectionPage() {
                     : "bg-green-50"
               }`}
             >
-              <p className="text-xs text-gray-500">可用薪資</p>
+              <p className="text-xs text-gray-500">可用薪資 Cap Space</p>
               <p
                 className={`text-lg font-bold ${
                   fin.available_salary < 0
@@ -329,19 +329,27 @@ export default function KeeperSelectionPage() {
               </p>
             </div>
             <div className="rounded bg-gray-50 p-3">
-              <p className="text-xs text-gray-500">FAAB 預算</p>
+              <p className="text-xs text-gray-500">FAAB 預算 Budget</p>
               <p className="text-lg font-bold">${fin.faab_budget}</p>
             </div>
+            {fin.faab_adjustment !== 0 && (
+              <div className={`rounded p-3 ${fin.faab_adjustment > 0 ? "bg-purple-50" : "bg-orange-50"}`}>
+                <p className="text-xs text-gray-500">FAAB 調整 Adjustment</p>
+                <p className={`text-lg font-bold ${fin.faab_adjustment > 0 ? "text-purple-600" : "text-orange-600"}`}>
+                  {fin.faab_adjustment > 0 ? "+" : ""}${fin.faab_adjustment}
+                </p>
+              </div>
+            )}
             {fin.buyout_faab_cost > 0 && (
               <div className="rounded bg-red-50 p-3">
-                <p className="text-xs text-gray-500">FAAB 買斷</p>
+                <p className="text-xs text-gray-500">FAAB 買斷 Buyout</p>
                 <p className="text-lg font-bold text-red-600">
                   -${fin.buyout_faab_cost}
                 </p>
               </div>
             )}
             <div className="rounded bg-blue-50 p-3">
-              <p className="text-xs text-gray-500">活躍留用</p>
+              <p className="text-xs text-gray-500">活躍留用 Active Keepers</p>
               <p className="text-lg font-bold">
                 {fin.active_keeper_count}
                 <span className="text-sm font-normal text-gray-400">
@@ -350,7 +358,7 @@ export default function KeeperSelectionPage() {
               </p>
             </div>
             <div className="rounded bg-gray-50 p-3">
-              <p className="text-xs text-gray-500">板凳新秀 (R)</p>
+              <p className="text-xs text-gray-500">板凳新秀 Bench Rookie (R)</p>
               <p className="text-lg font-bold">
                 {fin.bench_keeper_count}
                 <span className="text-sm font-normal text-gray-400">/2</span>
@@ -386,7 +394,7 @@ export default function KeeperSelectionPage() {
 
       {/* Active Players Table */}
       <div className="mb-2 text-sm font-semibold text-gray-600">
-        活躍球員 ({activePlayers.length})
+        活躍球員 Active Players ({activePlayers.length})
       </div>
       <PlayerTable
         players={activePlayers}
@@ -401,7 +409,7 @@ export default function KeeperSelectionPage() {
       {benchPlayers.length > 0 && (
         <>
           <div className="mb-2 mt-6 text-sm font-semibold text-gray-600">
-            板凳新秀 R 約 ({benchPlayers.length})
+            板凳新秀 Bench Rookie / R 約 ({benchPlayers.length})
           </div>
           <PlayerTable
             players={benchPlayers}
@@ -418,15 +426,15 @@ export default function KeeperSelectionPage() {
       {team.buyout_records.length > 0 && (
         <div className="mt-6">
           <h3 className="mb-2 text-sm font-semibold text-gray-600">
-            買斷紀錄
+            買斷紀錄 Buyout Records
           </h3>
           <div className="overflow-x-auto rounded-lg border bg-white">
             <table className="w-full text-sm">
               <thead className="border-b bg-gray-50">
                 <tr>
-                  <th className="px-3 py-2 text-left">球員</th>
-                  <th className="px-3 py-2 text-left">原合約</th>
-                  <th className="px-3 py-2 text-right">薪資成本</th>
+                  <th className="px-3 py-2 text-left">球員 Player</th>
+                  <th className="px-3 py-2 text-left">原合約 Contract</th>
+                  <th className="px-3 py-2 text-right">薪資成本 Salary</th>
                   <th className="px-3 py-2 text-right">FAAB 成本</th>
                 </tr>
               </thead>
@@ -464,7 +472,7 @@ export default function KeeperSelectionPage() {
             disabled={saving}
             className="rounded bg-gray-700 px-4 py-2 text-sm text-white hover:bg-gray-600 disabled:opacity-50"
           >
-            {saving ? "儲存中..." : "手動儲存"}
+            {saving ? "儲存中..." : "手動儲存 Save"}
           </button>
           <button
             onClick={handleSubmit}
@@ -475,10 +483,10 @@ export default function KeeperSelectionPage() {
             }
             className="rounded bg-green-600 px-5 py-2 text-sm font-medium text-white hover:bg-green-500 disabled:opacity-50"
           >
-            {submitting ? "繳交中..." : "繳交留用名單"}
+            {submitting ? "繳交中..." : "繳交留用名單 Submit"}
           </button>
           <span className="text-xs text-gray-400">
-            選擇變更後會自動儲存
+            選擇變更後會自動儲存 Auto-save enabled
           </span>
         </div>
       )}
@@ -509,22 +517,22 @@ function PlayerTable({
         <thead className="border-b bg-gray-50">
           <tr>
             <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">
-              守備
+              守備 Pos.
             </th>
             <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">
-              球員
+              球員 Player
             </th>
             <th className="px-3 py-2 text-right text-xs font-medium text-gray-500">
-              薪資
+              薪資 Salary
             </th>
             <th className="px-3 py-2 text-center text-xs font-medium text-gray-500">
-              合約
+              合約 Contract
             </th>
             <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">
-              動作
+              動作 Action
             </th>
             <th className="px-3 py-2 text-center text-xs font-medium text-gray-500">
-              下季合約
+              下季合約 Next
             </th>
           </tr>
         </thead>

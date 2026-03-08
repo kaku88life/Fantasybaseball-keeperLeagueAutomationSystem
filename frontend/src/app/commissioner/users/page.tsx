@@ -63,12 +63,12 @@ export default function UserManagementPage() {
   return (
     <div>
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">用戶管理</h1>
+        <h1 className="text-2xl font-bold">用戶管理 User Management</h1>
         <Link
           href="/commissioner"
           className="rounded border px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50"
         >
-          返回管理面板
+          返回管理面板 Back to Dashboard
         </Link>
       </div>
 
@@ -81,12 +81,12 @@ export default function UserManagementPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b bg-gray-50 text-left text-xs text-gray-500">
-                <th className="px-4 py-3">Yahoo 暱稱</th>
+                <th className="px-4 py-3">Yahoo 暱稱 Nickname</th>
                 <th className="px-4 py-3">Email</th>
-                <th className="px-4 py-3">對應隊伍</th>
-                <th className="px-4 py-3">最後登入</th>
+                <th className="px-4 py-3">對應隊伍 Team</th>
+                <th className="px-4 py-3">最後登入 Last Login</th>
                 <th className="px-4 py-3">Commissioner</th>
-                <th className="px-4 py-3">操作</th>
+                <th className="px-4 py-3">操作 Action</th>
               </tr>
             </thead>
             <tbody>
@@ -137,7 +137,7 @@ export default function UserManagementPage() {
                         }
                         className="rounded border px-2 py-1 text-xs text-indigo-600 hover:bg-indigo-50"
                       >
-                        授予權限
+                        授予權限 Grant
                       </button>
                     )}
                   </td>

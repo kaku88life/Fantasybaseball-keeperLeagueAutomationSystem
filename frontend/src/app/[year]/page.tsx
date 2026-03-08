@@ -135,18 +135,28 @@ export default function YearOverviewPage() {
               )}
               <div className="space-y-1 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-gray-500">留用:</span>
+                  <span className="text-gray-500">
+                    留用 <span className="text-gray-400">Keepers</span>:
+                  </span>
                   <span>
-                    {t.active_keepers} 活躍
-                    {t.bench_keepers > 0 && ` + ${t.bench_keepers} 板凳`}
+                    {t.active_keepers} 活躍 <span className="text-gray-400">Active</span>
+                    {t.bench_keepers > 0 && (
+                      <>
+                        {" "}+ {t.bench_keepers} 板凳 <span className="text-gray-400">Bench</span>
+                      </>
+                    )}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-500">留用成本:</span>
+                  <span className="text-gray-500">
+                    留用成本 <span className="text-gray-400">Cost</span>:
+                  </span>
                   <span className="font-medium">${t.total_keeper_cost}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-500">可用薪資:</span>
+                  <span className="text-gray-500">
+                    可用薪資 <span className="text-gray-400">Cap Space</span>:
+                  </span>
                   <span
                     className={
                       t.available_salary < 20
@@ -159,7 +169,9 @@ export default function YearOverviewPage() {
                 </div>
                 {t.ranking_bonus > 0 && (
                   <div className="flex justify-between">
-                    <span className="text-gray-500">排名獎勵:</span>
+                    <span className="text-gray-500">
+                      排名獎勵 <span className="text-gray-400">Bonus</span>:
+                    </span>
                     <span className="text-yellow-600">+${t.ranking_bonus}</span>
                   </div>
                 )}

@@ -164,23 +164,37 @@ export default function RulesPage() {
                   R
                 </span>
                 <span className="text-gray-400">&rarr;</span>
-                <span className="inline-block w-8 rounded bg-blue-100 px-1.5 py-1 text-center font-bold text-blue-800">
+                <span className="inline-block rounded bg-blue-100 px-1.5 py-1 text-center font-bold text-blue-800">
                   A
+                </span>
+                <span className="text-gray-400">/</span>
+                <span className="inline-block w-8 rounded bg-gray-200 px-1.5 py-1 text-center font-bold text-gray-700">
+                  R
                 </span>
               </div>
               <div>
-                <p className="font-medium">新秀 (板凳)</p>
+                <p className="font-medium">新秀 Rookie</p>
                 <p className="text-xs text-gray-500">
-                  R 約球員放在板凳名單，不計入薪資上限。啟用後轉為 A
-                  約進入正規合約流程。
+                  R 約球員放在 Keep 名單，不計入 Keepers 人數上限，每隊最多 {settings.keeper_bench_max} 人。
+                  薪資依取得方式計算（選秀、FAAB 競標等）。
                 </p>
+                <ul className="mt-1.5 list-inside list-disc space-y-0.5 text-xs text-gray-500">
+                  <li>
+                    <span className="font-medium text-gray-700">仍符合新秀資格</span>
+                    {" "}&rarr; 可繼續維持 R 約 Keep，達到新秀資格門檻自動轉為 A 約
+                  </li>
+                  <li>
+                    <span className="font-medium text-gray-700">已超過新秀門檻（畢業）</span>
+                    {" "}&rarr; 必須轉為 A 約進入正規合約流程
+                  </li>
+                </ul>
               </div>
             </div>
           </div>
 
           {/* Visual flow chart */}
           <div className="mt-4 rounded bg-slate-50 p-3 text-center text-xs text-gray-600">
-            <p className="font-medium">完整合約路徑</p>
+            <p className="font-medium">完整合約路徑 Contract Flow</p>
             <p className="mt-1">
               <span className="font-bold text-blue-700">A</span>
               {" "}&rarr;{" "}
@@ -203,6 +217,16 @@ export default function RulesPage() {
               {" "}&rarr;{" "}
               <span className="text-gray-500">FA</span>
             </p>
+            <p className="mt-0.5">
+              <span className="font-bold text-gray-600">R</span>
+              {" "}&rarr;{" "}
+              <span className="font-bold text-gray-600">R</span>
+              {" "}(仍符合新秀) 或{" "}
+              <span className="font-bold text-gray-600">R</span>
+              {" "}&rarr;{" "}
+              <span className="font-bold text-blue-700">A</span>
+              {" "}(畢業/啟用)
+            </p>
           </div>
         </section>
 
@@ -214,7 +238,7 @@ export default function RulesPage() {
             <div>
               <p className="font-medium">一般買斷</p>
               <p className="text-xs text-gray-500">
-                買斷金 = 薪資 x 剩餘合約年數。例: $20/N1 (剩 2 年) &rarr; 買斷金 $40。
+                買斷金 = 薪資 x 剩餘合約年數。例: $20/N1 (剩 2 年) &rarr; 買斷金 $40（根據剩下的合約年數攤提）。
               </p>
             </div>
             <div>

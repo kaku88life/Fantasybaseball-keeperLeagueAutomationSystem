@@ -37,17 +37,22 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# CORS
-frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3001")
+# CORS - production origins via ALLOWED_ORIGINS env var (comma-separated)
+_default_origins = [
+    "http://localhost:3000",
+    "http://localhost:3001",
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:3001",
+]
+_extra = os.getenv("ALLOWED_ORIGINS", "")
+_extra_origins = [o.strip() for o in _extra.split(",") if o.strip()] if _extra else []
+_frontend_url = os.getenv("FRONTEND_URL", "")
+_all_origins = list(dict.fromkeys(
+    _extra_origins + ([_frontend_url] if _frontend_url else []) + _default_origins
+))
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        frontend_url,
-        "http://localhost:3000",
-        "http://localhost:3001",
-        "http://127.0.0.1:3000",
-        "http://127.0.0.1:3001",
-    ],
+    allow_origins=_all_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

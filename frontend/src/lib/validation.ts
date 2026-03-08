@@ -177,6 +177,7 @@ export function validateSelections(
     buyout_salary_cost: buyoutSalaryCost,
     available_salary: availableSalary,
     faab_budget: faabBudget,
+    faab_adjustment: 0,
     buyout_faab_cost: buyoutFaabCost,
     available_faab: availableFaab,
     active_keeper_count: activeCount,
@@ -193,6 +194,7 @@ export function validateSelections(
 
 /**
  * Get human-readable Chinese action label for a keeper option.
+ * All domain terms include English alongside Traditional Chinese.
  */
 export function getActionLabel(
   contractType: ContractType,
@@ -200,31 +202,39 @@ export function getActionLabel(
   extensionYears: number,
   currentSalary: number,
 ): string {
-  if (keepAction === "release") return "释出 (Release)";
+  // Release / Buyout label depends on contract type
+  if (keepAction === "release") {
+    if (contractType === "N") {
+      return "買斷 Buyout → FA";
+    }
+    return "不保留 Release → FA";
+  }
 
   switch (contractType) {
     case "A":
-      if (keepAction === "keep") return "留用 → B 約 (薪資不變)";
-      if (keepAction === "rookie") return "指定為 R 約 (板凳新秀)";
+      if (keepAction === "keep") return "留用 Keep → B 約 (薪資 Salary 不變)";
+      if (keepAction === "rookie") return "指定新秀 Rookie → R 約";
       break;
     case "B":
-      if (keepAction === "keep") return "留用 → O 約 (薪資不變，最後一年)";
+      if (keepAction === "keep")
+        return "留用 Keep → O 約 (薪資 Salary 不變，最後一年 Final Year)";
       if (keepAction === "extend" && extensionYears > 0) {
         const newSalary =
           currentSalary + extensionYears * EXTENSION_COST_PER_YEAR;
-        return `延長 ${extensionYears} 年 → N${extensionYears}+O ($${currentSalary}→$${newSalary})`;
+        return `延長 Extend ${extensionYears} 年 → N${extensionYears}+O ($${currentSalary}→$${newSalary})`;
       }
       break;
     case "N":
       if (keepAction === "keep" || keepAction === "frozen") {
-        return "自動延續 (薪資不變)";
+        return "自動延續 Auto-renew (薪資 Salary 不變)";
       }
       break;
     case "O":
-      return "O 約到期 → 自由球員";
+      return "到期 Expired → 自由球員 FA";
     case "R":
-      if (keepAction === "keep") return "板凳留用 (保持 R 約)";
-      if (keepAction === "activate") return "啟用 → A 約 (進入正規合約)";
+      if (keepAction === "keep") return "維持新秀 Keep Rookie (R 約)";
+      if (keepAction === "activate")
+        return "啟用 Activate → A 約 (進入正規合約 Regular Contract)";
       break;
   }
 

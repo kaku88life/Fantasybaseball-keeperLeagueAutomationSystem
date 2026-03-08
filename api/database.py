@@ -31,6 +31,8 @@ CREATE TABLE IF NOT EXISTS teams (
     manager_name TEXT NOT NULL,
     team_name TEXT,
     yahoo_team_id TEXT,
+    trade_compensation INTEGER DEFAULT 0,
+    faab_adjustment INTEGER DEFAULT 0,
     UNIQUE(manager_name)
 );
 
@@ -88,6 +90,12 @@ async def init_db():
     conn = get_db()
     try:
         conn.executescript(SCHEMA_SQL)
+        # Migration: add trade_compensation and faab_adjustment columns to existing DBs
+        for col in ("trade_compensation", "faab_adjustment"):
+            try:
+                conn.execute(f"ALTER TABLE teams ADD COLUMN {col} INTEGER DEFAULT 0")
+            except sqlite3.OperationalError:
+                pass  # Column already exists
         conn.commit()
     finally:
         conn.close()
@@ -186,6 +194,19 @@ def upsert_team(manager_name: str, team_name: str = "", yahoo_team_id: str = "")
         )
         conn.commit()
         return get_team_by_manager(manager_name)
+    finally:
+        conn.close()
+
+
+def update_team_adjustments(team_id: int, trade_compensation: int, faab_adjustment: int):
+    conn = get_db()
+    try:
+        conn.execute(
+            """UPDATE teams SET trade_compensation = ?, faab_adjustment = ?
+               WHERE id = ?""",
+            (trade_compensation, faab_adjustment, team_id),
+        )
+        conn.commit()
     finally:
         conn.close()
 

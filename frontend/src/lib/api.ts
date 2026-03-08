@@ -2,7 +2,7 @@
  * API client for communicating with the FastAPI backend.
  */
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://localhost:8002";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8002";
 
 function getToken(): string | null {
   if (typeof window === "undefined") return null;
@@ -26,15 +26,10 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
       headers,
     });
   } catch {
-    // Network error - likely self-signed cert not yet accepted
-    if (API_BASE.startsWith("https://localhost")) {
-      throw new ApiError(
-        0,
-        "Cannot connect to backend. Please login first to accept the SSL certificate, " +
-        `or visit ${API_BASE}/api/health in your browser and accept the certificate.`,
-      );
-    }
-    throw new ApiError(0, "Cannot connect to backend server.");
+    throw new ApiError(
+      0,
+      "Cannot connect to backend server. Please check if the server is running.",
+    );
   }
 
   if (!res.ok) {
@@ -191,6 +186,24 @@ export async function assignTeam(
 export async function setCommissioner(userId: number): Promise<{ message: string }> {
   return request(`/api/commissioner/set-commissioner/${userId}`, {
     method: "POST",
+  });
+}
+
+export async function getAllTeamAdjustments(): Promise<import("@/types").TeamAdjustments[]> {
+  return request("/api/commissioner/all-team-adjustments");
+}
+
+export async function updateTeamAdjustments(
+  teamId: number,
+  tradeCompensation: number,
+  faabAdjustment: number,
+): Promise<{ message: string }> {
+  return request(`/api/commissioner/team-adjustments/${teamId}`, {
+    method: "PUT",
+    body: JSON.stringify({
+      trade_compensation: tradeCompensation,
+      faab_adjustment: faabAdjustment,
+    }),
   });
 }
 
