@@ -88,6 +88,36 @@ export async function getLeagueSettings(): Promise<import("@/types").LeagueSetti
   return request("/api/league/settings");
 }
 
+export interface KeptPlayer {
+  player_name: string;
+  current_contract: string;
+  next_contract: string;
+  action: string;
+  salary: number;
+  position: string;
+}
+
+export interface KeeperResultTeam {
+  team_id: number;
+  manager_name: string;
+  team_name: string;
+  is_submitted: boolean;
+  kept_players: KeptPlayer[];
+  keeper_cost: number;
+  buyout_cost: number;
+  ranking_bonus: number;
+  trade_compensation: number;
+  salary_cap: number;
+  available_salary: number;
+}
+
+export async function getKeeperResults(year: number): Promise<{
+  year: number;
+  teams: KeeperResultTeam[];
+}> {
+  return request(`/api/league/${year}/keeper-results`);
+}
+
 // ========== Teams ==========
 
 export async function getTeams(): Promise<import("@/types").DBTeam[]> {

@@ -112,8 +112,21 @@ def evaluate_next_contract(
             is_mandatory=False,
         )
 
-    # A -> B or A -> R (rookie bench designation)
+    # A -> B, A -> A (keep without progression), or A -> R (rookie bench)
     if ct.contract_type == ContractType.A:
+        if keep_action == "keep_a":
+            next_ct = Contract(
+                contract_type=ContractType.A,
+                salary=ct.salary,
+            )
+            return ContractTransition(
+                player_name=name,
+                current_contract=ct,
+                next_contract=next_ct,
+                action="A -> A (kept on A contract, salary unchanged)",
+                salary_change=0,
+                is_mandatory=False,
+            )
         if keep_action == "rookie":
             next_ct = Contract(
                 contract_type=ContractType.R,
@@ -500,9 +513,10 @@ def generate_keeper_options(player: Player) -> list[ContractTransition]:
         options.append(evaluate_next_contract(player))
         return options
 
-    # A contract: keep as B, designate as R (bench rookie), or release
+    # A contract: keep as B, keep as A, designate as R (bench rookie), or release
     if ct.contract_type == ContractType.A:
         options.append(evaluate_next_contract(player, keep_action="keep"))
+        options.append(evaluate_next_contract(player, keep_action="keep_a"))
         options.append(evaluate_next_contract(player, keep_action="rookie"))
         options.append(evaluate_next_contract(player, keep_action="release"))
         return options

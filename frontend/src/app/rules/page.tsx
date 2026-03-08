@@ -115,6 +115,25 @@ export default function RulesPage() {
               </div>
             </div>
 
+            {/* A -> A */}
+            <div className="flex items-start gap-3">
+              <div className="flex shrink-0 items-center gap-1.5">
+                <span className="inline-block w-8 rounded bg-blue-100 px-1.5 py-1 text-center font-bold text-blue-800">
+                  A
+                </span>
+                <span className="text-gray-400">&rarr;</span>
+                <span className="inline-block w-8 rounded bg-blue-100 px-1.5 py-1 text-center font-bold text-blue-800">
+                  A
+                </span>
+              </div>
+              <div>
+                <p className="font-medium">保持 A 約 (可選)</p>
+                <p className="text-xs text-gray-500">
+                  A 約球員可選擇不升約，下季仍維持 A 約，薪資不變。適用於想保留較長合約彈性的球員。
+                </p>
+              </div>
+            </div>
+
             {/* B -> O */}
             <div className="flex items-start gap-3">
               <div className="flex shrink-0 items-center gap-1.5">
@@ -218,6 +237,12 @@ export default function RulesPage() {
               <span className="text-gray-500">FA</span>
             </p>
             <p className="mt-0.5">
+              <span className="font-bold text-blue-700">A</span>
+              {" "}&rarr;{" "}
+              <span className="font-bold text-blue-700">A</span>
+              {" "}(保持 A 約，不升約)
+            </p>
+            <p className="mt-0.5">
               <span className="font-bold text-gray-600">R</span>
               {" "}&rarr;{" "}
               <span className="font-bold text-gray-600">R</span>
@@ -275,6 +300,22 @@ export default function RulesPage() {
           <p className="mt-3 text-xs text-gray-400">
             獎勵金將加到下一季的薪資上限中，增加你的可用薪資空間。
           </p>
+        </section>
+
+        {/* Shutout Bonus */}
+        <section className="rounded-lg border bg-white p-5">
+          <h2 className="mb-1 text-lg font-semibold">完封獎勵</h2>
+          <p className="mb-3 text-xs text-gray-400">Shutout Bonus</p>
+          <div className="text-sm text-gray-600">
+            <p>
+              H2H 對戰中，若某一項計分類別讓對手得到 0 分（完封），可獲得{" "}
+              <span className="font-bold text-green-600">+$10 FAAB</span>{" "}
+              獎勵。
+            </p>
+            <p className="mt-2 text-xs text-gray-400">
+              獎勵將加入該季 FAAB 預算中，可用於自由球員競標。
+            </p>
+          </div>
         </section>
 
         {/* Trade Rules */}

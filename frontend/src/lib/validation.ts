@@ -213,6 +213,7 @@ export function getActionLabel(
   switch (contractType) {
     case "A":
       if (keepAction === "keep") return "留用 Keep → B 約 (薪資 Salary 不變)";
+      if (keepAction === "keep_a") return "留用 Keep → A 約 (薪資 Salary 不變)";
       if (keepAction === "rookie") return "指定新秀 Rookie → R 約";
       break;
     case "B":
@@ -256,6 +257,7 @@ export function getNextContractDisplay(
   switch (contractType) {
     case "A":
       if (action === "keep") return `$${currentSalary}/B`;
+      if (action === "keep_a") return `$${currentSalary}/A`;
       if (action === "rookie") return `$${currentSalary}/R`;
       break;
     case "B":

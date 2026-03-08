@@ -134,6 +134,8 @@ def _infer_keep_action(transition, player) -> str:
         return "release"
     if "rookie" in action_lower or "bench rookie" in action_lower:
         return "rookie"
+    if "a -> a" in action_lower:
+        return "keep_a"
     if "activate" in action_lower:
         return "activate"
     # N contract mandatory auto-transitions contain "extension" in text

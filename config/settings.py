@@ -27,6 +27,7 @@ SALARY_START_YEAR = 2024   # year salary increments begin
 
 FAAB_BASE = 100            # yearly FAAB budget
 MIN_BID = 1                # minimum FAAB bid / minimum salary
+SHUTOUT_FAAB_BONUS = 10    # $10 FAAB bonus for shutting out opponent in H2H
 
 
 def get_salary_cap(year: int) -> int:
