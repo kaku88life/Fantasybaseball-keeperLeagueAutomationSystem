@@ -73,6 +73,7 @@ export interface ContractTransition {
 export interface PlayerKeeperOptions {
   player: Player;
   options: ContractTransition[];
+  is_mandatory_keeper: boolean;
 }
 
 // Keeper selections

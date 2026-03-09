@@ -418,6 +418,7 @@ export default function KeeperSelectionPage() {
         updateSelection={updateSelection}
         onPlayerClick={(name, pos) => setStatsPlayer({ name, position: pos })}
         positionFilter={positionFilter}
+        mandatoryKeepers={new Set(options.filter(o => o.is_mandatory_keeper).map(o => o.player.name))}
       />
 
       {/* Bench Players (R contracts) */}
@@ -434,6 +435,7 @@ export default function KeeperSelectionPage() {
             getNextContract={getNextContract}
             updateSelection={updateSelection}
             onPlayerClick={(name, pos) => setStatsPlayer({ name, position: pos })}
+            mandatoryKeepers={new Set(options.filter(o => o.is_mandatory_keeper).map(o => o.player.name))}
           />
         </>
       )}
@@ -442,34 +444,68 @@ export default function KeeperSelectionPage() {
       {team.buyout_records.length > 0 && (
         <div className="mt-6">
           <h3 className="mb-2 text-sm font-semibold text-gray-600">
-            買斷紀錄 Buyout Records
+            買斷紀錄 Buyout Records ({team.buyout_records.length})
           </h3>
           <div className="overflow-x-auto rounded-lg border bg-white">
             <table className="w-full text-sm">
               <thead className="border-b bg-gray-50">
                 <tr>
-                  <th className="px-3 py-2 text-left">球員 Player</th>
-                  <th className="px-3 py-2 text-left">原合約 Contract</th>
-                  <th className="px-3 py-2 text-right">薪資成本 Salary</th>
-                  <th className="px-3 py-2 text-right">FAAB 成本</th>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">球員 Player</th>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">原合約 Contract</th>
+                  <th className="px-3 py-2 text-right text-xs font-medium text-gray-500">薪資成本 Salary</th>
+                  <th className="px-3 py-2 text-right text-xs font-medium text-gray-500">FAAB 成本</th>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">備註 Note</th>
                 </tr>
               </thead>
               <tbody>
-                {team.buyout_records.map((b) => (
-                  <tr key={b.player_name} className="border-b">
-                    <td className="px-3 py-2">{b.player_name}</td>
-                    <td className="px-3 py-2">{b.original_contract}</td>
-                    <td className="px-3 py-2 text-right">
-                      ${b.buyout_salary_cost}
-                    </td>
-                    <td className="px-3 py-2 text-right">
-                      ${b.buyout_faab_cost}
-                    </td>
-                  </tr>
-                ))}
+                {team.buyout_records.map((b) => {
+                  const isLeagueIssue = b.buyout_salary_cost === 0 && b.buyout_faab_cost === 0;
+                  return (
+                    <tr key={b.player_name} className={`border-b ${isLeagueIssue ? "bg-gray-50 text-gray-400" : ""}`}>
+                      <td className="px-3 py-2">{b.player_name}</td>
+                      <td className="px-3 py-2">{b.original_contract}</td>
+                      <td className="px-3 py-2 text-right">
+                        {isLeagueIssue ? (
+                          <span className="text-gray-400">--</span>
+                        ) : (
+                          <span className="text-red-600">${b.buyout_salary_cost}</span>
+                        )}
+                      </td>
+                      <td className="px-3 py-2 text-right">
+                        {isLeagueIssue ? (
+                          <span className="text-gray-400">--</span>
+                        ) : b.buyout_faab_cost > 0 ? (
+                          <span className="text-red-600">${b.buyout_faab_cost}</span>
+                        ) : (
+                          <span className="text-gray-400">$0</span>
+                        )}
+                      </td>
+                      <td className="px-3 py-2 text-xs text-gray-500">
+                        {b.note || (isLeagueIssue ? "League Issue (no cost)" : b.use_faab ? "FAAB buyout" : "")}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
+              <tfoot className="border-t bg-gray-50 font-medium">
+                <tr>
+                  <td className="px-3 py-2" colSpan={2}>
+                    合計 Total
+                  </td>
+                  <td className="px-3 py-2 text-right text-red-600">
+                    ${team.buyout_records.reduce((sum, b) => sum + b.buyout_salary_cost, 0)}
+                  </td>
+                  <td className="px-3 py-2 text-right text-red-600">
+                    ${team.buyout_records.reduce((sum, b) => sum + b.buyout_faab_cost, 0)}
+                  </td>
+                  <td className="px-3 py-2"></td>
+                </tr>
+              </tfoot>
             </table>
           </div>
+          <p className="mt-1.5 text-xs text-gray-400">
+            買斷薪資從 Salary Cap 扣除，FAAB 買斷從 FAAB 預算扣除。League Issue 球員不計成本。
+          </p>
         </div>
       )}
 
@@ -530,6 +566,7 @@ function PlayerTable({
   updateSelection,
   onPlayerClick,
   positionFilter = "ALL",
+  mandatoryKeepers = new Set(),
 }: {
   players: import("@/types").Player[];
   options: PlayerKeeperOptions[];
@@ -539,6 +576,7 @@ function PlayerTable({
   updateSelection: (name: string, action: string, ext: number) => void;
   onPlayerClick: (name: string, position: string) => void;
   positionFilter?: string;
+  mandatoryKeepers?: Set<string>;
 }) {
   const filteredPlayers = useMemo(() => {
     if (positionFilter === "ALL") return players;
@@ -623,13 +661,23 @@ function PlayerTable({
                   <span className="text-xs">{player.position}</span>
                 </td>
                 <td className="px-3 py-2 font-medium">
-                  <button
-                    type="button"
-                    onClick={() => onPlayerClick(player.name, player.position)}
-                    className="text-left text-blue-600 hover:text-blue-800 hover:underline"
-                  >
-                    {player.name}
-                  </button>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => onPlayerClick(player.name, player.position)}
+                      className="text-left text-blue-600 hover:text-blue-800 hover:underline"
+                    >
+                      {player.name}
+                    </button>
+                    {mandatoryKeepers.has(player.name) && (
+                      <span
+                        className="shrink-0 rounded bg-orange-100 px-1.5 py-0.5 text-[10px] font-semibold text-orange-700"
+                        title="FAAB >= $10, must be kept (mandatory keeper)"
+                      >
+                        FAAB &ge; $10 強制留用
+                      </span>
+                    )}
+                  </div>
                 </td>
                 <td className="px-3 py-2 text-right">
                   ${player.contract.salary}
