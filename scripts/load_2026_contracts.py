@@ -150,14 +150,14 @@ def load_contracts():
             mgr = br["team"]
             team = team_lookup.get(mgr)
             if team:
-                is_league_issue = br.get("league_issue", False)
+                is_legal_issue = br.get("legal_issue", False)
                 team.buyout_records.append(BuyoutRecord(
                     player_name=br["player_name"],
                     original_contract=br["original_contract"],
-                    buyout_salary_cost=br["salary_cost"] if not is_league_issue else 0,
-                    buyout_faab_cost=br["faab_cost"] if not is_league_issue else 0,
+                    buyout_salary_cost=br["salary_cost"] if not is_legal_issue else 0,
+                    buyout_faab_cost=br["faab_cost"] if not is_legal_issue else 0,
                     remaining_years=1,
-                    use_faab=br["faab_cost"] > 0 and not is_league_issue,
+                    use_faab=br["faab_cost"] > 0 and not is_legal_issue,
                     note=br.get("note", ""),
                 ))
                 buyout_count += 1

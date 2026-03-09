@@ -545,10 +545,10 @@ export default function RulesPage() {
           </p>
         </section>
 
-        {/* ===== 16. Special Clause (League Issue) ===== */}
+        {/* ===== 16. Special Clause (Legal Issue) ===== */}
         <section className="rounded-lg border bg-white p-5">
           <h2 className="mb-1 text-lg font-semibold">特別條款</h2>
-          <p className="mb-3 text-xs text-gray-400">Special Clause (League Issue)</p>
+          <p className="mb-3 text-xs text-gray-400">Special Clause (Legal Issue)</p>
           <p className="mb-2 text-sm text-gray-600">
             若球員在當打之年決定退休、或因為家暴案、負面新聞無法出賽或終生禁賽等狀況，依特殊案例處理：
           </p>

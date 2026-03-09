@@ -459,20 +459,20 @@ export default function KeeperSelectionPage() {
               </thead>
               <tbody>
                 {team.buyout_records.map((b) => {
-                  const isLeagueIssue = b.buyout_salary_cost === 0 && b.buyout_faab_cost === 0;
+                  const isLegalIssue = b.buyout_salary_cost === 0 && b.buyout_faab_cost === 0;
                   return (
-                    <tr key={b.player_name} className={`border-b ${isLeagueIssue ? "bg-gray-50 text-gray-400" : ""}`}>
+                    <tr key={b.player_name} className={`border-b ${isLegalIssue ? "bg-gray-50 text-gray-400" : ""}`}>
                       <td className="px-3 py-2">{b.player_name}</td>
                       <td className="px-3 py-2">{b.original_contract}</td>
                       <td className="px-3 py-2 text-right">
-                        {isLeagueIssue ? (
+                        {isLegalIssue ? (
                           <span className="text-gray-400">--</span>
                         ) : (
                           <span className="text-red-600">${b.buyout_salary_cost}</span>
                         )}
                       </td>
                       <td className="px-3 py-2 text-right">
-                        {isLeagueIssue ? (
+                        {isLegalIssue ? (
                           <span className="text-gray-400">--</span>
                         ) : b.buyout_faab_cost > 0 ? (
                           <span className="text-red-600">${b.buyout_faab_cost}</span>
@@ -481,7 +481,7 @@ export default function KeeperSelectionPage() {
                         )}
                       </td>
                       <td className="px-3 py-2 text-xs text-gray-500">
-                        {b.note || (isLeagueIssue ? "League Issue (no cost)" : b.use_faab ? "FAAB buyout" : "")}
+                        {b.note || (isLegalIssue ? "Legal Issue (no cost)" : b.use_faab ? "FAAB buyout" : "")}
                       </td>
                     </tr>
                   );
@@ -504,7 +504,7 @@ export default function KeeperSelectionPage() {
             </table>
           </div>
           <p className="mt-1.5 text-xs text-gray-400">
-            買斷薪資從 Salary Cap 扣除，FAAB 買斷從 FAAB 預算扣除。League Issue 球員不計成本。
+            買斷薪資從 Salary Cap 扣除，FAAB 買斷從 FAAB 預算扣除。Legal Issue 球員不計成本。
           </p>
         </div>
       )}

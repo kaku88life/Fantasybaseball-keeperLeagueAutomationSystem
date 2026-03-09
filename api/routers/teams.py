@@ -147,8 +147,8 @@ def _infer_keep_action(transition, player) -> str:
         return "extend"
     if "expires" in action_lower or "fa" in action_lower:
         return "fa"
-    if "league issue" in action_lower:
-        return "league_issue"
+    if "legal issue" in action_lower:
+        return "legal_issue"
     if "frozen" in action_lower or "special" in action_lower:
         return "frozen"
     return "keep"
@@ -364,7 +364,7 @@ def _validate_selections(year: int, team_id: int, selections_db: list[dict]) -> 
         if action == "fa":
             continue
 
-        if action == "league_issue":
+        if action == "legal_issue":
             continue  # no salary, no roster spot
 
         # This player is being kept

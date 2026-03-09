@@ -28,16 +28,16 @@
   {
     "team": "叫我寬哥",
     "player_name": "Julio Urías",
-    "contract_detail": "25/N2-13=12",
+    "contract_detail": "25/N1",
     "salary_cost": 12,
     "faab_cost": 13,
     "note": "(Legal issue)",
-    "original_contract": "$25/N2",
+    "original_contract": "$25/N1",
     "parsed_salary": 25,
-    "parsed_contract_type": "N2",
+    "parsed_contract_type": "N1",
     "parsed_faab_deduct": 13,
     "parsed_salary_deduct": 12,
-    "league_issue": true
+    "legal_issue": true
   },
   {
     "team": "Leo",
@@ -55,17 +55,17 @@
   {
     "team": "EDDIE",
     "player_name": "Wander Franco",
-    "contract_detail": "34/N5",
+    "contract_detail": "34/N4",
     "salary_cost": 0,
     "faab_cost": 0,
     "note": "(Legal issue)",
-    "original_contract": "$34/N5",
+    "original_contract": "$34/N4",
     "parsed_salary": 34,
-    "parsed_contract_type": "N5",
+    "parsed_contract_type": "N4",
     "parsed_faab_deduct": 0,
     "parsed_salary_deduct": 0,
     "position": "SS",
-    "league_issue": true
+    "legal_issue": true
   },
   {
     "team": "小喆",
