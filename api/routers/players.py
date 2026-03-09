@@ -11,6 +11,8 @@ from typing import Optional
 import httpx
 from fastapi import APIRouter, HTTPException, Query
 
+from config.settings import ROOKIE_IP_THRESHOLD, ROOKIE_PA_THRESHOLD
+
 router = APIRouter()
 
 # ========== In-memory cache ==========
@@ -36,6 +38,22 @@ def _set_cached(key: str, data: dict | list) -> None:
 
 
 MLB_BASE = "https://statsapi.mlb.com/api/v1"
+
+
+def _parse_ip(ip_str: str) -> float:
+    """Parse innings pitched string like '50.1' into a float.
+
+    MLB uses fractional notation: 50.1 = 50 1/3 IP, 50.2 = 50 2/3 IP.
+    """
+    try:
+        parts = str(ip_str).split(".")
+        whole = int(parts[0])
+        if len(parts) > 1:
+            thirds = int(parts[1])
+            return whole + thirds / 3.0
+        return float(whole)
+    except (ValueError, IndexError):
+        return 0.0
 
 
 # ========== MLB API helpers ==========
@@ -84,7 +102,10 @@ async def _search_mlb_player(name: str, position: str = "") -> Optional[dict]:
 
 
 async def _get_mlb_stats(mlb_id: int) -> dict:
-    """Fetch year-by-year stats for a player from MLB Stats API."""
+    """Fetch year-by-year AND career stats for a player from MLB Stats API.
+
+    Uses stats=yearByYear,career to get both in a single API call.
+    """
     cache_key = f"stats:{mlb_id}"
     cached = _get_cached(cache_key)
     if cached:
@@ -94,7 +115,7 @@ async def _get_mlb_stats(mlb_id: int) -> dict:
         resp = await client.get(
             f"{MLB_BASE}/people/{mlb_id}/stats",
             params={
-                "stats": "yearByYear",
+                "stats": "yearByYear,career",
                 "group": "hitting,pitching",
             },
         )
@@ -113,7 +134,10 @@ async def get_player_stats(
     name: str = Query(..., description="Player name"),
     position: str = Query("", description="Player position code (e.g. SP, C, LF)"),
 ):
-    """Look up a player's MLB year-by-year stats via MLB Stats API."""
+    """Look up a player's MLB year-by-year stats via MLB Stats API.
+
+    Also returns career totals and rookie eligibility status.
+    """
     player = await _search_mlb_player(name, position)
     if not player:
         raise HTTPException(
@@ -124,27 +148,45 @@ async def get_player_stats(
     mlb_id = player["id"]
     raw_stats = await _get_mlb_stats(mlb_id)
 
-    # Parse into hitting + pitching season lists
+    # Parse into hitting + pitching season lists AND career totals
     hitting_seasons = []
     pitching_seasons = []
+    career_pa = 0
+    career_ip = 0.0
 
     for stat_group in raw_stats.get("stats", []):
         group_name = stat_group.get("group", {}).get("displayName", "")
+        stat_type = stat_group.get("type", {}).get("displayName", "")
+
         for split in stat_group.get("splits", []):
-            season = split.get("season", "")
-            team_name = split.get("team", {}).get("name", "")
             s = split.get("stat", {})
 
             # Only include MLB-level stats (sport.id == 1)
             sport_id = split.get("sport", {}).get("id")
-            if sport_id != 1:
+            if sport_id is not None and sport_id != 1:
                 continue
+
+            # Career totals (stat_type == "career")
+            if stat_type == "career":
+                if group_name == "hitting":
+                    career_pa = s.get("plateAppearances", 0)
+                elif group_name == "pitching":
+                    career_ip = _parse_ip(s.get("inningsPitched", "0.0"))
+                continue
+
+            # Year-by-year stats
+            if stat_type != "yearByYear":
+                continue
+
+            season = split.get("season", "")
+            team_name = split.get("team", {}).get("name", "")
 
             if group_name == "hitting":
                 hitting_seasons.append({
                     "season": season,
                     "team": team_name,
                     "games": s.get("gamesPlayed", 0),
+                    "plate_appearances": s.get("plateAppearances", 0),
                     "at_bats": s.get("atBats", 0),
                     "hits": s.get("hits", 0),
                     "home_runs": s.get("homeRuns", 0),
@@ -177,6 +219,11 @@ async def get_player_stats(
     hitting_seasons.sort(key=lambda x: x["season"], reverse=True)
     pitching_seasons.sort(key=lambda x: x["season"], reverse=True)
 
+    # Determine rookie eligibility
+    exceeded_pa = career_pa > ROOKIE_PA_THRESHOLD
+    exceeded_ip = career_ip > ROOKIE_IP_THRESHOLD
+    rookie_eligible = not exceeded_pa and not exceeded_ip
+
     return {
         "mlb_id": mlb_id,
         "name": player.get("fullName", name),
@@ -188,4 +235,14 @@ async def get_player_stats(
         "pitch_hand": player.get("pitchHand", {}).get("code", ""),
         "hitting": hitting_seasons[:5],
         "pitching": pitching_seasons[:5],
+        # Career totals and rookie eligibility
+        "career_pa": career_pa,
+        "career_ip": round(career_ip, 1),
+        "rookie_eligible": rookie_eligible,
+        "rookie_thresholds": {
+            "pa_threshold": ROOKIE_PA_THRESHOLD,
+            "ip_threshold": ROOKIE_IP_THRESHOLD,
+            "exceeded_pa": exceeded_pa,
+            "exceeded_ip": exceeded_ip,
+        },
     }

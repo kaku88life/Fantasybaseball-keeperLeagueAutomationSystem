@@ -130,6 +130,39 @@ export default function PlayerStatsModal({
                 {stats.bat_side && <span>打: {stats.bat_side}</span>}
                 {stats.pitch_hand && <span>投: {stats.pitch_hand}</span>}
               </div>
+
+              {/* Rookie Eligibility Status */}
+              {stats.rookie_thresholds && (
+                <div className={`mt-3 rounded-lg border px-4 py-3 ${
+                  stats.rookie_eligible
+                    ? "border-green-200 bg-green-50"
+                    : "border-orange-200 bg-orange-50"
+                }`}>
+                  <div className="flex items-center gap-2">
+                    <span className={`text-sm font-semibold ${
+                      stats.rookie_eligible ? "text-green-700" : "text-orange-700"
+                    }`}>
+                      {stats.rookie_eligible
+                        ? "符合新秀資格 Rookie Eligible"
+                        : "已超過新秀門檻 Exceeded Rookie Threshold"}
+                    </span>
+                  </div>
+                  <div className="mt-1 flex flex-wrap gap-4 text-xs text-gray-600">
+                    <span className={stats.rookie_thresholds.exceeded_pa ? "font-bold text-orange-600" : ""}>
+                      生涯打席 PA: {stats.career_pa}
+                      <span className="text-gray-400">
+                        /{stats.rookie_thresholds.pa_threshold}
+                      </span>
+                    </span>
+                    <span className={stats.rookie_thresholds.exceeded_ip ? "font-bold text-orange-600" : ""}>
+                      生涯投球局數 IP: {stats.career_ip}
+                      <span className="text-gray-400">
+                        /{stats.rookie_thresholds.ip_threshold}
+                      </span>
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="px-6 py-4 space-y-6">
@@ -146,6 +179,7 @@ export default function PlayerStatsModal({
                           <th className="px-2 py-2 text-left">Year</th>
                           <th className="px-2 py-2 text-left">Team</th>
                           <th className="px-2 py-2 text-right">G</th>
+                          <th className="px-2 py-2 text-right">PA</th>
                           <th className="px-2 py-2 text-right">AB</th>
                           <th className="px-2 py-2 text-right">H</th>
                           <th className="px-2 py-2 text-right font-bold">HR</th>
@@ -171,6 +205,9 @@ export default function PlayerStatsModal({
                             </td>
                             <td className="px-2 py-1.5 text-right">
                               {s.games}
+                            </td>
+                            <td className="px-2 py-1.5 text-right">
+                              {s.plate_appearances}
                             </td>
                             <td className="px-2 py-1.5 text-right">
                               {s.at_bats}

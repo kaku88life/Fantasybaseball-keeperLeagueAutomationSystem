@@ -29,6 +29,11 @@ FAAB_BASE = 100            # yearly FAAB budget
 MIN_BID = 1                # minimum FAAB bid / minimum salary
 SHUTOUT_FAAB_BONUS = 10    # $10 FAAB bonus for shutting out opponent in H2H
 
+# ========== Rookie Eligibility Thresholds ==========
+# Players exceeding these MLB career thresholds lose rookie eligibility
+ROOKIE_IP_THRESHOLD = 50   # pitching: >50 innings pitched in MLB
+ROOKIE_PA_THRESHOLD = 130  # batting: >130 plate appearances in MLB
+
 
 def get_salary_cap(year: int) -> int:
     """Calculate salary cap for a given year.

@@ -194,6 +194,7 @@ export interface HittingSeason {
   season: string;
   team: string;
   games: number;
+  plate_appearances: number;
   at_bats: number;
   hits: number;
   home_runs: number;
@@ -222,6 +223,13 @@ export interface PitchingSeason {
   holds: number;
 }
 
+export interface RookieThresholds {
+  pa_threshold: number;
+  ip_threshold: number;
+  exceeded_pa: boolean;
+  exceeded_ip: boolean;
+}
+
 export interface PlayerStats {
   mlb_id: number;
   name: string;
@@ -233,6 +241,11 @@ export interface PlayerStats {
   pitch_hand: string;
   hitting: HittingSeason[];
   pitching: PitchingSeason[];
+  // Career totals and rookie eligibility
+  career_pa: number;
+  career_ip: number;
+  rookie_eligible: boolean;
+  rookie_thresholds: RookieThresholds;
 }
 
 // DB team record
