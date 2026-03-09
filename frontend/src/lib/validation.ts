@@ -33,6 +33,7 @@ export function computeNextSalary(
   extensionYears: number,
 ): number {
   if (action === "release" || action === "fa") return 0;
+  if (action === "league_issue") return 0; // no salary cost
 
   if (contractType === "B" && action === "extend" && extensionYears > 0) {
     return currentSalary + extensionYears * EXTENSION_COST_PER_YEAR;
@@ -51,6 +52,7 @@ export function getKeeperCategory(
   action: string,
 ): "active" | "bench" | "none" {
   if (action === "release" || action === "fa") return "none";
+  if (action === "league_issue") return "none"; // no roster spot
 
   // O contract = FA, cannot keep
   if (contractType === "O") return "none";
@@ -228,6 +230,9 @@ export function getActionLabel(
       if (keepAction === "keep" || keepAction === "frozen") {
         return "自動延續 Auto-renew (薪資 Salary 不變)";
       }
+      if (keepAction === "league_issue") {
+        return "聯盟特殊條款 League Issue (合約凍結，不佔薪資/名額)";
+      }
       break;
     case "O":
       return "到期 Expired → 自由球員 FA";
@@ -252,6 +257,7 @@ export function getNextContractDisplay(
 ): string | null {
   if (action === "release") return "FA";
   if (action === "fa") return "FA";
+  if (action === "league_issue") return "凍結 Frozen";
 
   switch (contractType) {
     case "A":

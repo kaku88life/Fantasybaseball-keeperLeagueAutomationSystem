@@ -101,6 +101,23 @@ def evaluate_next_contract(
             is_mandatory=True,
         )
 
+    # League issue: contract frozen, no salary, no roster spot
+    if keep_action == "league_issue":
+        frozen_contract = Contract(
+            contract_type=ct.contract_type,
+            salary=ct.salary,
+            extension_years=ct.extension_years,
+            special_status=SpecialStatus.LEGAL_ISSUE,
+        )
+        return ContractTransition(
+            player_name=name,
+            current_contract=ct,
+            next_contract=frozen_contract,
+            action="League issue -> contract frozen (no salary, no roster spot)",
+            salary_change=0,
+            is_mandatory=False,
+        )
+
     # Release (don't keep) -> needs buyout
     if keep_action == "release":
         return ContractTransition(
@@ -504,7 +521,9 @@ def generate_keeper_options(player: Player) -> list[ContractTransition]:
     if ct.contract_type == ContractType.A:
         options.append(evaluate_next_contract(player, keep_action="keep"))
         options.append(evaluate_next_contract(player, keep_action="rookie"))
-        options.append(evaluate_next_contract(player, keep_action="release"))
+        # FAAB >= $10 players cannot be released (mandatory keeper)
+        if not player.is_mandatory_keeper:
+            options.append(evaluate_next_contract(player, keep_action="release"))
         return options
 
     # B contract: keep as O, extend N+O (various lengths), or release
@@ -520,11 +539,13 @@ def generate_keeper_options(player: Player) -> list[ContractTransition]:
         options.append(evaluate_next_contract(player, keep_action="release"))
         return options
 
-    # N contract: automatic transition (mandatory)
+    # N contract: automatic transition (mandatory), buyout, or league issue
     if ct.contract_type == ContractType.N:
         options.append(evaluate_next_contract(player))
         # Can also choose to release (buyout)
         options.append(evaluate_next_contract(player, keep_action="release"))
+        # League issue (legal problems, suspension, etc.)
+        options.append(evaluate_next_contract(player, keep_action="league_issue"))
         return options
 
     # R contract: stay bench, activate, or release

@@ -21,6 +21,7 @@ sys.path.insert(0, str(ROOT))
 
 from config.settings import FAAB_BASE, get_salary_cap
 from src.contract.models import (
+    BuyoutRecord,
     Contract,
     ContractType,
     LeagueState,
@@ -32,6 +33,7 @@ from api.database import init_db, save_snapshot, upsert_team
 from api.serializers import league_state_to_dict
 
 JSON_PATH = ROOT / "data" / "2026_contracts_v2.json"
+BUYOUT_PATH = ROOT / "data" / "2025_buyout_records.json"
 YEAR = 2026
 
 CT_MAP = {v.value: v for v in ContractType}
@@ -86,6 +88,7 @@ def build_player(player_data: dict) -> Player:
         contract=contract,
         yahoo_player_id=player_data.get("player_key"),
         is_active_keeper=True,
+        source=player_data.get("source", ""),
     )
 
 
@@ -134,6 +137,41 @@ def load_contracts():
         total_players += len(players)
         total_keepable += team_keepable
         print(f"  {manager_name}: {len(players)} players ({team_keepable} keepable)")
+
+    # Load 2025 buyout records into teams
+    if BUYOUT_PATH.exists():
+        with open(BUYOUT_PATH, "r", encoding="utf-8") as f:
+            buyout_data = json.load(f)
+
+        team_lookup = {t.manager_name: t for t in teams}
+        buyout_count = 0
+
+        for br in buyout_data:
+            mgr = br["team"]
+            team = team_lookup.get(mgr)
+            if team:
+                is_league_issue = br.get("league_issue", False)
+                team.buyout_records.append(BuyoutRecord(
+                    player_name=br["player_name"],
+                    original_contract=br["original_contract"],
+                    buyout_salary_cost=br["salary_cost"] if not is_league_issue else 0,
+                    buyout_faab_cost=br["faab_cost"] if not is_league_issue else 0,
+                    remaining_years=1,
+                    use_faab=br["faab_cost"] > 0 and not is_league_issue,
+                    note=br.get("note", ""),
+                ))
+                buyout_count += 1
+            else:
+                print(f"  WARNING: Buyout team '{mgr}' not found in contracts")
+
+        print(f"\nLoaded {buyout_count} buyout records from {BUYOUT_PATH.name}")
+        for t in teams:
+            if t.buyout_records:
+                total_sal = sum(b.buyout_salary_cost for b in t.buyout_records)
+                total_faab = sum(b.buyout_faab_cost for b in t.buyout_records)
+                print(f"  {t.manager_name}: {len(t.buyout_records)} buyouts (salary: ${total_sal}, FAAB: ${total_faab})")
+    else:
+        print(f"\nNo buyout records file found at {BUYOUT_PATH}")
 
     # Build LeagueState (year=2026, but contracts are 2025 state)
     # The engine will compute 2026 transitions via generate_keeper_options()

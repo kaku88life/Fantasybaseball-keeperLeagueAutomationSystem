@@ -115,6 +115,7 @@ def league_state_to_dict(ls: LeagueState) -> dict:
                         "special_status": p.contract.special_status.value,
                         "yahoo_player_id": p.yahoo_player_id,
                         "is_active_keeper": p.is_active_keeper,
+                        "source": p.source,
                     }
                     for p in t.players
                 ],
@@ -158,6 +159,7 @@ def dict_to_league_state(data: dict) -> LeagueState:
                 contract=contract,
                 yahoo_player_id=pd.get("yahoo_player_id"),
                 is_active_keeper=pd.get("is_active_keeper", True),
+                source=pd.get("source", ""),
             ))
         buyouts = []
         for bd in td.get("buyout_records", []):
