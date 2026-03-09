@@ -102,7 +102,7 @@ class Player:
 
     @property
     def is_mandatory_keeper(self) -> bool:
-        """FAAB >= $10 players must be kept (cannot release)."""
+        """FAAB >= $10 players must be kept. Releasing requires buyout."""
         from config.settings import FAAB_KEEPER_THRESHOLD
         return self.source in ("faab", "trade_faab") and self.contract.salary >= FAAB_KEEPER_THRESHOLD
 

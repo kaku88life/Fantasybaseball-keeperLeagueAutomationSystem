@@ -337,7 +337,7 @@ export default function RulesPage() {
           </ul>
           <div className="mt-3 rounded bg-red-50 p-3 text-xs text-red-800">
             <span className="font-semibold">強制 Keeper</span>：標金超過{" "}
-            <span className="font-bold">$10（含）</span>者，於該年底時必須強制 Keeper，不可釋出。
+            <span className="font-bold">$10（含）</span>者，於該年底時必須強制 Keeper。釋出的話必須支付買斷金。
           </div>
         </section>
 
@@ -440,6 +440,7 @@ export default function RulesPage() {
               <p className="font-medium">N 約多年買斷</p>
               <p className="text-xs text-gray-500">
                 例: $18/N3 球員不保留，需執行 3 年買斷：$18/N2、$18/N1、$18/O 共三年合約之買斷動作。
+                多年度買斷可選擇全部以起始薪資（Salary Cap）支付，或分成起始薪資 + FAAB 各半支付。
               </p>
             </div>
           </div>

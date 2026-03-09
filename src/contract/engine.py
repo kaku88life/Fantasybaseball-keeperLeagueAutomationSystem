@@ -521,9 +521,8 @@ def generate_keeper_options(player: Player) -> list[ContractTransition]:
     if ct.contract_type == ContractType.A:
         options.append(evaluate_next_contract(player, keep_action="keep"))
         options.append(evaluate_next_contract(player, keep_action="rookie"))
-        # FAAB >= $10 players cannot be released (mandatory keeper)
-        if not player.is_mandatory_keeper:
-            options.append(evaluate_next_contract(player, keep_action="release"))
+        # FAAB >= $10 mandatory keepers can still release but must pay buyout
+        options.append(evaluate_next_contract(player, keep_action="release"))
         return options
 
     # B contract: keep as O, extend N+O (various lengths), or release

@@ -672,7 +672,7 @@ function PlayerTable({
                     {mandatoryKeepers.has(player.name) && (
                       <span
                         className="shrink-0 rounded bg-orange-100 px-1.5 py-0.5 text-[10px] font-semibold text-orange-700"
-                        title="FAAB >= $10, must be kept (mandatory keeper)"
+                        title="FAAB >= $10, must be kept. Release requires buyout."
                       >
                         FAAB &ge; $10 強制留用
                       </span>
@@ -709,19 +709,27 @@ function PlayerTable({
                       }`}
                     >
                       <option value="">-- 請選擇 --</option>
-                      {playerOpts.options.map((opt, i) => (
-                        <option
-                          key={i}
-                          value={`${opt.keep_action}:${opt.extension_years}`}
-                        >
-                          {getActionLabel(
-                            ct,
-                            opt.keep_action,
-                            opt.extension_years,
-                            player.contract.salary,
-                          )}
-                        </option>
-                      ))}
+                      {playerOpts.options.map((opt, i) => {
+                        const label = getActionLabel(
+                          ct,
+                          opt.keep_action,
+                          opt.extension_years,
+                          player.contract.salary,
+                        );
+                        const isMandatoryRelease =
+                          mandatoryKeepers.has(player.name) &&
+                          opt.keep_action === "release";
+                        return (
+                          <option
+                            key={i}
+                            value={`${opt.keep_action}:${opt.extension_years}`}
+                          >
+                            {isMandatoryRelease
+                              ? `${label} (需買斷 Buyout Required)`
+                              : label}
+                          </option>
+                        );
+                      })}
                     </select>
                   ) : (
                     <span className="text-gray-500">
