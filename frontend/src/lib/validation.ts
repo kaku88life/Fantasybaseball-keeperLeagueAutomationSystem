@@ -6,8 +6,8 @@
 import type { ContractType, FinancialSummary, Player, Team } from "@/types";
 
 // League constants (must match config/settings.py)
-const KEEPER_ACTIVE_MIN = 6;
-const KEEPER_ACTIVE_MAX = 10;
+const KEEPER_ACTIVE_MIN = 12;
+const KEEPER_ACTIVE_MAX = 15;
 const KEEPER_BENCH_MAX = 2;
 const EXTENSION_COST_PER_YEAR = 5;
 

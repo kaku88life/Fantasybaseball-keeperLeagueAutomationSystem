@@ -14,7 +14,7 @@ class ContractType(Enum):
     B = "B"       # 2nd year (A kept)
     N = "N"       # Extension year (N+O, salary + N*$5)
     O = "O"       # Option year (final year, then FA)
-    R = "R"       # Rookie (bench only, doesn't count toward 10-man limit)
+    R = "R"       # Rookie (bench only, doesn't count toward 15-man limit)
     FA = "FA"     # Free agent (not on any team)
 
 
@@ -131,7 +131,7 @@ class Team:
 
     @property
     def active_keepers(self) -> list[Player]:
-        """Players with A/B/N/O contracts (count toward 10-man limit)."""
+        """Players with A/B/N/O contracts (count toward 15-man limit)."""
         return [p for p in self.players
                 if p.contract.contract_type != ContractType.R
                 and p.is_active_keeper]

@@ -14,6 +14,7 @@ from config.settings import (
     EXTENSION_COST_PER_YEAR,
     FAAB_KEEPER_THRESHOLD,
     KEEPER_ACTIVE_MAX,
+    KEEPER_ACTIVE_MIN,
     KEEPER_BENCH_MAX,
     get_salary_cap,
 )
@@ -423,7 +424,7 @@ def apply_special_clause(player: Player, status: SpecialStatus) -> Player:
 
     When active:
     - No salary payment required
-    - Doesn't count toward 10-man keeper limit
+    - Doesn't count toward 15-man keeper limit
     - Must be noted below team roster
     - If player returns, original contract resumes or GM can choose buyout
     """
@@ -452,11 +453,11 @@ def validate_keeper_list(team: Team) -> list[str]:
     bench = team.bench_keepers
     special = team.special_clause_players
 
-    # Active keeper count (6-10)
+    # Active keeper count (12-15)
     active_non_special = [p for p in active if not p.contract.is_special_clause_active]
-    if len(active_non_special) < 6:
+    if len(active_non_special) < KEEPER_ACTIVE_MIN:
         errors.append(
-            f"Active keepers too few: {len(active_non_special)} (minimum 6)"
+            f"Active keepers too few: {len(active_non_special)} (minimum {KEEPER_ACTIVE_MIN})"
         )
     if len(active_non_special) > KEEPER_ACTIVE_MAX:
         errors.append(

@@ -55,8 +55,8 @@ RANKING_BONUS = {
 }
 
 # ========== Keeper Rules ==========
-KEEPER_ACTIVE_MIN = 6      # minimum active keepers
-KEEPER_ACTIVE_MAX = 10     # maximum active keepers (A/B/N/O contracts)
+KEEPER_ACTIVE_MIN = 12     # minimum active keepers
+KEEPER_ACTIVE_MAX = 15     # maximum active keepers (A/B/N/O contracts)
 KEEPER_BENCH_MAX = 2       # maximum R-contract bench keepers
 MIN_ROSTER_SIZE = 5        # minimum players on roster at all times
 
@@ -93,7 +93,7 @@ MAX_TRADE_INSTALLMENT_YEARS = 5  # max installment years for salary compensation
 
 # ========== Special Clause ==========
 # Players who retire, get lifetime ban, domestic violence cases, etc.
-# -> No salary payment required, doesn't count toward 10-man keeper limit
+# -> No salary payment required, doesn't count toward 15-man keeper limit
 # -> Must be noted below team roster
 # -> If player returns, original contract resumes or GM can choose buyout
 
