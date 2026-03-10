@@ -799,15 +799,15 @@
           "position": "SP",
           "mlb_team": "CHC",
           "source": "keeper",
-          "contract_2025": "$1/R",
-          "contract_type": "R",
+          "contract_2025": "A/$1",
+          "contract_type": "A",
           "salary": 1,
           "extension_years": 0,
-          "contract_2026_type": "R",
+          "contract_2026_type": "B",
           "contract_2026_salary": 1,
           "contract_2026_ext": 0,
           "can_keep": true,
-          "contract_2026": "R/$1"
+          "contract_2026": "B/$1"
         },
         {
           "name": "Emmanuel Clase",
@@ -3050,15 +3050,15 @@
           "position": "LF,CF",
           "mlb_team": "NYY",
           "source": "keeper",
-          "contract_2025": "$1/R",
-          "contract_type": "R",
+          "contract_2025": "A/$1",
+          "contract_type": "A",
           "salary": 1,
           "extension_years": 0,
-          "contract_2026_type": "R",
+          "contract_2026_type": "B",
           "contract_2026_salary": 1,
           "contract_2026_ext": 0,
           "can_keep": true,
-          "contract_2026": "R/$1"
+          "contract_2026": "B/$1"
         },
         {
           "name": "Lawrence Butler",
@@ -3922,13 +3922,15 @@
           "position": "2B,3B,SS",
           "mlb_team": "CHC",
           "source": "trade_keeper",
-          "contract_2025": "$1/R",
+          "contract_2025": "A/$1",
           "original_team": "Billy WU",
-          "contract_2026_type": "R",
+          "contract_2026_type": "B",
           "contract_2026_salary": 1,
           "contract_2026_ext": 0,
           "can_keep": true,
-          "contract_2026": "R/$1"
+          "contract_2026": "B/$1",
+          "contract_type": "A",
+          "salary": 1
         },
         {
           "name": "Manny Machado",
@@ -4318,15 +4320,15 @@
           "position": "LF,CF,RF",
           "mlb_team": "BOS",
           "source": "keeper",
-          "contract_2025": "$1/R",
-          "contract_type": "R",
+          "contract_2025": "A/$1",
+          "contract_type": "A",
           "salary": 1,
           "extension_years": 0,
-          "contract_2026_type": "R",
+          "contract_2026_type": "B",
           "contract_2026_salary": 1,
           "contract_2026_ext": 0,
           "can_keep": true,
-          "contract_2026": "R/$1"
+          "contract_2026": "B/$1"
         },
         {
           "name": "Zack Wheeler",
@@ -7521,15 +7523,15 @@
           "position": "SP",
           "mlb_team": "TEX",
           "source": "keeper",
-          "contract_2025": "$1/R",
-          "contract_type": "R",
+          "contract_2025": "A/$1",
+          "contract_type": "A",
           "salary": 1,
           "extension_years": 0,
-          "contract_2026_type": "R",
+          "contract_2026_type": "B",
           "contract_2026_salary": 1,
           "contract_2026_ext": 0,
           "can_keep": true,
-          "contract_2026": "R/$1"
+          "contract_2026": "B/$1"
         },
         {
           "name": "Jason Alexander",
