@@ -57,9 +57,6 @@ export function getKeeperCategory(
   // O contract = FA, cannot keep
   if (contractType === "O") return "none";
 
-  // A contract designated as rookie -> bench
-  if (contractType === "A" && action === "rookie") return "bench";
-
   // R contract kept on bench
   if (contractType === "R" && action === "keep") return "bench";
 
@@ -90,9 +87,17 @@ export function validateSelections(
 
   for (const player of team.players) {
     const sel = selections[player.name];
-    if (!sel) continue;
-
     const ct = player.contract.contract_type as ContractType;
+
+    // R contract players without explicit selection default to "keep" (bench)
+    if (!sel) {
+      if (ct === "R") {
+        benchCount++;
+        keeperCost += player.contract.salary;
+      }
+      continue;
+    }
+
     const category = getKeeperCategory(ct, sel.action);
 
     if (category === "none") continue;
@@ -215,7 +220,6 @@ export function getActionLabel(
   switch (contractType) {
     case "A":
       if (keepAction === "keep") return "留用 Keep → B 約 (薪資 Salary 不變)";
-      if (keepAction === "rookie") return "指定新秀 Rookie → R 約";
       break;
     case "B":
       if (keepAction === "keep")
@@ -262,7 +266,6 @@ export function getNextContractDisplay(
   switch (contractType) {
     case "A":
       if (action === "keep") return `$${currentSalary}/B`;
-      if (action === "rookie") return `$${currentSalary}/R`;
       break;
     case "B":
       if (action === "keep") return `$${currentSalary}/O`;

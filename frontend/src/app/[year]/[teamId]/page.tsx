@@ -359,7 +359,7 @@ export default function KeeperSelectionPage() {
               <p className="text-lg font-bold">
                 {fin.active_keeper_count}
                 <span className="text-sm font-normal text-gray-400">
-                  /6~10
+                  /12~15
                 </span>
               </p>
             </div>

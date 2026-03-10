@@ -518,10 +518,11 @@ def generate_keeper_options(player: Player) -> list[ContractTransition]:
         options.append(evaluate_next_contract(player))
         return options
 
-    # A contract: keep as B, designate as R (bench rookie), or release
+    # A contract: keep as B, or release
+    # Note: R (rookie bench) designation is handled during contract loading,
+    # not during keeper selection. R-eligible players already have R contracts.
     if ct.contract_type == ContractType.A:
         options.append(evaluate_next_contract(player, keep_action="keep"))
-        options.append(evaluate_next_contract(player, keep_action="rookie"))
         # FAAB >= $10 mandatory keepers can still release but must pay buyout
         options.append(evaluate_next_contract(player, keep_action="release"))
         return options

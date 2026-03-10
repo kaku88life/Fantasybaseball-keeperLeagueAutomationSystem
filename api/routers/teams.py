@@ -379,7 +379,7 @@ def _validate_selections(year: int, team_id: int, selections_db: list[dict]) -> 
         next_salary = transition.next_contract.salary
         next_type = transition.next_contract.contract_type.value
 
-        if next_type == "R" and (action == "keep" or action == "rookie"):
+        if next_type == "R" and action == "keep":
             bench_count += 1
             keeper_cost += next_salary
         elif action == "activate":
