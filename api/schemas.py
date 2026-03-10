@@ -61,7 +61,7 @@ class TeamSchema(BaseModel):
     available_salary: int = 0
     available_faab: int = 0
     active_keeper_count: int = 0
-    bench_keeper_count: int = 0
+    farm_rookie_count: int = 0
 
 
 class LeagueSnapshotSchema(BaseModel):
@@ -122,7 +122,7 @@ class FinancialSummary(BaseModel):
     buyout_faab_cost: int = 0
     available_faab: int = 0
     active_keeper_count: int = 0
-    bench_keeper_count: int = 0
+    farm_rookie_count: int = 0
 
 
 class ValidationResult(BaseModel):

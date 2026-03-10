@@ -832,7 +832,7 @@ if __name__ == "__main__":
             print(f"\n--- {year} Season ({len(teams)} teams) ---")
             for team in teams:
                 active = len(team.active_keepers)
-                bench = len(team.bench_keepers)
+                bench = len(team.farm_rookies)
                 print(f"  {team.manager_name:20s} | "
                       f"Active: {active:2d} | "
                       f"Bench(R): {bench} | "

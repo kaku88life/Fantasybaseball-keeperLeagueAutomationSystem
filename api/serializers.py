@@ -79,7 +79,7 @@ def serialize_team(t: Team, db_team_id: Optional[int] = None) -> TeamSchema:
         available_salary=t.available_salary,
         available_faab=t.available_faab,
         active_keeper_count=len(t.active_keepers),
-        bench_keeper_count=len(t.bench_keepers),
+        farm_rookie_count=len(t.farm_rookies),
     )
 
 

@@ -436,7 +436,7 @@ export default function RulesPage() {
                 {settings.keeper_active_min} ~ {settings.keeper_active_max} 人
                 (A/B/N/O)
               </dd>
-              <dt className="text-gray-500">板凳留用 (Bench)</dt>
+              <dt className="text-gray-500">農場新秀 (Farm Rookie)</dt>
               <dd>最多 {settings.keeper_bench_max} 人 (R 約)</dd>
               <dt className="text-gray-500">延長合約成本</dt>
               <dd>每延長 1 年 +${settings.extension_cost_per_year}</dd>

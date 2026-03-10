@@ -223,7 +223,7 @@ def evaluate_next_contract(
                 is_mandatory=True,
             )
 
-    # R -> stay R (bench) or activate -> A
+    # R -> stay R (farm rookie) or activate -> A
     if ct.contract_type == ContractType.R:
         if keep_action == "activate":
             next_ct = Contract(
@@ -234,7 +234,7 @@ def evaluate_next_contract(
                 player_name=name,
                 current_contract=ct,
                 next_contract=next_ct,
-                action="R -> A (activated from bench, salary unchanged)",
+                action="R -> A (activated from farm, salary unchanged)",
                 salary_change=0,
                 is_mandatory=False,
             )
@@ -243,7 +243,7 @@ def evaluate_next_contract(
                 player_name=name,
                 current_contract=ct,
                 next_contract=ct,
-                action="R -> R (stays on bench as rookie)",
+                action="R -> R (stays on farm as rookie)",
                 salary_change=0,
                 is_mandatory=False,
             )
@@ -450,7 +450,7 @@ def validate_keeper_list(team: Team) -> list[str]:
     """
     errors = []
     active = team.active_keepers
-    bench = team.bench_keepers
+    bench = team.farm_rookies
     special = team.special_clause_players
 
     # Active keeper count (12-15)
@@ -464,10 +464,10 @@ def validate_keeper_list(team: Team) -> list[str]:
             f"Active keepers too many: {len(active_non_special)} (maximum {KEEPER_ACTIVE_MAX})"
         )
 
-    # Bench keepers (max 2 R contracts)
+    # Farm rookies (max 2 R contracts)
     if len(bench) > KEEPER_BENCH_MAX:
         errors.append(
-            f"R-contract bench keepers too many: {len(bench)} (maximum {KEEPER_BENCH_MAX})"
+            f"R-contract farm rookies too many: {len(bench)} (maximum {KEEPER_BENCH_MAX})"
         )
 
     # O contracts cannot be kept

@@ -84,7 +84,7 @@ async def get_league_summary(year: int):
             "manager_name": t.manager_name,
             "team_name": t.team_name,
             "active_keepers": len(t.active_keepers),
-            "bench_keepers": len(t.bench_keepers),
+            "farm_rookies": len(t.farm_rookies),
             "total_keeper_cost": t.total_keeper_cost,
             "total_buyout_cost": t.total_buyout_cost,
             "available_salary": t.available_salary,

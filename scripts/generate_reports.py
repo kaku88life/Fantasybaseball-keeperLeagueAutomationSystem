@@ -75,14 +75,14 @@ def generate_team_report(team: Team, target_year: int) -> str:
             f"{keepable:>8}{special}"
         )
 
-    # Bench keepers (R contracts)
-    if team.bench_keepers:
-        lines.append(f"\n  Bench Keepers (R contracts):")
-        for p in team.bench_keepers:
+    # Farm rookies (R contracts)
+    if team.farm_rookies:
+        lines.append(f"\n  Farm Rookies (R contracts):")
+        for p in team.farm_rookies:
             lines.append(
                 f"  {p.position:<8} {p.name:<28} "
                 f"${p.contract.salary:>5} {p.contract.display:>8} "
-                f"{'Bench':>8}"
+                f"{'Farm':>8}"
             )
 
     # Special clause players
@@ -177,7 +177,7 @@ def generate_team_report(team: Team, target_year: int) -> str:
     lines.append(f"  Can keep (A/B/R):           {len(can_keep)}")
     lines.append(f"  Will become FA (O):         {len(will_fa)}")
     lines.append(f"  Current active keepers:     {active_count}/{KEEPER_ACTIVE_MAX}")
-    lines.append(f"  Bench keepers (R):          {len(team.bench_keepers)}/{KEEPER_BENCH_MAX}")
+    lines.append(f"  Farm rookies (R):           {len(team.farm_rookies)}/{KEEPER_BENCH_MAX}")
 
     lines.append("\n" + "=" * 70)
     return "\n".join(lines)

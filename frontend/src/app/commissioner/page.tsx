@@ -859,10 +859,10 @@ export default function CommissionerDashboard() {
                                     </div>
                                     <div className="rounded bg-gray-50 p-2">
                                       <p className="text-xs text-gray-500">
-                                        留用人數 Keepers (Active/Bench)
+                                        留用人數 Keepers (Active/Farm)
                                       </p>
                                       <p className="font-semibold">
-                                        {f.active_keeper_count} / {f.bench_keeper_count}
+                                        {f.active_keeper_count} / {f.farm_rookie_count}
                                       </p>
                                     </div>
                                   </>

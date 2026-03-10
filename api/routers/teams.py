@@ -346,7 +346,7 @@ def _validate_selections(year: int, team_id: int, selections_db: list[dict]) -> 
 
     # Compute keeper costs and counts
     active_count = 0
-    bench_count = 0
+    farm_count = 0
     keeper_cost = 0
 
     for p in team.players:
@@ -380,7 +380,7 @@ def _validate_selections(year: int, team_id: int, selections_db: list[dict]) -> 
         next_type = transition.next_contract.contract_type.value
 
         if next_type == "R" and action == "keep":
-            bench_count += 1
+            farm_count += 1
             keeper_cost += next_salary
         elif action == "activate":
             # R -> A, counts as active
@@ -403,8 +403,8 @@ def _validate_selections(year: int, team_id: int, selections_db: list[dict]) -> 
     if active_count > KEEPER_ACTIVE_MAX:
         errors.append(f"Active keepers too many: {active_count} (maximum {KEEPER_ACTIVE_MAX})")
 
-    if bench_count > KEEPER_BENCH_MAX:
-        errors.append(f"R-contract bench keepers too many: {bench_count} (maximum {KEEPER_BENCH_MAX})")
+    if farm_count > KEEPER_BENCH_MAX:
+        errors.append(f"R-contract farm rookies too many: {farm_count} (maximum {KEEPER_BENCH_MAX})")
 
     # Financial validation
     salary_cap = team.salary_cap or get_salary_cap(year)
@@ -446,7 +446,7 @@ def _validate_selections(year: int, team_id: int, selections_db: list[dict]) -> 
         buyout_faab_cost=buyout_faab_cost,
         available_faab=available_faab,
         active_keeper_count=active_count,
-        bench_keeper_count=bench_count,
+        farm_rookie_count=farm_count,
     )
 
     return ValidationResult(

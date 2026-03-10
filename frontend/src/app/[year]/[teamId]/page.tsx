@@ -366,7 +366,7 @@ export default function KeeperSelectionPage() {
             <div className="rounded bg-gray-50 p-3">
               <p className="text-xs text-gray-500">農場新秀名單 Rookie (R)</p>
               <p className="text-lg font-bold">
-                {fin.bench_keeper_count}
+                {fin.farm_rookie_count}
                 <span className="text-sm font-normal text-gray-400">/2</span>
               </p>
             </div>

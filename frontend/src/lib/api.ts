@@ -73,7 +73,7 @@ export async function getLeagueSummary(year: number): Promise<{
     manager_name: string;
     team_name: string;
     active_keepers: number;
-    bench_keepers: number;
+    farm_rookies: number;
     total_keeper_cost: number;
     available_salary: number;
     available_faab: number;

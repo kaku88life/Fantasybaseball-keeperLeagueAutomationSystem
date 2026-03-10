@@ -49,7 +49,7 @@ export interface Team {
   available_salary: number;
   available_faab: number;
   active_keeper_count: number;
-  bench_keeper_count: number;
+  farm_rookie_count: number;
 }
 
 export interface LeagueSnapshot {
@@ -97,7 +97,7 @@ export interface FinancialSummary {
   buyout_faab_cost: number;
   available_faab: number;
   active_keeper_count: number;
-  bench_keeper_count: number;
+  farm_rookie_count: number;
 }
 
 // Commissioner - Team adjustments

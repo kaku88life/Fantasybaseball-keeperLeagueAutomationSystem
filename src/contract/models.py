@@ -137,8 +137,8 @@ class Team:
                 and p.is_active_keeper]
 
     @property
-    def bench_keepers(self) -> list[Player]:
-        """Players with R contracts (bench keepers, max 2)."""
+    def farm_rookies(self) -> list[Player]:
+        """Players with R contracts (farm rookies, max 2)."""
         return [p for p in self.players
                 if p.contract.contract_type == ContractType.R]
 

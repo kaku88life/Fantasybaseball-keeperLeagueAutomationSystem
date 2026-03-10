@@ -17,7 +17,7 @@ interface TeamSummary {
   manager_name: string;
   team_name: string;
   active_keepers: number;
-  bench_keepers: number;
+  farm_rookies: number;
   total_keeper_cost: number;
   available_salary: number;
   available_faab: number;
@@ -232,11 +232,11 @@ function SeasonEndTab({
                 <span>
                   {t.active_keepers}{" "}
                   <span className="text-gray-400">Active</span>
-                  {t.bench_keepers > 0 && (
+                  {t.farm_rookies > 0 && (
                     <>
                       {" "}
-                      + {t.bench_keepers} 板凳{" "}
-                      <span className="text-gray-400">Bench</span>
+                      + {t.farm_rookies} 農場新秀{" "}
+                      <span className="text-gray-400">Farm</span>
                     </>
                   )}
                 </span>

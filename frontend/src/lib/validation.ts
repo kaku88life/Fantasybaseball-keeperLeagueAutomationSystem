@@ -44,21 +44,21 @@ export function computeNextSalary(
 }
 
 /**
- * Determine if a player counts as active or bench keeper.
- * Returns "active" | "bench" | "none" (released/FA)
+ * Determine if a player counts as active keeper or farm rookie.
+ * Returns "active" | "farm" | "none" (released/FA)
  */
 export function getKeeperCategory(
   contractType: ContractType,
   action: string,
-): "active" | "bench" | "none" {
+): "active" | "farm" | "none" {
   if (action === "release" || action === "fa") return "none";
   if (action === "legal_issue") return "none"; // no roster spot
 
   // O contract = FA, cannot keep
   if (contractType === "O") return "none";
 
-  // R contract kept on bench
-  if (contractType === "R" && action === "keep") return "bench";
+  // R contract kept as farm rookie
+  if (contractType === "R" && action === "keep") return "farm";
 
   // R contract activated = active
   if (contractType === "R" && action === "activate") return "active";
@@ -79,7 +79,7 @@ export function validateSelections(
   const warnings: string[] = [];
 
   let activeCount = 0;
-  let benchCount = 0;
+  let farmCount = 0;
   let keeperCost = 0;
 
   const totalPlayers = team.players.length;
@@ -89,10 +89,10 @@ export function validateSelections(
     const sel = selections[player.name];
     const ct = player.contract.contract_type as ContractType;
 
-    // R contract players without explicit selection default to "keep" (bench)
+    // R contract players without explicit selection default to "keep" (farm rookie)
     if (!sel) {
       if (ct === "R") {
-        benchCount++;
+        farmCount++;
         keeperCost += player.contract.salary;
       }
       continue;
@@ -112,8 +112,8 @@ export function validateSelections(
     if (category === "active") {
       activeCount++;
       keeperCost += nextSalary;
-    } else if (category === "bench") {
-      benchCount++;
+    } else if (category === "farm") {
+      farmCount++;
       keeperCost += nextSalary;
     }
 
@@ -142,9 +142,9 @@ export function validateSelections(
     );
   }
 
-  if (benchCount > KEEPER_BENCH_MAX) {
+  if (farmCount > KEEPER_BENCH_MAX) {
     errors.push(
-      `板凳新秀 (R) 超標: ${benchCount} 人（最多 ${KEEPER_BENCH_MAX} 人）`,
+      `農場新秀 (R) 超標: ${farmCount} 人（最多 ${KEEPER_BENCH_MAX} 人）`,
     );
   }
 
@@ -188,7 +188,7 @@ export function validateSelections(
     buyout_faab_cost: buyoutFaabCost,
     available_faab: availableFaab,
     active_keeper_count: activeCount,
-    bench_keeper_count: benchCount,
+    farm_rookie_count: farmCount,
   };
 
   return {
