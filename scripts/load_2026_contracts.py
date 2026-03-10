@@ -69,11 +69,7 @@ def build_player(player_data: dict) -> Player:
         salary = player_data["salary"]
         ext = player_data.get("extension_years", 0)
 
-    # R contracts are treated as A contracts -- managers choose R designation
-    # during keeper selection (R is a keeper choice, not a pre-existing state)
     resolved_type = CT_MAP.get(ct_str, ContractType.A)
-    if resolved_type == ContractType.R:
-        resolved_type = ContractType.A
 
     contract = Contract(
         contract_type=resolved_type,

@@ -702,7 +702,7 @@ function PlayerTable({
                           Number(ext) || 0,
                         );
                       }}
-                      className={`w-full max-w-[260px] rounded border px-2 py-1 text-sm ${
+                      className={`w-full min-w-[260px] max-w-[520px] rounded border px-2 py-1 text-sm ${
                         !sel
                           ? "border-yellow-300 bg-yellow-50"
                           : "border-gray-300"
