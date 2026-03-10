@@ -648,14 +648,14 @@
           "position": "C",
           "mlb_team": "CHC",
           "source": "faab",
-          "contract_2025": "A/$1",
-          "contract_type": "A",
+          "contract_2025": "$1/R",
+          "contract_type": "R",
           "salary": 1,
-          "contract_2026_type": "B",
+          "contract_2026_type": "R",
           "contract_2026_salary": 1,
           "contract_2026_ext": 0,
           "can_keep": true,
-          "contract_2026": "B/$1"
+          "contract_2026": "R/$1"
         },
         {
           "name": "Nolan McLean",
@@ -663,14 +663,14 @@
           "position": "SP",
           "mlb_team": "NYM",
           "source": "faab",
-          "contract_2025": "A/$1",
-          "contract_type": "A",
+          "contract_2025": "$1/R",
+          "contract_type": "R",
           "salary": 1,
-          "contract_2026_type": "B",
+          "contract_2026_type": "R",
           "contract_2026_salary": 1,
           "contract_2026_ext": 0,
           "can_keep": true,
-          "contract_2026": "B/$1"
+          "contract_2026": "R/$1"
         },
         {
           "name": "Luis Severino",
@@ -876,14 +876,14 @@
           "position": "SP",
           "mlb_team": "MIN",
           "source": "faab",
-          "contract_2025": "A/$1",
-          "contract_type": "A",
+          "contract_2025": "$1/R",
+          "contract_type": "R",
           "salary": 1,
-          "contract_2026_type": "B",
+          "contract_2026_type": "R",
           "contract_2026_salary": 1,
           "contract_2026_ext": 0,
           "can_keep": true,
-          "contract_2026": "B/$1"
+          "contract_2026": "R/$1"
         },
         {
           "name": "Bubba Chandler",
@@ -953,14 +953,14 @@
           "position": "SP",
           "mlb_team": "MIL",
           "source": "faab",
-          "contract_2025": "A/$1",
-          "contract_type": "A",
+          "contract_2025": "$1/R",
+          "contract_type": "R",
           "salary": 1,
-          "contract_2026_type": "B",
+          "contract_2026_type": "R",
           "contract_2026_salary": 1,
           "contract_2026_ext": 0,
           "can_keep": true,
-          "contract_2026": "B/$1"
+          "contract_2026": "R/$1"
         },
         {
           "name": "Luis Garcia",
@@ -983,14 +983,14 @@
           "position": "CF,RF",
           "mlb_team": "PIT",
           "source": "faab",
-          "contract_2025": "A/$1",
-          "contract_type": "A",
+          "contract_2025": "$1/R",
+          "contract_type": "R",
           "salary": 1,
-          "contract_2026_type": "B",
+          "contract_2026_type": "R",
           "contract_2026_salary": 1,
           "contract_2026_ext": 0,
           "can_keep": true,
-          "contract_2026": "B/$1"
+          "contract_2026": "R/$1"
         },
         {
           "name": "Blade Tidwell",
@@ -998,14 +998,14 @@
           "position": "SP",
           "mlb_team": "SF",
           "source": "faab",
-          "contract_2025": "A/$1",
-          "contract_type": "A",
+          "contract_2025": "$1/R",
+          "contract_type": "R",
           "salary": 1,
-          "contract_2026_type": "B",
+          "contract_2026_type": "R",
           "contract_2026_salary": 1,
           "contract_2026_ext": 0,
           "can_keep": true,
-          "contract_2026": "B/$1"
+          "contract_2026": "R/$1"
         }
       ]
     },
@@ -1340,14 +1340,14 @@
           "position": "RP",
           "mlb_team": "AZ",
           "source": "faab",
-          "contract_2025": "A/$2",
-          "contract_type": "A",
+          "contract_2025": "$2/R",
+          "contract_type": "R",
           "salary": 2,
-          "contract_2026_type": "B",
+          "contract_2026_type": "R",
           "contract_2026_salary": 2,
           "contract_2026_ext": 0,
           "can_keep": true,
-          "contract_2026": "B/$2"
+          "contract_2026": "R/$2"
         },
         {
           "name": "Victor Vodnik",
@@ -1491,14 +1491,14 @@
           "position": "SS",
           "mlb_team": "SEA",
           "source": "faab",
-          "contract_2025": "A/$1",
-          "contract_type": "A",
+          "contract_2025": "$1/R",
+          "contract_type": "R",
           "salary": 1,
-          "contract_2026_type": "B",
+          "contract_2026_type": "R",
           "contract_2026_salary": 1,
           "contract_2026_ext": 0,
           "can_keep": true,
-          "contract_2026": "B/$1"
+          "contract_2026": "R/$1"
         },
         {
           "name": "Walker Jenkins",
@@ -1956,14 +1956,14 @@
           "position": "1B,3B",
           "mlb_team": "MIA",
           "source": "draft",
-          "contract_2025": "A/$1",
-          "contract_type": "A",
+          "contract_2025": "$1/R",
+          "contract_type": "R",
           "salary": 1,
-          "contract_2026_type": "B",
+          "contract_2026_type": "R",
           "contract_2026_salary": 1,
           "contract_2026_ext": 0,
           "can_keep": true,
-          "contract_2026": "B/$1"
+          "contract_2026": "R/$1"
         }
       ]
     },
@@ -2423,14 +2423,14 @@
           "position": "SP",
           "mlb_team": "STL",
           "source": "faab",
-          "contract_2025": "A/$1",
-          "contract_type": "A",
+          "contract_2025": "$1/R",
+          "contract_type": "R",
           "salary": 1,
-          "contract_2026_type": "B",
+          "contract_2026_type": "R",
           "contract_2026_salary": 1,
           "contract_2026_ext": 0,
           "can_keep": true,
-          "contract_2026": "B/$1"
+          "contract_2026": "R/$1"
         }
       ]
     },
@@ -2890,14 +2890,14 @@
           "position": "SP",
           "mlb_team": "SF",
           "source": "faab",
-          "contract_2025": "A/$1",
-          "contract_type": "A",
+          "contract_2025": "$1/R",
+          "contract_type": "R",
           "salary": 1,
-          "contract_2026_type": "B",
+          "contract_2026_type": "R",
           "contract_2026_salary": 1,
           "contract_2026_ext": 0,
           "can_keep": true,
-          "contract_2026": "B/$1"
+          "contract_2026": "R/$1"
         },
         {
           "name": "Ryan Gusto",
@@ -2920,14 +2920,14 @@
           "position": "2B",
           "mlb_team": "CLE",
           "source": "draft",
-          "contract_2025": "A/$6",
-          "contract_type": "A",
+          "contract_2025": "$6/R",
+          "contract_type": "R",
           "salary": 6,
-          "contract_2026_type": "B",
+          "contract_2026_type": "R",
           "contract_2026_salary": 6,
           "contract_2026_ext": 0,
           "can_keep": true,
-          "contract_2026": "B/$6"
+          "contract_2026": "R/$6"
         }
       ]
     },
@@ -3097,14 +3097,14 @@
           "position": "1B",
           "mlb_team": "COL",
           "source": "faab",
-          "contract_2025": "A/$1",
-          "contract_type": "A",
+          "contract_2025": "$1/R",
+          "contract_type": "R",
           "salary": 1,
-          "contract_2026_type": "B",
+          "contract_2026_type": "R",
           "contract_2026_salary": 1,
           "contract_2026_ext": 0,
           "can_keep": true,
-          "contract_2026": "B/$1"
+          "contract_2026": "R/$1"
         },
         {
           "name": "Brayan Rocchio",
@@ -3418,14 +3418,14 @@
           "position": "2B,SS",
           "mlb_team": "DET",
           "source": "faab",
-          "contract_2025": "A/$1",
-          "contract_type": "A",
+          "contract_2025": "$1/R",
+          "contract_type": "R",
           "salary": 1,
-          "contract_2026_type": "B",
+          "contract_2026_type": "R",
           "contract_2026_salary": 1,
           "contract_2026_ext": 0,
           "can_keep": true,
-          "contract_2026": "B/$1"
+          "contract_2026": "R/$1"
         },
         {
           "name": "Quinn Mathews",
@@ -3433,14 +3433,14 @@
           "position": "SP",
           "mlb_team": "STL",
           "source": "faab",
-          "contract_2025": "A/$1",
-          "contract_type": "A",
+          "contract_2025": "$1/R",
+          "contract_type": "R",
           "salary": 1,
-          "contract_2026_type": "B",
+          "contract_2026_type": "R",
           "contract_2026_salary": 1,
           "contract_2026_ext": 0,
           "can_keep": true,
-          "contract_2026": "B/$1"
+          "contract_2026": "R/$1"
         }
       ]
     },
@@ -4092,14 +4092,14 @@
           "position": "SP",
           "mlb_team": "BOS",
           "source": "faab",
-          "contract_2025": "A/$1",
-          "contract_type": "A",
+          "contract_2025": "$1/R",
+          "contract_type": "R",
           "salary": 1,
-          "contract_2026_type": "B",
+          "contract_2026_type": "R",
           "contract_2026_salary": 1,
           "contract_2026_ext": 0,
           "can_keep": true,
-          "contract_2026": "B/$1"
+          "contract_2026": "R/$1"
         },
         {
           "name": "Cam Schlittler",
@@ -4288,14 +4288,14 @@
           "position": "SP,RP",
           "mlb_team": "CWS",
           "source": "faab",
-          "contract_2025": "A/$1",
-          "contract_type": "A",
+          "contract_2025": "$1/R",
+          "contract_type": "R",
           "salary": 1,
-          "contract_2026_type": "B",
+          "contract_2026_type": "R",
           "contract_2026_salary": 1,
           "contract_2026_ext": 0,
           "can_keep": true,
-          "contract_2026": "B/$1"
+          "contract_2026": "R/$1"
         },
         {
           "name": "Ozzie Albies",
@@ -4349,14 +4349,14 @@
           "position": "SS",
           "mlb_team": "STL",
           "source": "faab",
-          "contract_2025": "A/$1",
-          "contract_type": "A",
+          "contract_2025": "$1/R",
+          "contract_type": "R",
           "salary": 1,
-          "contract_2026_type": "B",
+          "contract_2026_type": "R",
           "contract_2026_salary": 1,
           "contract_2026_ext": 0,
           "can_keep": true,
-          "contract_2026": "B/$1"
+          "contract_2026": "R/$1"
         },
         {
           "name": "Leo De Vries",
@@ -4364,14 +4364,14 @@
           "position": "SS",
           "mlb_team": "ATH",
           "source": "faab",
-          "contract_2025": "A/$1",
-          "contract_type": "A",
+          "contract_2025": "$1/R",
+          "contract_type": "R",
           "salary": 1,
-          "contract_2026_type": "B",
+          "contract_2026_type": "R",
           "contract_2026_salary": 1,
           "contract_2026_ext": 0,
           "can_keep": true,
-          "contract_2026": "B/$1"
+          "contract_2026": "R/$1"
         }
       ]
     },
@@ -4559,14 +4559,14 @@
           "position": "1B,2B,3B",
           "mlb_team": "CIN",
           "source": "faab",
-          "contract_2025": "A/$3",
-          "contract_type": "A",
+          "contract_2025": "$3/R",
+          "contract_type": "R",
           "salary": 3,
-          "contract_2026_type": "B",
+          "contract_2026_type": "R",
           "contract_2026_salary": 3,
           "contract_2026_ext": 0,
           "can_keep": true,
-          "contract_2026": "B/$3"
+          "contract_2026": "R/$3"
         },
         {
           "name": "Samuel Basallo",
@@ -4574,14 +4574,14 @@
           "position": "C,1B",
           "mlb_team": "BAL",
           "source": "draft",
-          "contract_2025": "A/$1",
-          "contract_type": "A",
+          "contract_2025": "$1/R",
+          "contract_type": "R",
           "salary": 1,
-          "contract_2026_type": "B",
+          "contract_2026_type": "R",
           "contract_2026_salary": 1,
           "contract_2026_ext": 0,
           "can_keep": true,
-          "contract_2026": "B/$1"
+          "contract_2026": "R/$1"
         },
         {
           "name": "Sonny Gray",
@@ -4710,14 +4710,14 @@
           "position": "SP",
           "mlb_team": "ATH",
           "source": "faab",
-          "contract_2025": "A/$2",
-          "contract_type": "A",
+          "contract_2025": "$2/R",
+          "contract_type": "R",
           "salary": 2,
-          "contract_2026_type": "B",
+          "contract_2026_type": "R",
           "contract_2026_salary": 2,
           "contract_2026_ext": 0,
           "can_keep": true,
-          "contract_2026": "B/$2"
+          "contract_2026": "R/$2"
         },
         {
           "name": "Casey Mize",
@@ -4740,14 +4740,14 @@
           "position": "SP",
           "mlb_team": "BOS",
           "source": "faab",
-          "contract_2025": "A/$1",
-          "contract_type": "A",
+          "contract_2025": "$1/R",
+          "contract_type": "R",
           "salary": 1,
-          "contract_2026_type": "B",
+          "contract_2026_type": "R",
           "contract_2026_salary": 1,
           "contract_2026_ext": 0,
           "can_keep": true,
-          "contract_2026": "B/$1"
+          "contract_2026": "R/$1"
         },
         {
           "name": "Chase Burns",
@@ -4755,14 +4755,14 @@
           "position": "SP,RP",
           "mlb_team": "CIN",
           "source": "faab",
-          "contract_2025": "A/$1",
-          "contract_type": "A",
+          "contract_2025": "$1/R",
+          "contract_type": "R",
           "salary": 1,
-          "contract_2026_type": "B",
+          "contract_2026_type": "R",
           "contract_2026_salary": 1,
           "contract_2026_ext": 0,
           "can_keep": true,
-          "contract_2026": "B/$1"
+          "contract_2026": "R/$1"
         },
         {
           "name": "MacKenzie Gore",
@@ -4785,14 +4785,14 @@
           "position": "SP",
           "mlb_team": "TOR",
           "source": "faab",
-          "contract_2025": "A/$2",
-          "contract_type": "A",
+          "contract_2025": "$2/R",
+          "contract_type": "R",
           "salary": 2,
-          "contract_2026_type": "B",
+          "contract_2026_type": "R",
           "contract_2026_salary": 2,
           "contract_2026_ext": 0,
           "can_keep": true,
-          "contract_2026": "B/$2"
+          "contract_2026": "R/$2"
         },
         {
           "name": "Reynaldo López",
@@ -4831,14 +4831,14 @@
           "position": "SS",
           "mlb_team": "PIT",
           "source": "faab",
-          "contract_2025": "A/$2",
-          "contract_type": "A",
+          "contract_2025": "$2/R",
+          "contract_type": "R",
           "salary": 2,
-          "contract_2026_type": "B",
+          "contract_2026_type": "R",
           "contract_2026_salary": 2,
           "contract_2026_ext": 0,
           "can_keep": true,
-          "contract_2026": "B/$2"
+          "contract_2026": "R/$2"
         },
         {
           "name": "Jesús Made",
@@ -4846,14 +4846,14 @@
           "position": "3B,SS",
           "mlb_team": "MIL",
           "source": "faab",
-          "contract_2025": "A/$1",
-          "contract_type": "A",
+          "contract_2025": "$1/R",
+          "contract_type": "R",
           "salary": 1,
-          "contract_2026_type": "B",
+          "contract_2026_type": "R",
           "contract_2026_salary": 1,
           "contract_2026_ext": 0,
           "can_keep": true,
-          "contract_2026": "B/$1"
+          "contract_2026": "R/$1"
         }
       ]
     },
@@ -5543,14 +5543,14 @@
           "position": "C",
           "mlb_team": "KC",
           "source": "faab",
-          "contract_2025": "A/$3",
-          "contract_type": "A",
+          "contract_2025": "$3/R",
+          "contract_type": "R",
           "salary": 3,
-          "contract_2026_type": "B",
+          "contract_2026_type": "R",
           "contract_2026_salary": 3,
           "contract_2026_ext": 0,
           "can_keep": true,
-          "contract_2026": "B/$3"
+          "contract_2026": "R/$3"
         },
         {
           "name": "Noah Cameron",
@@ -5775,14 +5775,14 @@
           "position": "SP",
           "mlb_team": "LAD",
           "source": "draft",
-          "contract_2025": "A/$50",
-          "contract_type": "A",
+          "contract_2025": "$50/R",
+          "contract_type": "R",
           "salary": 50,
-          "contract_2026_type": "B",
+          "contract_2026_type": "R",
           "contract_2026_salary": 50,
           "contract_2026_ext": 0,
           "can_keep": true,
-          "contract_2026": "B/$50"
+          "contract_2026": "R/$50"
         },
         {
           "name": "Sebastian Walcott",
@@ -5790,14 +5790,14 @@
           "position": "3B,SS",
           "mlb_team": "TEX",
           "source": "faab",
-          "contract_2025": "A/$2",
-          "contract_type": "A",
+          "contract_2025": "$2/R",
+          "contract_type": "R",
           "salary": 2,
-          "contract_2026_type": "B",
+          "contract_2026_type": "R",
           "contract_2026_salary": 2,
           "contract_2026_ext": 0,
           "can_keep": true,
-          "contract_2026": "B/$2"
+          "contract_2026": "R/$2"
         },
         {
           "name": "Jurrangelo Cijntje",
@@ -5805,14 +5805,14 @@
           "position": "SP",
           "mlb_team": "STL",
           "source": "faab",
-          "contract_2025": "A/$1",
-          "contract_type": "A",
+          "contract_2025": "$1/R",
+          "contract_type": "R",
           "salary": 1,
-          "contract_2026_type": "B",
+          "contract_2026_type": "R",
           "contract_2026_salary": 1,
           "contract_2026_ext": 0,
           "can_keep": true,
-          "contract_2026": "B/$1"
+          "contract_2026": "R/$1"
         }
       ]
     },
@@ -5903,14 +5903,14 @@
           "position": "2B,3B,SS",
           "mlb_team": "LAD",
           "source": "faab",
-          "contract_2025": "A/$1",
-          "contract_type": "A",
+          "contract_2025": "$1/R",
+          "contract_type": "R",
           "salary": 1,
-          "contract_2026_type": "B",
+          "contract_2026_type": "R",
           "contract_2026_salary": 1,
           "contract_2026_ext": 0,
           "can_keep": true,
-          "contract_2026": "B/$1"
+          "contract_2026": "R/$1"
         },
         {
           "name": "Jarren Duran",
@@ -6303,14 +6303,14 @@
           "position": "LF,RF",
           "mlb_team": "COL",
           "source": "faab",
-          "contract_2025": "A/$1",
-          "contract_type": "A",
+          "contract_2025": "$1/R",
+          "contract_type": "R",
           "salary": 1,
-          "contract_2026_type": "B",
+          "contract_2026_type": "R",
           "contract_2026_salary": 1,
           "contract_2026_ext": 0,
           "can_keep": true,
-          "contract_2026": "B/$1"
+          "contract_2026": "R/$1"
         }
       ]
     },
@@ -6479,14 +6479,14 @@
           "position": "LF,CF,RF",
           "mlb_team": "HOU",
           "source": "faab",
-          "contract_2025": "A/$1",
-          "contract_type": "A",
+          "contract_2025": "$1/R",
+          "contract_type": "R",
           "salary": 1,
-          "contract_2026_type": "B",
+          "contract_2026_type": "R",
           "contract_2026_salary": 1,
           "contract_2026_ext": 0,
           "can_keep": true,
-          "contract_2026": "B/$1"
+          "contract_2026": "R/$1"
         },
         {
           "name": "Christian Yelich",
@@ -6779,14 +6779,14 @@
           "position": "CF",
           "mlb_team": "DET",
           "source": "faab",
-          "contract_2025": "A/$1",
-          "contract_type": "A",
+          "contract_2025": "$1/R",
+          "contract_type": "R",
           "salary": 1,
-          "contract_2026_type": "B",
+          "contract_2026_type": "R",
           "contract_2026_salary": 1,
           "contract_2026_ext": 0,
           "can_keep": true,
-          "contract_2026": "B/$1"
+          "contract_2026": "R/$1"
         },
         {
           "name": "Spencer Jones",
@@ -6794,14 +6794,14 @@
           "position": "CF",
           "mlb_team": "NYY",
           "source": "faab",
-          "contract_2025": "A/$1",
-          "contract_type": "A",
+          "contract_2025": "$1/R",
+          "contract_type": "R",
           "salary": 1,
-          "contract_2026_type": "B",
+          "contract_2026_type": "R",
           "contract_2026_salary": 1,
           "contract_2026_ext": 0,
           "can_keep": true,
-          "contract_2026": "B/$1"
+          "contract_2026": "R/$1"
         }
       ]
     },
@@ -7275,14 +7275,14 @@
           "position": "1B",
           "mlb_team": "SF",
           "source": "faab",
-          "contract_2025": "A/$2",
-          "contract_type": "A",
+          "contract_2025": "$2/R",
+          "contract_type": "R",
           "salary": 2,
-          "contract_2026_type": "B",
+          "contract_2026_type": "R",
           "contract_2026_salary": 2,
           "contract_2026_ext": 0,
           "can_keep": true,
-          "contract_2026": "B/$2"
+          "contract_2026": "R/$2"
         },
         {
           "name": "Andrew Painter",
@@ -7290,14 +7290,14 @@
           "position": "SP",
           "mlb_team": "PHI",
           "source": "draft",
-          "contract_2025": "A/$1",
-          "contract_type": "A",
+          "contract_2025": "$1/R",
+          "contract_type": "R",
           "salary": 1,
-          "contract_2026_type": "B",
+          "contract_2026_type": "R",
           "contract_2026_salary": 1,
           "contract_2026_ext": 0,
           "can_keep": true,
-          "contract_2026": "B/$1"
+          "contract_2026": "R/$1"
         }
       ]
     },
@@ -7552,14 +7552,14 @@
           "position": "SP",
           "mlb_team": "MIL",
           "source": "faab",
-          "contract_2025": "A/$2",
-          "contract_type": "A",
+          "contract_2025": "$2/R",
+          "contract_type": "R",
           "salary": 2,
-          "contract_2026_type": "B",
+          "contract_2026_type": "R",
           "contract_2026_salary": 2,
           "contract_2026_ext": 0,
           "can_keep": true,
-          "contract_2026": "B/$2"
+          "contract_2026": "R/$2"
         },
         {
           "name": "Jacob Misiorowski",
@@ -7673,14 +7673,14 @@
           "position": "SP",
           "mlb_team": "NYM",
           "source": "faab",
-          "contract_2025": "A/$1",
-          "contract_type": "A",
+          "contract_2025": "$1/R",
+          "contract_type": "R",
           "salary": 1,
-          "contract_2026_type": "B",
+          "contract_2026_type": "R",
           "contract_2026_salary": 1,
           "contract_2026_ext": 0,
           "can_keep": true,
-          "contract_2026": "B/$1"
+          "contract_2026": "R/$1"
         },
         {
           "name": "Mike Burrows",
