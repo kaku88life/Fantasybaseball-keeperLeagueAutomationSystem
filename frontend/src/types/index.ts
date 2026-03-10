@@ -130,6 +130,7 @@ export interface UserInfo {
   team_name: string | null;
   manager_name: string | null;
   is_commissioner: boolean;
+  line_name: string;
 }
 
 // Commissioner
@@ -165,6 +166,7 @@ export interface UserWithTeam {
   yahoo_email: string;
   team_id: number | null;
   is_commissioner: number;
+  line_name: string;
   last_login: string;
   manager_name: string | null;
   team_name: string | null;

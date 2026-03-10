@@ -15,10 +15,11 @@ from api.database import (
     get_all_teams,
     get_team_by_id,
     get_user_by_guid,
+    update_user_line_name,
     upsert_user,
 )
 from api.dependencies import create_jwt_token, get_current_user
-from api.schemas import CallbackResponse, UserInfoSchema
+from api.schemas import CallbackResponse, UpdateLineNameRequest, UserInfoSchema
 
 router = APIRouter()
 
@@ -309,6 +310,7 @@ async def _exchange_code_for_jwt(code: str) -> CallbackResponse:
         team_name=team["team_name"] if team else None,
         manager_name=team["manager_name"] if team else None,
         is_commissioner=is_commissioner,
+        line_name=user.get("line_name", ""),
     )
 
     return CallbackResponse(token=jwt_token, user=user_info)
@@ -482,7 +484,21 @@ async def get_current_user_info(user: dict = Depends(get_current_user)):
         team_name=team["team_name"] if team else None,
         manager_name=team["manager_name"] if team else None,
         is_commissioner=bool(user.get("is_commissioner")),
+        line_name=user.get("line_name", ""),
     )
+
+
+@router.put("/line-name")
+async def update_line_name(
+    body: UpdateLineNameRequest,
+    user: dict = Depends(get_current_user),
+):
+    """Update user's LINE display name."""
+    name = body.line_name.strip()
+    if not name:
+        raise HTTPException(status_code=400, detail="LINE name cannot be empty")
+    update_user_line_name(user["id"], name)
+    return {"message": "LINE name updated", "line_name": name}
 
 
 @router.post("/logout")

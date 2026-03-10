@@ -56,6 +56,13 @@ export async function getCurrentUser(): Promise<import("@/types").UserInfo> {
   return request("/api/auth/me");
 }
 
+export async function updateLineName(lineName: string): Promise<{ message: string; line_name: string }> {
+  return request("/api/auth/line-name", {
+    method: "PUT",
+    body: JSON.stringify({ line_name: lineName }),
+  });
+}
+
 // ========== League ==========
 
 export async function getYears(): Promise<number[]> {

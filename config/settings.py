@@ -77,9 +77,9 @@ EXTENSION_COST_PER_YEAR = 5  # salary increases by $5 per extension year (N)
 #   - If salary is odd, FAAB pays the larger half (ceil)
 #   - e.g., $11 -> FAAB pays $6, salary pays $5
 
-# Buyout penalty per missed FAAB pickup (sequential)
-FAAB_PENALTY_FIRST = 5
-FAAB_PENALTY_SUBSEQUENT = 10  # 2nd: $10, 3rd: $15, etc.
+# Buyout penalty per missed FAAB pickup
+FAAB_PENALTY_FIRST = 5        # 1st missed pickup: $5
+FAAB_PENALTY_SUBSEQUENT = 10  # 2nd and subsequent missed pickups: $10 each
 
 # Players with FAAB >= $10 must become keepers
 FAAB_KEEPER_THRESHOLD = 10
@@ -118,8 +118,9 @@ YAHOO_GAME_KEY = "mlb"
 # Maps Excel manager names to Yahoo nicknames (for teams that don't auto-match)
 # Format: {excel_name: yahoo_nickname}
 MANAGER_NAME_MAPPING = {
-    "林剛": "小喆",
-    "Yu-Che Chang": "Hyper",
+    "林剛": "Hyper",
+    "Yu-Che Chang": "小喆",
+    "Javier": "謙謙",
     "Issac": "rawstuff",
     "楊善合": "Ｋａｋｕ",
     # 郭子睿(Rangers) is Kaku's old Excel name (2023-2024).

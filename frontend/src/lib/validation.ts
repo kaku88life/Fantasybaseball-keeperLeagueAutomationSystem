@@ -89,12 +89,8 @@ export function validateSelections(
     const sel = selections[player.name];
     const ct = player.contract.contract_type as ContractType;
 
-    // R contract players without explicit selection default to "keep" (farm rookie)
+    // No selection made yet: skip (treat as undecided, same as backend)
     if (!sel) {
-      if (ct === "R") {
-        farmCount++;
-        keeperCost += player.contract.salary;
-      }
       continue;
     }
 
@@ -241,7 +237,7 @@ export function getActionLabel(
     case "O":
       return "到期 Expired → 自由球員 FA";
     case "R":
-      if (keepAction === "keep") return "維持新秀 Keep Rookie (R 約)";
+      if (keepAction === "keep") return "自動延續 R 約 Auto-renew Rookie";
       if (keepAction === "activate")
         return "啟用 Activate → A 約 (進入正規合約 Regular Contract)";
       break;

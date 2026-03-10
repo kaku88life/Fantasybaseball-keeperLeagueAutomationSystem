@@ -130,21 +130,9 @@ def evaluate_next_contract(
             is_mandatory=False,
         )
 
-    # A -> B or A -> R (rookie bench)
+    # A -> B (rookie eligibility is determined at contract loading via MLB Stats API,
+    # so A contract players cannot be manually designated as R during keeper selection)
     if ct.contract_type == ContractType.A:
-        if keep_action == "rookie":
-            next_ct = Contract(
-                contract_type=ContractType.R,
-                salary=ct.salary,
-            )
-            return ContractTransition(
-                player_name=name,
-                current_contract=ct,
-                next_contract=next_ct,
-                action="A -> R (designated as bench rookie)",
-                salary_change=0,
-                is_mandatory=False,
-            )
         next_ct = Contract(
             contract_type=ContractType.B,
             salary=ct.salary,
@@ -519,8 +507,8 @@ def generate_keeper_options(player: Player) -> list[ContractTransition]:
         return options
 
     # A contract: keep as B, or release
-    # Note: R (rookie bench) designation is handled during contract loading,
-    # not during keeper selection. R-eligible players already have R contracts.
+    # Rookie eligibility is determined at contract loading via MLB Stats API.
+    # R-eligible players already have R contracts; A players cannot be designated as R.
     if ct.contract_type == ContractType.A:
         options.append(evaluate_next_contract(player, keep_action="keep"))
         # FAAB >= $10 mandatory keepers can still release but must pay buyout

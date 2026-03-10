@@ -199,6 +199,11 @@ class UserInfoSchema(BaseModel):
     team_name: Optional[str] = None
     manager_name: Optional[str] = None
     is_commissioner: bool = False
+    line_name: str = ""
+
+
+class UpdateLineNameRequest(BaseModel):
+    line_name: str
 
 
 # ========== League Settings ==========

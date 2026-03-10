@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth";
 import Navbar from "@/components/Navbar";
+import LineNamePrompt from "@/components/LineNamePrompt";
 
 export const metadata: Metadata = {
   title: "5-Man Keeper League",
@@ -18,6 +19,7 @@ export default function RootLayout({
       <body className="min-h-screen bg-gray-50 text-gray-900">
         <AuthProvider>
           <Navbar />
+          <LineNamePrompt />
           <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
             {children}
           </main>

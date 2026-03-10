@@ -24,6 +24,7 @@ SCHEMA_STATEMENTS = [
         yahoo_email TEXT,
         team_id INTEGER,
         is_commissioner INTEGER DEFAULT 0,
+        line_name TEXT DEFAULT '',
         created_at TIMESTAMPTZ DEFAULT NOW(),
         last_login TIMESTAMPTZ
     )
@@ -116,12 +117,30 @@ def _fetchall(conn, query: str, params: tuple = ()) -> list[dict]:
         return [dict(row) for row in cur.fetchall()]
 
 
+MIGRATION_STATEMENTS = [
+    # Add line_name column to existing users table (idempotent)
+    """
+    DO $$
+    BEGIN
+        IF NOT EXISTS (
+            SELECT 1 FROM information_schema.columns
+            WHERE table_name = 'users' AND column_name = 'line_name'
+        ) THEN
+            ALTER TABLE users ADD COLUMN line_name TEXT DEFAULT '';
+        END IF;
+    END $$;
+    """,
+]
+
+
 async def init_db():
-    """Initialize the database schema."""
+    """Initialize the database schema and run migrations."""
     conn = get_db()
     try:
         with conn.cursor() as cur:
             for stmt in SCHEMA_STATEMENTS:
+                cur.execute(stmt)
+            for stmt in MIGRATION_STATEMENTS:
                 cur.execute(stmt)
         conn.commit()
     finally:
@@ -187,6 +206,20 @@ def upsert_user(
             )
         conn.commit()
         return get_user_by_guid(yahoo_guid)
+    finally:
+        conn.close()
+
+
+def update_user_line_name(user_id: int, line_name: str):
+    """Update user's LINE display name."""
+    conn = get_db()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                "UPDATE users SET line_name = %s WHERE id = %s",
+                (line_name.strip(), user_id),
+            )
+        conn.commit()
     finally:
         conn.close()
 
