@@ -33,7 +33,7 @@ export default function RulesPage() {
 
   return (
     <div className="mx-auto max-w-3xl pb-10">
-      <h1 className="mb-2 text-2xl font-bold">League Rules</h1>
+      <h1 className="mb-2 text-xl font-bold sm:text-2xl">League Rules</h1>
       <p className="mb-4 text-sm text-gray-500">
         5-Man MLB Keeper League 聯盟規則總覽（2025.02.26 版）
       </p>
@@ -45,7 +45,7 @@ export default function RulesPage() {
             key={tab.id}
             type="button"
             onClick={() => setActiveTab(tab.id)}
-            className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+            className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors sm:px-4 sm:py-2 sm:text-sm ${
               activeTab === tab.id
                 ? "bg-indigo-600 text-white"
                 : "bg-gray-100 text-gray-600 hover:bg-gray-200"
@@ -536,7 +536,7 @@ export default function RulesPage() {
             <p className="mb-3 text-xs text-gray-500">
               球季結束後，季後賽前 6 名都有獎勵（類似票房收入增加的概念），獎勵為下季的額外 FAAB 競標金額。
             </p>
-            <div className="grid grid-cols-3 gap-2 text-sm">
+            <div className="grid grid-cols-2 gap-2 text-sm sm:grid-cols-3">
               {Object.entries(settings.ranking_bonus)
                 .sort(([a], [b]) => Number(a) - Number(b))
                 .map(([rank, bonus]) => (

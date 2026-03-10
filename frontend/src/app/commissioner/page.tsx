@@ -295,13 +295,13 @@ export default function CommissionerDashboard() {
   return (
     <div>
       {/* Header */}
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Commissioner 管理面板</h1>
-        <div className="flex items-center gap-3">
+      <div className="mb-6">
+        <h1 className="text-xl font-bold sm:text-2xl">Commissioner 管理面板</h1>
+        <div className="mt-2 flex flex-wrap items-center gap-2 sm:gap-3">
           <select
             value={selectedYear}
             onChange={(e) => setSelectedYear(Number(e.target.value))}
-            className="rounded border px-3 py-1.5"
+            className="rounded border px-2 py-1.5 text-sm sm:px-3"
           >
             {years.map((y) => (
               <option key={y} value={y}>
@@ -311,13 +311,13 @@ export default function CommissionerDashboard() {
           </select>
           <Link
             href="/commissioner/users"
-            className="rounded bg-gray-600 px-3 py-1.5 text-sm text-white hover:bg-gray-500"
+            className="rounded bg-gray-600 px-2.5 py-1.5 text-xs text-white hover:bg-gray-500 sm:px-3 sm:text-sm"
           >
             用戶管理
           </Link>
           <Link
             href="/commissioner/import"
-            className="rounded bg-indigo-600 px-3 py-1.5 text-sm text-white hover:bg-indigo-500"
+            className="rounded bg-indigo-600 px-2.5 py-1.5 text-xs text-white hover:bg-indigo-500 sm:px-3 sm:text-sm"
           >
             匯入 Excel
           </Link>
@@ -325,32 +325,32 @@ export default function CommissionerDashboard() {
       </div>
 
       {/* Stats */}
-      <div className="mb-6 flex flex-wrap gap-4">
-        <div className="rounded-lg border bg-white px-4 py-3">
-          <p className="text-xs text-gray-500">總隊伍 Teams</p>
-          <p className="text-2xl font-bold">{submissions.length}</p>
+      <div className="mb-6 grid grid-cols-3 gap-2 sm:flex sm:flex-wrap sm:gap-4">
+        <div className="rounded-lg border bg-white px-3 py-2 sm:px-4 sm:py-3">
+          <p className="text-[10px] text-gray-500 sm:text-xs">總隊伍</p>
+          <p className="text-xl font-bold sm:text-2xl">{submissions.length}</p>
         </div>
-        <div className="rounded-lg border bg-green-50 px-4 py-3">
-          <p className="text-xs text-gray-500">待審核 Pending</p>
-          <p className="text-2xl font-bold text-green-600">
+        <div className="rounded-lg border bg-green-50 px-3 py-2 sm:px-4 sm:py-3">
+          <p className="text-[10px] text-gray-500 sm:text-xs">待審核</p>
+          <p className="text-xl font-bold text-green-600 sm:text-2xl">
             {statusCounts.submitted}
           </p>
         </div>
-        <div className="rounded-lg border bg-blue-50 px-4 py-3">
-          <p className="text-xs text-gray-500">已審核 Approved</p>
-          <p className="text-2xl font-bold text-blue-600">
+        <div className="rounded-lg border bg-blue-50 px-3 py-2 sm:px-4 sm:py-3">
+          <p className="text-[10px] text-gray-500 sm:text-xs">已審核</p>
+          <p className="text-xl font-bold text-blue-600 sm:text-2xl">
             {statusCounts.approved}
           </p>
         </div>
-        <div className="rounded-lg border bg-red-50 px-4 py-3">
-          <p className="text-xs text-gray-500">已退回 Rejected</p>
-          <p className="text-2xl font-bold text-red-600">
+        <div className="rounded-lg border bg-red-50 px-3 py-2 sm:px-4 sm:py-3">
+          <p className="text-[10px] text-gray-500 sm:text-xs">已退回</p>
+          <p className="text-xl font-bold text-red-600 sm:text-2xl">
             {statusCounts.rejected}
           </p>
         </div>
-        <div className="rounded-lg border bg-yellow-50 px-4 py-3">
-          <p className="text-xs text-gray-500">未繳交 Not Submitted</p>
-          <p className="text-2xl font-bold text-yellow-600">
+        <div className="rounded-lg border bg-yellow-50 px-3 py-2 sm:px-4 sm:py-3">
+          <p className="text-[10px] text-gray-500 sm:text-xs">未繳交</p>
+          <p className="text-xl font-bold text-yellow-600 sm:text-2xl">
             {statusCounts.pending}
           </p>
         </div>
@@ -647,8 +647,8 @@ export default function CommissionerDashboard() {
 
       {/* Reject Modal */}
       {rejectingTeam !== null && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-lg">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="w-full max-w-md rounded-lg bg-white p-4 shadow-lg sm:p-6">
             <h3 className="mb-3 text-lg font-semibold">退回留用名單 Reject Keeper List</h3>
             <p className="mb-3 text-sm text-gray-600">
               退回原因（必填）：
@@ -693,11 +693,11 @@ export default function CommissionerDashboard() {
               <div key={s.team_id}>
                 {/* Card */}
                 <div
-                  className={`rounded-lg border p-4 ${cfg.border} ${cfg.bg}`}
+                  className={`rounded-lg border p-3 sm:p-4 ${cfg.border} ${cfg.bg}`}
                 >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="flex items-center gap-2">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
                         <h3 className="font-semibold">{s.manager_name}</h3>
                         <span
                           className={`rounded px-1.5 py-0.5 text-xs ${cfg.badge} ${cfg.badgeText}`}
@@ -710,7 +710,7 @@ export default function CommissionerDashboard() {
                       )}
                       {s.submitted_at && (
                         <p className="text-xs text-gray-400">
-                          繳交時間：{new Date(s.submitted_at).toLocaleString("zh-TW")}
+                          繳交：{new Date(s.submitted_at).toLocaleString("zh-TW")}
                         </p>
                       )}
                       {status === "rejected" && s.commissioner_notes && (
@@ -721,13 +721,13 @@ export default function CommissionerDashboard() {
                     </div>
 
                     {/* Action buttons */}
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
                       {s.is_submitted && (
                         <button
                           onClick={() => handleExpand(s.team_id)}
                           className="rounded border bg-white px-3 py-1 text-xs text-gray-700 hover:bg-gray-50"
                         >
-                          {isExpanded ? "收合" : "查看詳情"}
+                          {isExpanded ? "收合" : "詳情"}
                         </button>
                       )}
 
@@ -737,7 +737,7 @@ export default function CommissionerDashboard() {
                             onClick={() => handleApprove(s.team_id)}
                             className="rounded bg-green-600 px-3 py-1 text-xs text-white hover:bg-green-500"
                           >
-                            審核通過
+                            通過
                           </button>
                           <button
                             onClick={() => handleRejectStart(s.team_id)}

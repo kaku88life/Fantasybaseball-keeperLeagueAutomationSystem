@@ -238,26 +238,24 @@ export default function KeeperSelectionPage() {
   return (
     <div className="pb-10">
       {/* Header */}
-      <div className="mb-4 flex items-center justify-between">
-        <div>
-          <div className="flex items-center gap-3">
-            <Link
-              href={`/${year}`}
-              className="text-gray-400 hover:text-gray-600"
-            >
-              &larr;
-            </Link>
-            <h1 className="text-2xl font-bold">
-              {team.manager_name} - {year} 留用名單
-            </h1>
-          </div>
-          {team.team_name && (
-            <p className="ml-8 text-sm text-gray-500">{team.team_name}</p>
-          )}
+      <div className="mb-4">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <Link
+            href={`/${year}`}
+            className="text-gray-400 hover:text-gray-600"
+          >
+            &larr;
+          </Link>
+          <h1 className="text-lg font-bold sm:text-2xl">
+            {team.manager_name} - {year} 留用名單
+          </h1>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="mt-1 flex flex-wrap items-center gap-2 pl-6 sm:pl-8">
+          {team.team_name && (
+            <p className="text-sm text-gray-500">{team.team_name}</p>
+          )}
           {isSubmitted && (
-            <span className="rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-800">
+            <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800 sm:px-3 sm:py-1 sm:text-sm">
               已繳交 Submitted
             </span>
           )}
@@ -399,9 +397,9 @@ export default function KeeperSelectionPage() {
       )}
 
       {/* Active Players Table */}
-      <div className="mb-2 flex flex-wrap items-center gap-2">
+      <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
         <span className="text-sm font-semibold text-gray-600">
-          球員名單 Active Players ({activePlayers.length})
+          球員名單 Active ({activePlayers.length})
         </span>
         <PositionFilter
           players={activePlayers}
@@ -518,25 +516,27 @@ export default function KeeperSelectionPage() {
 
       {/* Action buttons */}
       {canEdit && (
-        <div className="mt-6 flex items-center gap-4">
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            className="rounded bg-gray-700 px-4 py-2 text-sm text-white hover:bg-gray-600 disabled:opacity-50"
-          >
-            {saving ? "儲存中..." : "手動儲存 Save"}
-          </button>
-          <button
-            onClick={handleSubmit}
-            disabled={
-              submitting ||
-              !displayValidation?.is_valid ||
-              Object.keys(selections).length === 0
-            }
-            className="rounded bg-green-600 px-5 py-2 text-sm font-medium text-white hover:bg-green-500 disabled:opacity-50"
-          >
-            {submitting ? "繳交中..." : "繳交留用名單 Submit"}
-          </button>
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+          <div className="flex gap-3">
+            <button
+              onClick={handleSave}
+              disabled={saving}
+              className="rounded bg-gray-700 px-4 py-2 text-sm text-white hover:bg-gray-600 disabled:opacity-50"
+            >
+              {saving ? "儲存中..." : "手動儲存 Save"}
+            </button>
+            <button
+              onClick={handleSubmit}
+              disabled={
+                submitting ||
+                !displayValidation?.is_valid ||
+                Object.keys(selections).length === 0
+              }
+              className="rounded bg-green-600 px-5 py-2 text-sm font-medium text-white hover:bg-green-500 disabled:opacity-50"
+            >
+              {submitting ? "繳交中..." : "繳交留用名單 Submit"}
+            </button>
+          </div>
           <span className="text-xs text-gray-400">
             選擇變更後會自動儲存 Auto-save enabled
           </span>
@@ -601,26 +601,26 @@ function PlayerTable({
 
   return (
     <div className="overflow-x-auto rounded-lg border bg-white">
-      <table className="w-full text-sm">
+      <table className="w-full min-w-[640px] text-sm">
         <thead className="border-b bg-gray-50">
           <tr>
-            <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">
-              守備 Pos.
+            <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 sm:px-3">
+              守備
             </th>
-            <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">
+            <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 sm:px-3">
               球員 Player
             </th>
-            <th className="px-3 py-2 text-right text-xs font-medium text-gray-500">
-              薪資 Salary
+            <th className="px-2 py-2 text-right text-xs font-medium text-gray-500 sm:px-3">
+              薪資
             </th>
-            <th className="px-3 py-2 text-center text-xs font-medium text-gray-500">
-              合約 Contract
+            <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 sm:px-3">
+              合約
             </th>
-            <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">
+            <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 sm:px-3">
               動作 Action
             </th>
-            <th className="px-3 py-2 text-center text-xs font-medium text-gray-500">
-              下季合約 Next
+            <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 sm:px-3">
+              下季
             </th>
           </tr>
         </thead>
@@ -657,10 +657,10 @@ function PlayerTable({
                       : "hover:bg-gray-50"
                 }`}
               >
-                <td className="px-3 py-2">
+                <td className="px-2 py-2 sm:px-3">
                   <span className="text-xs">{player.position}</span>
                 </td>
-                <td className="px-3 py-2 font-medium">
+                <td className="px-2 py-2 font-medium sm:px-3">
                   <div className="flex items-center gap-1.5">
                     <button
                       type="button"
@@ -671,24 +671,24 @@ function PlayerTable({
                     </button>
                     {mandatoryKeepers.has(player.name) && (
                       <span
-                        className="shrink-0 rounded bg-orange-100 px-1.5 py-0.5 text-[10px] font-semibold text-orange-700"
+                        className="shrink-0 rounded bg-orange-100 px-1 py-0.5 text-[10px] font-semibold text-orange-700"
                         title="FAAB >= $10, must be kept. Release requires buyout."
                       >
-                        FAAB &ge; $10 強制留用
+                        FAAB$10+
                       </span>
                     )}
                   </div>
                 </td>
-                <td className="px-3 py-2 text-right">
+                <td className="px-2 py-2 text-right sm:px-3">
                   ${player.contract.salary}
                 </td>
-                <td className="px-3 py-2 text-center">
+                <td className="px-2 py-2 text-center sm:px-3">
                   <ContractBadge
                     type={ct}
                     display={player.contract.display}
                   />
                 </td>
-                <td className="px-3 py-2">
+                <td className="px-2 py-2 sm:px-3">
                   {canEdit && playerOpts ? (
                     <select
                       value={
@@ -702,7 +702,7 @@ function PlayerTable({
                           Number(ext) || 0,
                         );
                       }}
-                      className={`w-full min-w-[260px] max-w-[520px] rounded border px-2 py-1 text-sm ${
+                      className={`w-full min-w-0 sm:min-w-[260px] max-w-[520px] rounded border px-2 py-1 text-xs sm:text-sm ${
                         !sel
                           ? "border-yellow-300 bg-yellow-50"
                           : "border-gray-300"
@@ -746,7 +746,7 @@ function PlayerTable({
                     </span>
                   )}
                 </td>
-                <td className="px-3 py-2 text-center">
+                <td className="px-2 py-2 text-center sm:px-3">
                   {nextContract ? (
                     nextContract === "FA" ? (
                       <span className="text-xs text-gray-400">FA</span>

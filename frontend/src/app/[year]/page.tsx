@@ -121,44 +121,44 @@ export default function YearOverviewPage() {
   return (
     <div>
       {/* Header */}
-      <div className="mb-4 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">{year} 賽季</h1>
-          <p className="text-sm text-gray-500">
-            薪資上限: ${summary.salary_cap} | {summary.teams.length} 隊
-          </p>
+      <div className="mb-4">
+        <div className="flex items-center justify-between">
+          <h1 className="text-xl font-bold sm:text-2xl">{year} 賽季</h1>
+          <div className="flex gap-1.5 sm:gap-2">
+            {years.map((y) => (
+              <Link
+                key={y}
+                href={`/${y}`}
+                className={`rounded px-2.5 py-1 text-xs sm:px-3 sm:text-sm ${
+                  y === year
+                    ? "bg-indigo-600 text-white"
+                    : "bg-gray-200 hover:bg-gray-300"
+                }`}
+              >
+                {y}
+              </Link>
+            ))}
+          </div>
         </div>
-        <div className="flex gap-2">
-          {years.map((y) => (
-            <Link
-              key={y}
-              href={`/${y}`}
-              className={`rounded px-3 py-1 text-sm ${
-                y === year
-                  ? "bg-indigo-600 text-white"
-                  : "bg-gray-200 hover:bg-gray-300"
-              }`}
-            >
-              {y}
-            </Link>
-          ))}
-        </div>
+        <p className="mt-1 text-sm text-gray-500">
+          薪資上限: ${summary.salary_cap} | {summary.teams.length} 隊
+        </p>
       </div>
 
       {/* Tabs */}
-      <div className="mb-6 flex border-b">
+      <div className="mb-6 flex border-b overflow-x-auto">
         {tabs.map((tab) => (
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
-            className={`px-4 py-2 text-sm font-medium transition ${
+            className={`whitespace-nowrap px-3 py-2 text-xs font-medium transition sm:px-4 sm:text-sm ${
               activeTab === tab.key
                 ? "border-b-2 border-indigo-600 text-indigo-600"
                 : "text-gray-500 hover:text-gray-700"
             }`}
           >
             {tab.label}
-            <span className="ml-1 text-xs text-gray-400">{tab.sublabel}</span>
+            <span className="ml-1 hidden text-xs text-gray-400 sm:inline">{tab.sublabel}</span>
           </button>
         ))}
       </div>
@@ -198,7 +198,7 @@ function SeasonEndTab({
   findTeamId: (name: string) => number | null;
 }) {
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 sm:gap-4">
       {summary.teams.map((t) => {
         const teamId = findTeamId(t.manager_name);
         const isMyTeam = user?.manager_name === t.manager_name;
@@ -207,14 +207,14 @@ function SeasonEndTab({
           <Link
             key={t.manager_name}
             href={teamId ? `/${year}/${teamId}` : "#"}
-            className={`block rounded-lg border p-4 transition hover:shadow-md ${
+            className={`block rounded-lg border p-3 transition hover:shadow-md sm:p-4 ${
               isMyTeam
                 ? "border-indigo-300 bg-indigo-50"
                 : "border-gray-200 bg-white"
             }`}
           >
             <div className="mb-2 flex items-center justify-between">
-              <h3 className="font-semibold">{t.manager_name}</h3>
+              <h3 className="text-sm font-semibold sm:text-base">{t.manager_name}</h3>
               {isMyTeam && (
                 <span className="rounded bg-indigo-100 px-1.5 py-0.5 text-xs text-indigo-700">
                   我的隊伍
@@ -224,34 +224,22 @@ function SeasonEndTab({
             {t.team_name && (
               <p className="mb-2 text-xs text-gray-500">{t.team_name}</p>
             )}
-            <div className="space-y-1 text-sm">
+            <div className="space-y-1 text-xs sm:text-sm">
               <div className="flex justify-between">
-                <span className="text-gray-500">
-                  球員人數 <span className="text-gray-400">Players</span>:
-                </span>
+                <span className="text-gray-500">球員:</span>
                 <span>
-                  {t.active_keepers}{" "}
-                  <span className="text-gray-400">Active</span>
+                  {t.active_keepers}
                   {t.farm_rookies > 0 && (
-                    <>
-                      {" "}
-                      + {t.farm_rookies} 農場新秀{" "}
-                      <span className="text-gray-400">Farm</span>
-                    </>
+                    <span className="text-gray-400"> +{t.farm_rookies}R</span>
                   )}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-500">
-                  團隊薪資{" "}
-                  <span className="text-gray-400">Keepers Cost</span>:
-                </span>
+                <span className="text-gray-500">團隊薪資:</span>
                 <span className="font-medium">${t.total_keeper_cost}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-500">
-                  可用薪資 <span className="text-gray-400">Cap Space</span>:
-                </span>
+                <span className="text-gray-500">可用薪資:</span>
                 <span
                   className={
                     t.available_salary < 20
@@ -264,9 +252,7 @@ function SeasonEndTab({
               </div>
               {t.ranking_bonus > 0 && (
                 <div className="flex justify-between">
-                  <span className="text-gray-500">
-                    排名獎勵 <span className="text-gray-400">Bonus</span>:
-                  </span>
+                  <span className="text-gray-500">排名獎勵:</span>
                   <span className="text-yellow-600">+${t.ranking_bonus}</span>
                 </div>
               )}
@@ -400,28 +386,28 @@ function KeepersTab({
               </div>
 
               {/* Player list */}
-              <div className="space-y-0.5">
-                <div className="flex items-center gap-2 border-b pb-1 text-xs font-medium text-gray-500">
-                  <span className="w-[140px]">球員</span>
-                  <span className="w-[60px] text-center">位置</span>
-                  <span className="w-[70px] text-center">原合約</span>
-                  <span className="w-[70px] text-center">新合約</span>
+              <div className="space-y-0.5 overflow-x-auto">
+                <div className="flex items-center gap-1 border-b pb-1 text-xs font-medium text-gray-500 sm:gap-2">
+                  <span className="min-w-0 flex-1">球員</span>
+                  <span className="w-10 shrink-0 text-center sm:w-14">位置</span>
+                  <span className="w-14 shrink-0 text-center sm:w-16">原合約</span>
+                  <span className="w-14 shrink-0 text-center sm:w-16">新合約</span>
                 </div>
                 {team.kept_players.map((p) => (
                   <div
                     key={p.player_name}
-                    className="flex items-center gap-2 py-0.5 text-xs"
+                    className="flex items-center gap-1 py-0.5 text-xs sm:gap-2"
                   >
-                    <span className="w-[140px] truncate font-medium">
+                    <span className="min-w-0 flex-1 truncate font-medium">
                       {p.player_name}
                     </span>
-                    <span className="w-[60px] text-center text-gray-400">
+                    <span className="w-10 shrink-0 text-center text-gray-400 sm:w-14">
                       {p.position || "-"}
                     </span>
-                    <span className="w-[70px] text-center text-gray-500">
+                    <span className="w-14 shrink-0 text-center text-gray-500 sm:w-16">
                       {p.current_contract}
                     </span>
-                    <span className="w-[70px] text-center font-medium text-indigo-600">
+                    <span className="w-14 shrink-0 text-center font-medium text-indigo-600 sm:w-16">
                       {p.next_contract}
                     </span>
                   </div>

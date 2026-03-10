@@ -57,7 +57,7 @@ export default function PlayerStatsModal({
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
       onClick={handleBackdropClick}
     >
-      <div className="relative max-h-[85vh] w-full max-w-3xl overflow-hidden rounded-xl bg-white shadow-2xl">
+      <div className="relative max-h-[90vh] w-full max-w-3xl overflow-hidden rounded-xl bg-white shadow-2xl sm:max-h-[85vh]">
         {/* Close button */}
         <button
           onClick={onClose}
@@ -111,10 +111,10 @@ export default function PlayerStatsModal({
 
         {/* Stats content */}
         {!loading && stats && (
-          <div className="overflow-y-auto" style={{ maxHeight: "85vh" }}>
+          <div className="overflow-y-auto" style={{ maxHeight: "90vh" }}>
             {/* Header */}
-            <div className="sticky top-0 z-[1] border-b bg-white px-6 py-4">
-              <h3 className="text-xl font-bold text-gray-800">{stats.name}</h3>
+            <div className="sticky top-0 z-[1] border-b bg-white px-4 py-3 sm:px-6 sm:py-4">
+              <h3 className="text-lg font-bold text-gray-800 sm:text-xl">{stats.name}</h3>
               <div className="mt-1 flex flex-wrap items-center gap-3 text-sm text-gray-500">
                 {stats.current_team && (
                   <span className="rounded bg-blue-50 px-2 py-0.5 text-blue-700">
@@ -165,7 +165,7 @@ export default function PlayerStatsModal({
               )}
             </div>
 
-            <div className="px-6 py-4 space-y-6">
+            <div className="px-4 py-3 space-y-6 sm:px-6 sm:py-4">
               {/* Hitting stats */}
               {stats.hitting.length > 0 && (
                 <div>
@@ -173,22 +173,22 @@ export default function PlayerStatsModal({
                     打擊成績 Hitting Stats
                   </h4>
                   <div className="overflow-x-auto rounded-lg border">
-                    <table className="w-full text-sm">
-                      <thead className="bg-gray-50 text-xs text-gray-500">
+                    <table className="w-full min-w-[600px] text-xs sm:text-sm">
+                      <thead className="bg-gray-50 text-[10px] text-gray-500 sm:text-xs">
                         <tr>
-                          <th className="px-2 py-2 text-left">Year</th>
-                          <th className="px-2 py-2 text-left">Team</th>
-                          <th className="px-2 py-2 text-right">G</th>
-                          <th className="px-2 py-2 text-right">PA</th>
-                          <th className="px-2 py-2 text-right">AB</th>
-                          <th className="px-2 py-2 text-right">H</th>
-                          <th className="px-2 py-2 text-right font-bold">HR</th>
-                          <th className="px-2 py-2 text-right">RBI</th>
-                          <th className="px-2 py-2 text-right">R</th>
-                          <th className="px-2 py-2 text-right">SB</th>
-                          <th className="px-2 py-2 text-right font-bold">AVG</th>
-                          <th className="px-2 py-2 text-right">OBP</th>
-                          <th className="px-2 py-2 text-right font-bold">OPS</th>
+                          <th className="px-1.5 py-1.5 text-left sm:px-2 sm:py-2">Year</th>
+                          <th className="px-1.5 py-1.5 text-left sm:px-2 sm:py-2">Team</th>
+                          <th className="px-1.5 py-1.5 text-right sm:px-2 sm:py-2">G</th>
+                          <th className="px-1.5 py-1.5 text-right sm:px-2 sm:py-2">PA</th>
+                          <th className="px-1.5 py-1.5 text-right sm:px-2 sm:py-2">AB</th>
+                          <th className="px-1.5 py-1.5 text-right sm:px-2 sm:py-2">H</th>
+                          <th className="px-1.5 py-1.5 text-right font-bold sm:px-2 sm:py-2">HR</th>
+                          <th className="px-1.5 py-1.5 text-right sm:px-2 sm:py-2">RBI</th>
+                          <th className="px-1.5 py-1.5 text-right sm:px-2 sm:py-2">R</th>
+                          <th className="px-1.5 py-1.5 text-right sm:px-2 sm:py-2">SB</th>
+                          <th className="px-1.5 py-1.5 text-right font-bold sm:px-2 sm:py-2">AVG</th>
+                          <th className="px-1.5 py-1.5 text-right sm:px-2 sm:py-2">OBP</th>
+                          <th className="px-1.5 py-1.5 text-right font-bold sm:px-2 sm:py-2">OPS</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -251,26 +251,22 @@ export default function PlayerStatsModal({
                     投球成績 Pitching Stats
                   </h4>
                   <div className="overflow-x-auto rounded-lg border">
-                    <table className="w-full text-sm">
-                      <thead className="bg-gray-50 text-xs text-gray-500">
+                    <table className="w-full min-w-[600px] text-xs sm:text-sm">
+                      <thead className="bg-gray-50 text-[10px] text-gray-500 sm:text-xs">
                         <tr>
-                          <th className="px-2 py-2 text-left">Year</th>
-                          <th className="px-2 py-2 text-left">Team</th>
-                          <th className="px-2 py-2 text-right">G</th>
-                          <th className="px-2 py-2 text-right">GS</th>
-                          <th className="px-2 py-2 text-right">W</th>
-                          <th className="px-2 py-2 text-right">L</th>
-                          <th className="px-2 py-2 text-right font-bold">
-                            ERA
-                          </th>
-                          <th className="px-2 py-2 text-right">IP</th>
-                          <th className="px-2 py-2 text-right font-bold">K</th>
-                          <th className="px-2 py-2 text-right">BB</th>
-                          <th className="px-2 py-2 text-right font-bold">
-                            WHIP
-                          </th>
-                          <th className="px-2 py-2 text-right">SV</th>
-                          <th className="px-2 py-2 text-right">HLD</th>
+                          <th className="px-1.5 py-1.5 text-left sm:px-2 sm:py-2">Year</th>
+                          <th className="px-1.5 py-1.5 text-left sm:px-2 sm:py-2">Team</th>
+                          <th className="px-1.5 py-1.5 text-right sm:px-2 sm:py-2">G</th>
+                          <th className="px-1.5 py-1.5 text-right sm:px-2 sm:py-2">GS</th>
+                          <th className="px-1.5 py-1.5 text-right sm:px-2 sm:py-2">W</th>
+                          <th className="px-1.5 py-1.5 text-right sm:px-2 sm:py-2">L</th>
+                          <th className="px-1.5 py-1.5 text-right font-bold sm:px-2 sm:py-2">ERA</th>
+                          <th className="px-1.5 py-1.5 text-right sm:px-2 sm:py-2">IP</th>
+                          <th className="px-1.5 py-1.5 text-right font-bold sm:px-2 sm:py-2">K</th>
+                          <th className="px-1.5 py-1.5 text-right sm:px-2 sm:py-2">BB</th>
+                          <th className="px-1.5 py-1.5 text-right font-bold sm:px-2 sm:py-2">WHIP</th>
+                          <th className="px-1.5 py-1.5 text-right sm:px-2 sm:py-2">SV</th>
+                          <th className="px-1.5 py-1.5 text-right sm:px-2 sm:py-2">HLD</th>
                         </tr>
                       </thead>
                       <tbody>
