@@ -57,8 +57,9 @@ export function getKeeperCategory(
   // O contract = FA, cannot keep
   if (contractType === "O") return "none";
 
-  // R contract kept as farm rookie
-  if (contractType === "R" && action === "keep") return "farm";
+  // R contract kept as farm rookie ("keep" from manual, "rookie" from backend inference)
+  if (contractType === "R" && (action === "keep" || action === "rookie"))
+    return "farm";
 
   // R contract activated = active
   if (contractType === "R" && action === "activate") return "active";
@@ -237,7 +238,8 @@ export function getActionLabel(
     case "O":
       return "到期 Expired → 自由球員 FA";
     case "R":
-      if (keepAction === "keep") return "自動延續 R 約 Auto-renew Rookie";
+      if (keepAction === "keep" || keepAction === "rookie")
+        return "維持農場新秀 Keep as Rookie (R 約)";
       if (keepAction === "activate")
         return "啟用 Activate → A 約 (進入正規合約 Regular Contract)";
       break;
@@ -277,7 +279,8 @@ export function getNextContractDisplay(
     case "O":
       return "FA";
     case "R":
-      if (action === "keep") return `$${currentSalary}/R`;
+      if (action === "keep" || action === "rookie")
+        return `$${currentSalary}/R`;
       if (action === "activate") return `$${currentSalary}/A`;
       break;
   }
