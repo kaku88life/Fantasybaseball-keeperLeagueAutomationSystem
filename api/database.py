@@ -78,6 +78,20 @@ SCHEMA_STATEMENTS = [
         UNIQUE(year, team_id)
     )
     """,
+    """
+    CREATE TABLE IF NOT EXISTS notification_log (
+        id SERIAL PRIMARY KEY,
+        year INTEGER NOT NULL,
+        team_id INTEGER NOT NULL,
+        notification_type TEXT NOT NULL,
+        channel TEXT NOT NULL DEFAULT 'email',
+        recipient_email TEXT,
+        sent_at TIMESTAMPTZ DEFAULT NOW(),
+        sent_by TEXT,
+        status TEXT DEFAULT 'sent',
+        error_message TEXT
+    )
+    """,
 ]
 
 
@@ -439,5 +453,72 @@ def delete_submission(year: int, team_id: int):
                 (year, team_id),
             )
         conn.commit()
+    finally:
+        conn.close()
+
+
+# ========== Notification Log ==========
+
+def get_recent_notifications(
+    year: int, team_id: int, notification_type: str, hours: int = 24
+) -> list[dict]:
+    """Check if a notification was sent recently (cooldown window)."""
+    conn = get_db()
+    try:
+        return _fetchall(
+            conn,
+            """SELECT * FROM notification_log
+               WHERE year = %s AND team_id = %s
+                 AND notification_type = %s
+                 AND status = 'sent'
+                 AND sent_at > NOW() - INTERVAL '%s hours'
+               ORDER BY sent_at DESC""",
+            (year, team_id, notification_type, hours),
+        )
+    finally:
+        conn.close()
+
+
+def insert_notification_log(
+    year: int,
+    team_id: int,
+    notification_type: str,
+    channel: str,
+    recipient_email: str,
+    sent_by: str,
+    status: str,
+    error_message: str = "",
+):
+    """Record a notification send attempt."""
+    conn = get_db()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                """INSERT INTO notification_log
+                   (year, team_id, notification_type, channel, recipient_email,
+                    sent_by, status, error_message)
+                   VALUES (%s, %s, %s, %s, %s, %s, %s, %s)""",
+                (year, team_id, notification_type, channel, recipient_email,
+                 sent_by, status, error_message),
+            )
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def get_reminder_history(year: int) -> list[dict]:
+    """Get all notification records for a year (for commissioner dashboard)."""
+    conn = get_db()
+    try:
+        return _fetchall(
+            conn,
+            """SELECT n.*, t.manager_name
+               FROM notification_log n
+               JOIN teams t ON n.team_id = t.id
+               WHERE n.year = %s
+               ORDER BY n.sent_at DESC
+               LIMIT 100""",
+            (year,),
+        )
     finally:
         conn.close()

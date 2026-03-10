@@ -10,6 +10,9 @@ import {
   unlockSubmission,
   getAllTeamAdjustments,
   updateTeamAdjustments,
+  sendReminders,
+  getReminderStatus,
+  getPendingTeams,
 } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import type { SubmissionStatus, SubmissionDetail, TeamAdjustments } from "@/types";
@@ -81,6 +84,21 @@ export default function CommissionerDashboard() {
   const [adjSaving, setAdjSaving] = useState<number | null>(null);
   const [showAdjustments, setShowAdjustments] = useState(false);
 
+  // Reminder state
+  const [showReminders, setShowReminders] = useState(false);
+  const [pendingTeams, setPendingTeams] = useState<{
+    pending_count: number;
+    teams: Array<{ id: number; manager_name: string; email: string | null; has_email: boolean }>;
+  } | null>(null);
+  const [reminderHistory, setReminderHistory] = useState<Array<{
+    id: number; team_id: number; manager_name: string; sent_at: string;
+    sent_by: string; status: string; error_message: string;
+  }>>([]);
+  const [reminderSending, setReminderSending] = useState(false);
+  const [reminderResult, setReminderResult] = useState<{
+    sent: string[]; skipped: string[]; failed: Array<{ manager: string; error: string }>; no_email: string[];
+  } | null>(null);
+
   useEffect(() => {
     getYears().then((y) => {
       setYears(y);
@@ -116,6 +134,20 @@ export default function CommissionerDashboard() {
       // ignore
     }
   }, [user]);
+
+  const refreshReminders = useCallback(async () => {
+    if (!user?.is_commissioner || !selectedYear) return;
+    try {
+      const [p, h] = await Promise.all([
+        getPendingTeams(selectedYear),
+        getReminderStatus(selectedYear),
+      ]);
+      setPendingTeams(p);
+      setReminderHistory(h.history);
+    } catch {
+      // ignore
+    }
+  }, [selectedYear, user]);
 
   useEffect(() => {
     refreshSubmissions();
@@ -155,6 +187,30 @@ export default function CommissionerDashboard() {
       alert(e instanceof Error ? e.message : "儲存失敗");
     } finally {
       setAdjSaving(null);
+    }
+  };
+
+  const handleToggleReminders = async () => {
+    const next = !showReminders;
+    setShowReminders(next);
+    if (next) {
+      setReminderResult(null);
+      await refreshReminders();
+    }
+  };
+
+  const handleSendReminders = async () => {
+    if (!confirm("確定要發送催繳 Email 給所有未繳交的隊伍？\nSend reminder emails to all pending teams?")) return;
+    setReminderSending(true);
+    setReminderResult(null);
+    try {
+      const result = await sendReminders(selectedYear);
+      setReminderResult(result);
+      await refreshReminders();
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "發送失敗");
+    } finally {
+      setReminderSending(false);
     }
   };
 
@@ -424,6 +480,167 @@ export default function CommissionerDashboard() {
                 })}
               </tbody>
             </table>
+          </div>
+        )}
+      </div>
+
+      {/* Keeper Reminders */}
+      <div className="mb-6">
+        <button
+          onClick={handleToggleReminders}
+          className="mb-3 flex items-center gap-2 text-sm font-semibold text-gray-700 hover:text-gray-900"
+        >
+          <span>{showReminders ? "\u25BC" : "\u25B6"}</span>
+          催繳提醒 Keeper Reminders
+        </button>
+        {showReminders && (
+          <div className="rounded-lg border bg-white p-4">
+            {/* Pending summary */}
+            <div className="mb-4 flex flex-wrap items-center gap-4">
+              <div className="rounded bg-yellow-50 px-3 py-2">
+                <p className="text-xs text-gray-500">未繳交 Pending</p>
+                <p className="text-lg font-bold text-yellow-600">
+                  {pendingTeams?.pending_count ?? "-"} 隊
+                </p>
+              </div>
+              {pendingTeams && (
+                <>
+                  <div className="rounded bg-green-50 px-3 py-2">
+                    <p className="text-xs text-gray-500">有 Email</p>
+                    <p className="text-lg font-bold text-green-600">
+                      {pendingTeams.teams.filter((t) => t.has_email).length}
+                    </p>
+                  </div>
+                  <div className="rounded bg-gray-50 px-3 py-2">
+                    <p className="text-xs text-gray-500">無 Email</p>
+                    <p className="text-lg font-bold text-gray-500">
+                      {pendingTeams.teams.filter((t) => !t.has_email).length}
+                    </p>
+                  </div>
+                </>
+              )}
+              <button
+                onClick={handleSendReminders}
+                disabled={reminderSending || !pendingTeams || pendingTeams.pending_count === 0}
+                className="ml-auto rounded bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-50"
+              >
+                {reminderSending ? "發送中..." : "發送催繳 Email Send Reminders"}
+              </button>
+            </div>
+
+            {/* Send result */}
+            {reminderResult && (
+              <div className="mb-4 rounded border bg-gray-50 p-3 text-sm">
+                <p className="mb-1 font-semibold">發送結果 Result:</p>
+                {reminderResult.sent.length > 0 && (
+                  <p className="text-green-600">
+                    已發送 Sent ({reminderResult.sent.length}): {reminderResult.sent.join(", ")}
+                  </p>
+                )}
+                {reminderResult.skipped.length > 0 && (
+                  <p className="text-yellow-600">
+                    跳過 Skipped ({reminderResult.skipped.length}): {reminderResult.skipped.join(", ")}
+                  </p>
+                )}
+                {reminderResult.no_email.length > 0 && (
+                  <p className="text-gray-500">
+                    無 Email ({reminderResult.no_email.length}): {reminderResult.no_email.join(", ")}
+                  </p>
+                )}
+                {reminderResult.failed.length > 0 && (
+                  <p className="text-red-600">
+                    失敗 Failed ({reminderResult.failed.length}):{" "}
+                    {reminderResult.failed.map((f) => `${f.manager} (${f.error})`).join(", ")}
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* Pending teams list */}
+            {pendingTeams && pendingTeams.teams.length > 0 && (
+              <div className="mb-4">
+                <p className="mb-2 text-xs font-medium text-gray-500">
+                  未繳交隊伍 Pending Teams
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {pendingTeams.teams.map((t) => (
+                    <span
+                      key={t.id}
+                      className={`rounded px-2 py-1 text-xs ${
+                        t.has_email
+                          ? "bg-yellow-100 text-yellow-700"
+                          : "bg-gray-100 text-gray-500"
+                      }`}
+                    >
+                      {t.manager_name}
+                      {!t.has_email && " (no email)"}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Reminder history */}
+            {reminderHistory.length > 0 && (
+              <div>
+                <p className="mb-2 text-xs font-medium text-gray-500">
+                  最近催繳紀錄 Recent History
+                </p>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs">
+                    <thead className="border-b bg-gray-50">
+                      <tr>
+                        <th className="px-2 py-1.5 text-left text-gray-500">隊伍 Team</th>
+                        <th className="px-2 py-1.5 text-left text-gray-500">時間 Time</th>
+                        <th className="px-2 py-1.5 text-left text-gray-500">發送者 By</th>
+                        <th className="px-2 py-1.5 text-left text-gray-500">狀態 Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {reminderHistory.slice(0, 20).map((h) => (
+                        <tr key={h.id} className="border-b last:border-0">
+                          <td className="px-2 py-1.5">{h.manager_name}</td>
+                          <td className="px-2 py-1.5 text-gray-500">
+                            {new Date(h.sent_at).toLocaleString("zh-TW")}
+                          </td>
+                          <td className="px-2 py-1.5">
+                            <span className={`rounded px-1 py-0.5 ${
+                              h.sent_by === "scheduler"
+                                ? "bg-blue-100 text-blue-700"
+                                : "bg-purple-100 text-purple-700"
+                            }`}>
+                              {h.sent_by === "scheduler" ? "排程 Auto" : "手動 Manual"}
+                            </span>
+                          </td>
+                          <td className="px-2 py-1.5">
+                            <span className={`rounded px-1 py-0.5 ${
+                              h.status === "sent"
+                                ? "bg-green-100 text-green-700"
+                                : h.status === "failed"
+                                  ? "bg-red-100 text-red-700"
+                                  : "bg-gray-100 text-gray-500"
+                            }`}>
+                              {h.status === "sent" ? "已送出" : h.status === "failed" ? "失敗" : "跳過"}
+                            </span>
+                            {h.error_message && (
+                              <span className="ml-1 text-red-500" title={h.error_message}>
+                                ({h.error_message})
+                              </span>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {reminderHistory.length === 0 && pendingTeams?.pending_count === 0 && (
+              <p className="text-sm text-green-600">
+                所有隊伍已繳交留用名單! All teams have submitted.
+              </p>
+            )}
           </div>
         )}
       </div>

@@ -261,6 +261,50 @@ export async function importExcel(file: File, year: number): Promise<{
   return res.json();
 }
 
+// ========== Keeper Reminders ==========
+
+export async function sendReminders(year: number): Promise<{
+  sent: string[];
+  skipped: string[];
+  failed: Array<{ manager: string; error: string }>;
+  no_email: string[];
+}> {
+  return request(`/api/commissioner/reminders/${year}/send`, {
+    method: "POST",
+  });
+}
+
+export async function getReminderStatus(year: number): Promise<{
+  year: number;
+  history: Array<{
+    id: number;
+    team_id: number;
+    manager_name: string;
+    notification_type: string;
+    channel: string;
+    recipient_email: string;
+    sent_at: string;
+    sent_by: string;
+    status: string;
+    error_message: string;
+  }>;
+}> {
+  return request(`/api/commissioner/reminders/${year}/status`);
+}
+
+export async function getPendingTeams(year: number): Promise<{
+  year: number;
+  pending_count: number;
+  teams: Array<{
+    id: number;
+    manager_name: string;
+    email: string | null;
+    has_email: boolean;
+  }>;
+}> {
+  return request(`/api/commissioner/reminders/${year}/pending`);
+}
+
 // ========== Player Stats (MLB Stats API) ==========
 
 export async function getPlayerStats(

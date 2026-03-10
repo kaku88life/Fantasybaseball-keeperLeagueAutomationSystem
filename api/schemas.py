@@ -173,6 +173,13 @@ class TeamAdjustmentsRequest(BaseModel):
     faab_adjustment: int = 0
 
 
+class ReminderResult(BaseModel):
+    sent: list[str] = []
+    skipped: list[str] = []
+    failed: list[dict] = []
+    no_email: list[str] = []
+
+
 # ========== Auth ==========
 
 class LoginResponse(BaseModel):

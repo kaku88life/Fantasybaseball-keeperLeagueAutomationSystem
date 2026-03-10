@@ -28,7 +28,11 @@ async def lifespan(app: FastAPI):
     """Startup / shutdown events."""
     await init_db()
     seed_if_empty()
+    # Start reminder scheduler (no-op if env vars not configured)
+    from src.notification.scheduler import start_scheduler, stop_scheduler
+    start_scheduler()
     yield
+    stop_scheduler()
 
 
 app = FastAPI(

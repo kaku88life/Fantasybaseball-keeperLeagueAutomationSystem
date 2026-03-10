@@ -320,3 +320,42 @@ async def update_team_adjustments_endpoint(
         "trade_compensation": body.trade_compensation,
         "faab_adjustment": body.faab_adjustment,
     }
+
+
+# ========== Keeper Reminders ==========
+
+@router.post("/reminders/{year}/send")
+async def send_keeper_reminders(
+    year: int,
+    user: dict = Depends(get_current_commissioner),
+):
+    """Send keeper reminder emails to all teams that haven't submitted. Commissioner only."""
+    from src.notification.reminder import send_reminders
+    result = send_reminders(year, sent_by="commissioner", cooldown_hours=1)
+    return result
+
+
+@router.get("/reminders/{year}/status")
+async def get_reminder_status(
+    year: int,
+    user: dict = Depends(get_current_commissioner),
+):
+    """Get reminder notification history for a year."""
+    from api.database import get_reminder_history
+    history = get_reminder_history(year)
+    # Convert datetime objects to strings for JSON serialization
+    for h in history:
+        if h.get("sent_at"):
+            h["sent_at"] = str(h["sent_at"])
+    return {"year": year, "history": history}
+
+
+@router.get("/reminders/{year}/pending")
+async def get_pending_teams_endpoint(
+    year: int,
+    user: dict = Depends(get_current_commissioner),
+):
+    """Get list of teams that haven't submitted keeper lists."""
+    from src.notification.reminder import get_pending_teams
+    pending = get_pending_teams(year)
+    return {"year": year, "pending_count": len(pending), "teams": pending}
