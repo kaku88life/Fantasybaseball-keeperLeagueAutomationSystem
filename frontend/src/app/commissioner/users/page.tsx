@@ -81,8 +81,10 @@ export default function UserManagementPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b bg-gray-50 text-left text-xs text-gray-500">
+                <th className="px-4 py-3">ID</th>
                 <th className="px-4 py-3">Yahoo 暱稱 Nickname</th>
                 <th className="px-4 py-3">Email</th>
+                <th className="px-4 py-3">Yahoo GUID</th>
                 <th className="px-4 py-3">對應隊伍 Team</th>
                 <th className="px-4 py-3">最後登入 Last Login</th>
                 <th className="px-4 py-3">Commissioner</th>
@@ -92,8 +94,21 @@ export default function UserManagementPage() {
             <tbody>
               {users.map((u) => (
                 <tr key={u.id} className="border-b last:border-0 hover:bg-gray-50">
+                  <td className="px-4 py-3 text-xs text-gray-400">#{u.id}</td>
                   <td className="px-4 py-3 font-medium">{u.yahoo_nickname || "-"}</td>
                   <td className="px-4 py-3 text-gray-500">{u.yahoo_email || "-"}</td>
+                  <td className="px-4 py-3">
+                    {u.yahoo_guid ? (
+                      <span
+                        className="cursor-help font-mono text-xs text-gray-400"
+                        title={u.yahoo_guid}
+                      >
+                        {u.yahoo_guid.slice(0, 8)}...
+                      </span>
+                    ) : (
+                      "-"
+                    )}
+                  </td>
                   <td className="px-4 py-3">
                     <select
                       value={u.team_id ?? ""}
