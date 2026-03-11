@@ -78,6 +78,19 @@ _all_origins = list(dict.fromkeys(
     _extra_origins + ([_frontend_url] if _frontend_url else []) + _default_origins
 ))
 print(f"[CORS] Allowed origins: {_all_origins}")
+
+_all_origins_set = set(_all_origins)
+
+
+def _add_cors_headers(response: JSONResponse, origin: str):
+    """Manually add CORS headers to a response."""
+    if origin and origin in _all_origins_set:
+        response.headers["Access-Control-Allow-Origin"] = origin
+        response.headers["Access-Control-Allow-Credentials"] = "true"
+        response.headers["Access-Control-Allow-Methods"] = "*"
+        response.headers["Access-Control-Allow-Headers"] = "*"
+
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=_all_origins,
@@ -95,22 +108,85 @@ app.include_router(validation.router, prefix="/api/validate", tags=["validation"
 app.include_router(players.router, prefix="/api/players", tags=["players"])
 
 
+@app.middleware("http")
+async def catch_all_errors_middleware(request: Request, call_next):
+    """Catch unhandled exceptions inside CORSMiddleware scope.
+    Returns proper JSONResponse so CORSMiddleware can add CORS headers.
+    Also manually adds CORS headers as a fallback safety net."""
+    origin = request.headers.get("origin", "")
+    try:
+        response = await call_next(request)
+        return response
+    except Exception as exc:
+        print(f"[ERROR] {request.method} {request.url.path}: {exc}", flush=True)
+        traceback.print_exc()
+        response = JSONResponse(
+            status_code=500,
+            content={"detail": f"Internal server error: {type(exc).__name__}: {exc}"},
+        )
+        _add_cors_headers(response, origin)
+        return response
+
+
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
-    """Catch all unhandled exceptions and return proper JSON response.
-    This ensures CORS headers are still applied even on 500 errors,
-    because CORSMiddleware can process a proper JSONResponse."""
-    print(f"[ERROR] {request.method} {request.url.path}: {exc}", flush=True)
+    """Fallback: catch exceptions that bypass the middleware.
+    Manually adds CORS headers since this handler's response
+    may not flow through CORSMiddleware."""
+    print(f"[ERROR-HANDLER] {request.method} {request.url.path}: {exc}", flush=True)
     traceback.print_exc()
-    return JSONResponse(
+    origin = request.headers.get("origin", "")
+    response = JSONResponse(
         status_code=500,
         content={"detail": f"Internal server error: {type(exc).__name__}: {exc}"},
     )
+    _add_cors_headers(response, origin)
+    return response
+
+
+from fastapi.exceptions import RequestValidationError
+from fastapi import HTTPException as FastAPIHTTPException
+
+
+@app.exception_handler(FastAPIHTTPException)
+async def http_exception_handler(request: Request, exc: FastAPIHTTPException):
+    """Ensure CORS headers on all HTTP error responses (401, 403, etc.)."""
+    origin = request.headers.get("origin", "")
+    response = JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail},
+    )
+    _add_cors_headers(response, origin)
+    return response
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    """Ensure CORS headers on validation error responses."""
+    origin = request.headers.get("origin", "")
+    response = JSONResponse(
+        status_code=422,
+        content={"detail": str(exc)},
+    )
+    _add_cors_headers(response, origin)
+    return response
 
 
 @app.get("/")
 async def root():
     return {"status": "ok", "service": "keeper-league-api", "docs": "/docs"}
+
+
+@app.get("/api/debug/cors")
+async def debug_cors(request: Request):
+    """Debug endpoint to verify CORS headers are working."""
+    origin = request.headers.get("origin", "")
+    return {
+        "origin_received": origin,
+        "origin_allowed": origin in _all_origins_set if origin else None,
+        "all_origins": _all_origins,
+        "headers": dict(request.headers),
+    }
 
 
 @app.get("/api/health")
