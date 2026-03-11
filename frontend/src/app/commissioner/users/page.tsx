@@ -83,6 +83,7 @@ export default function UserManagementPage() {
               <tr className="border-b bg-gray-50 text-left text-xs text-gray-500">
                 <th className="px-4 py-3">ID</th>
                 <th className="px-4 py-3">Yahoo 暱稱 Nickname</th>
+                <th className="px-4 py-3">LINE 名稱</th>
                 <th className="px-4 py-3">Email</th>
                 <th className="px-4 py-3">Yahoo GUID</th>
                 <th className="px-4 py-3">對應隊伍 Team</th>
@@ -96,6 +97,15 @@ export default function UserManagementPage() {
                 <tr key={u.id} className="border-b last:border-0 hover:bg-gray-50">
                   <td className="px-4 py-3 text-xs text-gray-400">#{u.id}</td>
                   <td className="px-4 py-3 font-medium">{u.yahoo_nickname || "-"}</td>
+                  <td className="px-4 py-3">
+                    {u.line_name ? (
+                      <span className="rounded bg-green-50 px-2 py-0.5 text-xs font-medium text-green-700">
+                        {u.line_name}
+                      </span>
+                    ) : (
+                      <span className="text-xs text-gray-400">-</span>
+                    )}
+                  </td>
                   <td className="px-4 py-3 text-gray-500">{u.yahoo_email || "-"}</td>
                   <td className="px-4 py-3">
                     {u.yahoo_guid ? (

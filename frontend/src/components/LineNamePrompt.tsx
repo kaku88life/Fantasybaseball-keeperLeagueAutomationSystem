@@ -38,7 +38,7 @@ export default function LineNamePrompt() {
       e.preventDefault();
       const trimmed = name.trim();
       if (!trimmed) {
-        setError("Please enter your LINE name");
+        setError("請輸入你的 LINE 名稱");
         return;
       }
       setSaving(true);
@@ -57,10 +57,7 @@ export default function LineNamePrompt() {
     [name, updateUser],
   );
 
-  const handleSkip = useCallback(() => {
-    // Allow dismissing, but it will show again on next page load / refresh
-    setOpen(false);
-  }, []);
+  // No skip allowed - LINE name is mandatory for identification
 
   if (!open) return null;
 
@@ -68,11 +65,11 @@ export default function LineNamePrompt() {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       <div className="mx-4 w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
         <h2 className="mb-2 text-lg font-bold text-gray-900">
-          LINE Display Name
+          LINE 顯示名稱
         </h2>
         <p className="mb-4 text-sm text-gray-600">
-          Please enter your LINE display name so the commissioner can identify
-          you more easily. This only needs to be done once.
+          請輸入你的 LINE 顯示名稱，方便 Commissioner
+          辨識你的身份並指派隊伍。<strong className="text-red-600">必填</strong>，只需要設定一次。
         </p>
 
         <form onSubmit={handleSubmit}>
@@ -81,7 +78,7 @@ export default function LineNamePrompt() {
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Your LINE display name"
+            placeholder="你的 LINE 顯示名稱"
             className="mb-3 w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             disabled={saving}
             maxLength={50}
@@ -94,24 +91,15 @@ export default function LineNamePrompt() {
           <div className="flex gap-2">
             <button
               type="submit"
-              disabled={saving}
+              disabled={saving || !name.trim()}
               className="flex-1 rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
             >
-              {saving ? "Saving..." : "Save"}
-            </button>
-            <button
-              type="button"
-              onClick={handleSkip}
-              disabled={saving}
-              className="rounded border border-gray-300 px-4 py-2 text-sm text-gray-600 hover:bg-gray-50"
-            >
-              Later
+              {saving ? "儲存中..." : "確認送出"}
             </button>
           </div>
 
-          <p className="mt-3 text-xs text-amber-600">
-            * You will be reminded again next time you log in until you enter
-            your LINE name.
+          <p className="mt-3 text-xs text-red-500">
+            * 必須輸入 LINE 名稱後才能使用系統功能。
           </p>
         </form>
       </div>

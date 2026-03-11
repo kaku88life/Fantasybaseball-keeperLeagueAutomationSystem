@@ -215,7 +215,7 @@ async def list_users(user: dict = Depends(get_current_commissioner)):
             conn,
             """SELECT u.id, u.yahoo_guid, u.yahoo_nickname, u.yahoo_email,
                       u.team_id, u.is_commissioner, u.last_login,
-                      t.manager_name, t.team_name
+                      u.line_name, t.manager_name, t.team_name
                FROM users u
                LEFT JOIN teams t ON u.team_id = t.id
                ORDER BY u.yahoo_nickname""",
