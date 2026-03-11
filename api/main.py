@@ -44,6 +44,9 @@ app = FastAPI(
 
 # CORS - production origins via ALLOWED_ORIGINS env var (comma-separated)
 _default_origins = [
+    # Production (Zeabur)
+    "https://5man-keeperleague.zeabur.app",
+    # Local development
     "http://localhost:3000",
     "http://localhost:3001",
     "http://127.0.0.1:3000",
