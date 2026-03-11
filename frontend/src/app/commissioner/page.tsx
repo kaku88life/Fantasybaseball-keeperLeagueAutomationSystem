@@ -13,6 +13,7 @@ import {
   sendReminders,
   getReminderStatus,
   getPendingTeams,
+  verifyCommissionerPassword,
 } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import type { SubmissionStatus, SubmissionDetail, TeamAdjustments } from "@/types";
@@ -276,11 +277,7 @@ export default function CommissionerDashboard() {
   };
 
   if (!user?.is_commissioner) {
-    return (
-      <div className="py-10 text-center text-red-600">
-        需要 Commissioner 權限才能存取此頁面。
-      </div>
-    );
+    return <CommissionerLogin />;
   }
 
   const statusCounts = submissions.reduce(
@@ -918,6 +915,81 @@ export default function CommissionerDashboard() {
           })}
         </div>
       )}
+    </div>
+  );
+}
+
+/* ========== Commissioner Login (Password Prompt) ========== */
+
+function CommissionerLogin() {
+  const { user, refresh } = useAuth();
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [verifying, setVerifying] = useState(false);
+
+  const handleVerify = async () => {
+    if (!password.trim()) return;
+    setVerifying(true);
+    setError("");
+    try {
+      const result = await verifyCommissionerPassword(password.trim());
+      // Store new JWT token with commissioner flag
+      localStorage.setItem("auth_token", result.token);
+      // Refresh auth context to update user.is_commissioner
+      await refresh();
+    } catch (e) {
+      setError(
+        e instanceof Error ? e.message : "驗證失敗 Verification failed",
+      );
+    } finally {
+      setVerifying(false);
+    }
+  };
+
+  if (!user) {
+    return (
+      <div className="py-10 text-center text-gray-500">
+        請先登入 Yahoo 帳號。
+        <br />
+        <a
+          href={`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8002"}/api/auth/yahoo/login`}
+          className="mt-4 inline-block rounded bg-indigo-600 px-4 py-2 text-sm text-white hover:bg-indigo-500"
+        >
+          Login with Yahoo
+        </a>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex min-h-[40vh] items-center justify-center">
+      <div className="w-full max-w-sm rounded-lg border bg-white p-6 shadow-sm">
+        <h2 className="mb-1 text-lg font-bold">Commissioner 管理面板</h2>
+        <p className="mb-4 text-sm text-gray-500">
+          請輸入管理密碼以進入 Commissioner 面板。
+        </p>
+        <div className="space-y-3">
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleVerify()}
+            placeholder="管理密碼 Password"
+            className="w-full rounded border px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            autoFocus
+          />
+          {error && (
+            <p className="text-sm text-red-600">{error}</p>
+          )}
+          <button
+            onClick={handleVerify}
+            disabled={verifying || !password.trim()}
+            className="w-full rounded bg-indigo-600 py-2 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-50"
+          >
+            {verifying ? "驗證中..." : "進入管理面板 Enter"}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

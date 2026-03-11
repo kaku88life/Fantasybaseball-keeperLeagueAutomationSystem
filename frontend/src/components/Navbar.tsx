@@ -31,14 +31,16 @@ export default function Navbar() {
                 >
                   規則 Rules
                 </Link>
-                {user.is_commissioner && (
-                  <Link
-                    href="/commissioner"
-                    className="text-sm text-yellow-400 hover:text-yellow-300"
-                  >
-                    Commissioner
-                  </Link>
-                )}
+                <Link
+                  href="/commissioner"
+                  className={`text-sm ${
+                    user.is_commissioner
+                      ? "text-yellow-400 hover:text-yellow-300"
+                      : "text-gray-300 hover:text-white"
+                  }`}
+                >
+                  Commissioner
+                </Link>
               </div>
             )}
           </div>
@@ -125,15 +127,17 @@ export default function Navbar() {
             >
               規則 Rules
             </Link>
-            {user.is_commissioner && (
-              <Link
-                href="/commissioner"
-                className="block rounded px-3 py-2 text-sm text-yellow-400 hover:bg-gray-800 hover:text-yellow-300"
-                onClick={() => setMenuOpen(false)}
-              >
-                Commissioner
-              </Link>
-            )}
+            <Link
+              href="/commissioner"
+              className={`block rounded px-3 py-2 text-sm ${
+                user.is_commissioner
+                  ? "text-yellow-400 hover:bg-gray-800 hover:text-yellow-300"
+                  : "text-gray-300 hover:bg-gray-800 hover:text-white"
+              }`}
+              onClick={() => setMenuOpen(false)}
+            >
+              Commissioner
+            </Link>
           </div>
           <div className="border-t border-gray-700 px-4 py-3">
             <p className="text-sm text-gray-300">

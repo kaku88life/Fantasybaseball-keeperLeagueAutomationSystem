@@ -229,6 +229,15 @@ export async function setCommissioner(userId: number): Promise<{ message: string
   });
 }
 
+export async function verifyCommissionerPassword(
+  password: string,
+): Promise<{ message: string; token: string }> {
+  return request("/api/auth/commissioner-verify", {
+    method: "POST",
+    body: JSON.stringify({ password }),
+  });
+}
+
 export async function getAllTeamAdjustments(): Promise<import("@/types").TeamAdjustments[]> {
   return request("/api/commissioner/all-team-adjustments");
 }

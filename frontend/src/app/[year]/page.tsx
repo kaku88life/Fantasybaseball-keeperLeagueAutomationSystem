@@ -125,12 +125,16 @@ export default function YearOverviewPage() {
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-bold sm:text-2xl">{year} 賽季</h1>
           <div className="flex items-center gap-1.5 sm:gap-2">
-            {user?.is_commissioner && (
+            {user && (
               <Link
                 href="/commissioner"
-                className="rounded bg-yellow-500 px-2.5 py-1 text-xs font-medium text-white hover:bg-yellow-400 sm:px-3 sm:text-sm"
+                className={`rounded px-2.5 py-1 text-xs font-medium sm:px-3 sm:text-sm ${
+                  user.is_commissioner
+                    ? "bg-yellow-500 text-white hover:bg-yellow-400"
+                    : "bg-gray-500 text-white hover:bg-gray-400"
+                }`}
               >
-                Commissioner 管理
+                Commissioner
               </Link>
             )}
             {years.map((y) => (

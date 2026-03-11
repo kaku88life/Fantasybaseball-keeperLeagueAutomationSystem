@@ -501,6 +501,43 @@ async def update_line_name(
     return {"message": "LINE name updated", "line_name": name}
 
 
+@router.post("/commissioner-verify")
+async def commissioner_verify(
+    body: dict,
+    user: dict = Depends(get_current_user),
+):
+    """Verify commissioner password and grant commissioner access.
+
+    Any logged-in user can become commissioner by entering the correct password.
+    This avoids needing a separate admin setup flow.
+    """
+    import os
+    from api.database import get_db
+
+    password = body.get("password", "")
+    expected = os.getenv("COMMISSIONER_PASSWORD", "2026")
+
+    if password != expected:
+        raise HTTPException(status_code=403, detail="密碼錯誤 Incorrect password")
+
+    # Grant commissioner in DB
+    conn = get_db()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                "UPDATE users SET is_commissioner = 1 WHERE id = %s",
+                (user["id"],),
+            )
+        conn.commit()
+    finally:
+        conn.close()
+
+    # Issue new JWT with commissioner flag
+    new_token = create_jwt_token(user["id"], is_commissioner=True)
+
+    return {"message": "Commissioner access granted", "token": new_token}
+
+
 @router.post("/logout")
 async def logout():
     """Logout (client-side token removal, no server state to clear)."""
