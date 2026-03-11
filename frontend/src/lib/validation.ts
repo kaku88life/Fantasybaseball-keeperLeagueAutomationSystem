@@ -24,6 +24,26 @@ export interface ClientValidationResult {
 }
 
 /**
+ * Calculate buyout cost for releasing an N-contract player (FAAB buyout path).
+ * Mirrors backend calculate_buyout(player, use_faab=True).
+ *
+ * FAAB buyout: salary/2 from salary cap + ceil(salary/2) from FAAB per remaining year.
+ * remaining_years for N contracts = extension_years + 1 (N years + O year).
+ */
+export function computeBuyoutCost(
+  salary: number,
+  remainingYears: number,
+): { salaryCost: number; faabCost: number } {
+  if (remainingYears <= 0) return { salaryCost: 0, faabCost: 0 };
+  const salaryPerYear = Math.floor(salary / 2);
+  const faabPerYear = Math.ceil(salary / 2);
+  return {
+    salaryCost: salaryPerYear * remainingYears,
+    faabCost: faabPerYear * remainingYears,
+  };
+}
+
+/**
  * Compute the next contract salary for a given player/action.
  */
 export function computeNextSalary(
@@ -82,6 +102,8 @@ export function validateSelections(
   let activeCount = 0;
   let farmCount = 0;
   let keeperCost = 0;
+  let newBuyoutSalaryCost = 0;
+  let newBuyoutFaabCost = 0;
 
   const totalPlayers = team.players.length;
   const totalSelections = Object.keys(selections).length;
@@ -93,6 +115,16 @@ export function validateSelections(
     // No selection made yet: skip (treat as undecided, same as backend)
     if (!sel) {
       continue;
+    }
+
+    // Calculate buyout cost for N-contract players being released
+    if (sel.action === "release" && ct === "N") {
+      const buyout = computeBuyoutCost(
+        player.contract.salary,
+        player.contract.remaining_years,
+      );
+      newBuyoutSalaryCost += buyout.salaryCost;
+      newBuyoutFaabCost += buyout.faabCost;
     }
 
     const category = getKeeperCategory(ct, sel.action);
@@ -146,26 +178,29 @@ export function validateSelections(
   }
 
   // Financial validation
+  // Carryover buyout costs from previous years + new buyouts from keeper decisions
   const salaryCap = team.salary_cap;
   const rankingBonus = team.ranking_bonus;
   const tradeComp = team.trade_compensation;
-  const buyoutSalaryCost = team.total_buyout_cost;
+  const carryoverBuyoutSalary = team.total_buyout_cost;
+  const totalBuyoutSalaryCost = carryoverBuyoutSalary + newBuyoutSalaryCost;
   const availableSalary =
-    salaryCap + rankingBonus + tradeComp - keeperCost - buyoutSalaryCost;
+    salaryCap + rankingBonus + tradeComp - keeperCost - totalBuyoutSalaryCost;
 
   if (availableSalary < 0) {
     errors.push(
-      `薪資超標: 留用成本 $${keeperCost} + 買斷 $${buyoutSalaryCost} 超過可用額度 $${salaryCap + rankingBonus + tradeComp}`,
+      `薪資超標: 留用成本 $${keeperCost} + 買斷 $${totalBuyoutSalaryCost} 超過可用額度 $${salaryCap + rankingBonus + tradeComp}`,
     );
   }
 
   const faabBudget = team.faab_budget;
-  const buyoutFaabCost = team.total_buyout_faab_cost;
-  const availableFaab = faabBudget - buyoutFaabCost;
+  const carryoverBuyoutFaab = team.total_buyout_faab_cost;
+  const totalBuyoutFaabCost = carryoverBuyoutFaab + newBuyoutFaabCost;
+  const availableFaab = faabBudget - totalBuyoutFaabCost;
 
   if (availableFaab < 0) {
     errors.push(
-      `FAAB 超標: 買斷 FAAB $${buyoutFaabCost} 超過預算 $${faabBudget}`,
+      `FAAB 超標: 買斷 FAAB $${totalBuyoutFaabCost} 超過預算 $${faabBudget}`,
     );
   }
 
@@ -178,11 +213,11 @@ export function validateSelections(
     ranking_bonus: rankingBonus,
     trade_compensation: tradeComp,
     keeper_cost: keeperCost,
-    buyout_salary_cost: buyoutSalaryCost,
+    buyout_salary_cost: totalBuyoutSalaryCost,
     available_salary: availableSalary,
     faab_budget: faabBudget,
     faab_adjustment: 0,
-    buyout_faab_cost: buyoutFaabCost,
+    buyout_faab_cost: totalBuyoutFaabCost,
     available_faab: availableFaab,
     active_keeper_count: activeCount,
     farm_rookie_count: farmCount,

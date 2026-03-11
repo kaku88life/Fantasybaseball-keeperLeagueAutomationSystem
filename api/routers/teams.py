@@ -330,7 +330,8 @@ def _validate_selections(year: int, team_id: int, selections_db: list[dict]) -> 
         KEEPER_BENCH_MAX,
         get_salary_cap,
     )
-    from src.contract.engine import evaluate_next_contract
+    from src.contract.engine import calculate_buyout, evaluate_next_contract
+    from src.contract.models import ContractType
     from api.schemas import FinancialSummary
 
     try:
@@ -344,10 +345,12 @@ def _validate_selections(year: int, team_id: int, selections_db: list[dict]) -> 
     # Build a map of player_name -> selection
     sel_map = {s["player_name"]: s for s in selections_db}
 
-    # Compute keeper costs and counts
+    # Compute keeper costs, counts, and new buyout costs from release decisions
     active_count = 0
     farm_count = 0
     keeper_cost = 0
+    new_buyout_salary_cost = 0
+    new_buyout_faab_cost = 0
 
     for p in team.players:
         sel = sel_map.get(p.name)
@@ -359,6 +362,13 @@ def _validate_selections(year: int, team_id: int, selections_db: list[dict]) -> 
         ext_years = sel["extension_years"]
 
         if action == "release":
+            # Calculate buyout cost for N-contract players being released.
+            # A/B contracts don't incur buyout when released (just don't keep).
+            # O contracts expire naturally.
+            if p.contract.contract_type == ContractType.N:
+                buyout = calculate_buyout(p, use_faab=True)
+                new_buyout_salary_cost += buyout.salary_cap_cost
+                new_buyout_faab_cost += buyout.faab_cost
             continue
 
         if action == "fa":
@@ -407,25 +417,29 @@ def _validate_selections(year: int, team_id: int, selections_db: list[dict]) -> 
         errors.append(f"R-contract farm rookies too many: {farm_count} (maximum {KEEPER_BENCH_MAX})")
 
     # Financial validation
+    # total_buyout_cost from team.buyout_records = carried-over multi-year buyouts
+    # new_buyout_salary_cost = new buyouts from this year's keeper decisions
     salary_cap = team.salary_cap or get_salary_cap(year)
     ranking_bonus = team.ranking_bonus
     trade_comp = team.trade_compensation
-    buyout_salary_cost = team.total_buyout_cost
-    available_salary = salary_cap + ranking_bonus + trade_comp - keeper_cost - buyout_salary_cost
+    carryover_buyout_salary = team.total_buyout_cost
+    total_buyout_salary = carryover_buyout_salary + new_buyout_salary_cost
+    available_salary = salary_cap + ranking_bonus + trade_comp - keeper_cost - total_buyout_salary
 
     if available_salary < 0:
         errors.append(
-            f"Salary cap exceeded: keeper cost ${keeper_cost} + buyout ${buyout_salary_cost} "
+            f"Salary cap exceeded: keeper cost ${keeper_cost} + buyout ${total_buyout_salary} "
             f"> available ${salary_cap + ranking_bonus + trade_comp}"
         )
 
     faab_budget = team.faab_budget or FAAB_BASE
-    buyout_faab_cost = team.total_buyout_faab_cost
-    available_faab = faab_budget - buyout_faab_cost
+    carryover_buyout_faab = team.total_buyout_faab_cost
+    total_buyout_faab = carryover_buyout_faab + new_buyout_faab_cost
+    available_faab = faab_budget - total_buyout_faab
 
     if available_faab < 0:
         errors.append(
-            f"FAAB budget exceeded: buyout FAAB ${buyout_faab_cost} > budget ${faab_budget}"
+            f"FAAB budget exceeded: buyout FAAB ${total_buyout_faab} > budget ${faab_budget}"
         )
 
     # Warnings
@@ -439,11 +453,11 @@ def _validate_selections(year: int, team_id: int, selections_db: list[dict]) -> 
         ranking_bonus=ranking_bonus,
         trade_compensation=trade_comp,
         keeper_cost=keeper_cost,
-        buyout_salary_cost=buyout_salary_cost,
+        buyout_salary_cost=total_buyout_salary,
         available_salary=available_salary,
         faab_budget=faab_budget,
         faab_adjustment=faab_adj,
-        buyout_faab_cost=buyout_faab_cost,
+        buyout_faab_cost=total_buyout_faab,
         available_faab=available_faab,
         active_keeper_count=active_count,
         farm_rookie_count=farm_count,

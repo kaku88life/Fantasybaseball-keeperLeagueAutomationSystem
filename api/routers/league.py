@@ -8,6 +8,8 @@ from fastapi import APIRouter, HTTPException
 from api.database import get_all_submissions, get_all_teams, get_snapshot, get_snapshot_years
 from api.schemas import LeagueSettingsSchema, LeagueSnapshotSchema
 from api.serializers import dict_to_league_state, serialize_league_state, serialize_team
+from src.contract.engine import calculate_buyout
+from src.contract.models import ContractType
 
 router = APIRouter()
 
@@ -130,12 +132,24 @@ async def get_keeper_results(year: int):
 
         kept_players = []
         keeper_cost = 0
-        buyout_cost = 0
+        new_buyout_salary_cost = 0
+        new_buyout_faab_cost = 0
 
         if sub and sub.get("selections"):
             for sel in sub["selections"]:
                 action = sel.get("action", "")
-                if action in ("release", "fa"):
+                if action == "fa":
+                    continue
+                if action == "release":
+                    # Calculate buyout cost for N-contract players being released
+                    if team_model:
+                        for p in team_model.players:
+                            if p.name == sel["player_name"]:
+                                if p.contract.contract_type == ContractType.N:
+                                    buyout = calculate_buyout(p, use_faab=True)
+                                    new_buyout_salary_cost += buyout.salary_cap_cost
+                                    new_buyout_faab_cost += buyout.faab_cost
+                                break
                     continue
                 # This is a kept player
                 next_contract = sel.get("next_contract", "")
@@ -169,14 +183,24 @@ async def get_keeper_results(year: int):
         salary_cap = 0
         ranking_bonus = 0
         trade_comp = db_team.get("trade_compensation", 0) or 0
-        total_buyout_cost = 0
+        carryover_buyout_salary = 0
+        carryover_buyout_faab = 0
 
         if team_model:
             salary_cap = team_model.salary_cap
             ranking_bonus = team_model.ranking_bonus
-            total_buyout_cost = team_model.total_buyout_cost
+            carryover_buyout_salary = team_model.total_buyout_cost
+            carryover_buyout_faab = team_model.total_buyout_faab_cost
 
+        total_buyout_cost = carryover_buyout_salary + new_buyout_salary_cost
+        total_buyout_faab = carryover_buyout_faab + new_buyout_faab_cost
         available_salary = salary_cap + ranking_bonus + trade_comp - keeper_cost - total_buyout_cost
+
+        # FAAB calculation
+        faab_budget = 0
+        if team_model:
+            faab_budget = team_model.faab_budget
+        available_faab = faab_budget - total_buyout_faab
 
         results.append({
             "team_id": team_id,
@@ -186,10 +210,13 @@ async def get_keeper_results(year: int):
             "kept_players": kept_players,
             "keeper_cost": keeper_cost,
             "buyout_cost": total_buyout_cost,
+            "buyout_faab_cost": total_buyout_faab,
             "ranking_bonus": ranking_bonus,
             "trade_compensation": trade_comp,
             "salary_cap": salary_cap,
             "available_salary": available_salary,
+            "faab_budget": faab_budget,
+            "available_faab": available_faab,
         })
 
     return {

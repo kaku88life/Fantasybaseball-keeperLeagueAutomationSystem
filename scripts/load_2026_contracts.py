@@ -134,38 +134,52 @@ def load_contracts():
         total_keepable += team_keepable
         print(f"  {manager_name}: {len(players)} players ({team_keepable} keepable)")
 
-    # Load 2025 buyout records into teams
+    # Load 2025 buyout records — only carry over records with remaining obligation
+    # Buyouts executed in 2025 with remaining_years=1 are fully paid; skip them.
+    # Multi-year buyouts (remaining_years > 1) still have obligation; carry over
+    # with remaining_years decremented by 1.
     if BUYOUT_PATH.exists():
         with open(BUYOUT_PATH, "r", encoding="utf-8") as f:
             buyout_data = json.load(f)
 
         team_lookup = {t.manager_name: t for t in teams}
-        buyout_count = 0
+        loaded_count = 0
+        skipped_count = 0
 
         for br in buyout_data:
             mgr = br["team"]
             team = team_lookup.get(mgr)
             if team:
                 is_legal_issue = br.get("legal_issue", False)
+                remaining = br.get("remaining_years", 1)
+
+                # Buyout was executed in 2025; one year of obligation consumed.
+                # If remaining_years was 1, the obligation is fully paid — skip.
+                remaining_after = remaining - 1
+                if remaining_after <= 0:
+                    skipped_count += 1
+                    continue
+
+                # Multi-year buyout still has obligation remaining
                 team.buyout_records.append(BuyoutRecord(
                     player_name=br["player_name"],
                     original_contract=br["original_contract"],
                     buyout_salary_cost=br["salary_cost"] if not is_legal_issue else 0,
                     buyout_faab_cost=br["faab_cost"] if not is_legal_issue else 0,
-                    remaining_years=1,
+                    remaining_years=remaining_after,
                     use_faab=br["faab_cost"] > 0 and not is_legal_issue,
                     note=br.get("note", ""),
                 ))
-                buyout_count += 1
+                loaded_count += 1
             else:
                 print(f"  WARNING: Buyout team '{mgr}' not found in contracts")
 
-        print(f"\nLoaded {buyout_count} buyout records from {BUYOUT_PATH.name}")
+        print(f"\n2025 buyout records: {loaded_count} carried over, {skipped_count} completed (skipped)")
         for t in teams:
             if t.buyout_records:
                 total_sal = sum(b.buyout_salary_cost for b in t.buyout_records)
                 total_faab = sum(b.buyout_faab_cost for b in t.buyout_records)
-                print(f"  {t.manager_name}: {len(t.buyout_records)} buyouts (salary: ${total_sal}, FAAB: ${total_faab})")
+                print(f"  {t.manager_name}: {len(t.buyout_records)} ongoing buyouts (salary: ${total_sal}, FAAB: ${total_faab})")
     else:
         print(f"\nNo buyout records file found at {BUYOUT_PATH}")
 

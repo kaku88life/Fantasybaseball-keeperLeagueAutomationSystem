@@ -112,10 +112,13 @@ export interface KeeperResultTeam {
   kept_players: KeptPlayer[];
   keeper_cost: number;
   buyout_cost: number;
+  buyout_faab_cost: number;
   ranking_bonus: number;
   trade_compensation: number;
   salary_cap: number;
   available_salary: number;
+  faab_budget: number;
+  available_faab: number;
 }
 
 export async function getKeeperResults(year: number): Promise<{
