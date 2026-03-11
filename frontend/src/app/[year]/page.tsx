@@ -23,6 +23,16 @@ interface TeamSummary {
   available_faab: number;
   salary_cap: number;
   ranking_bonus: number;
+  line_name?: string;
+}
+
+// Total roster slots (active + pitchers + bench), excluding NA and DL
+const TOTAL_ROSTER_SLOTS = 27;
+
+// Derive previous-year ranking from ranking_bonus
+function getRanking(bonus: number): number | null {
+  const map: Record<number, number> = { 10: 1, 7: 2, 5: 3, 3: 4, 2: 5, 1: 6 };
+  return map[bonus] ?? null;
 }
 
 type TabKey = "season-end" | "keepers";
@@ -214,6 +224,7 @@ function SeasonEndTab({
       {summary.teams.map((t) => {
         const teamId = findTeamId(t.manager_name);
         const isMyTeam = user?.manager_name === t.manager_name;
+        const ranking = getRanking(t.ranking_bonus);
 
         return (
           <Link
@@ -222,13 +233,28 @@ function SeasonEndTab({
             className={`block rounded-lg border p-3 transition hover:shadow-md sm:p-4 ${
               isMyTeam
                 ? "border-indigo-300 bg-indigo-50"
-                : "border-gray-200 bg-white"
+                : ranking === 1
+                  ? "border-yellow-300 bg-yellow-50"
+                  : "border-gray-200 bg-white"
             }`}
           >
             <div className="mb-2 flex items-center justify-between">
-              <h3 className="text-sm font-semibold sm:text-base">{t.manager_name}</h3>
+              <div className="flex items-center gap-1.5 min-w-0">
+                {ranking === 1 && <span className="text-base">&#x1F451;</span>}
+                {ranking && ranking > 1 && (
+                  <span className="rounded bg-gray-200 px-1.5 py-0.5 text-xs font-bold text-gray-600">
+                    #{ranking}
+                  </span>
+                )}
+                <h3 className="truncate text-sm font-semibold sm:text-base">{t.manager_name}</h3>
+                {t.line_name && (
+                  <span className="truncate text-xs text-gray-400">
+                    ({t.line_name})
+                  </span>
+                )}
+              </div>
               {isMyTeam && (
-                <span className="rounded bg-indigo-100 px-1.5 py-0.5 text-xs text-indigo-700">
+                <span className="shrink-0 rounded bg-indigo-100 px-1.5 py-0.5 text-xs text-indigo-700">
                   我的隊伍
                 </span>
               )}
@@ -289,6 +315,30 @@ function KeepersTab({
   user: { manager_name?: string | null } | null;
   year: number;
 }) {
+  // Track which teams are expanded (default: all collapsed)
+  const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set());
+
+  const toggleExpand = (teamId: number) => {
+    setExpandedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(teamId)) {
+        next.delete(teamId);
+      } else {
+        next.add(teamId);
+      }
+      return next;
+    });
+  };
+
+  const expandAll = () => {
+    if (!keeperResults) return;
+    setExpandedIds(new Set(keeperResults.teams.map((t) => t.team_id)));
+  };
+
+  const collapseAll = () => {
+    setExpandedIds(new Set());
+  };
+
   if (loading) {
     return <div className="py-10 text-center text-gray-500">Loading...</div>;
   }
@@ -307,16 +357,34 @@ function KeepersTab({
   return (
     <div className="space-y-6">
       {/* Summary bar */}
-      <div className="rounded-lg border bg-gray-50 px-4 py-3 text-sm text-gray-600">
-        已繳交{" "}
-        <span className="font-bold text-indigo-600">
-          {submittedTeams.length}
-        </span>{" "}
-        / {keeperResults.teams.length} 隊
-        {pendingTeams.length > 0 && (
-          <span className="ml-2 text-gray-400">
-            (尚未繳交: {pendingTeams.map((t) => t.manager_name).join(", ")})
-          </span>
+      <div className="flex items-center justify-between rounded-lg border bg-gray-50 px-4 py-3 text-sm text-gray-600">
+        <div>
+          已繳交{" "}
+          <span className="font-bold text-indigo-600">
+            {submittedTeams.length}
+          </span>{" "}
+          / {keeperResults.teams.length} 隊
+          {pendingTeams.length > 0 && (
+            <span className="ml-2 hidden text-gray-400 sm:inline">
+              (尚未繳交: {pendingTeams.map((t) => t.manager_name).join(", ")})
+            </span>
+          )}
+        </div>
+        {submittedTeams.length > 0 && (
+          <div className="flex gap-2">
+            <button
+              onClick={expandAll}
+              className="rounded px-2 py-0.5 text-xs text-indigo-600 hover:bg-indigo-50"
+            >
+              全部展開
+            </button>
+            <button
+              onClick={collapseAll}
+              className="rounded px-2 py-0.5 text-xs text-gray-500 hover:bg-gray-100"
+            >
+              全部收合
+            </button>
+          </div>
         )}
       </div>
 
@@ -324,69 +392,63 @@ function KeepersTab({
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         {submittedTeams.map((team) => {
           const isMyTeam = user?.manager_name === team.manager_name;
+          const isExpanded = expandedIds.has(team.team_id);
+          // Count active keepers (non-R kept players) and farm rookies
+          const activeCount = team.kept_players.filter(
+            (p) => p.next_contract && !p.next_contract.includes("/R")
+          ).length;
+          const farmCount = team.kept_players.filter(
+            (p) => p.next_contract && p.next_contract.includes("/R")
+          ).length;
 
           return (
             <div
               key={team.team_id}
-              className={`rounded-lg border p-4 ${
+              className={`rounded-lg border ${
                 isMyTeam
                   ? "border-indigo-300 bg-indigo-50"
                   : "border-gray-200 bg-white"
               }`}
             >
-              {/* Team header */}
-              <div className="mb-3 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <h3 className="font-semibold">{team.manager_name}</h3>
+              {/* Clickable team header */}
+              <button
+                onClick={() => toggleExpand(team.team_id)}
+                className="flex w-full items-center justify-between px-4 py-3 text-left"
+              >
+                <div className="flex items-center gap-2 min-w-0">
+                  <svg
+                    className={`h-4 w-4 shrink-0 text-gray-400 transition-transform ${
+                      isExpanded ? "rotate-90" : ""
+                    }`}
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                  <h3 className="truncate font-semibold text-sm sm:text-base">
+                    {team.manager_name}
+                  </h3>
+                  {team.line_name && (
+                    <span className="truncate text-xs text-gray-400">
+                      ({team.line_name})
+                    </span>
+                  )}
                   {isMyTeam && (
-                    <span className="rounded bg-indigo-100 px-1.5 py-0.5 text-xs text-indigo-700">
+                    <span className="shrink-0 rounded bg-indigo-100 px-1.5 py-0.5 text-xs text-indigo-700">
                       我的隊伍
                     </span>
                   )}
                 </div>
-                <span className="rounded bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
-                  已繳交
-                </span>
-              </div>
-
-              {/* Financial summary */}
-              <div className="mb-3 grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
-                <div className="flex justify-between">
-                  <span className="text-gray-500">留用薪資:</span>
-                  <span className="font-medium">${team.keeper_cost}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-500">薪資上限:</span>
-                  <span>${team.salary_cap}</span>
-                </div>
-                {team.buyout_cost > 0 && (
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">買斷成本:</span>
-                    <span className="text-red-600">
-                      -${team.buyout_cost}
-                    </span>
-                  </div>
-                )}
-                {team.ranking_bonus > 0 && (
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">排名獎勵:</span>
-                    <span className="text-yellow-600">
-                      +${team.ranking_bonus}
-                    </span>
-                  </div>
-                )}
-                {team.trade_compensation > 0 && (
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">交易補償:</span>
-                    <span className="text-blue-600">
-                      +${team.trade_compensation}
-                    </span>
-                  </div>
-                )}
-                <div className="col-span-2 flex justify-between border-t pt-1">
-                  <span className="text-gray-500">可用薪資 Cap Space:</span>
+                <div className="flex items-center gap-2 shrink-0 ml-2">
+                  <span className="rounded bg-gray-100 px-2 py-0.5 text-xs font-mono font-medium text-gray-700">
+                    {activeCount}/{TOTAL_ROSTER_SLOTS}
+                    {farmCount > 0 && (
+                      <span className="text-blue-600"> +{farmCount}R</span>
+                    )}
+                  </span>
                   <span
-                    className={`font-bold ${
+                    className={`text-xs font-bold ${
                       team.available_salary < 20
                         ? "text-red-600"
                         : "text-green-700"
@@ -394,42 +456,98 @@ function KeepersTab({
                   >
                     ${team.available_salary}
                   </span>
+                  <span className="rounded bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
+                    已繳交
+                  </span>
                 </div>
-              </div>
+              </button>
 
-              {/* Player list */}
-              <div className="space-y-0.5 overflow-x-auto">
-                <div className="flex items-center gap-1 border-b pb-1 text-xs font-medium text-gray-500 sm:gap-2">
-                  <span className="min-w-0 flex-1">球員</span>
-                  <span className="w-10 shrink-0 text-center sm:w-14">位置</span>
-                  <span className="w-14 shrink-0 text-center sm:w-16">原合約</span>
-                  <span className="w-14 shrink-0 text-center sm:w-16">新合約</span>
-                </div>
-                {team.kept_players.map((p) => (
-                  <div
-                    key={p.player_name}
-                    className="flex items-center gap-1 py-0.5 text-xs sm:gap-2"
-                  >
-                    <span className="min-w-0 flex-1 truncate font-medium">
-                      {p.player_name}
-                    </span>
-                    <span className="w-10 shrink-0 text-center text-gray-400 sm:w-14">
-                      {p.position || "-"}
-                    </span>
-                    <span className="w-14 shrink-0 text-center text-gray-500 sm:w-16">
-                      {p.current_contract}
-                    </span>
-                    <span className="w-14 shrink-0 text-center font-medium text-indigo-600 sm:w-16">
-                      {p.next_contract}
-                    </span>
+              {/* Expandable content */}
+              {isExpanded && (
+                <div className="border-t px-4 pb-4 pt-3">
+                  {/* Financial summary */}
+                  <div className="mb-3 grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">留用薪資:</span>
+                      <span className="font-medium">${team.keeper_cost}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">薪資上限:</span>
+                      <span>${team.salary_cap}</span>
+                    </div>
+                    {team.buyout_cost > 0 && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">買斷成本:</span>
+                        <span className="text-red-600">
+                          -${team.buyout_cost}
+                        </span>
+                      </div>
+                    )}
+                    {team.ranking_bonus > 0 && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">排名獎勵:</span>
+                        <span className="text-yellow-600">
+                          +${team.ranking_bonus}
+                        </span>
+                      </div>
+                    )}
+                    {team.trade_compensation > 0 && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">交易補償:</span>
+                        <span className="text-blue-600">
+                          +${team.trade_compensation}
+                        </span>
+                      </div>
+                    )}
+                    <div className="col-span-2 flex justify-between border-t pt-1">
+                      <span className="text-gray-500">可用薪資 Cap Space:</span>
+                      <span
+                        className={`font-bold ${
+                          team.available_salary < 20
+                            ? "text-red-600"
+                            : "text-green-700"
+                        }`}
+                      >
+                        ${team.available_salary}
+                      </span>
+                    </div>
                   </div>
-                ))}
-                {team.kept_players.length === 0 && (
-                  <p className="py-2 text-center text-xs text-gray-400">
-                    無留用球員資料
-                  </p>
-                )}
-              </div>
+
+                  {/* Player list */}
+                  <div className="space-y-0.5 overflow-x-auto">
+                    <div className="flex items-center gap-1 border-b pb-1 text-xs font-medium text-gray-500 sm:gap-2">
+                      <span className="min-w-0 flex-1">球員</span>
+                      <span className="w-10 shrink-0 text-center sm:w-14">位置</span>
+                      <span className="w-14 shrink-0 text-center sm:w-16">原合約</span>
+                      <span className="w-14 shrink-0 text-center sm:w-16">新合約</span>
+                    </div>
+                    {team.kept_players.map((p) => (
+                      <div
+                        key={p.player_name}
+                        className="flex items-center gap-1 py-0.5 text-xs sm:gap-2"
+                      >
+                        <span className="min-w-0 flex-1 truncate font-medium">
+                          {p.player_name}
+                        </span>
+                        <span className="w-10 shrink-0 text-center text-gray-400 sm:w-14">
+                          {p.position || "-"}
+                        </span>
+                        <span className="w-14 shrink-0 text-center text-gray-500 sm:w-16">
+                          {p.current_contract}
+                        </span>
+                        <span className="w-14 shrink-0 text-center font-medium text-indigo-600 sm:w-16">
+                          {p.next_contract}
+                        </span>
+                      </div>
+                    ))}
+                    {team.kept_players.length === 0 && (
+                      <p className="py-2 text-center text-xs text-gray-400">
+                        無留用球員資料
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           );
         })}
@@ -444,9 +562,16 @@ function KeepersTab({
               className="rounded-lg border border-dashed border-gray-300 bg-gray-50 p-4"
             >
               <div className="flex items-center justify-between">
-                <h3 className="font-semibold text-gray-400">
-                  {team.manager_name}
-                </h3>
+                <div className="flex items-center gap-2">
+                  <h3 className="font-semibold text-gray-400">
+                    {team.manager_name}
+                  </h3>
+                  {team.line_name && (
+                    <span className="text-xs text-gray-300">
+                      ({team.line_name})
+                    </span>
+                  )}
+                </div>
                 <span className="rounded bg-gray-200 px-2 py-0.5 text-xs text-gray-500">
                   尚未繳交
                 </span>

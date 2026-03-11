@@ -234,6 +234,21 @@ def get_all_teams() -> list[dict]:
         conn.close()
 
 
+def get_team_line_names() -> dict[int, str]:
+    """Return mapping of team_id -> line_name from users table."""
+    conn = get_db()
+    try:
+        rows = _fetchall(
+            conn,
+            """SELECT u.team_id, u.line_name
+               FROM users u
+               WHERE u.team_id IS NOT NULL AND u.line_name IS NOT NULL AND u.line_name != ''""",
+        )
+        return {r["team_id"]: r["line_name"] for r in rows}
+    finally:
+        conn.close()
+
+
 def get_team_by_id(team_id: int) -> Optional[dict]:
     conn = get_db()
     try:

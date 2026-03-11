@@ -75,13 +75,22 @@ async def get_league_year(year: int):
 @router.get("/{year}/summary")
 async def get_league_summary(year: int):
     """Return a summary of all teams for a year."""
+    from api.database import get_team_line_names, get_all_teams as _get_all_teams
+
     snap = get_snapshot(year)
     if not snap:
         raise HTTPException(status_code=404, detail=f"No data for year {year}")
 
     ls = dict_to_league_state(snap["data"])
+
+    # Get line names and team IDs
+    line_names = get_team_line_names()
+    db_teams = _get_all_teams()
+    manager_to_team_id = {t["manager_name"]: t["id"] for t in db_teams}
+
     summary = []
     for t in ls.teams:
+        team_id = manager_to_team_id.get(t.manager_name)
         summary.append({
             "manager_name": t.manager_name,
             "team_name": t.team_name,
@@ -93,6 +102,7 @@ async def get_league_summary(year: int):
             "available_faab": t.available_faab,
             "salary_cap": t.salary_cap,
             "ranking_bonus": t.ranking_bonus,
+            "line_name": line_names.get(team_id, "") if team_id else "",
         })
     return {
         "year": year,
@@ -116,6 +126,10 @@ async def get_keeper_results(year: int):
     # Get all DB teams for ID mapping
     db_teams = get_all_teams()
     db_team_map = {t["id"]: t for t in db_teams}
+
+    # Get line names
+    from api.database import get_team_line_names
+    line_names = get_team_line_names()
 
     # Get all submissions for this year
     submissions = get_all_submissions(year)
@@ -206,6 +220,7 @@ async def get_keeper_results(year: int):
             "team_id": team_id,
             "manager_name": manager_name,
             "team_name": db_team.get("team_name", ""),
+            "line_name": line_names.get(team_id, ""),
             "is_submitted": is_submitted,
             "kept_players": kept_players,
             "keeper_cost": keeper_cost,

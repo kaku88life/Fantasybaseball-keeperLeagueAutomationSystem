@@ -108,6 +108,7 @@ export interface KeeperResultTeam {
   team_id: number;
   manager_name: string;
   team_name: string;
+  line_name?: string;
   is_submitted: boolean;
   kept_players: KeptPlayer[];
   keeper_cost: number;
