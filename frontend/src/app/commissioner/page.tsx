@@ -69,6 +69,7 @@ export default function CommissionerDashboard() {
   );
   const [submissions, setSubmissions] = useState<SubmissionStatus[]>([]);
   const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState("");
 
   // Detail expansion
   const [expandedTeam, setExpandedTeam] = useState<number | null>(null);
@@ -112,11 +113,14 @@ export default function CommissionerDashboard() {
   const refreshSubmissions = useCallback(async () => {
     if (!selectedYear || !user?.is_commissioner) return;
     setLoading(true);
+    setLoadError("");
     try {
       const data = await getSubmissions(selectedYear);
       setSubmissions(data);
-    } catch {
-      // ignore
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error("[Commissioner] Failed to load submissions:", msg);
+      setLoadError(msg);
     } finally {
       setLoading(false);
     }
@@ -673,6 +677,14 @@ export default function CommissionerDashboard() {
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Error Banner */}
+      {loadError && (
+        <div className="mb-4 rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <p className="font-semibold">載入失敗 Load Error</p>
+          <p className="mt-1">{loadError}</p>
         </div>
       )}
 

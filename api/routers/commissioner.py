@@ -113,6 +113,7 @@ async def get_submission_status(
     all_teams = get_all_teams()
     submissions = get_all_submissions(year)
     sub_map = {s["team_id"]: s for s in submissions}
+    print(f"[COMMISSIONER DEBUG] submissions/{year}: teams={len(all_teams)}, submissions={len(submissions)}", flush=True)
 
     result = []
     for t in all_teams:
