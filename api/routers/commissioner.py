@@ -110,10 +110,15 @@ async def get_submission_status(
     user: dict = Depends(get_current_commissioner),
 ):
     """Get submission status for all teams in a year."""
-    all_teams = get_all_teams()
-    submissions = get_all_submissions(year)
+    try:
+        all_teams = get_all_teams()
+        submissions = get_all_submissions(year)
+    except Exception as e:
+        print(f"[COMMISSIONER ERROR] submissions/{year} DB query failed: {e}", flush=True)
+        raise HTTPException(status_code=500, detail=f"Database error: {e}")
+
     sub_map = {s["team_id"]: s for s in submissions}
-    print(f"[COMMISSIONER DEBUG] submissions/{year}: teams={len(all_teams)}, submissions={len(submissions)}", flush=True)
+    print(f"[COMMISSIONER] submissions/{year}: teams={len(all_teams)}, submissions={len(submissions)}", flush=True)
 
     result = []
     for t in all_teams:
@@ -206,11 +211,15 @@ async def assign_user_to_team(
 @router.get("/users")
 async def list_users(user: dict = Depends(get_current_commissioner)):
     """List all registered users with their team assignments."""
-    from api.database import get_db
+    from api.database import get_db, _fetchall
 
-    conn = get_db()
     try:
-        from api.database import _fetchall
+        conn = get_db()
+    except Exception as e:
+        print(f"[COMMISSIONER ERROR] users DB connect failed: {e}", flush=True)
+        raise HTTPException(status_code=500, detail=f"Database connection error: {e}")
+
+    try:
         rows = _fetchall(
             conn,
             """SELECT u.id, u.yahoo_guid, u.yahoo_nickname, u.yahoo_email,
@@ -221,6 +230,9 @@ async def list_users(user: dict = Depends(get_current_commissioner)):
                ORDER BY u.yahoo_nickname""",
         )
         return rows
+    except Exception as e:
+        print(f"[COMMISSIONER ERROR] users query failed: {e}", flush=True)
+        raise HTTPException(status_code=500, detail=f"Database query error: {e}")
     finally:
         conn.close()
 

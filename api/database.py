@@ -519,7 +519,7 @@ def get_recent_notifications(
                WHERE year = %s AND team_id = %s
                  AND notification_type = %s
                  AND status = 'sent'
-                 AND sent_at > NOW() - INTERVAL '%s hours'
+                 AND sent_at > NOW() - make_interval(hours => %s)
                ORDER BY sent_at DESC""",
             (year, team_id, notification_type, hours),
         )

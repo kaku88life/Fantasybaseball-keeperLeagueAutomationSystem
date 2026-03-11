@@ -13,7 +13,8 @@ from jose import JWTError, jwt
 
 from api.database import get_user_by_id
 
-JWT_SECRET = os.getenv("JWT_SECRET_KEY", "dev-secret-change-in-production")
+# Support both JWT_SECRET and JWT_SECRET_KEY env var names
+JWT_SECRET = os.getenv("JWT_SECRET") or os.getenv("JWT_SECRET_KEY", "dev-secret-change-in-production")
 JWT_ALGORITHM = "HS256"
 JWT_EXPIRE_DAYS = 30
 

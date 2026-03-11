@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import os
 import sys
+import traceback
 from pathlib import Path
 
 # Ensure project root is on the path
@@ -14,8 +15,9 @@ sys.path.insert(0, str(project_root))
 from contextlib import asynccontextmanager
 
 from dotenv import load_dotenv
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 load_dotenv(project_root / ".env")
 
@@ -26,13 +28,27 @@ from api.routers import auth, commissioner, league, players, teams, validation
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Startup / shutdown events."""
-    await init_db()
-    seed_if_empty()
+    try:
+        await init_db()
+        seed_if_empty()
+    except Exception as e:
+        print(f"[Startup] DB init/seed error (non-fatal): {e}", flush=True)
+        traceback.print_exc()
+
     # Start reminder scheduler (no-op if env vars not configured)
-    from src.notification.scheduler import start_scheduler, stop_scheduler
-    start_scheduler()
+    try:
+        from src.notification.scheduler import start_scheduler, stop_scheduler
+        start_scheduler()
+    except Exception as e:
+        print(f"[Startup] Scheduler error (non-fatal): {e}", flush=True)
+
     yield
-    stop_scheduler()
+
+    try:
+        from src.notification.scheduler import stop_scheduler
+        stop_scheduler()
+    except Exception:
+        pass
 
 
 app = FastAPI(
@@ -79,6 +95,19 @@ app.include_router(validation.router, prefix="/api/validate", tags=["validation"
 app.include_router(players.router, prefix="/api/players", tags=["players"])
 
 
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    """Catch all unhandled exceptions and return proper JSON response.
+    This ensures CORS headers are still applied even on 500 errors,
+    because CORSMiddleware can process a proper JSONResponse."""
+    print(f"[ERROR] {request.method} {request.url.path}: {exc}", flush=True)
+    traceback.print_exc()
+    return JSONResponse(
+        status_code=500,
+        content={"detail": f"Internal server error: {type(exc).__name__}: {exc}"},
+    )
+
+
 @app.get("/")
 async def root():
     return {"status": "ok", "service": "keeper-league-api", "docs": "/docs"}
@@ -86,6 +115,28 @@ async def root():
 
 @app.get("/api/health")
 async def health_check():
-    return {"status": "ok", "service": "keeper-league-api"}
+    """Health check with DB connectivity test."""
+    db_status = "unknown"
+    db_error = ""
+    try:
+        from api.database import get_db
+        conn = get_db()
+        try:
+            with conn.cursor() as cur:
+                cur.execute("SELECT 1")
+            db_status = "ok"
+        finally:
+            conn.close()
+    except Exception as e:
+        db_status = "error"
+        db_error = str(e)
+
+    return {
+        "status": "ok" if db_status == "ok" else "degraded",
+        "service": "keeper-league-api",
+        "database": db_status,
+        "database_error": db_error or None,
+        "cors_origins_count": len(_all_origins),
+    }
 
 
