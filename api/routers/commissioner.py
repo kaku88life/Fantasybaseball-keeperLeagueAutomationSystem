@@ -123,15 +123,19 @@ async def get_submission_status(
     result = []
     for t in all_teams:
         sub = sub_map.get(t["id"])
+        # Convert datetime to string for Pydantic serialization
+        submitted_at_str = None
+        if sub and sub.get("submitted_at"):
+            submitted_at_str = str(sub["submitted_at"])
         result.append(SubmissionStatusSchema(
             team_id=t["id"],
             manager_name=t["manager_name"],
             team_name=t.get("team_name", ""),
             is_submitted=sub is not None,
-            submitted_at=sub["submitted_at"] if sub else None,
+            submitted_at=submitted_at_str,
             is_valid=bool(sub["is_valid"]) if sub else False,
             commissioner_approved=bool(sub["commissioner_approved"]) if sub else False,
-            commissioner_notes=sub.get("commissioner_notes", "") if sub else "",
+            commissioner_notes=sub.get("commissioner_notes") or "" if sub else "",
         ))
 
     return result

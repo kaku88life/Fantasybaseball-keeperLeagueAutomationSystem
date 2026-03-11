@@ -155,7 +155,7 @@ class SubmissionStatusSchema(BaseModel):
     submitted_at: Optional[str] = None
     is_valid: bool = False
     commissioner_approved: bool = False
-    commissioner_notes: str = ""
+    commissioner_notes: Optional[str] = ""
 
 
 class ApproveRequest(BaseModel):
