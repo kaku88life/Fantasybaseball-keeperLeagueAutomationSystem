@@ -98,7 +98,7 @@ async def yahoo_login():
         "client_id": _get_yahoo_client_id(),
         "redirect_uri": _get_redirect_uri(),
         "response_type": "code",
-        "scope": "openid",
+        "scope": "openid fspt-r",
         "state": state,
     }
     auth_url = f"{YAHOO_AUTH_URL}?{urlencode(params)}"
