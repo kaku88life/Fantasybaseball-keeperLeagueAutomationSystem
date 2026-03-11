@@ -107,7 +107,7 @@ MAX_TRADE_INSTALLMENT_YEARS = 5  # max installment years for salary compensation
 #   Last place gets 1st priority, descending
 
 # ========== Season Schedule ==========
-PLAYOFF_WEEKS = [23, 24, 25]  # week numbers for playoffs
+PLAYOFF_WEEKS = [23, 24, 25]  # week numbers for playoffs (QF, SF, Finals)
 PLAYOFF_TEAMS = 8
 
 # ========== Yahoo API (populated from .env) ==========

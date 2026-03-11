@@ -1,0 +1,68 @@
+{
+  "year": 2025,
+  "playoff_weeks": [
+    23,
+    24,
+    25
+  ],
+  "standings": [
+    {
+      "place": 1,
+      "manager": "Leo",
+      "name": "PHI Phillies",
+      "team_key": "458.l.40288.t.2"
+    },
+    {
+      "place": 2,
+      "manager": "Tony",
+      "name": "Cincinnati Reds 2025",
+      "team_key": "458.l.40288.t.6"
+    },
+    {
+      "place": 3,
+      "manager": "rawstuff",
+      "name": "Chicago Cubs",
+      "team_key": "458.l.40288.t.7"
+    },
+    {
+      "place": 4,
+      "manager": "謙謙",
+      "name": "New York Yankees",
+      "team_key": "458.l.40288.t.14"
+    },
+    {
+      "place": 5,
+      "manager": "Billy",
+      "name": "Detroit Tigers",
+      "team_key": "458.l.40288.t.8"
+    },
+    {
+      "place": 6,
+      "manager": "TIMMY LIU",
+      "name": "Boston Red Sox",
+      "team_key": "458.l.40288.t.13"
+    },
+    {
+      "place": 7,
+      "manager": "Ponpon",
+      "name": "Tampa Bay Rays",
+      "team_key": "458.l.40288.t.16"
+    },
+    {
+      "place": 8,
+      "manager": "Hyper",
+      "name": "Arizona",
+      "team_key": "458.l.40288.t.12"
+    }
+  ],
+  "ranking_bonus_map": {
+    "Leo": 10,
+    "Tony": 7,
+    "rawstuff": 5,
+    "謙謙": 3,
+    "Billy": 2,
+    "TIMMY LIU": 1,
+    "Ponpon": 0,
+    "Hyper": 0
+  }
+}

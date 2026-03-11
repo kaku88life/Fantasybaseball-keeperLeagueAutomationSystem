@@ -251,6 +251,96 @@ class YahooFantasyClient:
 
         return teams
 
+    def get_scoreboard(
+        self, week: int, league_key: Optional[str] = None
+    ) -> list[dict]:
+        """
+        Get scoreboard (matchups) for a specific week.
+
+        Args:
+            week: Week number (e.g., 24, 25, 26)
+            league_key: Override league key
+
+        Returns:
+            List of matchup dicts with teams and results:
+            [
+              {
+                "week": 24,
+                "status": "postevent",
+                "is_playoffs": True,
+                "is_consolation": False,
+                "teams": [
+                  {"team_key": "...", "name": "...", "manager": "...", "points": 5.0, "is_winner": True},
+                  {"team_key": "...", "name": "...", "manager": "...", "points": 2.0, "is_winner": False},
+                ]
+              },
+              ...
+            ]
+        """
+        lk = league_key or self.league_id
+        data = self._get(f"/league/{lk}/scoreboard;week={week}")
+
+        # Navigate nested Yahoo API response structure
+        league_data = data["fantasy_content"]["league"]
+        # Find scoreboard in the response (may be at index 1 or nested differently)
+        scoreboard = None
+        if isinstance(league_data, list) and len(league_data) > 1:
+            scoreboard = league_data[1].get("scoreboard")
+        if not scoreboard:
+            raise KeyError(f"No scoreboard data found for week {week}")
+
+        # Matchups may be in scoreboard["0"]["matchups"] or scoreboard["matchups"]
+        if "0" in scoreboard and "matchups" in scoreboard["0"]:
+            matchups_data = scoreboard["0"]["matchups"]
+        elif "matchups" in scoreboard:
+            matchups_data = scoreboard["matchups"]
+        else:
+            raise KeyError(f"No matchups data in scoreboard for week {week}")
+        count = matchups_data["count"]
+
+        matchups = []
+        for i in range(count):
+            matchup_raw = matchups_data[str(i)]["matchup"]
+
+            # Matchup metadata
+            entry: dict = {
+                "week": matchup_raw.get("week", str(week)),
+                "status": matchup_raw.get("status", ""),
+                "is_playoffs": matchup_raw.get("is_playoffs", "0") == "1",
+                "is_consolation": matchup_raw.get("is_consolation", "0") == "1",
+                "teams": [],
+            }
+
+            # Parse the two teams in this matchup
+            teams_data = matchup_raw.get("0", {}).get("teams", {})
+            team_count = teams_data.get("count", 0)
+            winner_key = matchup_raw.get("winner_team_key", "")
+
+            for t_idx in range(team_count):
+                team_raw = teams_data[str(t_idx)]["team"]
+                info = self._parse_team_info(team_raw[0])
+
+                # Parse points from team_points
+                points = 0.0
+                if len(team_raw) > 1:
+                    tp = team_raw[1].get("team_points", {})
+                    try:
+                        points = float(tp.get("total", 0))
+                    except (ValueError, TypeError):
+                        points = 0.0
+
+                entry["teams"].append({
+                    "team_key": info.get("team_key", ""),
+                    "name": info.get("name", ""),
+                    "manager": info.get("manager", ""),
+                    "points": points,
+                    "is_winner": info.get("team_key", "") == winner_key,
+                })
+
+            matchups.append(entry)
+
+        return matchups
+
     # ========== Teams ==========
 
     def get_teams(self, league_key: Optional[str] = None) -> list[dict]:
