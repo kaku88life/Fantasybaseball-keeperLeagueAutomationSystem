@@ -927,9 +927,10 @@ export default function CommissionerDashboard() {
                         {detail.validation_result?.financial_summary && (
                           <div>
                             <h4 className="mb-2 text-sm font-semibold">財務摘要 Financial Summary</h4>
-                            <div className="grid grid-cols-2 gap-2 text-sm md:grid-cols-4">
+                            <div className="grid grid-cols-2 gap-2 text-sm md:grid-cols-3 lg:grid-cols-5">
                               {(() => {
                                 const f = detail.validation_result.financial_summary;
+                                const hasBuyout = f.buyout_salary_cost > 0 || f.buyout_faab_cost > 0;
                                 return (
                                   <>
                                     <div className="rounded bg-gray-50 p-2">
@@ -940,9 +941,22 @@ export default function CommissionerDashboard() {
                                       <p className="text-xs text-gray-500">留用成本 Keeper Cost</p>
                                       <p className="font-semibold">${f.keeper_cost}</p>
                                     </div>
+                                    {hasBuyout && (
+                                      <div className="rounded bg-amber-50 p-2">
+                                        <p className="text-xs text-gray-500">買斷成本 Buyout</p>
+                                        <p className="font-semibold text-amber-700">
+                                          ${f.buyout_salary_cost} Cap
+                                          {f.buyout_faab_cost > 0 && (
+                                            <span className="text-xs font-normal text-amber-600"> + ${f.buyout_faab_cost} FAAB</span>
+                                          )}
+                                        </p>
+                                      </div>
+                                    )}
                                     <div className="rounded bg-gray-50 p-2">
                                       <p className="text-xs text-gray-500">可用薪資 Cap Space</p>
-                                      <p className="font-semibold">${f.available_salary}</p>
+                                      <p className={`font-semibold ${f.available_salary < 0 ? "text-red-600" : ""}`}>
+                                        ${f.available_salary}
+                                      </p>
                                     </div>
                                     <div className="rounded bg-gray-50 p-2">
                                       <p className="text-xs text-gray-500">
