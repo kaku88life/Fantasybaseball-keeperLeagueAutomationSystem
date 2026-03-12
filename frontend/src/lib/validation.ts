@@ -52,7 +52,7 @@ export function computeNextSalary(
   action: string,
   extensionYears: number,
 ): number {
-  if (action === "release" || action === "fa") return 0;
+  if (action === "release" || action === "release_normal" || action === "fa") return 0;
   if (action === "legal_issue") return 0; // no salary cost
 
   if (contractType === "B" && action === "extend" && extensionYears > 0) {
@@ -71,7 +71,7 @@ export function getKeeperCategory(
   contractType: ContractType,
   action: string,
 ): "active" | "farm" | "none" {
-  if (action === "release" || action === "fa") return "none";
+  if (action === "release" || action === "release_normal" || action === "fa") return "none";
   if (action === "legal_issue") return "none"; // no roster spot
 
   // O contract = FA, cannot keep
@@ -118,13 +118,20 @@ export function validateSelections(
     }
 
     // Calculate buyout cost for N-contract players being released
-    if (sel.action === "release" && ct === "N") {
-      const buyout = computeBuyoutCost(
-        player.contract.salary,
-        player.contract.remaining_years,
-      );
-      newBuyoutSalaryCost += buyout.salaryCost;
-      newBuyoutFaabCost += buyout.faabCost;
+    if ((sel.action === "release" || sel.action === "release_normal") && ct === "N") {
+      if (sel.action === "release_normal") {
+        // Normal buyout: full salary from salary cap only
+        const remaining = player.contract.remaining_years;
+        newBuyoutSalaryCost += player.contract.salary * remaining;
+      } else {
+        // FAAB buyout: split salary between cap and FAAB
+        const buyout = computeBuyoutCost(
+          player.contract.salary,
+          player.contract.remaining_years,
+        );
+        newBuyoutSalaryCost += buyout.salaryCost;
+        newBuyoutFaabCost += buyout.faabCost;
+      }
     }
 
     const category = getKeeperCategory(ct, sel.action);
@@ -241,12 +248,20 @@ export function getActionLabel(
   extensionYears: number,
   currentSalary: number,
 ): string {
+  // FA (O contract auto-release)
+  if (keepAction === "fa") {
+    return "自由球員 Free Agent";
+  }
+
   // Release / Buyout label depends on contract type
   if (keepAction === "release") {
     if (contractType === "N") {
-      return "買斷 Buyout → FA";
+      return "買斷 FAAB Buyout → FA";
     }
     return "不保留 Release → FA";
+  }
+  if (keepAction === "release_normal") {
+    return "買斷 Buyout (全薪資帽) → FA";
   }
 
   switch (contractType) {
@@ -271,7 +286,7 @@ export function getActionLabel(
       }
       break;
     case "O":
-      return "到期 Expired → 自由球員 FA";
+      return "自由球員 Free Agent";
     case "R":
       if (keepAction === "keep" || keepAction === "rookie")
         return "維持農場新秀 Keep as Rookie (R 約)";
@@ -292,7 +307,7 @@ export function getNextContractDisplay(
   action: string,
   extensionYears: number,
 ): string | null {
-  if (action === "release") return "FA";
+  if (action === "release" || action === "release_normal") return "FA";
   if (action === "fa") return "FA";
   if (action === "legal_issue") return "凍結 Frozen";
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { Fragment, useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import {
   getSubmissions,
@@ -60,6 +60,33 @@ const STATUS_CONFIG: Record<
     badge: "bg-gray-100",
     badgeText: "text-gray-500",
   },
+};
+
+// Sort order for submitted keeper selections
+// Priority: O(1) → N(2) → B(3) → A(4) → R(5) → Buyout(6) → Release/FA(7)
+function getSelectionSortOrder(sel: { current_contract?: string; action: string; next_contract?: string | null }): number {
+  if (sel.action === "release" || sel.action === "release_normal") {
+    return sel.current_contract?.includes("/N") ? 6 : 7;
+  }
+  const nc = sel.next_contract;
+  if (!nc || nc === "FA") return 7;
+  if (nc.includes("/O")) return 1;
+  if (nc.includes("/N")) return 2;
+  if (nc.includes("/B")) return 3;
+  if (nc.includes("/A")) return 4;
+  if (nc.includes("/R")) return 5;
+  return 8;
+}
+
+const SELECTION_GROUP_CONFIG: Record<number, { label: string; style: string }> = {
+  1: { label: "O 約 — 到期年 Final Year", style: "bg-gray-200 text-gray-700" },
+  2: { label: "N 約 — 延長 Extension", style: "bg-blue-100 text-blue-800" },
+  3: { label: "B 約 — 第二年 2nd Year", style: "bg-green-100 text-green-800" },
+  4: { label: "A 約 — 第一年 1st Year", style: "bg-indigo-100 text-indigo-800" },
+  5: { label: "R 約 — 農場新秀 Rookie", style: "bg-purple-100 text-purple-800" },
+  6: { label: "買斷 Buyout", style: "bg-amber-100 text-amber-800" },
+  7: { label: "不保留 Release / FA", style: "bg-red-100 text-red-800" },
+  8: { label: "其他 Other", style: "bg-gray-100 text-gray-600" },
 };
 
 export default function CommissionerDashboard() {
@@ -822,47 +849,74 @@ export default function CommissionerDashboard() {
                                 </tr>
                               </thead>
                               <tbody>
-                                {detail.selections.map((sel) => (
-                                  <tr
-                                    key={sel.player_name}
-                                    className="border-b last:border-0"
-                                  >
-                                    <td className="px-3 py-1.5">{sel.player_name}</td>
-                                    <td className="px-3 py-1.5 font-mono text-xs">
-                                      {sel.current_contract}
-                                    </td>
-                                    <td className="px-3 py-1.5">
-                                      <span
-                                        className={`rounded px-1.5 py-0.5 text-xs ${
-                                          sel.action === "release"
-                                            ? "bg-red-100 text-red-700"
-                                            : sel.action === "keep"
-                                              ? "bg-green-100 text-green-700"
-                                              : sel.action === "rookie"
-                                                ? "bg-purple-100 text-purple-700"
-                                                : sel.action.startsWith("extend")
-                                                  ? "bg-blue-100 text-blue-700"
-                                                  : "bg-gray-100 text-gray-700"
-                                        }`}
-                                      >
-                                        {sel.action === "keep"
-                                          ? "留用 Keep"
-                                          : sel.action === "release"
-                                            ? "不保留 Release"
-                                            : sel.action === "rookie"
-                                              ? "新秀 Rookie"
-                                              : sel.action === "activate"
-                                                ? "啟用 Activate"
-                                                : sel.action.startsWith("extend")
-                                                  ? `延長 Extend ${sel.extension_years} 年`
-                                                  : sel.action}
-                                      </span>
-                                    </td>
-                                    <td className="px-3 py-1.5 font-mono text-xs">
-                                      {sel.next_contract || "-"}
-                                    </td>
-                                  </tr>
-                                ))}
+                                {[...detail.selections]
+                                  .sort((a, b) => {
+                                    const orderA = getSelectionSortOrder(a);
+                                    const orderB = getSelectionSortOrder(b);
+                                    return orderA - orderB;
+                                  })
+                                  .map((sel, idx, sorted) => {
+                                    const order = getSelectionSortOrder(sel);
+                                    const prevOrder = idx > 0 ? getSelectionSortOrder(sorted[idx - 1]) : -1;
+                                    const showHeader = order !== prevOrder;
+                                    const groupCfg = SELECTION_GROUP_CONFIG[order] || SELECTION_GROUP_CONFIG[8];
+                                    return (
+                                      <Fragment key={sel.player_name}>
+                                        {showHeader && (
+                                          <tr>
+                                            <td
+                                              colSpan={4}
+                                              className={`px-3 py-1 text-xs font-bold ${groupCfg.style}`}
+                                            >
+                                              {groupCfg.label}
+                                            </td>
+                                          </tr>
+                                        )}
+                                        <tr className="border-b last:border-0">
+                                          <td className="px-3 py-1.5">{sel.player_name}</td>
+                                          <td className="px-3 py-1.5 font-mono text-xs">
+                                            {sel.current_contract}
+                                          </td>
+                                          <td className="px-3 py-1.5">
+                                            <span
+                                              className={`rounded px-1.5 py-0.5 text-xs ${
+                                                sel.action === "release" || sel.action === "release_normal"
+                                                  ? "bg-red-100 text-red-700"
+                                                  : sel.action === "fa"
+                                                    ? "bg-gray-100 text-gray-500"
+                                                    : sel.action === "keep"
+                                                      ? "bg-green-100 text-green-700"
+                                                      : sel.action === "rookie"
+                                                        ? "bg-purple-100 text-purple-700"
+                                                        : sel.action.startsWith("extend")
+                                                          ? "bg-blue-100 text-blue-700"
+                                                          : "bg-gray-100 text-gray-700"
+                                              }`}
+                                            >
+                                              {sel.action === "keep"
+                                                ? "留用 Keep"
+                                                : sel.action === "release"
+                                                  ? "買斷 FAAB Buyout"
+                                                  : sel.action === "release_normal"
+                                                    ? "買斷 Buyout (全薪資帽)"
+                                                    : sel.action === "fa"
+                                                      ? "自由球員 Free Agent"
+                                                      : sel.action === "rookie"
+                                                        ? "新秀 Rookie"
+                                                        : sel.action === "activate"
+                                                          ? "啟用 Activate"
+                                                          : sel.action.startsWith("extend")
+                                                            ? `延長 Extend ${sel.extension_years} 年`
+                                                            : sel.action}
+                                            </span>
+                                          </td>
+                                          <td className="px-3 py-1.5 font-mono text-xs">
+                                            {sel.next_contract || "-"}
+                                          </td>
+                                        </tr>
+                                      </Fragment>
+                                    );
+                                  })}
                               </tbody>
                             </table>
                           </div>

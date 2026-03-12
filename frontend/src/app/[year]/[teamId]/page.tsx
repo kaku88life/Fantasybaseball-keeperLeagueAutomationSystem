@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import {
@@ -14,6 +14,7 @@ import { useAuth } from "@/lib/auth";
 import ContractBadge from "@/components/ContractBadge";
 import PlayerStatsModal from "@/components/PlayerStatsModal";
 import {
+  computeBuyoutCost,
   getActionLabel,
   validateSelections,
   type Selection,
@@ -202,6 +203,14 @@ export default function KeeperSelectionPage() {
           opt.extension_years === sel.extension_years
         ) {
           return opt.next_contract;
+        }
+      }
+      // release_normal uses same next_contract as release (both -> FA)
+      if (sel.action === "release_normal") {
+        for (const opt of playerOpts.options) {
+          if (opt.keep_action === "release") {
+            return opt.next_contract;
+          }
         }
       }
       return null;
@@ -396,45 +405,67 @@ export default function KeeperSelectionPage() {
         </div>
       )}
 
-      {/* Active Players Table */}
-      <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
-        <span className="text-sm font-semibold text-gray-600">
-          球員名單 Active ({activePlayers.length})
-        </span>
-        <PositionFilter
-          players={activePlayers}
-          value={positionFilter}
-          onChange={setPositionFilter}
-        />
-      </div>
-      <PlayerTable
-        players={activePlayers}
-        options={options}
-        selections={selections}
-        canEdit={canEdit}
-        getNextContract={getNextContract}
-        updateSelection={updateSelection}
-        onPlayerClick={(name, pos) => setStatsPlayer({ name, position: pos })}
-        positionFilter={positionFilter}
-        mandatoryKeepers={new Set(options.filter(o => o.is_mandatory_keeper).map(o => o.player.name))}
-      />
-
-      {/* Bench Players (R contracts) */}
-      {benchPlayers.length > 0 && (
+      {isSubmitted ? (
+        /* Submitted: unified sorted view (O/N/B/A/R/Buyout/Release) */
         <>
-          <div className="mb-2 mt-6 text-sm font-semibold text-gray-600">
-            農場新秀名單 Rookie / R 約 ({benchPlayers.length})
+          <div className="mb-2 text-sm font-semibold text-gray-600">
+            留用名單總覽 Keeper Summary ({team.players.length})
           </div>
           <PlayerTable
-            players={benchPlayers}
+            players={team.players}
+            options={options}
+            selections={selections}
+            canEdit={false}
+            isSubmitted
+            getNextContract={getNextContract}
+            updateSelection={updateSelection}
+            onPlayerClick={(name, pos) => setStatsPlayer({ name, position: pos })}
+            mandatoryKeepers={new Set(options.filter(o => o.is_mandatory_keeper).map(o => o.player.name))}
+          />
+        </>
+      ) : (
+        <>
+          {/* Active Players Table */}
+          <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+            <span className="text-sm font-semibold text-gray-600">
+              球員名單 Active ({activePlayers.length})
+            </span>
+            <PositionFilter
+              players={activePlayers}
+              value={positionFilter}
+              onChange={setPositionFilter}
+            />
+          </div>
+          <PlayerTable
+            players={activePlayers}
             options={options}
             selections={selections}
             canEdit={canEdit}
             getNextContract={getNextContract}
             updateSelection={updateSelection}
             onPlayerClick={(name, pos) => setStatsPlayer({ name, position: pos })}
+            positionFilter={positionFilter}
             mandatoryKeepers={new Set(options.filter(o => o.is_mandatory_keeper).map(o => o.player.name))}
           />
+
+          {/* Bench Players (R contracts) */}
+          {benchPlayers.length > 0 && (
+            <>
+              <div className="mb-2 mt-6 text-sm font-semibold text-gray-600">
+                農場新秀名單 Rookie / R 約 ({benchPlayers.length})
+              </div>
+              <PlayerTable
+                players={benchPlayers}
+                options={options}
+                selections={selections}
+                canEdit={canEdit}
+                getNextContract={getNextContract}
+                updateSelection={updateSelection}
+                onPlayerClick={(name, pos) => setStatsPlayer({ name, position: pos })}
+                mandatoryKeepers={new Set(options.filter(o => o.is_mandatory_keeper).map(o => o.player.name))}
+              />
+            </>
+          )}
         </>
       )}
 
@@ -555,6 +586,37 @@ export default function KeeperSelectionPage() {
   );
 }
 
+// ---- Helper: contract sort order for submitted view ----
+// Priority: O(1) → N(2) → B(3) → A(4) → R(5) → Buyout(6) → Release/FA(7)
+function getContractSortOrder(
+  nextContract: string | null,
+  action: string | undefined,
+  currentContractType: string,
+): number {
+  if (currentContractType === "O") return 7;
+  if (action === "release" || action === "release_normal") {
+    return currentContractType === "N" ? 6 : 7;
+  }
+  if (nextContract?.includes("/O")) return 1;
+  if (nextContract?.includes("/N")) return 2;
+  if (nextContract?.includes("/B")) return 3;
+  if (nextContract?.includes("/A")) return 4;
+  if (nextContract?.includes("/R")) return 5;
+  if (nextContract === "FA") return 7;
+  return 8;
+}
+
+const CONTRACT_GROUP_CONFIG: Record<number, { label: string; style: string }> = {
+  1: { label: "O 約 — 到期年 Final Year", style: "bg-gray-200 text-gray-700" },
+  2: { label: "N 約 — 延長 Extension", style: "bg-blue-100 text-blue-800" },
+  3: { label: "B 約 — 第二年 2nd Year", style: "bg-green-100 text-green-800" },
+  4: { label: "A 約 — 第一年 1st Year", style: "bg-indigo-100 text-indigo-800" },
+  5: { label: "R 約 — 農場新秀 Rookie", style: "bg-purple-100 text-purple-800" },
+  6: { label: "買斷 Buyout", style: "bg-amber-100 text-amber-800" },
+  7: { label: "不保留 Release / FA", style: "bg-red-100 text-red-800" },
+  8: { label: "其他 Other", style: "bg-gray-100 text-gray-600" },
+};
+
 // ---- Sub-components ----
 
 function PlayerTable({
@@ -562,6 +624,7 @@ function PlayerTable({
   options,
   selections,
   canEdit,
+  isSubmitted = false,
   getNextContract,
   updateSelection,
   onPlayerClick,
@@ -572,6 +635,7 @@ function PlayerTable({
   options: PlayerKeeperOptions[];
   selections: Record<string, Selection>;
   canEdit: boolean;
+  isSubmitted?: boolean;
   getNextContract: (name: string) => string | null;
   updateSelection: (name: string, action: string, ext: number) => void;
   onPlayerClick: (name: string, position: string) => void;
@@ -599,6 +663,21 @@ function PlayerTable({
     });
   }, [players, positionFilter]);
 
+  // Sort by contract type when submitted: O → N → B → A → R → Buyout → Release
+  const displayPlayers = useMemo(() => {
+    if (!isSubmitted) return filteredPlayers;
+    return [...filteredPlayers].sort((a, b) => {
+      const selA = selections[a.name];
+      const selB = selections[b.name];
+      const nextA = getNextContract(a.name);
+      const nextB = getNextContract(b.name);
+      const orderA = getContractSortOrder(nextA, selA?.action, a.contract.contract_type);
+      const orderB = getContractSortOrder(nextB, selB?.action, b.contract.contract_type);
+      if (orderA !== orderB) return orderA - orderB;
+      return b.contract.salary - a.contract.salary;
+    });
+  }, [filteredPlayers, isSubmitted, selections, getNextContract]);
+
   return (
     <div className="overflow-x-auto rounded-lg border bg-white">
       <table className="w-full min-w-[640px] text-sm">
@@ -625,7 +704,7 @@ function PlayerTable({
           </tr>
         </thead>
         <tbody>
-          {filteredPlayers.length === 0 && (
+          {displayPlayers.length === 0 && (
             <tr>
               <td
                 colSpan={6}
@@ -635,7 +714,7 @@ function PlayerTable({
               </td>
             </tr>
           )}
-          {filteredPlayers.map((player) => {
+          {displayPlayers.map((player, idx) => {
             const playerOpts = options.find(
               (o) => o.player.name === player.name,
             );
@@ -643,12 +722,35 @@ function PlayerTable({
             const nextContract = getNextContract(player.name);
             const ct = player.contract.contract_type as ContractType;
 
-            const isReleased = sel?.action === "release";
+            const isReleased = sel?.action === "release" || sel?.action === "release_normal";
             const isFA = ct === "O";
 
+            // Group header for submitted sorted view
+            const sortOrder = getContractSortOrder(nextContract, sel?.action, ct);
+            const prevPlayer = idx > 0 ? displayPlayers[idx - 1] : null;
+            const prevOrder = prevPlayer
+              ? getContractSortOrder(
+                  getNextContract(prevPlayer.name),
+                  selections[prevPlayer.name]?.action,
+                  prevPlayer.contract.contract_type,
+                )
+              : -1;
+            const showGroupHeader = isSubmitted && sortOrder !== prevOrder;
+            const groupCfg = CONTRACT_GROUP_CONFIG[sortOrder] || CONTRACT_GROUP_CONFIG[8];
+
             return (
+              <Fragment key={player.name}>
+              {showGroupHeader && (
+                <tr>
+                  <td
+                    colSpan={6}
+                    className={`px-2 py-1.5 text-xs font-bold sm:px-3 ${groupCfg.style}`}
+                  >
+                    {groupCfg.label}
+                  </td>
+                </tr>
+              )}
               <tr
-                key={player.name}
                 className={`border-b transition-colors ${
                   isReleased
                     ? "bg-red-50/50 text-gray-400"
@@ -709,7 +811,23 @@ function PlayerTable({
                       }`}
                     >
                       <option value="">-- 請選擇 --</option>
-                      {playerOpts.options.map((opt, i) => {
+                      {playerOpts.options.flatMap((opt, i) => {
+                        // For N contracts, expand "release" into two buyout options
+                        if (ct === "N" && opt.keep_action === "release") {
+                          const salary = player.contract.salary;
+                          const remaining = player.contract.remaining_years;
+                          const faabBuyout = computeBuyoutCost(salary, remaining);
+                          const normalTotal = salary * remaining;
+                          const mandatoryTag = mandatoryKeepers.has(player.name) ? " (需買斷)" : "";
+                          return [
+                            <option key={`${i}-faab`} value="release:0">
+                              {`買斷 FAAB Buyout: $${faabBuyout.salaryCost} Cap + $${faabBuyout.faabCost} FAAB (${remaining}年)${mandatoryTag}`}
+                            </option>,
+                            <option key={`${i}-normal`} value="release_normal:0">
+                              {`買斷 Buyout (全薪資帽): $${normalTotal} Cap (${remaining}年)${mandatoryTag}`}
+                            </option>,
+                          ];
+                        }
                         const label = getActionLabel(
                           ct,
                           opt.keep_action,
@@ -719,7 +837,7 @@ function PlayerTable({
                         const isMandatoryRelease =
                           mandatoryKeepers.has(player.name) &&
                           opt.keep_action === "release";
-                        return (
+                        return [
                           <option
                             key={i}
                             value={`${opt.keep_action}:${opt.extension_years}`}
@@ -727,8 +845,8 @@ function PlayerTable({
                             {isMandatoryRelease
                               ? `${label} (需買斷 Buyout Required)`
                               : label}
-                          </option>
-                        );
+                          </option>,
+                        ];
                       })}
                     </select>
                   ) : (
@@ -773,6 +891,7 @@ function PlayerTable({
                   )}
                 </td>
               </tr>
+              </Fragment>
             );
           })}
         </tbody>

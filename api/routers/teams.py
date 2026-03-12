@@ -361,12 +361,13 @@ def _validate_selections(year: int, team_id: int, selections_db: list[dict]) -> 
         action = sel["action"]
         ext_years = sel["extension_years"]
 
-        if action == "release":
+        if action in ("release", "release_normal"):
             # Calculate buyout cost for N-contract players being released.
             # A/B contracts don't incur buyout when released (just don't keep).
             # O contracts expire naturally.
             if p.contract.contract_type == ContractType.N:
-                buyout = calculate_buyout(p, use_faab=True)
+                use_faab = action == "release"  # release = FAAB buyout, release_normal = full salary cap
+                buyout = calculate_buyout(p, use_faab=use_faab)
                 new_buyout_salary_cost += buyout.salary_cap_cost
                 new_buyout_faab_cost += buyout.faab_cost
             continue

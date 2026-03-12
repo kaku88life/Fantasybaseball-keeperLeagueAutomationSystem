@@ -120,7 +120,7 @@ def evaluate_next_contract(
         )
 
     # Release (don't keep) -> needs buyout
-    if keep_action == "release":
+    if keep_action in ("release", "release_normal"):
         return ContractTransition(
             player_name=name,
             current_contract=ct,
