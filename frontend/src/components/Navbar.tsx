@@ -3,10 +3,17 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useAuth } from "@/lib/auth";
+import { useToast } from "@/components/Toast";
 
 export default function Navbar() {
   const { user, logout } = useAuth();
+  const { showToast } = useToast();
   const [menuOpen, setMenuOpen] = useState(false);
+
+  const handleLogout = () => {
+    logout();
+    showToast("已登出，如需操作請先登入帳號", "info");
+  };
 
   return (
     <nav className="bg-gray-900 text-white">
@@ -63,7 +70,7 @@ export default function Navbar() {
                   )}
                 </span>
                 <button
-                  onClick={logout}
+                  onClick={handleLogout}
                   className="text-sm text-gray-400 hover:text-white"
                 >
                   Logout
@@ -150,7 +157,7 @@ export default function Navbar() {
               )}
             </p>
             <button
-              onClick={() => { logout(); setMenuOpen(false); }}
+              onClick={() => { handleLogout(); setMenuOpen(false); }}
               className="mt-2 text-sm text-gray-400 hover:text-white"
             >
               Logout

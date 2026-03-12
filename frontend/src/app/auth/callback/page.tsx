@@ -3,12 +3,14 @@
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth";
+import { useToast } from "@/components/Toast";
 import { getCurrentUser } from "@/lib/api";
 
 function CallbackHandler() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { loginWithToken } = useAuth();
+  const { showToast } = useToast();
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -28,12 +30,13 @@ function CallbackHandler() {
     // Save token, fetch user info, then redirect to home
     loginWithToken(token)
       .then(() => {
+        showToast("歡迎回來! Welcome to 5-Man Keep盟", "success");
         router.push("/");
       })
       .catch((e) => {
         setError(e instanceof Error ? e.message : "Failed to load user info");
       });
-  }, [searchParams, loginWithToken, router]);
+  }, [searchParams, loginWithToken, router, showToast]);
 
   if (error) {
     return (

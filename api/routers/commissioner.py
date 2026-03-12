@@ -165,15 +165,21 @@ async def approve_team_submission(
     body: ApproveRequest,
     user: dict = Depends(get_current_commissioner),
 ):
-    """Approve or reject a team's keeper submission."""
+    """Approve or reject a team's keeper submission.
+    Reject = auto-unlock (deletes submission, preserves selections).
+    """
     from api.database import get_submission
     sub = get_submission(year, team_id)
     if not sub:
         raise HTTPException(status_code=404, detail="No submission found")
 
-    approve_submission(year, team_id, body.approved, body.notes)
-    action = "approved" if body.approved else "rejected"
-    return {"message": f"Submission {action}", "year": year, "team_id": team_id}
+    if body.approved:
+        approve_submission(year, team_id, True, body.notes)
+        return {"message": "Submission approved", "year": year, "team_id": team_id}
+    else:
+        # Reject = auto-unlock: delete submission so user can re-edit
+        delete_submission(year, team_id)
+        return {"message": "Submission rejected and unlocked", "year": year, "team_id": team_id}
 
 
 @router.post("/assign-team")
