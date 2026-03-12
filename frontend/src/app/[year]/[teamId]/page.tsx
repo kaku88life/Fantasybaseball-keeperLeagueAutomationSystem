@@ -852,12 +852,19 @@ function PlayerTable({
                   ) : (
                     <span className="text-gray-500">
                       {sel
-                        ? getActionLabel(
-                            ct,
-                            sel.action,
-                            sel.extension_years,
-                            player.contract.salary,
-                          )
+                        ? (() => {
+                            // N contract buyout: show cost breakdown
+                            if (ct === "N" && (sel.action === "release" || sel.action === "release_normal")) {
+                              const salary = player.contract.salary;
+                              const remaining = player.contract.remaining_years;
+                              if (sel.action === "release_normal") {
+                                return `買斷 Buyout 全薪資帽 ($${salary * remaining} Cap, ${remaining}年)`;
+                              }
+                              const buyout = computeBuyoutCost(salary, remaining);
+                              return `買斷 FAAB Buyout ($${buyout.salaryCost} Cap + $${buyout.faabCost} FAAB, ${remaining}年)`;
+                            }
+                            return getActionLabel(ct, sel.action, sel.extension_years, player.contract.salary);
+                          })()
                         : isFA
                           ? "自由球員"
                           : "--"}

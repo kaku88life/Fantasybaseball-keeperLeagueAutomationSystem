@@ -89,6 +89,30 @@ const SELECTION_GROUP_CONFIG: Record<number, { label: string; style: string }> =
   8: { label: "其他 Other", style: "bg-gray-100 text-gray-600" },
 };
 
+// Get action label and badge style based on contract type
+// Key distinction: A/B release = free release, N release = paid buyout
+function getSelectionDisplay(sel: { current_contract?: string; action: string; extension_years: number }): { label: string; className: string } {
+  const isN = sel.current_contract?.includes("/N");
+
+  if (sel.action === "keep") return { label: "留用 Keep", className: "bg-green-100 text-green-700" };
+
+  if (sel.action === "release") {
+    if (isN) return { label: "買斷 FAAB Buyout", className: "bg-amber-100 text-amber-700" };
+    return { label: "不保留 Release", className: "bg-red-100 text-red-700" };
+  }
+  if (sel.action === "release_normal") {
+    return { label: "買斷 Buyout (全薪資帽)", className: "bg-amber-100 text-amber-700" };
+  }
+
+  if (sel.action === "fa") return { label: "自由球員 Free Agent", className: "bg-gray-100 text-gray-500" };
+  if (sel.action === "rookie") return { label: "新秀 Rookie", className: "bg-purple-100 text-purple-700" };
+  if (sel.action === "activate") return { label: "啟用 Activate", className: "bg-indigo-100 text-indigo-700" };
+  if (sel.action.startsWith("extend")) return { label: `延長 Extend ${sel.extension_years} 年`, className: "bg-blue-100 text-blue-700" };
+  if (sel.action === "legal_issue") return { label: "法律問題 Legal Issue", className: "bg-gray-200 text-gray-600" };
+
+  return { label: sel.action, className: "bg-gray-100 text-gray-700" };
+}
+
 export default function CommissionerDashboard() {
   const { user } = useAuth();
   const [years, setYears] = useState<number[]>([]);
@@ -878,37 +902,14 @@ export default function CommissionerDashboard() {
                                             {sel.current_contract}
                                           </td>
                                           <td className="px-3 py-1.5">
-                                            <span
-                                              className={`rounded px-1.5 py-0.5 text-xs ${
-                                                sel.action === "release" || sel.action === "release_normal"
-                                                  ? "bg-red-100 text-red-700"
-                                                  : sel.action === "fa"
-                                                    ? "bg-gray-100 text-gray-500"
-                                                    : sel.action === "keep"
-                                                      ? "bg-green-100 text-green-700"
-                                                      : sel.action === "rookie"
-                                                        ? "bg-purple-100 text-purple-700"
-                                                        : sel.action.startsWith("extend")
-                                                          ? "bg-blue-100 text-blue-700"
-                                                          : "bg-gray-100 text-gray-700"
-                                              }`}
-                                            >
-                                              {sel.action === "keep"
-                                                ? "留用 Keep"
-                                                : sel.action === "release"
-                                                  ? "買斷 FAAB Buyout"
-                                                  : sel.action === "release_normal"
-                                                    ? "買斷 Buyout (全薪資帽)"
-                                                    : sel.action === "fa"
-                                                      ? "自由球員 Free Agent"
-                                                      : sel.action === "rookie"
-                                                        ? "新秀 Rookie"
-                                                        : sel.action === "activate"
-                                                          ? "啟用 Activate"
-                                                          : sel.action.startsWith("extend")
-                                                            ? `延長 Extend ${sel.extension_years} 年`
-                                                            : sel.action}
-                                            </span>
+                                            {(() => {
+                                              const display = getSelectionDisplay(sel);
+                                              return (
+                                                <span className={`rounded px-1.5 py-0.5 text-xs ${display.className}`}>
+                                                  {display.label}
+                                                </span>
+                                              );
+                                            })()}
                                           </td>
                                           <td className="px-3 py-1.5 font-mono text-xs">
                                             {sel.next_contract || "-"}
