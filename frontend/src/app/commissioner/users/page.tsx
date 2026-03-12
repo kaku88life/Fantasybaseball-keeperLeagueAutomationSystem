@@ -2,7 +2,14 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { getUsers, getTeams, assignTeam, setCommissioner } from "@/lib/api";
+import {
+  getUsers,
+  getTeams,
+  assignTeam,
+  setCommissioner,
+  updateUserLineName,
+  deleteUser,
+} from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import type { UserWithTeam, DBTeam } from "@/types";
 
@@ -12,6 +19,9 @@ export default function UserManagementPage() {
   const [teams, setTeams] = useState<DBTeam[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<number | null>(null);
+  // LINE name editing state
+  const [editingLineName, setEditingLineName] = useState<number | null>(null);
+  const [lineNameInput, setLineNameInput] = useState("");
 
   const refresh = async () => {
     setLoading(true);
@@ -49,6 +59,47 @@ export default function UserManagementPage() {
       await refresh();
     } catch (e) {
       alert(e instanceof Error ? e.message : "操作失敗");
+    }
+  };
+
+  const handleClearLineName = async (userId: number, currentName: string) => {
+    if (!confirm(`確定要清除 "${currentName}" 的 LINE 名稱？`)) return;
+    setSaving(userId);
+    try {
+      await updateUserLineName(userId, "");
+      await refresh();
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "操作失敗");
+    } finally {
+      setSaving(null);
+    }
+  };
+
+  const handleSaveLineName = async (userId: number) => {
+    setSaving(userId);
+    try {
+      await updateUserLineName(userId, lineNameInput);
+      setEditingLineName(null);
+      setLineNameInput("");
+      await refresh();
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "操作失敗");
+    } finally {
+      setSaving(null);
+    }
+  };
+
+  const handleDeleteUser = async (u: UserWithTeam) => {
+    const name = u.yahoo_nickname || u.line_name || `#${u.id}`;
+    if (!confirm(`確定要刪除用戶 "${name}"？此操作無法復原。用戶下次登入會重新建立帳號。`)) return;
+    setSaving(u.id);
+    try {
+      await deleteUser(u.id);
+      await refresh();
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "操作失敗");
+    } finally {
+      setSaving(null);
     }
   };
 
@@ -98,12 +149,78 @@ export default function UserManagementPage() {
                   <td className="px-4 py-3 text-xs text-gray-400">#{u.id}</td>
                   <td className="px-4 py-3 font-medium">{u.yahoo_nickname || "-"}</td>
                   <td className="px-4 py-3">
-                    {u.line_name ? (
-                      <span className="rounded bg-green-50 px-2 py-0.5 text-xs font-medium text-green-700">
-                        {u.line_name}
-                      </span>
+                    {editingLineName === u.id ? (
+                      <div className="flex items-center gap-1">
+                        <input
+                          type="text"
+                          value={lineNameInput}
+                          onChange={(e) => setLineNameInput(e.target.value)}
+                          className="w-24 rounded border px-2 py-0.5 text-xs"
+                          placeholder="LINE 名稱"
+                          autoFocus
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") handleSaveLineName(u.id);
+                            if (e.key === "Escape") {
+                              setEditingLineName(null);
+                              setLineNameInput("");
+                            }
+                          }}
+                        />
+                        <button
+                          onClick={() => handleSaveLineName(u.id)}
+                          disabled={saving === u.id}
+                          className="rounded bg-green-600 px-1.5 py-0.5 text-xs text-white hover:bg-green-700"
+                        >
+                          OK
+                        </button>
+                        <button
+                          onClick={() => {
+                            setEditingLineName(null);
+                            setLineNameInput("");
+                          }}
+                          className="rounded px-1.5 py-0.5 text-xs text-gray-500 hover:bg-gray-200"
+                        >
+                          取消
+                        </button>
+                      </div>
+                    ) : u.line_name ? (
+                      <div className="flex items-center gap-1">
+                        <span className="rounded bg-green-50 px-2 py-0.5 text-xs font-medium text-green-700">
+                          {u.line_name}
+                        </span>
+                        <button
+                          onClick={() => {
+                            setEditingLineName(u.id);
+                            setLineNameInput(u.line_name || "");
+                          }}
+                          className="rounded p-0.5 text-gray-400 hover:bg-gray-200 hover:text-gray-600"
+                          title="編輯 LINE 名稱"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                          </svg>
+                        </button>
+                        <button
+                          onClick={() => handleClearLineName(u.id, u.line_name || "")}
+                          disabled={saving === u.id}
+                          className="rounded p-0.5 text-gray-400 hover:bg-red-100 hover:text-red-600"
+                          title="清除 LINE 名稱"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                          </svg>
+                        </button>
+                      </div>
                     ) : (
-                      <span className="text-xs text-gray-400">-</span>
+                      <button
+                        onClick={() => {
+                          setEditingLineName(u.id);
+                          setLineNameInput("");
+                        }}
+                        className="text-xs text-gray-400 hover:text-indigo-600"
+                      >
+                        + 設定
+                      </button>
                     )}
                   </td>
                   <td className="px-4 py-3 text-gray-500">{u.yahoo_email || "-"}</td>
@@ -155,16 +272,26 @@ export default function UserManagementPage() {
                     )}
                   </td>
                   <td className="px-4 py-3">
-                    {!u.is_commissioner && (
+                    <div className="flex items-center gap-2">
+                      {!u.is_commissioner && (
+                        <button
+                          onClick={() =>
+                            handleSetCommissioner(u.id, u.yahoo_nickname || `#${u.id}`)
+                          }
+                          className="rounded border px-2 py-1 text-xs text-indigo-600 hover:bg-indigo-50"
+                        >
+                          授予權限 Grant
+                        </button>
+                      )}
                       <button
-                        onClick={() =>
-                          handleSetCommissioner(u.id, u.yahoo_nickname || `#${u.id}`)
-                        }
-                        className="rounded border px-2 py-1 text-xs text-indigo-600 hover:bg-indigo-50"
+                        onClick={() => handleDeleteUser(u)}
+                        disabled={saving === u.id || u.id === user?.user_id}
+                        className="rounded border border-red-200 px-2 py-1 text-xs text-red-500 hover:bg-red-50 disabled:opacity-30"
+                        title={u.id === user?.user_id ? "無法刪除自己的帳號" : "刪除用戶"}
                       >
-                        授予權限 Grant
+                        刪除
                       </button>
-                    )}
+                    </div>
                   </td>
                 </tr>
               ))}

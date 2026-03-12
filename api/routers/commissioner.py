@@ -241,6 +241,61 @@ async def list_users(user: dict = Depends(get_current_commissioner)):
         conn.close()
 
 
+@router.put("/users/{user_id}/line-name")
+async def update_user_line_name_admin(
+    user_id: int,
+    body: dict,
+    user: dict = Depends(get_current_commissioner),
+):
+    """Update or clear a user's LINE name. Commissioner only."""
+    from api.database import get_db
+
+    target = get_user_by_id(user_id)
+    if not target:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    new_name = (body.get("line_name") or "").strip()
+    conn = get_db()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                "UPDATE users SET line_name = %s WHERE id = %s",
+                (new_name if new_name else None, user_id),
+            )
+        conn.commit()
+    finally:
+        conn.close()
+
+    action = f"updated to '{new_name}'" if new_name else "cleared"
+    return {"message": f"LINE name {action} for user #{user_id}"}
+
+
+@router.delete("/users/{user_id}")
+async def delete_user(
+    user_id: int,
+    user: dict = Depends(get_current_commissioner),
+):
+    """Delete a user account. Commissioner only. Cannot delete yourself."""
+    if user_id == user["id"]:
+        raise HTTPException(status_code=400, detail="Cannot delete your own account")
+
+    target = get_user_by_id(user_id)
+    if not target:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    from api.database import get_db
+    conn = get_db()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("DELETE FROM users WHERE id = %s", (user_id,))
+        conn.commit()
+    finally:
+        conn.close()
+
+    nickname = target.get("yahoo_nickname") or f"#{user_id}"
+    return {"message": f"User {nickname} deleted"}
+
+
 @router.post("/set-commissioner/{user_id}")
 async def set_commissioner(
     user_id: int,
@@ -283,6 +338,36 @@ async def unlock_submission(
     team = get_team_by_id(team_id)
     manager = team["manager_name"] if team else f"team {team_id}"
     return {"message": f"Submission unlocked for {manager}", "year": year, "team_id": team_id}
+
+
+@router.delete("/keeper-selections/{year}/{team_id}")
+async def clear_keeper_selections(
+    year: int,
+    team_id: int,
+    user: dict = Depends(get_current_commissioner),
+):
+    """Clear all keeper selections for a team in a year. Commissioner only.
+    Also removes any submission record so the team starts fresh."""
+    from api.database import delete_keeper_selections, get_submission
+
+    team = get_team_by_id(team_id)
+    if not team:
+        raise HTTPException(status_code=404, detail="Team not found")
+
+    # Remove submission if exists
+    sub = get_submission(year, team_id)
+    if sub:
+        delete_submission(year, team_id)
+
+    # Remove all selections
+    delete_keeper_selections(year, team_id)
+
+    manager = team["manager_name"]
+    return {
+        "message": f"All keeper selections cleared for {manager} ({year})",
+        "year": year,
+        "team_id": team_id,
+    }
 
 
 @router.get("/team-adjustments/{team_id}")

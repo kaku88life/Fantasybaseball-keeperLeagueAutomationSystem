@@ -8,6 +8,7 @@ import {
   approveSubmission,
   getSubmissionDetail,
   unlockSubmission,
+  clearKeeperSelections,
   getAllTeamAdjustments,
   updateTeamAdjustments,
   sendReminders,
@@ -272,6 +273,20 @@ export default function CommissionerDashboard() {
     if (!confirm(`確定要解鎖 ${managerName} 的繳交？解鎖後該隊可重新編輯留用名單。`)) return;
     try {
       await unlockSubmission(selectedYear, teamId);
+      await refreshSubmissions();
+      setExpandedTeam(null);
+      setDetail(null);
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "操作失敗");
+    }
+  };
+
+  const handleClearSelections = async (teamId: number, managerName: string) => {
+    if (!confirm(
+      `確定要清除 ${managerName} 的所有留用選擇？\n此操作會同時移除繳交記錄，該隊需要重新填寫。\nThis will remove all keeper selections and submission records.`
+    )) return;
+    try {
+      await clearKeeperSelections(selectedYear, teamId);
       await refreshSubmissions();
       setExpandedTeam(null);
       setDetail(null);
@@ -774,6 +789,14 @@ export default function CommissionerDashboard() {
                           查看名單
                         </Link>
                       )}
+
+                      <button
+                        onClick={() => handleClearSelections(s.team_id, s.manager_name)}
+                        className="rounded border border-red-200 px-3 py-1 text-xs text-red-500 hover:bg-red-50"
+                        title="清除該隊所有留用選擇及繳交記錄"
+                      >
+                        清除選擇
+                      </button>
                     </div>
                   </div>
                 </div>

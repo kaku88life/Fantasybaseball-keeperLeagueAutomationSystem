@@ -239,6 +239,31 @@ export async function verifyCommissionerPassword(
   });
 }
 
+export async function updateUserLineName(
+  userId: number,
+  lineName: string,
+): Promise<{ message: string }> {
+  return request(`/api/commissioner/users/${userId}/line-name`, {
+    method: "PUT",
+    body: JSON.stringify({ line_name: lineName }),
+  });
+}
+
+export async function deleteUser(userId: number): Promise<{ message: string }> {
+  return request(`/api/commissioner/users/${userId}`, {
+    method: "DELETE",
+  });
+}
+
+export async function clearKeeperSelections(
+  year: number,
+  teamId: number,
+): Promise<{ message: string }> {
+  return request(`/api/commissioner/keeper-selections/${year}/${teamId}`, {
+    method: "DELETE",
+  });
+}
+
 export async function getAllTeamAdjustments(): Promise<import("@/types").TeamAdjustments[]> {
   return request("/api/commissioner/all-team-adjustments");
 }
