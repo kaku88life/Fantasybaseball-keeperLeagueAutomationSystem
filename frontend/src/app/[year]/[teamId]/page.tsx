@@ -817,14 +817,13 @@ function PlayerTable({
                           const salary = player.contract.salary;
                           const remaining = player.contract.remaining_years;
                           const faabBuyout = computeBuyoutCost(salary, remaining);
-                          const normalTotal = salary * remaining;
                           const mandatoryTag = mandatoryKeepers.has(player.name) ? " (需買斷)" : "";
                           return [
                             <option key={`${i}-faab`} value="release:0">
-                              {`買斷 FAAB Buyout: $${faabBuyout.salaryCost} Cap + $${faabBuyout.faabCost} FAAB (${remaining}年)${mandatoryTag}`}
+                              {`買斷 FAAB Buyout: $${faabBuyout.salaryPerYear} Cap + $${faabBuyout.faabPerYear} FAAB/年 x ${remaining}年${mandatoryTag}`}
                             </option>,
                             <option key={`${i}-normal`} value="release_normal:0">
-                              {`買斷 Buyout (全薪資帽): $${normalTotal} Cap (${remaining}年)${mandatoryTag}`}
+                              {`買斷 Buyout (全薪資帽): $${salary} Cap/年 x ${remaining}年${mandatoryTag}`}
                             </option>,
                           ];
                         }
@@ -853,15 +852,15 @@ function PlayerTable({
                     <span className="text-gray-500">
                       {sel
                         ? (() => {
-                            // N contract buyout: show cost breakdown
+                            // N contract buyout: show per-year cost breakdown
                             if (ct === "N" && (sel.action === "release" || sel.action === "release_normal")) {
                               const salary = player.contract.salary;
                               const remaining = player.contract.remaining_years;
                               if (sel.action === "release_normal") {
-                                return `買斷 Buyout 全薪資帽 ($${salary * remaining} Cap, ${remaining}年)`;
+                                return `買斷 Buyout 全薪資帽 ($${salary} Cap/年 x ${remaining}年)`;
                               }
                               const buyout = computeBuyoutCost(salary, remaining);
-                              return `買斷 FAAB Buyout ($${buyout.salaryCost} Cap + $${buyout.faabCost} FAAB, ${remaining}年)`;
+                              return `買斷 FAAB Buyout ($${buyout.salaryPerYear} Cap + $${buyout.faabPerYear} FAAB/年 x ${remaining}年)`;
                             }
                             return getActionLabel(ct, sel.action, sel.extension_years, player.contract.salary);
                           })()

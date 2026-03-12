@@ -24,20 +24,31 @@ export interface ClientValidationResult {
 }
 
 /**
- * Calculate buyout cost for releasing an N-contract player (FAAB buyout path).
+ * Calculate FAAB buyout cost for releasing an N-contract player.
  * Mirrors backend calculate_buyout(player, use_faab=True).
  *
- * FAAB buyout: salary/2 from salary cap + ceil(salary/2) from FAAB per remaining year.
+ * FAAB buyout: floor(salary/2) from salary cap + ceil(salary/2) from FAAB per year.
  * remaining_years for N contracts = extension_years + 1 (N years + O year).
+ *
+ * Returns both per-year costs and total costs across all years.
+ * Validation should use per-year (only current year deducted from budget).
  */
 export function computeBuyoutCost(
   salary: number,
   remainingYears: number,
-): { salaryCost: number; faabCost: number } {
-  if (remainingYears <= 0) return { salaryCost: 0, faabCost: 0 };
+): {
+  salaryPerYear: number;
+  faabPerYear: number;
+  salaryCost: number;
+  faabCost: number;
+} {
+  if (remainingYears <= 0)
+    return { salaryPerYear: 0, faabPerYear: 0, salaryCost: 0, faabCost: 0 };
   const salaryPerYear = Math.floor(salary / 2);
   const faabPerYear = Math.ceil(salary / 2);
   return {
+    salaryPerYear,
+    faabPerYear,
     salaryCost: salaryPerYear * remainingYears,
     faabCost: faabPerYear * remainingYears,
   };
@@ -118,19 +129,19 @@ export function validateSelections(
     }
 
     // Calculate buyout cost for N-contract players being released
+    // Only deduct CURRENT YEAR's portion (buyout is paid annually, not all at once)
     if ((sel.action === "release" || sel.action === "release_normal") && ct === "N") {
       if (sel.action === "release_normal") {
-        // Normal buyout: full salary from salary cap only
-        const remaining = player.contract.remaining_years;
-        newBuyoutSalaryCost += player.contract.salary * remaining;
+        // Normal buyout: full salary from salary cap per year
+        newBuyoutSalaryCost += player.contract.salary;
       } else {
-        // FAAB buyout: split salary between cap and FAAB
+        // FAAB buyout: split salary between cap and FAAB per year
         const buyout = computeBuyoutCost(
           player.contract.salary,
           player.contract.remaining_years,
         );
-        newBuyoutSalaryCost += buyout.salaryCost;
-        newBuyoutFaabCost += buyout.faabCost;
+        newBuyoutSalaryCost += buyout.salaryPerYear;
+        newBuyoutFaabCost += buyout.faabPerYear;
       }
     }
 
