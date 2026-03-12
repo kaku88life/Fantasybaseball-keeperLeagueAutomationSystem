@@ -117,32 +117,194 @@ def _fetchall(conn, query: str, params: tuple = ()) -> list[dict]:
         return [dict(row) for row in cur.fetchall()]
 
 
-MIGRATION_STATEMENTS = [
-    # Add line_name column to existing users table (idempotent)
-    """
-    DO $$
-    BEGIN
-        IF NOT EXISTS (
-            SELECT 1 FROM information_schema.columns
-            WHERE table_name = 'users' AND column_name = 'line_name'
-        ) THEN
-            ALTER TABLE users ADD COLUMN line_name TEXT DEFAULT '';
-        END IF;
-    END $$;
-    """,
-]
+# ========== Versioned Migration System ==========
+# Each migration has a unique version key and a list of SQL statements.
+# Migrations are tracked in `schema_migrations` table so each runs only once.
+# All statements within a migration must be idempotent as a safety measure.
+
+MIGRATIONS: dict[str, list[str]] = {
+    "001_add_line_name": [
+        """
+        DO $$
+        BEGIN
+            IF NOT EXISTS (
+                SELECT 1 FROM information_schema.columns
+                WHERE table_name = 'users' AND column_name = 'line_name'
+            ) THEN
+                ALTER TABLE users ADD COLUMN line_name TEXT DEFAULT '';
+            END IF;
+        END $$;
+        """,
+    ],
+    "002_add_indexes": [
+        "CREATE INDEX IF NOT EXISTS idx_users_team_id ON users(team_id)",
+        "CREATE INDEX IF NOT EXISTS idx_keeper_selections_year_team ON keeper_selections(year, team_id)",
+        "CREATE INDEX IF NOT EXISTS idx_keeper_submissions_year_team ON keeper_submissions(year, team_id)",
+        "CREATE INDEX IF NOT EXISTS idx_notification_log_team_year ON notification_log(team_id, year, notification_type)",
+        "CREATE INDEX IF NOT EXISTS idx_notification_log_sent_at ON notification_log(sent_at DESC)",
+    ],
+    "003_add_foreign_keys": [
+        # users.team_id -> teams.id (nullable, SET NULL on delete)
+        """
+        DO $$
+        BEGIN
+            IF NOT EXISTS (
+                SELECT 1 FROM information_schema.table_constraints
+                WHERE constraint_name = 'fk_users_team_id'
+            ) THEN
+                -- Clean orphan references before adding FK
+                UPDATE users SET team_id = NULL
+                WHERE team_id IS NOT NULL
+                  AND team_id NOT IN (SELECT id FROM teams);
+                ALTER TABLE users
+                    ADD CONSTRAINT fk_users_team_id
+                    FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE SET NULL;
+            END IF;
+        END $$;
+        """,
+        # keeper_selections.team_id -> teams.id (required, CASCADE on delete)
+        """
+        DO $$
+        BEGIN
+            IF NOT EXISTS (
+                SELECT 1 FROM information_schema.table_constraints
+                WHERE constraint_name = 'fk_keeper_selections_team_id'
+            ) THEN
+                DELETE FROM keeper_selections
+                WHERE team_id NOT IN (SELECT id FROM teams);
+                ALTER TABLE keeper_selections
+                    ADD CONSTRAINT fk_keeper_selections_team_id
+                    FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE CASCADE;
+            END IF;
+        END $$;
+        """,
+        # keeper_submissions.team_id -> teams.id (required, CASCADE on delete)
+        """
+        DO $$
+        BEGIN
+            IF NOT EXISTS (
+                SELECT 1 FROM information_schema.table_constraints
+                WHERE constraint_name = 'fk_keeper_submissions_team_id'
+            ) THEN
+                DELETE FROM keeper_submissions
+                WHERE team_id NOT IN (SELECT id FROM teams);
+                ALTER TABLE keeper_submissions
+                    ADD CONSTRAINT fk_keeper_submissions_team_id
+                    FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE CASCADE;
+            END IF;
+        END $$;
+        """,
+        # keeper_submissions.submitted_by -> users.id (nullable, SET NULL on delete)
+        """
+        DO $$
+        BEGIN
+            IF NOT EXISTS (
+                SELECT 1 FROM information_schema.table_constraints
+                WHERE constraint_name = 'fk_keeper_submissions_submitted_by'
+            ) THEN
+                UPDATE keeper_submissions SET submitted_by = NULL
+                WHERE submitted_by IS NOT NULL
+                  AND submitted_by NOT IN (SELECT id FROM users);
+                ALTER TABLE keeper_submissions
+                    ADD CONSTRAINT fk_keeper_submissions_submitted_by
+                    FOREIGN KEY (submitted_by) REFERENCES users(id) ON DELETE SET NULL;
+            END IF;
+        END $$;
+        """,
+        # notification_log.team_id -> teams.id (required, CASCADE on delete)
+        """
+        DO $$
+        BEGIN
+            IF NOT EXISTS (
+                SELECT 1 FROM information_schema.table_constraints
+                WHERE constraint_name = 'fk_notification_log_team_id'
+            ) THEN
+                DELETE FROM notification_log
+                WHERE team_id NOT IN (SELECT id FROM teams);
+                ALTER TABLE notification_log
+                    ADD CONSTRAINT fk_notification_log_team_id
+                    FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE CASCADE;
+            END IF;
+        END $$;
+        """,
+        # league_snapshots.imported_by -> users.id (nullable, SET NULL on delete)
+        """
+        DO $$
+        BEGIN
+            IF NOT EXISTS (
+                SELECT 1 FROM information_schema.table_constraints
+                WHERE constraint_name = 'fk_league_snapshots_imported_by'
+            ) THEN
+                UPDATE league_snapshots SET imported_by = NULL
+                WHERE imported_by IS NOT NULL
+                  AND imported_by NOT IN (SELECT id FROM users);
+                ALTER TABLE league_snapshots
+                    ADD CONSTRAINT fk_league_snapshots_imported_by
+                    FOREIGN KEY (imported_by) REFERENCES users(id) ON DELETE SET NULL;
+            END IF;
+        END $$;
+        """,
+    ],
+}
+
+
+def _ensure_migration_table(conn):
+    """Create the migration tracking table if it doesn't exist."""
+    with conn.cursor() as cur:
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS schema_migrations (
+                version TEXT PRIMARY KEY,
+                applied_at TIMESTAMPTZ DEFAULT NOW()
+            )
+        """)
+    conn.commit()
+
+
+def _get_applied_migrations(conn) -> set[str]:
+    """Return set of already-applied migration versions."""
+    with conn.cursor() as cur:
+        cur.execute("SELECT version FROM schema_migrations ORDER BY version")
+        return {row[0] for row in cur.fetchall()}
+
+
+def _run_migrations(conn):
+    """Run all pending migrations in order, tracking each in schema_migrations."""
+    _ensure_migration_table(conn)
+    applied = _get_applied_migrations(conn)
+
+    for version in sorted(MIGRATIONS.keys()):
+        if version in applied:
+            continue
+        statements = MIGRATIONS[version]
+        print(f"[Migration] Applying {version} ...", flush=True)
+        try:
+            with conn.cursor() as cur:
+                for stmt in statements:
+                    cur.execute(stmt)
+                cur.execute(
+                    "INSERT INTO schema_migrations (version) VALUES (%s)",
+                    (version,),
+                )
+            conn.commit()
+            print(f"[Migration] {version} applied.", flush=True)
+        except Exception as e:
+            conn.rollback()
+            print(f"[Migration] {version} FAILED: {e}", flush=True)
+            raise
 
 
 async def init_db():
-    """Initialize the database schema and run migrations."""
+    """Initialize the database schema and run versioned migrations."""
     conn = get_db()
     try:
+        # 1) Create tables
         with conn.cursor() as cur:
             for stmt in SCHEMA_STATEMENTS:
                 cur.execute(stmt)
-            for stmt in MIGRATION_STATEMENTS:
-                cur.execute(stmt)
         conn.commit()
+
+        # 2) Run versioned migrations
+        _run_migrations(conn)
     finally:
         conn.close()
 
@@ -568,5 +730,27 @@ def get_reminder_history(year: int) -> list[dict]:
                LIMIT 100""",
             (year,),
         )
+    finally:
+        conn.close()
+
+
+def cleanup_old_notifications(retention_days: int = 365):
+    """Delete notification_log records older than retention_days.
+    Called on startup to prevent unbounded table growth."""
+    conn = get_db()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                """DELETE FROM notification_log
+                   WHERE sent_at < NOW() - make_interval(days => %s)""",
+                (retention_days,),
+            )
+            deleted = cur.rowcount
+        conn.commit()
+        if deleted > 0:
+            print(f"[Cleanup] Deleted {deleted} notification records older than {retention_days} days.")
+    except Exception as e:
+        conn.rollback()
+        print(f"[Cleanup] notification_log cleanup failed (non-fatal): {e}")
     finally:
         conn.close()

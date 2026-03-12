@@ -343,7 +343,10 @@
           "contract_2026_salary": 12,
           "contract_2026_ext": 0,
           "can_keep": true,
-          "contract_2026": "O/$12"
+          "contract_2026": "O/$12",
+          "contract_type": "N",
+          "salary": 12,
+          "extension_years": 1
         },
         {
           "name": "Tony Santillan",
@@ -1182,7 +1185,10 @@
           "contract_2026_salary": 16,
           "contract_2026_ext": 0,
           "can_keep": true,
-          "contract_2026": "O/$16"
+          "contract_2026": "O/$16",
+          "contract_type": "N",
+          "salary": 16,
+          "extension_years": 1
         },
         {
           "name": "Blaze Alexander",
@@ -1842,7 +1848,10 @@
           "contract_2026_salary": 33,
           "contract_2026_ext": 3,
           "can_keep": true,
-          "contract_2026": "N3/$33"
+          "contract_2026": "N3/$33",
+          "contract_type": "N",
+          "salary": 33,
+          "extension_years": 4
         },
         {
           "name": "Abner Uribe",
@@ -3930,7 +3939,8 @@
           "can_keep": true,
           "contract_2026": "B/$1",
           "contract_type": "A",
-          "salary": 1
+          "salary": 1,
+          "extension_years": 0
         },
         {
           "name": "Manny Machado",
@@ -5209,7 +5219,10 @@
           "contract_2026_salary": 11,
           "contract_2026_ext": 0,
           "can_keep": true,
-          "contract_2026": "O/$11"
+          "contract_2026": "O/$11",
+          "contract_type": "N",
+          "salary": 11,
+          "extension_years": 1
         },
         {
           "name": "Jeffrey Springs",
@@ -6381,7 +6394,10 @@
           "contract_2026_salary": 51,
           "contract_2026_ext": 6,
           "can_keep": true,
-          "contract_2026": "N6/$51"
+          "contract_2026": "N6/$51",
+          "contract_type": "N",
+          "salary": 51,
+          "extension_years": 7
         },
         {
           "name": "Romy Gonzalez",
@@ -6743,7 +6759,10 @@
           "contract_2026_salary": null,
           "contract_2026_ext": null,
           "can_keep": false,
-          "contract_2026": "EXPIRED"
+          "contract_2026": "EXPIRED",
+          "contract_type": "O",
+          "salary": 39,
+          "extension_years": 0
         },
         {
           "name": "Martín Pérez",
@@ -7351,7 +7370,10 @@
           "contract_2026_salary": null,
           "contract_2026_ext": null,
           "can_keep": false,
-          "contract_2026": "EXPIRED"
+          "contract_2026": "EXPIRED",
+          "contract_type": "O",
+          "salary": 58,
+          "extension_years": 0
         },
         {
           "name": "Josh Jung",
@@ -7381,7 +7403,10 @@
           "contract_2026_salary": 3,
           "contract_2026_ext": 0,
           "can_keep": true,
-          "contract_2026": "O/$3"
+          "contract_2026": "O/$3",
+          "contract_type": "B",
+          "salary": 3,
+          "extension_years": 0
         },
         {
           "name": "Jorge Polanco",
@@ -7470,7 +7495,10 @@
           "contract_2026_salary": 11,
           "contract_2026_ext": 1,
           "can_keep": true,
-          "contract_2026": "N1/$11"
+          "contract_2026": "N1/$11",
+          "contract_type": "N",
+          "salary": 11,
+          "extension_years": 2
         },
         {
           "name": "Isaac Collins",
@@ -7743,7 +7771,10 @@
           "contract_2026_salary": 3,
           "contract_2026_ext": 0,
           "can_keep": true,
-          "contract_2026": "O/$3"
+          "contract_2026": "O/$3",
+          "contract_type": "B",
+          "salary": 3,
+          "extension_years": 0
         },
         {
           "name": "Reese Olson",

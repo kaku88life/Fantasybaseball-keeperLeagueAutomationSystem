@@ -5,6 +5,7 @@ Mirrors the dataclasses in src/contract/models.py for JSON serialization.
 """
 from __future__ import annotations
 
+from datetime import datetime
 from typing import Optional
 
 from pydantic import BaseModel
@@ -152,7 +153,7 @@ class SubmissionStatusSchema(BaseModel):
     manager_name: str
     team_name: str
     is_submitted: bool
-    submitted_at: Optional[str] = None
+    submitted_at: Optional[datetime] = None
     is_valid: bool = False
     commissioner_approved: bool = False
     commissioner_notes: Optional[str] = ""

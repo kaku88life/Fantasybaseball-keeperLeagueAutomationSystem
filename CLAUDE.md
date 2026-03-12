@@ -444,3 +444,106 @@ Excel (歷史名冊)
 - 使用 1.5 秒 debounce
 - 目標端點: `PUT /api/teams/{id}/keeper-selections/{year}`
 - 提交 (submit) 後鎖定，需 Commissioner 解鎖才能修改
+
+---
+
+## 19. 資料庫遷移系統
+
+### 概述
+專案使用自製的輕量版本化遷移系統（非 Alembic），透過 `schema_migrations` 表追蹤已套用的遷移。
+
+### 遷移追蹤表
+```sql
+schema_migrations (
+    version TEXT PRIMARY KEY,     -- 遷移版本號，如 "001_add_line_name"
+    applied_at TIMESTAMPTZ        -- 套用時間
+)
+```
+
+### 現有遷移版本
+| 版本 | 說明 |
+|------|------|
+| `001_add_line_name` | users 表新增 line_name 欄位 |
+| `002_add_indexes` | 5 個效能索引（selections/submissions/notifications） |
+| `003_add_foreign_keys` | 6 個外鍵約束（資料一致性保護） |
+
+### 如何新增遷移
+在 `api/database.py` 的 `MIGRATIONS` dict 中新增項目：
+
+```python
+MIGRATIONS: dict[str, list[str]] = {
+    # ... 既有遷移 ...
+    "004_your_migration_name": [
+        "SQL statement 1;",
+        "SQL statement 2;",
+    ],
+}
+```
+
+**規則：**
+- 版本號格式：`NNN_描述`，數字遞增（如 `004_xxx`、`005_xxx`）
+- 每個 SQL 必須**冪等**（可重複執行不出錯），使用 `IF NOT EXISTS` / `DO $$` 保護
+- 遷移在 `init_db()` 啟動時自動執行，只跑尚未套用的版本
+- 失敗時自動 rollback 並印錯誤，不影響其他遷移
+
+### 外鍵約束清單
+| 約束名稱 | 關係 | 刪除行為 |
+|----------|------|---------|
+| `fk_users_team_id` | users.team_id → teams.id | SET NULL |
+| `fk_keeper_selections_team_id` | keeper_selections.team_id → teams.id | CASCADE |
+| `fk_keeper_submissions_team_id` | keeper_submissions.team_id → teams.id | CASCADE |
+| `fk_keeper_submissions_submitted_by` | keeper_submissions.submitted_by → users.id | SET NULL |
+| `fk_notification_log_team_id` | notification_log.team_id → teams.id | CASCADE |
+| `fk_league_snapshots_imported_by` | league_snapshots.imported_by → users.id | SET NULL |
+
+### 效能索引清單
+| 索引名稱 | 欄位 |
+|----------|------|
+| `idx_users_team_id` | users(team_id) |
+| `idx_keeper_selections_year_team` | keeper_selections(year, team_id) |
+| `idx_keeper_submissions_year_team` | keeper_submissions(year, team_id) |
+| `idx_notification_log_team_year` | notification_log(team_id, year, notification_type) |
+| `idx_notification_log_sent_at` | notification_log(sent_at DESC) |
+
+---
+
+## 20. 部署與容器化
+
+### Dockerfile
+專案根目錄有 `Dockerfile`，基於 `python:3.11-slim`：
+- 安裝 `libpq-dev`（PostgreSQL 驅動編譯需要）
+- 複用 `start.sh` 啟動腳本
+- 預設 port 8002，可由 `PORT` 環境變數覆蓋
+
+### 啟動順序（start.sh + lifespan）
+```
+1. start.sh: 載入 2026 合約 JSON → DB
+2. lifespan: init_db() → 建表 + 跑遷移
+3. lifespan: seed_if_empty() → 首次部署自動種子化
+4. lifespan: cleanup_old_notifications(365) → 清理超過 1 年的通知紀錄
+5. lifespan: start_scheduler() → 啟動排程器
+6. uvicorn: 開始接受請求
+```
+
+### 環境變數（完整清單見 .env.example）
+| 變數 | 必要性 | 說明 |
+|------|--------|------|
+| `DATABASE_URL` | 生產必要 | PostgreSQL 連線字串 |
+| `JWT_SECRET_KEY` | 生產必要 | JWT 簽章密鑰（32+ 字元） |
+| `YAHOO_CLIENT_ID` | 必要 | Yahoo OAuth2 Client ID |
+| `YAHOO_CLIENT_SECRET` | 必要 | Yahoo OAuth2 Client Secret |
+| `YAHOO_LEAGUE_ID` | 必要 | Yahoo 聯盟 ID |
+| `OAUTH_REDIRECT_URI` | 必要 | OAuth 回調 URL |
+| `FRONTEND_URL` | 必要 | 前端 URL（登入後導向） |
+| `ALLOWED_ORIGINS` | 建議 | 額外 CORS 允許來源 |
+
+### JWT 安全機制
+- 支援 `JWT_SECRET` 或 `JWT_SECRET_KEY` 兩個變數名稱
+- 未設定時使用 dev default 並印出 WARNING
+- 仍使用舊 placeholder 值時印出 WARNING
+- 生產環境務必設定：`python -c "import secrets; print(secrets.token_hex(32))"`
+
+### notification_log 清理
+- 啟動時自動刪除超過 365 天的通知紀錄
+- 由 `cleanup_old_notifications()` 處理，失敗不影響啟動
+- 可調整保留天數：修改 `main.py` 中的 `retention_days` 參數

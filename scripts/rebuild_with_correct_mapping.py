@@ -247,6 +247,9 @@ def main():
                 # Keeper from another team, traded here
                 player_entry["source"] = "trade_keeper"
                 player_entry["contract_2025"] = contract_str
+                player_entry["contract_type"] = resolved.get("type", "")
+                player_entry["salary"] = resolved.get("salary", 0)
+                player_entry["extension_years"] = resolved.get("extension_years", 0)
                 player_entry["original_team"] = excel_mgr_of_contract
                 team_result["matched"].append(player_entry)
             elif source == "keeper":

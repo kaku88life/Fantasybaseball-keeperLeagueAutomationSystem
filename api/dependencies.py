@@ -14,7 +14,16 @@ from jose import JWTError, jwt
 from api.database import get_user_by_id
 
 # Support both JWT_SECRET and JWT_SECRET_KEY env var names
-JWT_SECRET = os.getenv("JWT_SECRET") or os.getenv("JWT_SECRET_KEY", "dev-secret-change-in-production")
+_jwt_secret = os.getenv("JWT_SECRET") or os.getenv("JWT_SECRET_KEY", "")
+if not _jwt_secret:
+    # Local development: allow a default secret
+    _jwt_secret = "dev-secret-local-only"
+    print("[WARNING] JWT_SECRET / JWT_SECRET_KEY not set. Using dev default. "
+          "Set the env var before deploying to production!")
+elif _jwt_secret == "dev-secret-change-in-production":
+    print("[WARNING] JWT secret is still the placeholder value. "
+          "Please set a strong JWT_SECRET_KEY for production!")
+JWT_SECRET = _jwt_secret
 JWT_ALGORITHM = "HS256"
 JWT_EXPIRE_DAYS = 30
 

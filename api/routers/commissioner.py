@@ -123,16 +123,12 @@ async def get_submission_status(
     result = []
     for t in all_teams:
         sub = sub_map.get(t["id"])
-        # Convert datetime to string for Pydantic serialization
-        submitted_at_str = None
-        if sub and sub.get("submitted_at"):
-            submitted_at_str = str(sub["submitted_at"])
         result.append(SubmissionStatusSchema(
             team_id=t["id"],
             manager_name=t["manager_name"],
             team_name=t.get("team_name", ""),
             is_submitted=sub is not None,
-            submitted_at=submitted_at_str,
+            submitted_at=sub.get("submitted_at") if sub else None,
             is_valid=bool(sub["is_valid"]) if sub else False,
             commissioner_approved=bool(sub["commissioner_approved"]) if sub else False,
             commissioner_notes=sub.get("commissioner_notes") or "" if sub else "",
@@ -445,10 +441,8 @@ async def get_reminder_status(
     """Get reminder notification history for a year."""
     from api.database import get_reminder_history
     history = get_reminder_history(year)
-    # Convert datetime objects to strings for JSON serialization
-    for h in history:
-        if h.get("sent_at"):
-            h["sent_at"] = str(h["sent_at"])
+    # psycopg2 RealDictCursor returns datetime objects;
+    # FastAPI's jsonable_encoder handles them automatically via .isoformat()
     return {"year": year, "history": history}
 
 

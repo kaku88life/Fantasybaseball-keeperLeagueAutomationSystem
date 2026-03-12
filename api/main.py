@@ -21,7 +21,7 @@ from fastapi.responses import JSONResponse
 
 load_dotenv(project_root / ".env")
 
-from api.database import init_db, seed_if_empty
+from api.database import cleanup_old_notifications, init_db, seed_if_empty
 from api.routers import auth, commissioner, league, players, teams, validation
 
 
@@ -31,6 +31,7 @@ async def lifespan(app: FastAPI):
     try:
         await init_db()
         seed_if_empty()
+        cleanup_old_notifications(retention_days=365)
     except Exception as e:
         print(f"[Startup] DB init/seed error (non-fatal): {e}", flush=True)
         traceback.print_exc()
