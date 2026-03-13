@@ -7680,7 +7680,7 @@
           "contract_2026_type": "O",
           "contract_2026_salary": 22,
           "contract_2026_ext": 0,
-          "can_keep": false,
+          "can_keep": true,
           "contract_2026": "O/$22"
         },
         {
