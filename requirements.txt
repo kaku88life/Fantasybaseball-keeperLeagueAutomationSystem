@@ -23,9 +23,8 @@ psycopg2-binary>=2.9.9
 # AI summaries (Phase 4)
 # anthropic>=0.40.0
 
-# LINE Bot notifications (Phase 3)
-# line-bot-sdk>=3.0
-# flask>=3.0
+# LINE Bot group notifications (Phase 10-1)
+line-bot-sdk>=3.0
 
 # Scheduling (Phase 3)
 apscheduler>=3.10

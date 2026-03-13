@@ -32,10 +32,17 @@ def _daily_reminder_job():
     try:
         from src.notification.reminder import send_reminders
         result = send_reminders(year, sent_by="scheduler", cooldown_hours=24)
-        print(f"[Scheduler] Result: sent={len(result['sent'])}, "
-              f"skipped={len(result['skipped'])}, "
-              f"failed={len(result['failed'])}, "
-              f"no_email={len(result['no_email'])}")
+        pending_count = len(result["pending_managers"])
+        if result["sent_to_group"]:
+            print(f"[Scheduler] LINE group reminder sent. "
+                  f"Pending teams: {pending_count} "
+                  f"({', '.join(result['pending_managers'])})")
+        elif result["skipped_reason"] == "all_submitted":
+            print("[Scheduler] All teams submitted, no reminder needed.")
+        elif result["skipped_reason"] == "cooldown":
+            print(f"[Scheduler] Skipped (cooldown). Pending: {pending_count}")
+        else:
+            print(f"[Scheduler] Failed: {result['error']}")
     except Exception as e:
         print(f"[Scheduler] Error: {e}")
 

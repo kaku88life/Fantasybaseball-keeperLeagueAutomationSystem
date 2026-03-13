@@ -14,6 +14,7 @@ import {
   sendReminders,
   getReminderStatus,
   getPendingTeams,
+  testLineConnection,
   verifyCommissionerPassword,
   getYahooTokenStatus,
   refreshYahooToken,
@@ -147,15 +148,21 @@ export default function CommissionerDashboard() {
   const [showReminders, setShowReminders] = useState(false);
   const [pendingTeams, setPendingTeams] = useState<{
     pending_count: number;
-    teams: Array<{ id: number; manager_name: string; email: string | null; has_email: boolean }>;
+    teams: Array<{ id: number; manager_name: string }>;
   } | null>(null);
   const [reminderHistory, setReminderHistory] = useState<Array<{
-    id: number; team_id: number; manager_name: string; sent_at: string;
-    sent_by: string; status: string; error_message: string;
+    id: number; team_id: number; manager_name: string; channel: string;
+    sent_at: string; sent_by: string; status: string; error_message: string;
   }>>([]);
   const [reminderSending, setReminderSending] = useState(false);
   const [reminderResult, setReminderResult] = useState<{
-    sent: string[]; skipped: string[]; failed: Array<{ manager: string; error: string }>; no_email: string[];
+    sent_to_group: boolean; pending_managers: string[];
+    skipped_reason: string | null; error: string | null;
+  } | null>(null);
+  // LINE test state
+  const [lineTestLoading, setLineTestLoading] = useState(false);
+  const [lineTestResult, setLineTestResult] = useState<{
+    success: boolean; message: string; group_id: string | null;
   } | null>(null);
 
   // Yahoo API token state
@@ -271,7 +278,7 @@ export default function CommissionerDashboard() {
   };
 
   const handleSendReminders = async () => {
-    if (!confirm("確定要發送催繳 Email 給所有未繳交的隊伍？\nSend reminder emails to all pending teams?")) return;
+    if (!confirm("確定要發送 LINE 群組催繳通知？\nSend LINE group reminder to all pending teams?")) return;
     setReminderSending(true);
     setReminderResult(null);
     try {
@@ -282,6 +289,23 @@ export default function CommissionerDashboard() {
       alert(e instanceof Error ? e.message : "發送失敗");
     } finally {
       setReminderSending(false);
+    }
+  };
+
+  const handleLineTest = async () => {
+    setLineTestLoading(true);
+    setLineTestResult(null);
+    try {
+      const result = await testLineConnection();
+      setLineTestResult(result);
+    } catch (e) {
+      setLineTestResult({
+        success: false,
+        message: e instanceof Error ? e.message : "Test failed",
+        group_id: null,
+      });
+    } finally {
+      setLineTestLoading(false);
     }
   };
 
@@ -680,18 +704,18 @@ export default function CommissionerDashboard() {
         )}
       </div>
 
-      {/* Keeper Reminders */}
+      {/* Keeper Reminders (LINE) */}
       <div className="mb-6">
         <button
           onClick={handleToggleReminders}
           className="mb-3 flex items-center gap-2 text-sm font-semibold text-gray-700 hover:text-gray-900"
         >
           <span>{showReminders ? "\u25BC" : "\u25B6"}</span>
-          催繳提醒 Keeper Reminders
+          催繳提醒 Keeper Reminders (LINE)
         </button>
         {showReminders && (
           <div className="rounded-lg border bg-white p-4">
-            {/* Pending summary */}
+            {/* Pending summary + action buttons */}
             <div className="mb-4 flex flex-wrap items-center gap-4">
               <div className="rounded bg-yellow-50 px-3 py-2">
                 <p className="text-xs text-gray-500">未繳交 Pending</p>
@@ -699,54 +723,59 @@ export default function CommissionerDashboard() {
                   {pendingTeams?.pending_count ?? "-"} 隊
                 </p>
               </div>
-              {pendingTeams && (
-                <>
-                  <div className="rounded bg-green-50 px-3 py-2">
-                    <p className="text-xs text-gray-500">有 Email</p>
-                    <p className="text-lg font-bold text-green-600">
-                      {pendingTeams.teams.filter((t) => t.has_email).length}
-                    </p>
-                  </div>
-                  <div className="rounded bg-gray-50 px-3 py-2">
-                    <p className="text-xs text-gray-500">無 Email</p>
-                    <p className="text-lg font-bold text-gray-500">
-                      {pendingTeams.teams.filter((t) => !t.has_email).length}
-                    </p>
-                  </div>
-                </>
-              )}
               <button
                 onClick={handleSendReminders}
                 disabled={reminderSending || !pendingTeams || pendingTeams.pending_count === 0}
-                className="ml-auto rounded bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-50"
+                className="rounded bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-500 disabled:opacity-50"
               >
-                {reminderSending ? "發送中..." : "發送催繳 Email Send Reminders"}
+                {reminderSending ? "發送中..." : "發送 LINE 催繳 Send LINE Reminder"}
+              </button>
+              <button
+                onClick={handleLineTest}
+                disabled={lineTestLoading}
+                className="rounded bg-gray-200 px-3 py-2 text-sm text-gray-700 hover:bg-gray-300 disabled:opacity-50"
+              >
+                {lineTestLoading ? "測試中..." : "測試 LINE 連線 Test LINE"}
               </button>
             </div>
+
+            {/* LINE test result */}
+            {lineTestResult && (
+              <div className={`mb-4 rounded border p-3 text-sm ${
+                lineTestResult.success ? "border-green-200 bg-green-50" : "border-red-200 bg-red-50"
+              }`}>
+                <p className={lineTestResult.success ? "text-green-700" : "text-red-700"}>
+                  {lineTestResult.success ? "LINE 連線正常" : "LINE 連線失敗"}:{" "}
+                  {lineTestResult.message}
+                </p>
+                {lineTestResult.group_id && (
+                  <p className="mt-1 text-xs text-gray-500">Group ID: {lineTestResult.group_id}</p>
+                )}
+              </div>
+            )}
 
             {/* Send result */}
             {reminderResult && (
               <div className="mb-4 rounded border bg-gray-50 p-3 text-sm">
                 <p className="mb-1 font-semibold">發送結果 Result:</p>
-                {reminderResult.sent.length > 0 && (
+                {reminderResult.sent_to_group && (
                   <p className="text-green-600">
-                    已發送 Sent ({reminderResult.sent.length}): {reminderResult.sent.join(", ")}
+                    已發送至 LINE 群組 Sent to LINE group ({reminderResult.pending_managers.length} 隊未繳交)
                   </p>
                 )}
-                {reminderResult.skipped.length > 0 && (
+                {reminderResult.skipped_reason === "cooldown" && (
                   <p className="text-yellow-600">
-                    跳過 Skipped ({reminderResult.skipped.length}): {reminderResult.skipped.join(", ")}
+                    跳過 Skipped (冷卻時間內，請稍後再試 Cooldown active)
                   </p>
                 )}
-                {reminderResult.no_email.length > 0 && (
-                  <p className="text-gray-500">
-                    無 Email ({reminderResult.no_email.length}): {reminderResult.no_email.join(", ")}
+                {reminderResult.skipped_reason === "all_submitted" && (
+                  <p className="text-green-600">
+                    所有隊伍已繳交 All teams submitted
                   </p>
                 )}
-                {reminderResult.failed.length > 0 && (
+                {reminderResult.error && (
                   <p className="text-red-600">
-                    失敗 Failed ({reminderResult.failed.length}):{" "}
-                    {reminderResult.failed.map((f) => `${f.manager} (${f.error})`).join(", ")}
+                    發送失敗 Failed: {reminderResult.error}
                   </p>
                 )}
               </div>
@@ -762,14 +791,9 @@ export default function CommissionerDashboard() {
                   {pendingTeams.teams.map((t) => (
                     <span
                       key={t.id}
-                      className={`rounded px-2 py-1 text-xs ${
-                        t.has_email
-                          ? "bg-yellow-100 text-yellow-700"
-                          : "bg-gray-100 text-gray-500"
-                      }`}
+                      className="rounded bg-yellow-100 px-2 py-1 text-xs text-yellow-700"
                     >
                       {t.manager_name}
-                      {!t.has_email && " (no email)"}
                     </span>
                   ))}
                 </div>
@@ -786,7 +810,7 @@ export default function CommissionerDashboard() {
                   <table className="w-full text-xs">
                     <thead className="border-b bg-gray-50">
                       <tr>
-                        <th className="px-2 py-1.5 text-left text-gray-500">隊伍 Team</th>
+                        <th className="px-2 py-1.5 text-left text-gray-500">管道 Channel</th>
                         <th className="px-2 py-1.5 text-left text-gray-500">時間 Time</th>
                         <th className="px-2 py-1.5 text-left text-gray-500">發送者 By</th>
                         <th className="px-2 py-1.5 text-left text-gray-500">狀態 Status</th>
@@ -795,7 +819,15 @@ export default function CommissionerDashboard() {
                     <tbody>
                       {reminderHistory.slice(0, 20).map((h) => (
                         <tr key={h.id} className="border-b last:border-0">
-                          <td className="px-2 py-1.5">{h.manager_name}</td>
+                          <td className="px-2 py-1.5">
+                            <span className={`rounded px-1 py-0.5 ${
+                              h.channel === "line"
+                                ? "bg-green-100 text-green-700"
+                                : "bg-blue-100 text-blue-700"
+                            }`}>
+                              {h.channel === "line" ? "LINE" : "Email"}
+                            </span>
+                          </td>
                           <td className="px-2 py-1.5 text-gray-500">
                             {new Date(h.sent_at).toLocaleString("zh-TW")}
                           </td>

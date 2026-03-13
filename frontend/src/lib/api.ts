@@ -344,10 +344,10 @@ export async function importExcel(file: File, year: number): Promise<{
 // ========== Keeper Reminders ==========
 
 export async function sendReminders(year: number): Promise<{
-  sent: string[];
-  skipped: string[];
-  failed: Array<{ manager: string; error: string }>;
-  no_email: string[];
+  sent_to_group: boolean;
+  pending_managers: string[];
+  skipped_reason: string | null;
+  error: string | null;
 }> {
   return request(`/api/commissioner/reminders/${year}/send`, {
     method: "POST",
@@ -378,11 +378,19 @@ export async function getPendingTeams(year: number): Promise<{
   teams: Array<{
     id: number;
     manager_name: string;
-    email: string | null;
-    has_email: boolean;
   }>;
 }> {
   return request(`/api/commissioner/reminders/${year}/pending`);
+}
+
+export async function testLineConnection(): Promise<{
+  success: boolean;
+  message: string;
+  group_id: string | null;
+}> {
+  return request(`/api/commissioner/line/test`, {
+    method: "POST",
+  });
 }
 
 // ========== Buyout Management (Commissioner) ==========

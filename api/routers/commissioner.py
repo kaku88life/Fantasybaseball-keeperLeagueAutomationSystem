@@ -441,7 +441,7 @@ async def send_keeper_reminders(
     year: int,
     user: dict = Depends(get_current_commissioner),
 ):
-    """Send keeper reminder emails to all teams that haven't submitted. Commissioner only."""
+    """Send LINE group reminder to all teams that haven't submitted. Commissioner only."""
     from src.notification.reminder import send_reminders
     result = send_reminders(year, sent_by="commissioner", cooldown_hours=1)
     return result
@@ -469,6 +469,15 @@ async def get_pending_teams_endpoint(
     from src.notification.reminder import get_pending_teams
     pending = get_pending_teams(year)
     return {"year": year, "pending_count": len(pending), "teams": pending}
+
+
+@router.post("/line/test")
+async def test_line_connection_endpoint(
+    user: dict = Depends(get_current_commissioner),
+):
+    """Test LINE Bot group connection by sending a test message. Commissioner only."""
+    from src.notification.line_service import test_line_connection
+    return test_line_connection()
 
 
 # ========== Buyout Management ==========
