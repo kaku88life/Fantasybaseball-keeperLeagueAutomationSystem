@@ -174,6 +174,32 @@ class TeamAdjustmentsRequest(BaseModel):
     faab_adjustment: int = 0
 
 
+class BuyoutCreateRequest(BaseModel):
+    team_id: int
+    year: int
+    player_name: str
+    original_contract: str
+    buyout_salary: int
+    buyout_faab: int = 0
+    buyout_years: int
+    remaining_years: int
+    buyout_type: str = "keeper_release"  # "keeper_release" or "mid_season_drop"
+    use_faab: bool = False
+    notes: str = ""
+
+
+class BuyoutUpdateRequest(BaseModel):
+    player_name: Optional[str] = None
+    original_contract: Optional[str] = None
+    buyout_salary: Optional[int] = None
+    buyout_faab: Optional[int] = None
+    buyout_years: Optional[int] = None
+    remaining_years: Optional[int] = None
+    buyout_type: Optional[str] = None
+    use_faab: Optional[bool] = None
+    notes: Optional[str] = None
+
+
 class ReminderResult(BaseModel):
     sent: list[str] = []
     skipped: list[str] = []

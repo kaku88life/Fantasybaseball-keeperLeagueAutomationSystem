@@ -143,6 +143,39 @@ MIGRATIONS: dict[str, list[str]] = {
         "CREATE INDEX IF NOT EXISTS idx_notification_log_team_year ON notification_log(team_id, year, notification_type)",
         "CREATE INDEX IF NOT EXISTS idx_notification_log_sent_at ON notification_log(sent_at DESC)",
     ],
+    "004_buyouts_table": [
+        """
+        CREATE TABLE IF NOT EXISTS buyouts (
+            id SERIAL PRIMARY KEY,
+            team_id INTEGER NOT NULL,
+            year INTEGER NOT NULL,
+            player_name TEXT NOT NULL,
+            original_contract TEXT NOT NULL,
+            buyout_salary INTEGER NOT NULL,
+            buyout_faab INTEGER DEFAULT 0,
+            buyout_years INTEGER NOT NULL,
+            remaining_years INTEGER NOT NULL,
+            buyout_type TEXT NOT NULL DEFAULT 'keeper_release',
+            use_faab BOOLEAN DEFAULT FALSE,
+            notes TEXT DEFAULT '',
+            created_at TIMESTAMPTZ DEFAULT NOW()
+        )
+        """,
+        "CREATE INDEX IF NOT EXISTS idx_buyouts_team_year ON buyouts(team_id, year)",
+        """
+        DO $$
+        BEGIN
+            IF NOT EXISTS (
+                SELECT 1 FROM information_schema.table_constraints
+                WHERE constraint_name = 'fk_buyouts_team_id'
+            ) THEN
+                ALTER TABLE buyouts
+                    ADD CONSTRAINT fk_buyouts_team_id
+                    FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE CASCADE;
+            END IF;
+        END $$;
+        """,
+    ],
     "003_add_foreign_keys": [
         # users.team_id -> teams.id (nullable, SET NULL on delete)
         """
@@ -730,6 +763,117 @@ def get_reminder_history(year: int) -> list[dict]:
                LIMIT 100""",
             (year,),
         )
+    finally:
+        conn.close()
+
+
+# ========== Buyouts ==========
+
+def get_team_buyouts(team_id: int, year: int) -> list[dict]:
+    """Get all active buyout records for a team in a specific year."""
+    conn = get_db()
+    try:
+        return _fetchall(
+            conn,
+            """SELECT * FROM buyouts
+               WHERE team_id = %s AND year <= %s AND remaining_years > 0
+               ORDER BY player_name""",
+            (team_id, year),
+        )
+    finally:
+        conn.close()
+
+
+def get_all_buyouts(year: int) -> list[dict]:
+    """Get all buyout records for a year (commissioner view)."""
+    conn = get_db()
+    try:
+        return _fetchall(
+            conn,
+            """SELECT b.*, t.manager_name
+               FROM buyouts b
+               JOIN teams t ON b.team_id = t.id
+               WHERE b.year <= %s AND b.remaining_years > 0
+               ORDER BY t.manager_name, b.player_name""",
+            (year,),
+        )
+    finally:
+        conn.close()
+
+
+def create_buyout(
+    team_id: int,
+    year: int,
+    player_name: str,
+    original_contract: str,
+    buyout_salary: int,
+    buyout_faab: int,
+    buyout_years: int,
+    remaining_years: int,
+    buyout_type: str = "keeper_release",
+    use_faab: bool = False,
+    notes: str = "",
+) -> dict:
+    """Create a new buyout record."""
+    conn = get_db()
+    try:
+        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+            cur.execute(
+                """INSERT INTO buyouts
+                   (team_id, year, player_name, original_contract,
+                    buyout_salary, buyout_faab, buyout_years, remaining_years,
+                    buyout_type, use_faab, notes)
+                   VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                   RETURNING *""",
+                (team_id, year, player_name, original_contract,
+                 buyout_salary, buyout_faab, buyout_years, remaining_years,
+                 buyout_type, use_faab, notes),
+            )
+            result = dict(cur.fetchone())
+        conn.commit()
+        return result
+    finally:
+        conn.close()
+
+
+def update_buyout(buyout_id: int, **kwargs) -> dict:
+    """Update a buyout record. Pass only the fields to update."""
+    allowed = {
+        "player_name", "original_contract", "buyout_salary", "buyout_faab",
+        "buyout_years", "remaining_years", "buyout_type", "use_faab", "notes",
+    }
+    updates = {k: v for k, v in kwargs.items() if k in allowed}
+    if not updates:
+        conn = get_db()
+        try:
+            return _fetchone(conn, "SELECT * FROM buyouts WHERE id = %s", (buyout_id,))
+        finally:
+            conn.close()
+
+    set_clauses = ", ".join(f"{k} = %s" for k in updates)
+    values = list(updates.values()) + [buyout_id]
+
+    conn = get_db()
+    try:
+        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+            cur.execute(
+                f"UPDATE buyouts SET {set_clauses} WHERE id = %s RETURNING *",
+                values,
+            )
+            result = cur.fetchone()
+        conn.commit()
+        return dict(result) if result else None
+    finally:
+        conn.close()
+
+
+def delete_buyout(buyout_id: int):
+    """Delete a buyout record."""
+    conn = get_db()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("DELETE FROM buyouts WHERE id = %s", (buyout_id,))
+        conn.commit()
     finally:
         conn.close()
 

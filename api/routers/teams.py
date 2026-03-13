@@ -33,7 +33,7 @@ router = APIRouter()
 
 def _get_team_from_snapshot(year: int, team_id: int):
     """Get a Team model object from a league snapshot by DB team_id."""
-    from api.database import get_team_by_id
+    from api.database import get_team_by_id, get_team_buyouts
 
     db_team = get_team_by_id(team_id)
     if not db_team:
@@ -56,6 +56,21 @@ def _get_team_from_snapshot(year: int, team_id: int):
                 t.trade_compensation = db_trade_comp
             if db_faab_adj != 0:
                 t.faab_budget = t.faab_budget + db_faab_adj
+
+            # Load buyout records from DB and merge into team model
+            from src.contract.models import BuyoutRecord
+            db_buyouts = get_team_buyouts(team_id, year)
+            for bo in db_buyouts:
+                t.buyout_records.append(BuyoutRecord(
+                    player_name=bo["player_name"],
+                    original_contract=bo["original_contract"],
+                    buyout_salary_cost=bo["buyout_salary"],
+                    buyout_faab_cost=bo["buyout_faab"],
+                    remaining_years=bo["remaining_years"],
+                    use_faab=bo["use_faab"],
+                    note=bo.get("notes", ""),
+                ))
+
             return t, db_team
 
     raise HTTPException(

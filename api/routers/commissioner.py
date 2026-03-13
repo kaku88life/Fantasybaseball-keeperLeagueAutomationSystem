@@ -11,12 +11,17 @@ from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 
 from api.database import (
     approve_submission,
+    create_buyout,
+    delete_buyout,
     delete_submission,
+    get_all_buyouts,
     get_all_submissions,
     get_all_teams,
     get_team_by_id,
+    get_team_buyouts,
     get_user_by_id,
     save_snapshot,
+    update_buyout,
     update_team_adjustments,
     upsert_team,
 )
@@ -24,6 +29,8 @@ from api.dependencies import get_current_commissioner
 from api.schemas import (
     ApproveRequest,
     AssignTeamRequest,
+    BuyoutCreateRequest,
+    BuyoutUpdateRequest,
     ImportExcelResponse,
     SubmissionStatusSchema,
     TeamAdjustmentsRequest,
@@ -461,3 +468,88 @@ async def get_pending_teams_endpoint(
     from src.notification.reminder import get_pending_teams
     pending = get_pending_teams(year)
     return {"year": year, "pending_count": len(pending), "teams": pending}
+
+
+# ========== Buyout Management ==========
+
+@router.get("/buyouts/{year}")
+async def list_all_buyouts(
+    year: int,
+    user: dict = Depends(get_current_commissioner),
+):
+    """Get all active buyout records for a year. Commissioner only."""
+    buyouts = get_all_buyouts(year)
+    return {"year": year, "buyouts": buyouts, "total_count": len(buyouts)}
+
+
+@router.get("/buyouts/{year}/{team_id}")
+async def list_team_buyouts(
+    year: int,
+    team_id: int,
+    user: dict = Depends(get_current_commissioner),
+):
+    """Get buyout records for a specific team. Commissioner only."""
+    team = get_team_by_id(team_id)
+    if not team:
+        raise HTTPException(status_code=404, detail="Team not found")
+
+    buyouts = get_team_buyouts(team_id, year)
+    return {
+        "year": year,
+        "team_id": team_id,
+        "manager_name": team["manager_name"],
+        "buyouts": buyouts,
+    }
+
+
+@router.post("/buyouts")
+async def create_buyout_record(
+    body: BuyoutCreateRequest,
+    user: dict = Depends(get_current_commissioner),
+):
+    """Create a new buyout record. Commissioner only."""
+    team = get_team_by_id(body.team_id)
+    if not team:
+        raise HTTPException(status_code=404, detail="Team not found")
+
+    result = create_buyout(
+        team_id=body.team_id,
+        year=body.year,
+        player_name=body.player_name,
+        original_contract=body.original_contract,
+        buyout_salary=body.buyout_salary,
+        buyout_faab=body.buyout_faab,
+        buyout_years=body.buyout_years,
+        remaining_years=body.remaining_years,
+        buyout_type=body.buyout_type,
+        use_faab=body.use_faab,
+        notes=body.notes,
+    )
+    return {
+        "message": f"Buyout created for {body.player_name} ({team['manager_name']})",
+        "buyout": result,
+    }
+
+
+@router.put("/buyouts/{buyout_id}")
+async def update_buyout_record(
+    buyout_id: int,
+    body: BuyoutUpdateRequest,
+    user: dict = Depends(get_current_commissioner),
+):
+    """Update a buyout record. Commissioner only."""
+    updates = body.model_dump(exclude_none=True)
+    result = update_buyout(buyout_id, **updates)
+    if not result:
+        raise HTTPException(status_code=404, detail="Buyout record not found")
+    return {"message": "Buyout updated", "buyout": result}
+
+
+@router.delete("/buyouts/{buyout_id}")
+async def delete_buyout_record(
+    buyout_id: int,
+    user: dict = Depends(get_current_commissioner),
+):
+    """Delete a buyout record. Commissioner only."""
+    delete_buyout(buyout_id)
+    return {"message": f"Buyout #{buyout_id} deleted"}

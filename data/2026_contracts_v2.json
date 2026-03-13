@@ -200,15 +200,15 @@
           "player_key": "458.p.1000001",
           "position": "Util",
           "mlb_team": "LAD",
-          "source": "draft",
-          "contract_2025": "A/$20",
-          "contract_type": "A",
+          "source": "keeper",
+          "contract_2025": "N1/$20",
+          "contract_type": "O",
           "salary": 20,
           "contract_2026_type": "B",
           "contract_2026_salary": 20,
           "contract_2026_ext": 0,
           "can_keep": true,
-          "contract_2026": "B/$20"
+          "contract_2026": "O/$20"
         },
         {
           "name": "Parker Meadows",
@@ -558,15 +558,15 @@
           "player_key": "458.p.11375",
           "position": "2B,SS",
           "mlb_team": "MIA",
-          "source": "draft",
-          "contract_2025": "A/$1",
-          "contract_type": "A",
+          "source": "keeper",
+          "contract_2025": "B/$1",
+          "contract_type": "B",
           "salary": 1,
           "contract_2026_type": "B",
           "contract_2026_salary": 1,
           "contract_2026_ext": 0,
           "can_keep": true,
-          "contract_2026": "B/$1"
+          "contract_2026": "O/$1"
         },
         {
           "name": "Matt Chapman",
@@ -7672,15 +7672,15 @@
           "player_key": "458.p.1000002",
           "position": "SP",
           "mlb_team": "LAD",
-          "source": "draft",
-          "contract_2025": "A/$22",
-          "contract_type": "A",
+          "source": "keeper",
+          "contract_2025": "B/$22",
+          "contract_type": "B",
           "salary": 22,
           "contract_2026_type": "B",
           "contract_2026_salary": 22,
           "contract_2026_ext": 0,
           "can_keep": true,
-          "contract_2026": "B/$22"
+          "contract_2026": "O/$22"
         },
         {
           "name": "Ryan Bergert",

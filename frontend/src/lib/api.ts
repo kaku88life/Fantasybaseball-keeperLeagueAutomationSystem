@@ -2,6 +2,8 @@
  * API client for communicating with the FastAPI backend.
  */
 
+import type { BuyoutRecord } from "@/types";
+
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8002";
 
 /** Default request timeout in milliseconds (30 seconds — allows for Zeabur cold start) */
@@ -381,6 +383,71 @@ export async function getPendingTeams(year: number): Promise<{
   }>;
 }> {
   return request(`/api/commissioner/reminders/${year}/pending`);
+}
+
+// ========== Buyout Management (Commissioner) ==========
+
+export async function getAllBuyouts(year: number): Promise<{
+  year: number;
+  buyouts: Array<BuyoutRecord & { manager_name: string }>;
+  total_count: number;
+}> {
+  return request(`/api/commissioner/buyouts/${year}`);
+}
+
+export async function getTeamBuyouts(
+  year: number,
+  teamId: number,
+): Promise<{
+  year: number;
+  team_id: number;
+  manager_name: string;
+  buyouts: BuyoutRecord[];
+}> {
+  return request(`/api/commissioner/buyouts/${year}/${teamId}`);
+}
+
+export async function createBuyout(data: {
+  team_id: number;
+  year: number;
+  player_name: string;
+  original_contract: string;
+  buyout_salary: number;
+  buyout_faab?: number;
+  buyout_years: number;
+  remaining_years: number;
+  buyout_type?: string;
+  use_faab?: boolean;
+  notes?: string;
+}): Promise<{ message: string; buyout: BuyoutRecord }> {
+  return request("/api/commissioner/buyouts", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export async function updateBuyout(
+  buyoutId: number,
+  data: Partial<{
+    player_name: string;
+    original_contract: string;
+    buyout_salary: number;
+    buyout_faab: number;
+    buyout_years: number;
+    remaining_years: number;
+    buyout_type: string;
+    use_faab: boolean;
+    notes: string;
+  }>,
+): Promise<{ message: string; buyout: BuyoutRecord }> {
+  return request(`/api/commissioner/buyouts/${buyoutId}`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+  });
+}
+
+export async function deleteBuyout(buyoutId: number): Promise<{ message: string }> {
+  return request(`/api/commissioner/buyouts/${buyoutId}`, { method: "DELETE" });
 }
 
 // ========== Player Stats (MLB Stats API) ==========

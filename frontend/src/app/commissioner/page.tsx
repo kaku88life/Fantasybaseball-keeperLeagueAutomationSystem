@@ -383,6 +383,12 @@ export default function CommissionerDashboard() {
             用戶管理
           </Link>
           <Link
+            href="/commissioner/buyouts"
+            className="rounded bg-amber-600 px-2.5 py-1.5 text-xs text-white hover:bg-amber-500 sm:px-3 sm:text-sm"
+          >
+            Buyout Management
+          </Link>
+          <Link
             href="/commissioner/import"
             className="rounded bg-indigo-600 px-2.5 py-1.5 text-xs text-white hover:bg-indigo-500 sm:px-3 sm:text-sm"
           >

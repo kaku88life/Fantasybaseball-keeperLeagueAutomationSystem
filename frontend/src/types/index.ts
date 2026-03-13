@@ -13,14 +13,24 @@ export interface Contract {
 }
 
 export interface BuyoutRecord {
+  id?: number;
+  team_id?: number;
+  year?: number;
   player_name: string;
   original_contract: string;
   buyout_salary_cost: number;
   buyout_faab_cost: number;
+  buyout_salary?: number;
+  buyout_faab?: number;
+  buyout_years?: number;
   remaining_years: number;
+  buyout_type?: string;
   use_faab: boolean;
   note: string;
+  notes?: string;
   display: string;
+  manager_name?: string;
+  created_at?: string;
 }
 
 export interface Player {
