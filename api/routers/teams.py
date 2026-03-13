@@ -270,11 +270,32 @@ async def submit_keeper_list(
     user: dict = Depends(get_current_user),
 ):
     """Submit the final keeper list. Requires all validations to pass."""
+    from src.contract.models import ContractType
+
     _check_team_access(user, team_id)
 
     selections_db = get_keeper_selections(year, team_id)
     if not selections_db:
         raise HTTPException(status_code=400, detail="No keeper selections to submit")
+
+    # Auto-fill unselected players: O -> fa, others -> release
+    team, db_team = _get_team_from_snapshot(year, team_id)
+    sel_names = {s["player_name"] for s in selections_db}
+    for p in team.players:
+        if p.name not in sel_names:
+            default_action = "fa" if p.contract.contract_type == ContractType.O else "release"
+            next_contract = _compute_next_contract(team, p.name, default_action, 0)
+            upsert_keeper_selection(
+                year=year,
+                team_id=team_id,
+                player_name=p.name,
+                current_contract=p.contract.display,
+                action=default_action,
+                extension_years=0,
+                next_contract=next_contract,
+            )
+    # Re-read after auto-fill
+    selections_db = get_keeper_selections(year, team_id)
 
     validation = _validate_selections(year, team_id, selections_db)
     if not validation.is_valid:

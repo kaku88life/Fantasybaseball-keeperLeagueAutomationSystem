@@ -163,17 +163,42 @@ export default function KeeperSelectionPage() {
 
   // Submit keeper list
   const handleSubmit = useCallback(async () => {
+    if (!team) return;
+
+    // Auto-fill unselected players: O -> fa, others -> release
+    const autoFilled = { ...selections };
+    const unselectedNames: string[] = [];
+    for (const player of team.players) {
+      if (!autoFilled[player.name]) {
+        const ct = player.contract.contract_type;
+        const defaultAction = ct === "O" ? "fa" : "release";
+        autoFilled[player.name] = { action: defaultAction, extension_years: 0 };
+        unselectedNames.push(`${player.name} (${player.contract.display} -> ${defaultAction === "fa" ? "FA" : "Release"})`);
+      }
+    }
+
+    // Show confirmation with auto-fill info
+    const autoFillMsg = unselectedNames.length > 0
+      ? `\n\n以下 ${unselectedNames.length} 位球員未選擇，將自動判定：\n${unselectedNames.join("\n")}`
+      : "";
+
     if (
       !confirm(
-        "確定要繳交留用名單嗎？繳交後將鎖定你的選擇，無法再修改。",
+        `確定要繳交留用名單嗎？繳交後將鎖定你的選擇，無法再修改。${autoFillMsg}`,
       )
     ) {
       return;
     }
+
+    // Update state with auto-filled selections
+    if (unselectedNames.length > 0) {
+      setSelections(autoFilled);
+    }
+
     setSubmitting(true);
     setError("");
     try {
-      const sels = Object.entries(selections).map(([name, s]) => ({
+      const sels = Object.entries(autoFilled).map(([name, s]) => ({
         player_name: name,
         action: s.action,
         extension_years: s.extension_years,
@@ -186,7 +211,7 @@ export default function KeeperSelectionPage() {
     } finally {
       setSubmitting(false);
     }
-  }, [selections, teamId, year]);
+  }, [selections, team, teamId, year]);
 
   // Compute next contract display for each player based on current selection
   const getNextContract = useCallback(
