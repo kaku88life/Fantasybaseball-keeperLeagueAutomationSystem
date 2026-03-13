@@ -271,7 +271,9 @@ def calculate_buyout(
     """
     ct = player.contract
     salary = ct.salary
-    remaining = ct.remaining_years
+    # Buyout is calculated AFTER contract evolution (e.g., N1 evolves to O first,
+    # then O is bought out = 1 year). So subtract 1 from remaining_years.
+    remaining = ct.remaining_years - 1
 
     if remaining <= 0:
         return BuyoutCalculation(

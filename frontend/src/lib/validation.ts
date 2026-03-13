@@ -30,7 +30,10 @@ export interface ClientValidationResult {
  * FAAB buyout: floor(salary/2) from salary cap + ceil(salary/2) from FAAB per year.
  * remaining_years for N contracts = extension_years + 1 (N years + O year).
  *
- * Returns both per-year costs and total costs across all years.
+ * Buyout is calculated AFTER contract evolution, so actual buyout years = remainingYears - 1.
+ * e.g., N1 (remaining=2) evolves to O first, then buyout O = 1 year.
+ *
+ * Returns both per-year costs and total costs across all buyout years.
  * Validation should use per-year (only current year deducted from budget).
  */
 export function computeBuyoutCost(
@@ -41,16 +44,20 @@ export function computeBuyoutCost(
   faabPerYear: number;
   salaryCost: number;
   faabCost: number;
+  buyoutYears: number;
 } {
-  if (remainingYears <= 0)
-    return { salaryPerYear: 0, faabPerYear: 0, salaryCost: 0, faabCost: 0 };
+  // Buyout is post-evolution: subtract 1 year
+  const buyoutYears = remainingYears - 1;
+  if (buyoutYears <= 0)
+    return { salaryPerYear: 0, faabPerYear: 0, salaryCost: 0, faabCost: 0, buyoutYears: 0 };
   const salaryPerYear = Math.floor(salary / 2);
   const faabPerYear = Math.ceil(salary / 2);
   return {
     salaryPerYear,
     faabPerYear,
-    salaryCost: salaryPerYear * remainingYears,
-    faabCost: faabPerYear * remainingYears,
+    salaryCost: salaryPerYear * buyoutYears,
+    faabCost: faabPerYear * buyoutYears,
+    buyoutYears,
   };
 }
 
