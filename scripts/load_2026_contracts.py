@@ -86,6 +86,7 @@ def build_player(player_data: dict) -> Player:
         yahoo_player_id=player_data.get("player_key"),
         is_active_keeper=True,
         source=player_data.get("source", ""),
+        mlb_team=player_data.get("mlb_team", ""),
     )
 
 

@@ -12,6 +12,8 @@ import httpx
 from fastapi import APIRouter, HTTPException, Query
 
 from config.settings import ROOKIE_IP_THRESHOLD, ROOKIE_PA_THRESHOLD
+from api.database import get_player_rankings, get_ranking_fetch_status, get_snapshot
+from api.serializers import dict_to_league_state
 
 router = APIRouter()
 
@@ -127,6 +129,134 @@ async def _get_mlb_stats(mlb_id: int) -> dict:
 
 
 # ========== Endpoint ==========
+
+
+@router.get("/database/{year}")
+async def get_player_database(year: int):
+    """Get the full player database for a year.
+
+    Combines league snapshot data (ownership, contracts) with
+    player rankings (O_Rank, X_Rank, stats, projections).
+    No authentication required - public endpoint.
+    """
+    # 1. Load league snapshot for ownership data
+    snapshot = get_snapshot(year)
+    if not snapshot:
+        raise HTTPException(status_code=404, detail=f"No league data for year {year}")
+
+    league_state = dict_to_league_state(snapshot["data"])
+
+    # 2. Build player -> owner mapping from league snapshot
+    # Flatten all players across all teams
+    owner_map: dict[str, dict] = {}  # player_key -> owner info
+    player_name_map: dict[str, dict] = {}  # player_name -> owner info (fallback)
+
+    all_league_players: list[dict] = []
+
+    for team in league_state.teams:
+        for p in team.players:
+            player_entry = {
+                "name": p.name,
+                "position": p.position,
+                "mlb_team": p.mlb_team,
+                "contract_type": p.contract.contract_type.value,
+                "salary": p.contract.salary,
+                "extension_years": p.contract.extension_years,
+                "contract_display": p.contract.display,
+                "is_keepable": p.contract.is_keepable,
+                "owner_manager": team.manager_name,
+                "yahoo_player_id": p.yahoo_player_id or "",
+                # Rankings (filled later if available)
+                "o_rank": None,
+                "x_rank": None,
+                "stats": {},
+                "projections": {},
+            }
+
+            all_league_players.append(player_entry)
+
+            # Index by player_key for matching with rankings
+            if p.yahoo_player_id:
+                owner_map[p.yahoo_player_id] = player_entry
+            player_name_map[p.name.lower()] = player_entry
+
+    # 3. Load rankings if available
+    rankings = get_player_rankings(year)
+    ranking_status = get_ranking_fetch_status(year)
+
+    # Build ranked player list (may include unowned players)
+    ranked_players: list[dict] = []
+    matched_keys = set()
+
+    for r in rankings:
+        player_key = r["player_key"]
+
+        # Try to match with league player by player_key
+        league_player = owner_map.get(player_key)
+        if not league_player:
+            # Fallback: match by name
+            league_player = player_name_map.get(r["player_name"].lower())
+
+        if league_player:
+            # Merge ranking data into league player
+            league_player["o_rank"] = r.get("o_rank")
+            league_player["x_rank"] = r.get("x_rank")
+
+            # Override position/mlb_team from ranking if league data is empty
+            if not league_player["position"] and r.get("position"):
+                league_player["position"] = r["position"]
+            if not league_player["mlb_team"] and r.get("mlb_team"):
+                league_player["mlb_team"] = r["mlb_team"]
+
+            # Stats
+            league_player["stats"] = _extract_stats(r, "stat")
+            league_player["projections"] = _extract_stats(r, "proj")
+
+            matched_keys.add(player_key)
+        else:
+            # Unowned player from rankings
+            ranked_players.append({
+                "name": r["player_name"],
+                "position": r.get("position", ""),
+                "mlb_team": r.get("mlb_team", ""),
+                "contract_type": "",
+                "salary": 0,
+                "extension_years": 0,
+                "contract_display": "",
+                "is_keepable": False,
+                "owner_manager": "",
+                "yahoo_player_id": player_key,
+                "o_rank": r.get("o_rank"),
+                "x_rank": r.get("x_rank"),
+                "stats": _extract_stats(r, "stat"),
+                "projections": _extract_stats(r, "proj"),
+            })
+
+    # 4. Combine: league players + unowned ranked players
+    combined = all_league_players + ranked_players
+
+    # Sort: ranked players first (by o_rank), then unranked
+    combined.sort(key=lambda p: (p["o_rank"] if p["o_rank"] is not None else 99999))
+
+    return {
+        "year": year,
+        "total_count": len(combined),
+        "has_rankings": ranking_status["has_data"],
+        "last_fetched_at": ranking_status.get("last_fetched_at"),
+        "players": combined,
+    }
+
+
+def _extract_stats(row: dict, prefix: str) -> dict:
+    """Extract stat/proj fields from a player_rankings row into a clean dict."""
+    result = {}
+    stat_keys = ["r", "h", "hr", "rbi", "sb", "avg", "ops",
+                 "w", "sv", "hld", "k", "era", "whip", "qs"]
+    for key in stat_keys:
+        val = row.get(f"{prefix}_{key}")
+        if val is not None:
+            result[key] = val
+    return result
 
 
 @router.get("/stats")

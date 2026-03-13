@@ -99,6 +99,7 @@ class Player:
     yahoo_player_id: Optional[str] = None
     is_active_keeper: bool = True   # False if bench keeper (R contract)
     source: str = ""                # "draft", "faab", "keeper", "trade_draft", "trade_faab", "trade_keeper"
+    mlb_team: str = ""              # MLB team abbreviation, e.g., "LAD", "NYY"
 
     @property
     def is_mandatory_keeper(self) -> bool:

@@ -14,6 +14,7 @@ import { useAuth } from "@/lib/auth";
 import ContractBadge from "@/components/ContractBadge";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import PlayerStatsModal from "@/components/PlayerStatsModal";
+import PositionFilter from "@/components/PositionFilter";
 import {
   computeBuyoutCost,
   getActionLabel,
@@ -473,7 +474,7 @@ export default function KeeperSelectionPage() {
               球員名單 Active ({activePlayers.length})
             </span>
             <PositionFilter
-              players={activePlayers}
+              items={activePlayers}
               value={positionFilter}
               onChange={setPositionFilter}
             />
@@ -950,81 +951,4 @@ function PlayerTable({
   );
 }
 
-// Position filter button group
-const POSITION_GROUPS = [
-  { label: "全部", value: "ALL" },
-  { label: "C", value: "C" },
-  { label: "1B", value: "1B" },
-  { label: "2B", value: "2B" },
-  { label: "3B", value: "3B" },
-  { label: "SS", value: "SS" },
-  { label: "IF", value: "IF" },
-  { label: "OF", value: "OF" },
-  { label: "SP", value: "SP" },
-  { label: "RP", value: "RP" },
-  { label: "P", value: "P" },
-] as const;
-
-function PositionFilter({
-  players,
-  value,
-  onChange,
-}: {
-  players: import("@/types").Player[];
-  value: string;
-  onChange: (v: string) => void;
-}) {
-  // Count players per position group
-  const counts = useMemo(() => {
-    const map: Record<string, number> = { ALL: players.length };
-    for (const p of players) {
-      const positions = p.position.split(",").map((s) => s.trim());
-      for (const pos of positions) {
-        if (!pos) continue;
-        map[pos] = (map[pos] || 0) + 1;
-        // Aggregate groups
-        if (["C", "1B", "2B", "3B", "SS"].includes(pos)) {
-          map["IF"] = (map["IF"] || 0) + 1;
-        }
-        if (["LF", "CF", "RF", "OF"].includes(pos)) {
-          map["OF"] = (map["OF"] || 0) + 1;
-        }
-        if (["SP", "RP", "P"].includes(pos)) {
-          map["P"] = (map["P"] || 0) + 1;
-        }
-      }
-    }
-    return map;
-  }, [players]);
-
-  return (
-    <div className="ml-auto flex flex-wrap gap-1">
-      {POSITION_GROUPS.map((pg) => {
-        const count = counts[pg.value] || 0;
-        if (pg.value !== "ALL" && count === 0) return null;
-        const isActive = value === pg.value;
-        return (
-          <button
-            key={pg.value}
-            type="button"
-            onClick={() => onChange(pg.value)}
-            className={`rounded px-2 py-0.5 text-xs font-medium transition-colors ${
-              isActive
-                ? "bg-indigo-600 text-white"
-                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-            }`}
-          >
-            {pg.label}
-            {pg.value !== "ALL" && (
-              <span
-                className={`ml-1 ${isActive ? "text-indigo-200" : "text-gray-400"}`}
-              >
-                {count}
-              </span>
-            )}
-          </button>
-        );
-      })}
-    </div>
-  );
-}
+// PositionFilter is now imported from @/components/PositionFilter

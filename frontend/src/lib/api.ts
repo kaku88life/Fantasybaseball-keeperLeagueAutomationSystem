@@ -458,6 +458,36 @@ export async function deleteBuyout(buyoutId: number): Promise<{ message: string 
   return request(`/api/commissioner/buyouts/${buyoutId}`, { method: "DELETE" });
 }
 
+// ========== Player Database (Public) ==========
+
+export async function getPlayerDatabase(
+  year: number,
+): Promise<import("@/types").PlayerDatabaseResponse> {
+  return request(`/api/players/database/${year}`);
+}
+
+// ========== Player Rankings (Commissioner) ==========
+
+export async function fetchYahooRankings(
+  year: number,
+): Promise<{
+  message: string;
+  year: number;
+  total_fetched: number;
+  errors: string[] | null;
+}> {
+  // Longer timeout for batch Yahoo API calls (~20 requests)
+  return request(`/api/commissioner/fetch-rankings/${year}`, {
+    method: "POST",
+  }, 120_000);
+}
+
+export async function getRankingFetchStatus(
+  year: number,
+): Promise<import("@/types").RankingFetchStatus> {
+  return request(`/api/commissioner/ranking-status/${year}`);
+}
+
 // ========== Player Stats (MLB Stats API) ==========
 
 export async function getPlayerStats(

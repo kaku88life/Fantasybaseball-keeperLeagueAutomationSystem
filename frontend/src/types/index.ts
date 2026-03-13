@@ -39,6 +39,57 @@ export interface Player {
   contract: Contract;
   yahoo_player_id: string | null;
   is_active_keeper: boolean;
+  mlb_team?: string;
+}
+
+// Player Database (public player list with rankings + stats)
+export interface PlayerStatValues {
+  r?: number;
+  h?: number;
+  hr?: number;
+  rbi?: number;
+  sb?: number;
+  avg?: number;
+  ops?: number;
+  w?: number;
+  sv?: number;
+  hld?: number;
+  k?: number;
+  era?: number;
+  whip?: number;
+  qs?: number;
+}
+
+export interface PlayerDatabaseEntry {
+  name: string;
+  position: string;
+  mlb_team: string;
+  contract_type: string;
+  salary: number;
+  extension_years: number;
+  contract_display: string;
+  is_keepable: boolean;
+  owner_manager: string;
+  yahoo_player_id: string;
+  o_rank: number | null;
+  x_rank: number | null;
+  stats: PlayerStatValues;
+  projections: PlayerStatValues;
+}
+
+export interface PlayerDatabaseResponse {
+  year: number;
+  total_count: number;
+  has_rankings: boolean;
+  last_fetched_at: string | null;
+  players: PlayerDatabaseEntry[];
+}
+
+export interface RankingFetchStatus {
+  year: number;
+  has_data: boolean;
+  total_count: number;
+  last_fetched_at: string | null;
 }
 
 export interface Team {

@@ -57,6 +57,7 @@ def serialize_player(p: Player) -> PlayerSchema:
         contract=serialize_contract(p.contract),
         yahoo_player_id=p.yahoo_player_id,
         is_active_keeper=p.is_active_keeper,
+        mlb_team=p.mlb_team,
     )
 
 
@@ -116,6 +117,7 @@ def league_state_to_dict(ls: LeagueState) -> dict:
                         "yahoo_player_id": p.yahoo_player_id,
                         "is_active_keeper": p.is_active_keeper,
                         "source": p.source,
+                        "mlb_team": p.mlb_team,
                     }
                     for p in t.players
                 ],
@@ -160,6 +162,7 @@ def dict_to_league_state(data: dict) -> LeagueState:
                 yahoo_player_id=pd.get("yahoo_player_id"),
                 is_active_keeper=pd.get("is_active_keeper", True),
                 source=pd.get("source", ""),
+                mlb_team=pd.get("mlb_team", ""),
             ))
         buyouts = []
         for bd in td.get("buyout_records", []):

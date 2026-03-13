@@ -40,6 +40,7 @@ class PlayerSchema(BaseModel):
     contract: ContractSchema
     yahoo_player_id: Optional[str] = None
     is_active_keeper: bool = True
+    mlb_team: str = ""
 
 
 class TeamSchema(BaseModel):

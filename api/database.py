@@ -308,6 +308,38 @@ MIGRATIONS: dict[str, list[str]] = {
         """,
         "CREATE INDEX IF NOT EXISTS idx_yahoo_tokens_user_id ON yahoo_tokens(user_id)",
     ],
+    "006_player_rankings": [
+        """
+        CREATE TABLE IF NOT EXISTS player_rankings (
+            id SERIAL PRIMARY KEY,
+            year INTEGER NOT NULL,
+            player_key TEXT NOT NULL,
+            player_name TEXT NOT NULL,
+            o_rank INTEGER,
+            x_rank INTEGER,
+            position TEXT DEFAULT '',
+            mlb_team TEXT DEFAULT '',
+            -- Hitting stats (previous season actual)
+            stat_r INTEGER, stat_h INTEGER, stat_hr INTEGER,
+            stat_rbi INTEGER, stat_sb INTEGER,
+            stat_avg REAL, stat_ops REAL,
+            -- Pitching stats (previous season actual)
+            stat_w INTEGER, stat_sv INTEGER, stat_hld INTEGER,
+            stat_k INTEGER, stat_era REAL, stat_whip REAL, stat_qs INTEGER,
+            -- Projections (current season)
+            proj_r INTEGER, proj_h INTEGER, proj_hr INTEGER,
+            proj_rbi INTEGER, proj_sb INTEGER,
+            proj_avg REAL, proj_ops REAL,
+            proj_w INTEGER, proj_sv INTEGER, proj_hld INTEGER,
+            proj_k INTEGER, proj_era REAL, proj_whip REAL, proj_qs INTEGER,
+            -- Metadata
+            fetched_at TIMESTAMPTZ DEFAULT NOW(),
+            UNIQUE(year, player_key)
+        )
+        """,
+        "CREATE INDEX IF NOT EXISTS idx_player_rankings_year ON player_rankings(year)",
+        "CREATE INDEX IF NOT EXISTS idx_player_rankings_year_orank ON player_rankings(year, o_rank)",
+    ],
 }
 
 
@@ -979,6 +1011,127 @@ def delete_yahoo_token(user_id: int):
         with conn.cursor() as cur:
             cur.execute("DELETE FROM yahoo_tokens WHERE user_id = %s", (user_id,))
         conn.commit()
+    finally:
+        conn.close()
+
+
+# ========== Player Rankings ==========
+
+def get_player_rankings(year: int) -> list[dict]:
+    """Get all player rankings for a year."""
+    conn = get_db()
+    try:
+        return _fetchall(
+            conn,
+            """SELECT * FROM player_rankings
+               WHERE year = %s
+               ORDER BY COALESCE(o_rank, 9999)""",
+            (year,),
+        )
+    finally:
+        conn.close()
+
+
+def bulk_upsert_player_rankings(year: int, players: list[dict]):
+    """Bulk insert/update player rankings for a year.
+
+    Each player dict should have keys matching column names:
+    player_key, player_name, o_rank, x_rank, position, mlb_team,
+    stat_* (actual stats), proj_* (projections).
+    """
+    if not players:
+        return
+
+    conn = get_db()
+    try:
+        with conn.cursor() as cur:
+            for p in players:
+                cur.execute(
+                    """INSERT INTO player_rankings
+                       (year, player_key, player_name, o_rank, x_rank,
+                        position, mlb_team,
+                        stat_r, stat_h, stat_hr, stat_rbi, stat_sb, stat_avg, stat_ops,
+                        stat_w, stat_sv, stat_hld, stat_k, stat_era, stat_whip, stat_qs,
+                        proj_r, proj_h, proj_hr, proj_rbi, proj_sb, proj_avg, proj_ops,
+                        proj_w, proj_sv, proj_hld, proj_k, proj_era, proj_whip, proj_qs,
+                        fetched_at)
+                       VALUES (
+                        %s, %s, %s, %s, %s,
+                        %s, %s,
+                        %s, %s, %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s, %s, %s,
+                        NOW())
+                       ON CONFLICT(year, player_key) DO UPDATE SET
+                        player_name = EXCLUDED.player_name,
+                        o_rank = EXCLUDED.o_rank,
+                        x_rank = EXCLUDED.x_rank,
+                        position = EXCLUDED.position,
+                        mlb_team = EXCLUDED.mlb_team,
+                        stat_r = EXCLUDED.stat_r, stat_h = EXCLUDED.stat_h,
+                        stat_hr = EXCLUDED.stat_hr, stat_rbi = EXCLUDED.stat_rbi,
+                        stat_sb = EXCLUDED.stat_sb, stat_avg = EXCLUDED.stat_avg,
+                        stat_ops = EXCLUDED.stat_ops,
+                        stat_w = EXCLUDED.stat_w, stat_sv = EXCLUDED.stat_sv,
+                        stat_hld = EXCLUDED.stat_hld, stat_k = EXCLUDED.stat_k,
+                        stat_era = EXCLUDED.stat_era, stat_whip = EXCLUDED.stat_whip,
+                        stat_qs = EXCLUDED.stat_qs,
+                        proj_r = EXCLUDED.proj_r, proj_h = EXCLUDED.proj_h,
+                        proj_hr = EXCLUDED.proj_hr, proj_rbi = EXCLUDED.proj_rbi,
+                        proj_sb = EXCLUDED.proj_sb, proj_avg = EXCLUDED.proj_avg,
+                        proj_ops = EXCLUDED.proj_ops,
+                        proj_w = EXCLUDED.proj_w, proj_sv = EXCLUDED.proj_sv,
+                        proj_hld = EXCLUDED.proj_hld, proj_k = EXCLUDED.proj_k,
+                        proj_era = EXCLUDED.proj_era, proj_whip = EXCLUDED.proj_whip,
+                        proj_qs = EXCLUDED.proj_qs,
+                        fetched_at = NOW()""",
+                    (
+                        year, p["player_key"], p["player_name"],
+                        p.get("o_rank"), p.get("x_rank"),
+                        p.get("position", ""), p.get("mlb_team", ""),
+                        # Hitting stats
+                        p.get("stat_r"), p.get("stat_h"), p.get("stat_hr"),
+                        p.get("stat_rbi"), p.get("stat_sb"),
+                        p.get("stat_avg"), p.get("stat_ops"),
+                        # Pitching stats
+                        p.get("stat_w"), p.get("stat_sv"), p.get("stat_hld"),
+                        p.get("stat_k"), p.get("stat_era"), p.get("stat_whip"),
+                        p.get("stat_qs"),
+                        # Projections hitting
+                        p.get("proj_r"), p.get("proj_h"), p.get("proj_hr"),
+                        p.get("proj_rbi"), p.get("proj_sb"),
+                        p.get("proj_avg"), p.get("proj_ops"),
+                        # Projections pitching
+                        p.get("proj_w"), p.get("proj_sv"), p.get("proj_hld"),
+                        p.get("proj_k"), p.get("proj_era"), p.get("proj_whip"),
+                        p.get("proj_qs"),
+                    ),
+                )
+        conn.commit()
+        print(f"[PlayerRankings] Upserted {len(players)} rankings for year {year}", flush=True)
+    finally:
+        conn.close()
+
+
+def get_ranking_fetch_status(year: int) -> dict:
+    """Get the last fetch time and count for player rankings of a year."""
+    conn = get_db()
+    try:
+        row = _fetchone(
+            conn,
+            """SELECT COUNT(*) as total_count,
+                      MAX(fetched_at) as last_fetched_at
+               FROM player_rankings WHERE year = %s""",
+            (year,),
+        )
+        if row and row["total_count"] > 0:
+            return {
+                "has_data": True,
+                "total_count": row["total_count"],
+                "last_fetched_at": row["last_fetched_at"].isoformat() if row["last_fetched_at"] else None,
+            }
+        return {"has_data": False, "total_count": 0, "last_fetched_at": None}
     finally:
         conn.close()
 

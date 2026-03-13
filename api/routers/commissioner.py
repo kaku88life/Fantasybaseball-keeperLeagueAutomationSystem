@@ -11,6 +11,7 @@ from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 
 from api.database import (
     approve_submission,
+    bulk_upsert_player_rankings,
     create_buyout,
     delete_buyout,
     delete_submission,
@@ -18,6 +19,7 @@ from api.database import (
     get_all_buyouts,
     get_all_submissions,
     get_all_teams,
+    get_ranking_fetch_status,
     get_team_by_id,
     get_team_buyouts,
     get_user_by_id,
@@ -622,3 +624,288 @@ async def disconnect_yahoo_token(
     """Disconnect Yahoo API (delete stored token). Commissioner only."""
     delete_yahoo_token(user["id"])
     return {"message": "Yahoo API token disconnected"}
+
+
+# ========== Player Rankings (Yahoo API Fetch) ==========
+
+# Yahoo game_key per year (MLB Fantasy)
+_YAHOO_GAME_KEYS: dict[int, str] = {
+    2024: "431",
+    2025: "458",
+    2026: "469",
+    2027: "480",  # placeholder, update when known
+}
+
+# Yahoo stat_id -> our column name mapping
+# Hitting stats
+_HITTING_STAT_MAP: dict[str, str] = {
+    "60": "r",      # Runs
+    "8": "h",       # Hits
+    "12": "hr",     # Home Runs
+    "13": "rbi",    # RBI
+    "16": "sb",     # Stolen Bases
+    "3": "avg",     # Batting Average
+    "55": "ops",    # OPS
+}
+
+# Pitching stats
+_PITCHING_STAT_MAP: dict[str, str] = {
+    "28": "w",      # Wins
+    "32": "sv",     # Saves
+    "48": "hld",    # Holds
+    "42": "k",      # Strikeouts
+    "26": "era",    # ERA
+    "27": "whip",   # WHIP
+    "63": "qs",     # Quality Starts
+}
+
+
+def _resolve_league_key(year: int) -> str:
+    """Build Yahoo league key from year and env YAHOO_LEAGUE_ID."""
+    game_key = _YAHOO_GAME_KEYS.get(year)
+    if not game_key:
+        raise HTTPException(
+            status_code=400,
+            detail=f"No Yahoo game key configured for year {year}",
+        )
+    league_id = os.getenv("YAHOO_LEAGUE_ID", "")
+    if not league_id:
+        raise HTTPException(
+            status_code=400,
+            detail="YAHOO_LEAGUE_ID environment variable not set",
+        )
+    # league_id might be full "469.l.80910" or just "80910"
+    league_num = league_id.split(".")[-1] if "." in league_id else league_id
+    return f"{game_key}.l.{league_num}"
+
+
+def _parse_yahoo_player(player_data: list) -> dict:
+    """Parse a single Yahoo player entry from the nested API response.
+
+    Yahoo Fantasy API returns players as a list where:
+    - Index 0: player_key info
+    - Index 1: player name info
+    - etc.
+    The structure varies, so we iterate and look for specific keys.
+    """
+    result = {
+        "player_key": "",
+        "player_name": "",
+        "position": "",
+        "mlb_team": "",
+        "o_rank": None,
+        "x_rank": None,
+    }
+
+    # player_data is a list of dicts with various info
+    for item in player_data:
+        if isinstance(item, dict):
+            if "player_key" in item:
+                result["player_key"] = item["player_key"]
+            if "name" in item:
+                name_info = item["name"]
+                full = name_info.get("full", "")
+                if full:
+                    result["player_name"] = full
+            if "editorial_team_abbr" in item:
+                result["mlb_team"] = item["editorial_team_abbr"].upper()
+            if "display_position" in item:
+                result["position"] = item["display_position"]
+            if "primary_position" in item and not result["position"]:
+                result["position"] = item["primary_position"]
+            # Eligible positions list
+            if "eligible_positions" in item:
+                pass  # use display_position instead
+        elif isinstance(item, list):
+            # Sometimes nested lists contain position info
+            for sub in item:
+                if isinstance(sub, dict):
+                    if "position" in sub and sub.get("position_type"):
+                        pass  # skip position sub-items
+
+    return result
+
+
+def _parse_yahoo_stats(stats_data: dict, prefix: str = "stat") -> dict:
+    """Parse Yahoo stats coverage into our flat stat dict.
+
+    Args:
+        stats_data: The stats section from Yahoo API
+        prefix: "stat" for actual stats, "proj" for projections
+    """
+    result = {}
+    stats_list = stats_data.get("stats", [])
+
+    for stat_entry in stats_list:
+        stat = stat_entry.get("stat", {})
+        stat_id = str(stat.get("stat_id", ""))
+        value = stat.get("value", "")
+
+        if value == "" or value == "-":
+            continue
+
+        # Check hitting stats
+        if stat_id in _HITTING_STAT_MAP:
+            col = _HITTING_STAT_MAP[stat_id]
+            try:
+                if col in ("avg", "ops"):
+                    result[f"{prefix}_{col}"] = float(value)
+                else:
+                    result[f"{prefix}_{col}"] = int(float(value))
+            except (ValueError, TypeError):
+                pass
+
+        # Check pitching stats
+        if stat_id in _PITCHING_STAT_MAP:
+            col = _PITCHING_STAT_MAP[stat_id]
+            try:
+                if col in ("era", "whip"):
+                    result[f"{prefix}_{col}"] = float(value)
+                else:
+                    result[f"{prefix}_{col}"] = int(float(value))
+            except (ValueError, TypeError):
+                pass
+
+    return result
+
+
+@router.post("/fetch-rankings/{year}")
+async def fetch_yahoo_rankings(
+    year: int,
+    user: dict = Depends(get_current_commissioner),
+):
+    """Fetch player rankings + stats from Yahoo Fantasy API and store in DB.
+
+    This fetches the top 500 players sorted by Overall Rank (O_Rank),
+    including their stats for the previous season and current season projections.
+    Commissioner only. Takes about 10 seconds due to API pagination.
+    """
+    import time
+    from api.yahoo_service import YahooTokenError, yahoo_api_get
+
+    league_key = _resolve_league_key(year)
+    print(f"[FetchRankings] Starting for year {year}, league_key={league_key}", flush=True)
+
+    all_players: list[dict] = []
+    batch_size = 25
+    max_players = 500
+    errors: list[str] = []
+
+    for start in range(0, max_players, batch_size):
+        try:
+            # Fetch players sorted by Overall Rank with stats
+            path = (
+                f"/league/{league_key}/players"
+                f";start={start};count={batch_size};sort=OR"
+                f";out=stats"
+            )
+            data = yahoo_api_get(path)
+
+            # Parse the response
+            fantasy_content = data.get("fantasy_content", {})
+            league = fantasy_content.get("league", [])
+
+            # League data is typically [meta_info, {players: {...}}]
+            players_section = None
+            for section in league:
+                if isinstance(section, dict) and "players" in section:
+                    players_section = section["players"]
+                    break
+
+            if not players_section:
+                print(f"[FetchRankings] No players in batch start={start}", flush=True)
+                break
+
+            # Parse each player
+            batch_count = 0
+            for key, val in players_section.items():
+                if key == "count":
+                    continue
+                if not isinstance(val, dict) or "player" not in val:
+                    continue
+
+                player_raw = val["player"]
+                if not isinstance(player_raw, list):
+                    continue
+
+                # Parse player info from first part (list of info dicts)
+                player_info_list = player_raw[0] if player_raw else []
+                player = _parse_yahoo_player(player_info_list)
+
+                # Extract O_Rank from player info (typically in first item list)
+                for item in player_info_list:
+                    if isinstance(item, dict):
+                        if "player_key" in item:
+                            player["player_key"] = item["player_key"]
+
+                # Parse stats (second part of player list)
+                if len(player_raw) > 1:
+                    stats_section = player_raw[1]
+                    if isinstance(stats_section, dict):
+                        # Player stats
+                        player_stats = stats_section.get("player_stats", {})
+                        if player_stats:
+                            stats = _parse_yahoo_stats(player_stats, "stat")
+                            player.update(stats)
+
+                        # Player projections (may not be present)
+                        # Yahoo API may require separate call for projections
+
+                # O_Rank is the position in sorted results
+                player["o_rank"] = start + batch_count + 1
+
+                if player["player_key"] and player["player_name"]:
+                    all_players.append(player)
+                    batch_count += 1
+
+            print(
+                f"[FetchRankings] Batch start={start}: {batch_count} players parsed",
+                flush=True,
+            )
+
+            if batch_count < batch_size:
+                # Last page
+                break
+
+            # Rate limiting: 0.3s between requests
+            time.sleep(0.3)
+
+        except YahooTokenError as e:
+            raise HTTPException(status_code=401, detail=f"Yahoo token error: {e}")
+        except RuntimeError as e:
+            errors.append(f"Batch start={start}: {e}")
+            print(f"[FetchRankings] Error at start={start}: {e}", flush=True)
+            if start == 0:
+                # First batch failed, abort
+                raise HTTPException(status_code=502, detail=f"Yahoo API error: {e}")
+            break
+        except Exception as e:
+            errors.append(f"Batch start={start}: {e}")
+            print(f"[FetchRankings] Unexpected error at start={start}: {e}", flush=True)
+            break
+
+    if not all_players:
+        raise HTTPException(
+            status_code=502,
+            detail="No player data returned from Yahoo API",
+        )
+
+    # Store in database
+    bulk_upsert_player_rankings(year, all_players)
+
+    return {
+        "message": f"Successfully fetched {len(all_players)} player rankings for {year}",
+        "year": year,
+        "total_fetched": len(all_players),
+        "errors": errors if errors else None,
+    }
+
+
+@router.get("/ranking-status/{year}")
+async def get_ranking_status_endpoint(
+    year: int,
+    user: dict = Depends(get_current_commissioner),
+):
+    """Get the last fetch time and count for player rankings. Commissioner only."""
+    status = get_ranking_fetch_status(year)
+    return {"year": year, **status}

@@ -1,0 +1,596 @@
+"use client";
+
+import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  getPlayerDatabase,
+  getYears,
+  fetchYahooRankings,
+  getRankingFetchStatus,
+} from "@/lib/api";
+import { useAuth } from "@/lib/auth";
+import ContractBadge from "@/components/ContractBadge";
+import LoadingSpinner from "@/components/LoadingSpinner";
+import PlayerStatsModal from "@/components/PlayerStatsModal";
+import PositionFilter, { matchesPosition } from "@/components/PositionFilter";
+import type {
+  ContractType,
+  PlayerDatabaseEntry,
+  PlayerDatabaseResponse,
+  RankingFetchStatus,
+} from "@/types";
+
+// MLB team list (30 teams)
+const MLB_TEAMS = [
+  "ARI", "ATL", "BAL", "BOS", "CHC", "CHW", "CIN", "CLE",
+  "COL", "DET", "HOU", "KC", "LAA", "LAD", "MIA", "MIL",
+  "MIN", "NYM", "NYY", "OAK", "PHI", "PIT", "SD", "SF",
+  "SEA", "STL", "TB", "TEX", "TOR", "WAS",
+];
+
+// Sort key type
+type SortKey =
+  | "o_rank" | "x_rank" | "name" | "position" | "mlb_team"
+  | "salary" | "owner_manager"
+  | "r" | "h" | "hr" | "rbi" | "sb" | "avg" | "ops"
+  | "w" | "sv" | "hld" | "k" | "era" | "whip" | "qs";
+
+interface SortState {
+  key: SortKey;
+  dir: "asc" | "desc";
+}
+
+// Stat columns config
+const HITTING_COLS: Array<{ key: string; label: string }> = [
+  { key: "r", label: "R" },
+  { key: "h", label: "H" },
+  { key: "hr", label: "HR" },
+  { key: "rbi", label: "RBI" },
+  { key: "sb", label: "SB" },
+  { key: "avg", label: "AVG" },
+  { key: "ops", label: "OPS" },
+];
+
+const PITCHING_COLS: Array<{ key: string; label: string }> = [
+  { key: "w", label: "W" },
+  { key: "sv", label: "SV" },
+  { key: "hld", label: "HLD" },
+  { key: "k", label: "K" },
+  { key: "era", label: "ERA" },
+  { key: "whip", label: "WHIP" },
+  { key: "qs", label: "QS" },
+];
+
+function isPitcher(position: string): boolean {
+  const pos = position.split(",").map((s) => s.trim().toUpperCase());
+  return pos.some((p) => ["SP", "RP", "P"].includes(p));
+}
+
+export default function PlayersPage() {
+  const { user } = useAuth();
+  const isCommissioner = user?.is_commissioner ?? false;
+
+  // State
+  const [years, setYears] = useState<number[]>([]);
+  const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
+  const [data, setData] = useState<PlayerDatabaseResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string>("");
+
+  // Filters
+  const [positionFilter, setPositionFilter] = useState("ALL");
+  const [mlbTeamFilter, setMlbTeamFilter] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Sort
+  const [sort, setSort] = useState<SortState>({ key: "o_rank", dir: "asc" });
+
+  // Stats tab
+  const [statsTab, setStatsTab] = useState<"stats" | "projections">("stats");
+
+  // Player stats modal
+  const [modalPlayer, setModalPlayer] = useState<{ name: string; position: string } | null>(null);
+
+  // Commissioner ranking fetch
+  const [rankingStatus, setRankingStatus] = useState<RankingFetchStatus | null>(null);
+  const [fetching, setFetching] = useState(false);
+  const [fetchMessage, setFetchMessage] = useState("");
+
+  // Load years
+  useEffect(() => {
+    getYears()
+      .then((y) => {
+        setYears(y);
+        if (y.length > 0) setSelectedYear(Math.max(...y));
+      })
+      .catch(() => {});
+  }, []);
+
+  // Load player data
+  useEffect(() => {
+    setLoading(true);
+    setError("");
+    getPlayerDatabase(selectedYear)
+      .then((d) => {
+        setData(d);
+        setLoading(false);
+      })
+      .catch((e) => {
+        setError(e.message || "Failed to load player data");
+        setLoading(false);
+      });
+  }, [selectedYear]);
+
+  // Load ranking status for commissioner
+  useEffect(() => {
+    if (!isCommissioner) return;
+    getRankingFetchStatus(selectedYear)
+      .then(setRankingStatus)
+      .catch(() => {});
+  }, [selectedYear, isCommissioner]);
+
+  // Handle ranking fetch
+  const handleFetchRankings = useCallback(async () => {
+    setFetching(true);
+    setFetchMessage("");
+    try {
+      const result = await fetchYahooRankings(selectedYear);
+      setFetchMessage(result.message);
+      // Reload data
+      const d = await getPlayerDatabase(selectedYear);
+      setData(d);
+      const status = await getRankingFetchStatus(selectedYear);
+      setRankingStatus(status);
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : "Fetch failed";
+      setFetchMessage(`Error: ${msg}`);
+    } finally {
+      setFetching(false);
+    }
+  }, [selectedYear]);
+
+  // Sort handler
+  const handleSort = useCallback(
+    (key: SortKey) => {
+      setSort((prev) =>
+        prev.key === key
+          ? { key, dir: prev.dir === "asc" ? "desc" : "asc" }
+          : { key, dir: "asc" },
+      );
+    },
+    [],
+  );
+
+  // Filter + sort players
+  const filteredPlayers = useMemo(() => {
+    if (!data) return [];
+    let list = data.players;
+
+    // Position filter
+    if (positionFilter !== "ALL") {
+      list = list.filter((p) => matchesPosition(p.position, positionFilter));
+    }
+
+    // MLB team filter
+    if (mlbTeamFilter) {
+      list = list.filter(
+        (p) => p.mlb_team.toUpperCase() === mlbTeamFilter.toUpperCase(),
+      );
+    }
+
+    // Search
+    if (searchQuery.trim()) {
+      const q = searchQuery.trim().toLowerCase();
+      list = list.filter(
+        (p) =>
+          p.name.toLowerCase().includes(q) ||
+          p.owner_manager.toLowerCase().includes(q),
+      );
+    }
+
+    // Sort
+    const { key, dir } = sort;
+    const mul = dir === "asc" ? 1 : -1;
+
+    list = [...list].sort((a, b) => {
+      let va: number | string | null = null;
+      let vb: number | string | null = null;
+
+      // Determine values for comparison
+      if (key === "name") {
+        return mul * a.name.localeCompare(b.name);
+      } else if (key === "position") {
+        return mul * a.position.localeCompare(b.position);
+      } else if (key === "mlb_team") {
+        return mul * a.mlb_team.localeCompare(b.mlb_team);
+      } else if (key === "owner_manager") {
+        return mul * a.owner_manager.localeCompare(b.owner_manager);
+      } else if (key === "o_rank") {
+        va = a.o_rank;
+        vb = b.o_rank;
+      } else if (key === "x_rank") {
+        va = a.x_rank;
+        vb = b.x_rank;
+      } else if (key === "salary") {
+        va = a.salary;
+        vb = b.salary;
+      } else {
+        // Stat columns
+        const src = statsTab === "projections" ? "projections" : "stats";
+        va = (a[src] as Record<string, number | undefined>)[key] ?? null;
+        vb = (b[src] as Record<string, number | undefined>)[key] ?? null;
+      }
+
+      // null sorts to end
+      if (va === null && vb === null) return 0;
+      if (va === null) return 1;
+      if (vb === null) return -1;
+
+      if (typeof va === "number" && typeof vb === "number") {
+        return mul * (va - vb);
+      }
+
+      return 0;
+    });
+
+    return list;
+  }, [data, positionFilter, mlbTeamFilter, searchQuery, sort, statsTab]);
+
+  // Sort arrow indicator
+  const SortArrow = ({ col }: { col: SortKey }) => {
+    if (sort.key !== col) return <span className="ml-0.5 text-gray-300">&#x25B2;</span>;
+    return (
+      <span className="ml-0.5 text-indigo-600">
+        {sort.dir === "asc" ? "\u25B2" : "\u25BC"}
+      </span>
+    );
+  };
+
+  // Sortable table header
+  const SortTh = ({
+    col,
+    label,
+    className = "",
+  }: {
+    col: SortKey;
+    label: string;
+    className?: string;
+  }) => (
+    <th
+      className={`cursor-pointer select-none whitespace-nowrap px-2 py-2 text-left text-xs font-medium uppercase text-gray-500 hover:text-gray-700 ${className}`}
+      onClick={() => handleSort(col)}
+    >
+      {label}
+      <SortArrow col={col} />
+    </th>
+  );
+
+  // Format stat value for display
+  const formatStat = (val: number | undefined, key: string): string => {
+    if (val === undefined || val === null) return "-";
+    if (key === "avg" || key === "ops") return val.toFixed(3);
+    if (key === "era") return val.toFixed(2);
+    if (key === "whip") return val.toFixed(2);
+    return String(val);
+  };
+
+  if (loading) {
+    return (
+      <div className="flex min-h-[50vh] items-center justify-center">
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="mx-auto max-w-7xl px-4 py-8">
+        <div className="rounded-lg bg-red-50 p-4 text-red-800">
+          {error}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mx-auto max-w-[100rem] px-4 py-6">
+      {/* Header */}
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-gray-900">
+          球員資料庫 Player Database
+        </h1>
+        <p className="mt-1 text-sm text-gray-500">
+          {data?.total_count ?? 0} 位球員
+          {data?.has_rankings && " (含 Yahoo 排名)"}
+        </p>
+      </div>
+
+      {/* Controls Row */}
+      <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-wrap items-center gap-3">
+          {/* Year dropdown */}
+          <select
+            value={selectedYear}
+            onChange={(e) => setSelectedYear(Number(e.target.value))}
+            className="rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-indigo-500 focus:ring-indigo-500"
+          >
+            {years.map((y) => (
+              <option key={y} value={y}>
+                {y}
+              </option>
+            ))}
+          </select>
+
+          {/* Position filter */}
+          <PositionFilter
+            items={data?.players || []}
+            value={positionFilter}
+            onChange={setPositionFilter}
+            showCounts={false}
+          />
+
+          {/* MLB Team dropdown */}
+          <select
+            value={mlbTeamFilter}
+            onChange={(e) => setMlbTeamFilter(e.target.value)}
+            className="rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-indigo-500 focus:ring-indigo-500"
+          >
+            <option value="">All Teams</option>
+            {MLB_TEAMS.map((t) => (
+              <option key={t} value={t}>
+                {t}
+              </option>
+            ))}
+          </select>
+
+          {/* Search */}
+          <input
+            type="text"
+            placeholder="搜尋球員或經理..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-48 rounded-md border border-gray-300 px-3 py-1.5 text-sm placeholder-gray-400 focus:border-indigo-500 focus:ring-indigo-500"
+          />
+        </div>
+
+        <div className="flex items-center gap-3">
+          {/* Stats tab toggle */}
+          <div className="flex rounded-md border border-gray-300">
+            <button
+              onClick={() => setStatsTab("stats")}
+              className={`px-3 py-1.5 text-xs font-medium ${
+                statsTab === "stats"
+                  ? "bg-indigo-600 text-white"
+                  : "bg-white text-gray-600 hover:bg-gray-50"
+              } rounded-l-md`}
+            >
+              上季成績
+            </button>
+            <button
+              onClick={() => setStatsTab("projections")}
+              className={`px-3 py-1.5 text-xs font-medium ${
+                statsTab === "projections"
+                  ? "bg-indigo-600 text-white"
+                  : "bg-white text-gray-600 hover:bg-gray-50"
+              } rounded-r-md`}
+            >
+              當季預測
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Commissioner: Fetch Rankings */}
+      {isCommissioner && (
+        <div className="mb-4 rounded-lg border border-yellow-200 bg-yellow-50 p-3">
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="rounded bg-yellow-600 px-2 py-0.5 text-xs font-semibold text-white">
+              CM
+            </span>
+            <button
+              onClick={handleFetchRankings}
+              disabled={fetching}
+              className="rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-indigo-500 disabled:opacity-50"
+            >
+              {fetching ? "擷取中..." : "擷取 Yahoo 排名"}
+            </button>
+            {rankingStatus && (
+              <span className="text-xs text-gray-600">
+                {rankingStatus.has_data
+                  ? `${rankingStatus.total_count} 筆 | 上次更新: ${new Date(rankingStatus.last_fetched_at!).toLocaleString("zh-TW")}`
+                  : "尚未擷取排名資料"}
+              </span>
+            )}
+            {fetchMessage && (
+              <span
+                className={`text-xs ${fetchMessage.startsWith("Error") ? "text-red-600" : "text-green-600"}`}
+              >
+                {fetchMessage}
+              </span>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Result count */}
+      <div className="mb-2 text-sm text-gray-500">
+        顯示 {filteredPlayers.length} / {data?.total_count ?? 0} 位球員
+      </div>
+
+      {/* Table */}
+      <div className="overflow-x-auto rounded-lg border border-gray-200">
+        <table className="min-w-full divide-y divide-gray-200 text-sm">
+          <thead className="bg-gray-50">
+            <tr>
+              <SortTh col="o_rank" label="#" className="w-10" />
+              <th className="px-2 py-2 text-left text-xs font-medium uppercase text-gray-500">
+                O/X
+              </th>
+              <SortTh col="name" label="球員" />
+              <SortTh col="position" label="Pos" />
+              <SortTh col="mlb_team" label="MLB" />
+              <th className="px-2 py-2 text-left text-xs font-medium uppercase text-gray-500">
+                合約
+              </th>
+              <SortTh col="salary" label="$" />
+              <SortTh col="owner_manager" label="歸屬" />
+
+              {/* Stats columns */}
+              {HITTING_COLS.map((c) => (
+                <SortTh
+                  key={c.key}
+                  col={c.key as SortKey}
+                  label={c.label}
+                  className="hidden md:table-cell"
+                />
+              ))}
+              {PITCHING_COLS.map((c) => (
+                <SortTh
+                  key={c.key}
+                  col={c.key as SortKey}
+                  label={c.label}
+                  className="hidden lg:table-cell"
+                />
+              ))}
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-100 bg-white">
+            {filteredPlayers.map((p, idx) => {
+              const pitcher = isPitcher(p.position);
+              const statSource =
+                statsTab === "projections" ? p.projections : p.stats;
+
+              return (
+                <tr
+                  key={`${p.yahoo_player_id || p.name}-${idx}`}
+                  className="hover:bg-gray-50"
+                >
+                  {/* Rank */}
+                  <td className="whitespace-nowrap px-2 py-1.5 text-gray-400">
+                    {p.o_rank ?? "-"}
+                  </td>
+
+                  {/* O/X Rank */}
+                  <td className="whitespace-nowrap px-2 py-1.5 text-xs text-gray-500">
+                    {p.o_rank != null && p.x_rank != null ? (
+                      <span>
+                        {p.o_rank}/{p.x_rank}
+                      </span>
+                    ) : p.o_rank != null ? (
+                      p.o_rank
+                    ) : (
+                      "-"
+                    )}
+                  </td>
+
+                  {/* Player name */}
+                  <td className="whitespace-nowrap px-2 py-1.5 font-medium">
+                    <button
+                      onClick={() =>
+                        setModalPlayer({ name: p.name, position: p.position })
+                      }
+                      className="text-left text-indigo-600 hover:text-indigo-800 hover:underline"
+                    >
+                      {p.name}
+                    </button>
+                  </td>
+
+                  {/* Position */}
+                  <td className="whitespace-nowrap px-2 py-1.5 text-xs text-gray-600">
+                    {p.position}
+                  </td>
+
+                  {/* MLB Team */}
+                  <td className="whitespace-nowrap px-2 py-1.5 text-xs text-gray-500">
+                    {p.mlb_team || "-"}
+                  </td>
+
+                  {/* Contract */}
+                  <td className="whitespace-nowrap px-2 py-1.5">
+                    {p.contract_display ? (
+                      <ContractBadge
+                        type={p.contract_type as ContractType}
+                        display={p.contract_display}
+                      />
+                    ) : (
+                      <span className="text-xs text-gray-300">FA</span>
+                    )}
+                  </td>
+
+                  {/* Salary */}
+                  <td className="whitespace-nowrap px-2 py-1.5 text-right text-xs">
+                    {p.salary > 0 ? `$${p.salary}` : "-"}
+                  </td>
+
+                  {/* Owner */}
+                  <td className="whitespace-nowrap px-2 py-1.5 text-xs text-gray-600">
+                    {p.owner_manager || (
+                      <span className="text-gray-300">FA</span>
+                    )}
+                  </td>
+
+                  {/* Hitting stats */}
+                  {HITTING_COLS.map((c) => (
+                    <td
+                      key={c.key}
+                      className={`hidden whitespace-nowrap px-2 py-1.5 text-right text-xs md:table-cell ${
+                        pitcher ? "text-gray-300" : "text-gray-700"
+                      }`}
+                    >
+                      {!pitcher
+                        ? formatStat(
+                            statSource[c.key as keyof typeof statSource] as
+                              | number
+                              | undefined,
+                            c.key,
+                          )
+                        : "-"}
+                    </td>
+                  ))}
+
+                  {/* Pitching stats */}
+                  {PITCHING_COLS.map((c) => (
+                    <td
+                      key={c.key}
+                      className={`hidden whitespace-nowrap px-2 py-1.5 text-right text-xs lg:table-cell ${
+                        !pitcher ? "text-gray-300" : "text-gray-700"
+                      }`}
+                    >
+                      {pitcher
+                        ? formatStat(
+                            statSource[c.key as keyof typeof statSource] as
+                              | number
+                              | undefined,
+                            c.key,
+                          )
+                        : "-"}
+                    </td>
+                  ))}
+                </tr>
+              );
+            })}
+
+            {filteredPlayers.length === 0 && (
+              <tr>
+                <td
+                  colSpan={8 + HITTING_COLS.length + PITCHING_COLS.length}
+                  className="py-8 text-center text-gray-400"
+                >
+                  沒有符合條件的球員
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Player Stats Modal */}
+      {modalPlayer && (
+        <PlayerStatsModal
+          playerName={modalPlayer.name}
+          position={modalPlayer.position}
+          onClose={() => setModalPlayer(null)}
+        />
+      )}
+    </div>
+  );
+}
