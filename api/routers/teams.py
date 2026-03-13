@@ -169,8 +169,16 @@ async def get_team_keeper_selections(
     year: int,
     user: dict = Depends(get_current_user),
 ):
-    """Get saved keeper selections for a team."""
-    _check_team_access(user, team_id)
+    """Get saved keeper selections for a team.
+
+    Submitted teams are publicly readable by any logged-in user.
+    Unsubmitted teams require own-team or commissioner access.
+    """
+    submission = get_submission(year, team_id)
+    is_submitted = submission is not None
+
+    if not is_submitted:
+        _check_team_access(user, team_id)
 
     selections_db = get_keeper_selections(year, team_id)
     selections = [
@@ -186,10 +194,6 @@ async def get_team_keeper_selections(
 
     # Run validation
     validation = _validate_selections(year, team_id, selections_db)
-
-    # Check submission status
-    submission = get_submission(year, team_id)
-    is_submitted = submission is not None
 
     return KeeperSelectionsWithValidation(
         selections=selections,

@@ -34,6 +34,7 @@ from api.serializers import league_state_to_dict
 
 JSON_PATH = ROOT / "data" / "2026_contracts_v2.json"
 BUYOUT_PATH = ROOT / "data" / "2025_buyout_records.json"
+STANDINGS_PATH = ROOT / "data" / "2025_playoff_standings.json"
 YEAR = 2026
 
 CT_MAP = {v.value: v for v in ContractType}
@@ -102,6 +103,20 @@ def load_contracts():
     print(f"Source: {JSON_PATH}")
     print()
 
+    # Load 2025 playoff standings for ranking bonus
+    ranking_bonus_map: dict[str, int] = {}
+    if STANDINGS_PATH.exists():
+        with open(STANDINGS_PATH, "r", encoding="utf-8") as f:
+            standings_data = json.load(f)
+        ranking_bonus_map = standings_data.get("ranking_bonus_map", {})
+        print(f"Loaded ranking bonus from {STANDINGS_PATH.name}:")
+        for mgr, bonus in ranking_bonus_map.items():
+            if bonus > 0:
+                print(f"  {mgr}: +${bonus}")
+        print()
+    else:
+        print(f"WARNING: {STANDINGS_PATH} not found, all ranking_bonus = 0\n")
+
     teams_data = data.get("teams", {})
     teams: list[Team] = []
     total_players = 0
@@ -125,7 +140,7 @@ def load_contracts():
             buyout_records=[],
             salary_cap=salary_cap,
             faab_budget=FAAB_BASE,
-            ranking_bonus=0,
+            ranking_bonus=ranking_bonus_map.get(manager_name, 0),
             trade_compensation=0,
         )
         teams.append(team)
