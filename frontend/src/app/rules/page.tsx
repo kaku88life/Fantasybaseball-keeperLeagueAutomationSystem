@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { getLeagueSettings } from "@/lib/api";
+import LoadingSpinner from "@/components/LoadingSpinner";
 import type { LeagueSettings } from "@/types";
 
 const TABS = [
@@ -23,7 +24,7 @@ export default function RulesPage() {
   }, []);
 
   if (!settings) {
-    return <div className="py-10 text-center text-gray-500">Loading...</div>;
+    return <LoadingSpinner />;
   }
 
   const currentYear = new Date().getFullYear();

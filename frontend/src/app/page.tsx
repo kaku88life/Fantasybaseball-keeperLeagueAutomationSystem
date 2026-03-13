@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import { getYears } from "@/lib/api";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 export default function HomePage() {
   const { user, loading } = useAuth();
@@ -15,11 +16,7 @@ export default function HomePage() {
   }, []);
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <p className="text-gray-500">Loading...</p>
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   if (!user) {

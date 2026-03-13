@@ -4,12 +4,19 @@
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8002";
 
+/** Default request timeout in milliseconds (30 seconds — allows for Zeabur cold start) */
+const REQUEST_TIMEOUT_MS = 30_000;
+
 function getToken(): string | null {
   if (typeof window === "undefined") return null;
   return localStorage.getItem("auth_token");
 }
 
-async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
+async function request<T>(
+  path: string,
+  options: RequestInit = {},
+  timeoutMs: number = REQUEST_TIMEOUT_MS,
+): Promise<T> {
   const token = getToken();
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
@@ -19,17 +26,30 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
     headers["Authorization"] = `Bearer ${token}`;
   }
 
+  // AbortController for timeout
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
   let res: Response;
   try {
     res = await fetch(`${API_BASE}${path}`, {
       ...options,
       headers,
+      signal: controller.signal,
     });
-  } catch {
+  } catch (err) {
+    if (err instanceof DOMException && err.name === "AbortError") {
+      throw new ApiError(
+        0,
+        "Request timed out. The server may be starting up (cold start). Please try again in a few seconds.",
+      );
+    }
     throw new ApiError(
       0,
       "Cannot connect to backend server. Please check if the server is running.",
     );
+  } finally {
+    clearTimeout(timeoutId);
   }
 
   if (!res.ok) {
@@ -38,6 +58,19 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   }
 
   return res.json();
+}
+
+/**
+ * Check if backend is reachable (health check).
+ * Returns true if healthy, false otherwise.
+ */
+export async function checkHealth(): Promise<boolean> {
+  try {
+    await request<{ status: string }>("/api/health", {}, 10_000);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export class ApiError extends Error {

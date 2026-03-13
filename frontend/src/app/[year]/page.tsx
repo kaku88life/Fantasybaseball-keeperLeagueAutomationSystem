@@ -11,6 +11,7 @@ import {
 } from "@/lib/api";
 import type { KeeperResultTeam } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
+import LoadingSpinner from "@/components/LoadingSpinner";
 import type { DBTeam } from "@/types";
 
 interface TeamSummary {
@@ -112,7 +113,7 @@ export default function YearOverviewPage() {
   }
 
   if (!summary) {
-    return <div className="py-10 text-center text-gray-500">Loading...</div>;
+    return <LoadingSpinner />;
   }
 
   const tabs: { key: TabKey; label: string; sublabel: string }[] = [
@@ -340,7 +341,7 @@ function KeepersTab({
   };
 
   if (loading) {
-    return <div className="py-10 text-center text-gray-500">Loading...</div>;
+    return <LoadingSpinner />;
   }
 
   if (!keeperResults) {

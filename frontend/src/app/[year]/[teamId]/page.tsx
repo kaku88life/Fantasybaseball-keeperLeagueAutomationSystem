@@ -12,6 +12,7 @@ import {
 } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import ContractBadge from "@/components/ContractBadge";
+import LoadingSpinner from "@/components/LoadingSpinner";
 import PlayerStatsModal from "@/components/PlayerStatsModal";
 import {
   computeBuyoutCost,
@@ -68,18 +69,26 @@ export default function KeeperSelectionPage() {
   const displayValidation = clientValidation;
   const fin = displayValidation?.financial_summary;
 
-  // Load data
+  // Load data with retry support
+  const loadData = useCallback(async () => {
+    setError("");
+    setTeam(null);
+    try {
+      const [t, o] = await Promise.all([
+        getTeamRoster(teamId, year),
+        getKeeperOptions(teamId, year),
+      ]);
+      setTeam(t);
+      setOptions(o);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to load data");
+    }
+  }, [teamId, year]);
+
   useEffect(() => {
     if (!year || !teamId) return;
-    setError("");
-
-    Promise.all([getTeamRoster(teamId, year), getKeeperOptions(teamId, year)])
-      .then(([t, o]) => {
-        setTeam(t);
-        setOptions(o);
-      })
-      .catch((e) => setError(e.message));
-  }, [year, teamId]);
+    loadData();
+  }, [year, teamId, loadData]);
 
   // Load saved selections
   useEffect(() => {
@@ -247,18 +256,26 @@ export default function KeeperSelectionPage() {
     return (
       <div className="py-10 text-center">
         <p className="text-red-600">{error}</p>
-        <Link
-          href={`/${year}`}
-          className="mt-4 inline-block text-sm text-indigo-600 hover:underline"
-        >
-          返回聯盟總覽 Back to Overview
-        </Link>
+        <div className="mt-4 flex flex-col items-center gap-3">
+          <button
+            onClick={loadData}
+            className="rounded bg-indigo-600 px-4 py-2 text-sm text-white hover:bg-indigo-500"
+          >
+            重試 Retry
+          </button>
+          <Link
+            href={`/${year}`}
+            className="text-sm text-indigo-600 hover:underline"
+          >
+            返回聯盟總覽 Back to Overview
+          </Link>
+        </div>
       </div>
     );
   }
 
   if (!team) {
-    return <div className="py-10 text-center text-gray-500">Loading...</div>;
+    return <LoadingSpinner message="載入球員資料中..." />;
   }
 
   // Separate players by type for display
