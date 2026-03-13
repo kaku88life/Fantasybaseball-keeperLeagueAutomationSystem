@@ -297,6 +297,24 @@ async def _exchange_code_for_jwt(code: str) -> CallbackResponse:
         is_commissioner=is_commissioner,
     )
 
+    # Persist Yahoo tokens for commissioner (enables background Yahoo API access)
+    if is_commissioner and access_token:
+        try:
+            import datetime
+            from api.database import upsert_yahoo_token
+            expires_in = token_data.get("expires_in", 3600)
+            expires_at = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(seconds=expires_in)
+            upsert_yahoo_token(
+                user_id=user["id"],
+                access_token=access_token,
+                refresh_token=token_data.get("refresh_token", ""),
+                expires_at=expires_at,
+                yahoo_guid=yahoo_guid,
+            )
+            print(f"[AUTH] Commissioner Yahoo token persisted for user #{user['id']}", flush=True)
+        except Exception as e:
+            print(f"[AUTH] Failed to persist Yahoo token (non-fatal): {e}", flush=True)
+
     # Create JWT
     jwt_token = create_jwt_token(user["id"], is_commissioner=is_commissioner)
 

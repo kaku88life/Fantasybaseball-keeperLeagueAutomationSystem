@@ -14,6 +14,7 @@ from api.database import (
     create_buyout,
     delete_buyout,
     delete_submission,
+    delete_yahoo_token,
     get_all_buyouts,
     get_all_submissions,
     get_all_teams,
@@ -553,3 +554,62 @@ async def delete_buyout_record(
     """Delete a buyout record. Commissioner only."""
     delete_buyout(buyout_id)
     return {"message": f"Buyout #{buyout_id} deleted"}
+
+
+# ========== Yahoo API Token Management ==========
+
+@router.get("/yahoo-token/status")
+async def get_yahoo_token_status(
+    user: dict = Depends(get_current_commissioner),
+):
+    """Get Yahoo API token connection status. Commissioner only."""
+    from api.yahoo_service import get_token_status
+    return get_token_status()
+
+
+@router.post("/yahoo-token/refresh")
+async def refresh_yahoo_token(
+    user: dict = Depends(get_current_commissioner),
+):
+    """Manually trigger Yahoo token refresh. Commissioner only."""
+    from api.yahoo_service import YahooTokenError, refresh_db_token
+    from api.database import get_commissioner_yahoo_token
+
+    token_row = get_commissioner_yahoo_token()
+    if not token_row:
+        raise HTTPException(
+            status_code=404,
+            detail="No Yahoo token found. Please log in via Yahoo OAuth first.",
+        )
+
+    try:
+        refresh_db_token(token_row)
+        from api.yahoo_service import get_token_status
+        return get_token_status()
+    except YahooTokenError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.post("/yahoo-token/test")
+async def test_yahoo_connection(
+    user: dict = Depends(get_current_commissioner),
+):
+    """Test Yahoo API connection with current token. Commissioner only."""
+    from api.yahoo_service import YahooTokenError, yahoo_api_get
+
+    try:
+        yahoo_api_get("/users;use_login=1/profile")
+        return {"status": "ok", "message": "Yahoo API 連線正常 Connection working"}
+    except YahooTokenError as e:
+        return {"status": "error", "message": f"Token error: {e}"}
+    except RuntimeError as e:
+        return {"status": "error", "message": f"API error: {e}"}
+
+
+@router.delete("/yahoo-token")
+async def disconnect_yahoo_token(
+    user: dict = Depends(get_current_commissioner),
+):
+    """Disconnect Yahoo API (delete stored token). Commissioner only."""
+    delete_yahoo_token(user["id"])
+    return {"message": "Yahoo API token disconnected"}

@@ -474,6 +474,36 @@ export async function validateKeeperList(
   });
 }
 
+// ========== Yahoo API Token (Commissioner) ==========
+
+export interface YahooTokenStatus {
+  connected: boolean;
+  user_id: number | null;
+  yahoo_guid: string;
+  expires_at: string | null;
+  is_expired: boolean;
+  updated_at: string | null;
+  message: string;
+}
+
+export async function getYahooTokenStatus(): Promise<YahooTokenStatus> {
+  return request("/api/commissioner/yahoo-token/status");
+}
+
+export async function refreshYahooToken(): Promise<YahooTokenStatus> {
+  return request("/api/commissioner/yahoo-token/refresh", { method: "POST" });
+}
+
+export async function testYahooConnection(): Promise<{ status: string; message: string }> {
+  return request("/api/commissioner/yahoo-token/test", { method: "POST" });
+}
+
+export async function disconnectYahooToken(): Promise<{ message: string }> {
+  return request("/api/commissioner/yahoo-token", { method: "DELETE" });
+}
+
+// ========== Validation ==========
+
 export async function calculateBuyout(
   playerName: string,
   contractType: string,

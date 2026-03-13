@@ -15,7 +15,12 @@ import {
   getReminderStatus,
   getPendingTeams,
   verifyCommissionerPassword,
+  getYahooTokenStatus,
+  refreshYahooToken,
+  testYahooConnection,
+  disconnectYahooToken,
 } from "@/lib/api";
+import type { YahooTokenStatus } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import type { SubmissionStatus, SubmissionDetail, TeamAdjustments } from "@/types";
 
@@ -153,6 +158,11 @@ export default function CommissionerDashboard() {
     sent: string[]; skipped: string[]; failed: Array<{ manager: string; error: string }>; no_email: string[];
   } | null>(null);
 
+  // Yahoo API token state
+  const [yahooToken, setYahooToken] = useState<YahooTokenStatus | null>(null);
+  const [yahooTokenLoading, setYahooTokenLoading] = useState(false);
+  const [yahooTokenMsg, setYahooTokenMsg] = useState("");
+
   useEffect(() => {
     getYears().then((y) => {
       setYears(y);
@@ -209,7 +219,11 @@ export default function CommissionerDashboard() {
   useEffect(() => {
     refreshSubmissions();
     refreshAdjustments();
-  }, [refreshSubmissions, refreshAdjustments]);
+    // Load Yahoo token status on mount
+    if (user?.is_commissioner) {
+      getYahooTokenStatus().then(setYahooToken).catch(() => {});
+    }
+  }, [refreshSubmissions, refreshAdjustments, user]);
 
   const handleAdjEdit = (teamId: number) => {
     const adj = adjustments[teamId];
@@ -428,6 +442,115 @@ export default function CommissionerDashboard() {
           </p>
         </div>
       </div>
+
+      {/* Yahoo API Connection Status */}
+      {yahooToken !== null && (
+        <div className={`mb-6 rounded-lg border p-4 ${
+          yahooToken.connected
+            ? yahooToken.is_expired
+              ? "border-amber-300 bg-amber-50"
+              : "border-green-300 bg-green-50"
+            : "border-gray-300 bg-gray-50"
+        }`}>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <span className={`inline-block h-2.5 w-2.5 rounded-full ${
+                yahooToken.connected
+                  ? yahooToken.is_expired ? "bg-amber-500" : "bg-green-500"
+                  : "bg-gray-400"
+              }`} />
+              <h3 className="text-sm font-semibold text-gray-700">
+                Yahoo API 連結狀態
+              </h3>
+              <span className={`text-xs ${
+                yahooToken.connected
+                  ? yahooToken.is_expired ? "text-amber-600" : "text-green-600"
+                  : "text-gray-500"
+              }`}>
+                {yahooToken.message}
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {yahooToken.connected && (
+                <>
+                  <button
+                    onClick={async () => {
+                      setYahooTokenLoading(true);
+                      setYahooTokenMsg("");
+                      try {
+                        const result = await refreshYahooToken();
+                        setYahooToken(result);
+                        setYahooTokenMsg("Token 已刷新");
+                      } catch (e) {
+                        setYahooTokenMsg(e instanceof Error ? e.message : "刷新失敗");
+                      } finally {
+                        setYahooTokenLoading(false);
+                      }
+                    }}
+                    disabled={yahooTokenLoading}
+                    className="rounded bg-blue-500 px-2 py-1 text-xs text-white hover:bg-blue-400 disabled:opacity-50"
+                  >
+                    {yahooTokenLoading ? "..." : "Refresh Token"}
+                  </button>
+                  <button
+                    onClick={async () => {
+                      setYahooTokenLoading(true);
+                      setYahooTokenMsg("");
+                      try {
+                        const result = await testYahooConnection();
+                        setYahooTokenMsg(result.message);
+                      } catch (e) {
+                        setYahooTokenMsg(e instanceof Error ? e.message : "測試失敗");
+                      } finally {
+                        setYahooTokenLoading(false);
+                      }
+                    }}
+                    disabled={yahooTokenLoading}
+                    className="rounded bg-gray-500 px-2 py-1 text-xs text-white hover:bg-gray-400 disabled:opacity-50"
+                  >
+                    Test Connection
+                  </button>
+                  <button
+                    onClick={async () => {
+                      if (!confirm("確定要斷開 Yahoo API 連結？\nDisconnect Yahoo API?")) return;
+                      try {
+                        await disconnectYahooToken();
+                        setYahooToken({
+                          connected: false, user_id: null, yahoo_guid: "",
+                          expires_at: null, is_expired: false, updated_at: null,
+                          message: "Yahoo API 尚未連結 Not connected",
+                        });
+                        setYahooTokenMsg("已斷開連結");
+                      } catch (e) {
+                        setYahooTokenMsg(e instanceof Error ? e.message : "操作失敗");
+                      }
+                    }}
+                    className="rounded border border-red-300 px-2 py-1 text-xs text-red-600 hover:bg-red-50"
+                  >
+                    Disconnect
+                  </button>
+                </>
+              )}
+              {!yahooToken.connected && (
+                <a
+                  href={`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8002"}/api/auth/yahoo/login`}
+                  className="rounded bg-purple-600 px-2 py-1 text-xs text-white hover:bg-purple-500"
+                >
+                  重新登入 Yahoo Re-authorize
+                </a>
+              )}
+            </div>
+          </div>
+          {yahooToken.connected && yahooToken.expires_at && (
+            <p className="mt-1 text-[10px] text-gray-500">
+              Token 到期: {new Date(yahooToken.expires_at).toLocaleString()} | 最後更新: {yahooToken.updated_at ? new Date(yahooToken.updated_at).toLocaleString() : "-"}
+            </p>
+          )}
+          {yahooTokenMsg && (
+            <p className="mt-1 text-xs text-blue-600">{yahooTokenMsg}</p>
+          )}
+        </div>
+      )}
 
       {/* Trade & FAAB Adjustments */}
       <div className="mb-6">

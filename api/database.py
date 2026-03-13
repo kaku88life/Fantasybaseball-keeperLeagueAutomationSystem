@@ -278,6 +278,36 @@ MIGRATIONS: dict[str, list[str]] = {
         END $$;
         """,
     ],
+    "005_yahoo_tokens": [
+        """
+        CREATE TABLE IF NOT EXISTS yahoo_tokens (
+            id SERIAL PRIMARY KEY,
+            user_id INTEGER NOT NULL,
+            access_token TEXT NOT NULL,
+            refresh_token TEXT NOT NULL,
+            token_type TEXT DEFAULT 'bearer',
+            expires_at TIMESTAMPTZ,
+            yahoo_guid TEXT DEFAULT '',
+            created_at TIMESTAMPTZ DEFAULT NOW(),
+            updated_at TIMESTAMPTZ DEFAULT NOW(),
+            UNIQUE(user_id)
+        )
+        """,
+        """
+        DO $$
+        BEGIN
+            IF NOT EXISTS (
+                SELECT 1 FROM information_schema.table_constraints
+                WHERE constraint_name = 'fk_yahoo_tokens_user_id'
+            ) THEN
+                ALTER TABLE yahoo_tokens
+                    ADD CONSTRAINT fk_yahoo_tokens_user_id
+                    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+            END IF;
+        END $$;
+        """,
+        "CREATE INDEX IF NOT EXISTS idx_yahoo_tokens_user_id ON yahoo_tokens(user_id)",
+    ],
 }
 
 
@@ -873,6 +903,81 @@ def delete_buyout(buyout_id: int):
     try:
         with conn.cursor() as cur:
             cur.execute("DELETE FROM buyouts WHERE id = %s", (buyout_id,))
+        conn.commit()
+    finally:
+        conn.close()
+
+
+# ========== Yahoo Tokens ==========
+
+def get_yahoo_token(user_id: int) -> Optional[dict]:
+    """Get Yahoo OAuth token for a specific user."""
+    conn = get_db()
+    try:
+        return _fetchone(
+            conn,
+            "SELECT * FROM yahoo_tokens WHERE user_id = %s",
+            (user_id,),
+        )
+    finally:
+        conn.close()
+
+
+def get_commissioner_yahoo_token() -> Optional[dict]:
+    """Get the Yahoo token for a commissioner user (most recently updated)."""
+    conn = get_db()
+    try:
+        return _fetchone(
+            conn,
+            """SELECT yt.* FROM yahoo_tokens yt
+               JOIN users u ON u.id = yt.user_id
+               WHERE u.is_commissioner = 1
+               ORDER BY yt.updated_at DESC
+               LIMIT 1""",
+        )
+    finally:
+        conn.close()
+
+
+def upsert_yahoo_token(
+    user_id: int,
+    access_token: str,
+    refresh_token: str,
+    expires_at=None,
+    yahoo_guid: str = "",
+    token_type: str = "bearer",
+) -> Optional[dict]:
+    """Insert or update Yahoo OAuth token for a user."""
+    conn = get_db()
+    try:
+        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+            cur.execute(
+                """INSERT INTO yahoo_tokens
+                       (user_id, access_token, refresh_token, token_type, expires_at, yahoo_guid)
+                   VALUES (%s, %s, %s, %s, %s, %s)
+                   ON CONFLICT(user_id) DO UPDATE SET
+                       access_token = EXCLUDED.access_token,
+                       refresh_token = EXCLUDED.refresh_token,
+                       token_type = EXCLUDED.token_type,
+                       expires_at = EXCLUDED.expires_at,
+                       yahoo_guid = EXCLUDED.yahoo_guid,
+                       updated_at = NOW()
+                   RETURNING *""",
+                (user_id, access_token, refresh_token, token_type, expires_at, yahoo_guid),
+            )
+            result = cur.fetchone()
+        conn.commit()
+        return dict(result) if result else None
+    finally:
+        conn.close()
+
+
+def delete_yahoo_token(user_id: int):
+    """Remove a user's Yahoo OAuth token (disconnect)."""
+    conn = get_db()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("DELETE FROM yahoo_tokens WHERE user_id = %s", (user_id,))
         conn.commit()
     finally:
         conn.close()
