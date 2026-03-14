@@ -5,8 +5,8 @@ import { useMemo } from "react";
 // Position filter groups
 export const POSITION_GROUPS = [
   { label: "全部", value: "ALL" },
-  { label: "打者", value: "BATTER" },
-  { label: "投手", value: "PITCHER" },
+  { label: "All Batters", value: "BATTER" },
+  { label: "All Pitchers", value: "PITCHER" },
   { label: "C", value: "C" },
   { label: "1B", value: "1B" },
   { label: "2B", value: "2B" },

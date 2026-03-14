@@ -110,13 +110,19 @@ export default function PlayersPage() {
   const serverOwner = ownerFilter === "__FA__" ? "" : ownerFilter;
   const serverContract = ownerFilter === "__FA__" ? "fa" : "";
 
+  // Map position filter: BATTER/PITCHER -> player_type, others -> position
+  const isBatterPitcher = positionFilter === "BATTER" || positionFilter === "PITCHER";
+  const serverPosition = isBatterPitcher || positionFilter === "ALL" ? "" : positionFilter;
+  const serverPlayerType = positionFilter === "BATTER" ? "batter" : positionFilter === "PITCHER" ? "pitcher" : "";
+
   // SWR data fetch with server-side filtering/pagination
   const swrKey = effectiveYear
     ? JSON.stringify({
         ep: `player-db-${effectiveYear}`,
         page: currentPage,
         search: debouncedSearch,
-        position: positionFilter === "ALL" ? "" : positionFilter,
+        position: serverPosition,
+        player_type: serverPlayerType,
         mlb_team: mlbTeamFilter,
         owner: serverOwner,
         contract: serverContract,
@@ -131,7 +137,8 @@ export default function PlayersPage() {
         page: currentPage,
         page_size: ROWS_PER_PAGE,
         search: debouncedSearch,
-        position: positionFilter === "ALL" ? "" : positionFilter,
+        position: serverPosition,
+        player_type: serverPlayerType,
         mlb_team: mlbTeamFilter,
         owner: serverOwner,
         contract: serverContract,
