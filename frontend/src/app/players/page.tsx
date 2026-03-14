@@ -35,10 +35,13 @@ const SORT_TYPE_OPTIONS = [
   { label: "Today", value: "date" },
 ] as const;
 
-// Sort key type
+// Rows per page
+const ROWS_PER_PAGE = 200;
+
+// Sort key type (POS, MLB, owner removed — now filter-only)
 type SortKey =
-  | "o_rank" | "ar_rank" | "name" | "position" | "mlb_team"
-  | "salary" | "owner_manager"
+  | "o_rank" | "ar_rank" | "name"
+  | "salary"
   | "r" | "h" | "hr" | "rbi" | "sb" | "avg" | "ops"
   | "w" | "sv" | "hld" | "k" | "era" | "whip" | "qs";
 
@@ -87,7 +90,11 @@ export default function PlayersPage() {
   // Filters
   const [positionFilter, setPositionFilter] = useState("ALL");
   const [mlbTeamFilter, setMlbTeamFilter] = useState("");
+  const [ownerFilter, setOwnerFilter] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Sort
   const [sort, setSort] = useState<SortState>({ key: "o_rank", dir: "asc" });
@@ -171,6 +178,16 @@ export default function PlayersPage() {
     [],
   );
 
+  // Build unique owner list from data (for owner filter dropdown)
+  const ownerList = useMemo(() => {
+    if (!data) return [];
+    const owners = new Set<string>();
+    for (const p of data.players) {
+      if (p.owner_manager) owners.add(p.owner_manager);
+    }
+    return Array.from(owners).sort();
+  }, [data]);
+
   // Filter + sort players
   const filteredPlayers = useMemo(() => {
     if (!data) return [];
@@ -186,6 +203,13 @@ export default function PlayersPage() {
       list = list.filter(
         (p) => p.mlb_team.toUpperCase() === mlbTeamFilter.toUpperCase(),
       );
+    }
+
+    // Owner filter
+    if (ownerFilter === "__FA__") {
+      list = list.filter((p) => !p.owner_manager);
+    } else if (ownerFilter) {
+      list = list.filter((p) => p.owner_manager === ownerFilter);
     }
 
     // Search
@@ -209,12 +233,6 @@ export default function PlayersPage() {
       // Determine values for comparison
       if (key === "name") {
         return mul * a.name.localeCompare(b.name);
-      } else if (key === "position") {
-        return mul * a.position.localeCompare(b.position);
-      } else if (key === "mlb_team") {
-        return mul * a.mlb_team.localeCompare(b.mlb_team);
-      } else if (key === "owner_manager") {
-        return mul * a.owner_manager.localeCompare(b.owner_manager);
       } else if (key === "o_rank") {
         va = a.o_rank;
         vb = b.o_rank;
@@ -244,7 +262,19 @@ export default function PlayersPage() {
     });
 
     return list;
-  }, [data, positionFilter, mlbTeamFilter, searchQuery, sort, statsTab]);
+  }, [data, positionFilter, mlbTeamFilter, ownerFilter, searchQuery, sort, statsTab]);
+
+  // Pagination
+  const totalPages = Math.max(1, Math.ceil(filteredPlayers.length / ROWS_PER_PAGE));
+  const paginatedPlayers = useMemo(() => {
+    const start = (currentPage - 1) * ROWS_PER_PAGE;
+    return filteredPlayers.slice(start, start + ROWS_PER_PAGE);
+  }, [filteredPlayers, currentPage]);
+
+  // Reset page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [positionFilter, mlbTeamFilter, ownerFilter, searchQuery, sort, statsTab]);
 
   // Sort arrow indicator
   const SortArrow = ({ col }: { col: SortKey }) => {
@@ -358,6 +388,21 @@ export default function PlayersPage() {
             ))}
           </select>
 
+          {/* Owner dropdown */}
+          <select
+            value={ownerFilter}
+            onChange={(e) => setOwnerFilter(e.target.value)}
+            className="rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-indigo-500 focus:ring-indigo-500"
+          >
+            <option value="">All Owners</option>
+            <option value="__FA__">FA (Free Agent)</option>
+            {ownerList.map((o) => (
+              <option key={o} value={o}>
+                {o}
+              </option>
+            ))}
+          </select>
+
           {/* Sort Type dropdown (stat time range for Yahoo rankings) */}
           <select
             value={sortType}
@@ -439,9 +484,16 @@ export default function PlayersPage() {
         </div>
       )}
 
-      {/* Result count */}
-      <div className="mb-2 text-sm text-gray-500">
-        顯示 {filteredPlayers.length} / {data?.total_count ?? 0} 位球員
+      {/* Result count + pagination info */}
+      <div className="mb-2 flex items-center justify-between text-sm text-gray-500">
+        <span>
+          篩選結果 {filteredPlayers.length} / {data?.total_count ?? 0} 位球員
+          {totalPages > 1 && (
+            <span className="ml-2">
+              (第 {currentPage}/{totalPages} 頁，顯示 {(currentPage - 1) * ROWS_PER_PAGE + 1}-{Math.min(currentPage * ROWS_PER_PAGE, filteredPlayers.length)} 筆)
+            </span>
+          )}
+        </span>
       </div>
 
       {/* Table */}
@@ -452,8 +504,12 @@ export default function PlayersPage() {
               <SortTh col="o_rank" label="OR" className="w-10" />
               <SortTh col="ar_rank" label="AR" className="w-10" />
               <SortTh col="name" label="球員" />
-              <SortTh col="position" label="Pos" />
-              <SortTh col="mlb_team" label="MLB" />
+              <th className="whitespace-nowrap px-2 py-2 text-left text-xs font-medium uppercase text-gray-500">
+                Pos
+              </th>
+              <th className="whitespace-nowrap px-2 py-2 text-left text-xs font-medium uppercase text-gray-500">
+                MLB
+              </th>
               <th className="px-2 py-2 text-left text-xs font-medium uppercase text-gray-500">
                 2025
               </th>
@@ -461,7 +517,9 @@ export default function PlayersPage() {
                 2026
               </th>
               <SortTh col="salary" label="$" />
-              <SortTh col="owner_manager" label="歸屬" />
+              <th className="whitespace-nowrap px-2 py-2 text-left text-xs font-medium uppercase text-gray-500">
+                歸屬
+              </th>
 
               {/* Stats columns */}
               {HITTING_COLS.map((c) => (
@@ -483,7 +541,7 @@ export default function PlayersPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100 bg-white">
-            {filteredPlayers.map((p, idx) => {
+            {paginatedPlayers.map((p, idx) => {
               const pitcher = isPitcher(p.position);
               const statSource =
                 statsTab === "projections" ? p.projections : p.stats;
@@ -602,7 +660,7 @@ export default function PlayersPage() {
               );
             })}
 
-            {filteredPlayers.length === 0 && (
+            {paginatedPlayers.length === 0 && (
               <tr>
                 <td
                   colSpan={9 + HITTING_COLS.length + PITCHING_COLS.length}
@@ -615,6 +673,74 @@ export default function PlayersPage() {
           </tbody>
         </table>
       </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="mt-4 flex items-center justify-center gap-2">
+          <button
+            onClick={() => setCurrentPage(1)}
+            disabled={currentPage === 1}
+            className="rounded border border-gray-300 px-2 py-1 text-xs text-gray-600 hover:bg-gray-100 disabled:opacity-40"
+          >
+            &laquo;
+          </button>
+          <button
+            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+            disabled={currentPage === 1}
+            className="rounded border border-gray-300 px-3 py-1 text-sm text-gray-600 hover:bg-gray-100 disabled:opacity-40"
+          >
+            上一頁
+          </button>
+
+          {/* Page numbers */}
+          {Array.from({ length: totalPages }, (_, i) => i + 1)
+            .filter((p) => {
+              // Show: first, last, and pages near current
+              if (p === 1 || p === totalPages) return true;
+              if (Math.abs(p - currentPage) <= 2) return true;
+              return false;
+            })
+            .reduce<(number | "...")[]>((acc, p, i, arr) => {
+              if (i > 0 && p - (arr[i - 1] as number) > 1) acc.push("...");
+              acc.push(p);
+              return acc;
+            }, [])
+            .map((item, i) =>
+              item === "..." ? (
+                <span key={`ellipsis-${i}`} className="px-1 text-gray-400">
+                  ...
+                </span>
+              ) : (
+                <button
+                  key={item}
+                  onClick={() => setCurrentPage(item as number)}
+                  className={`rounded border px-3 py-1 text-sm ${
+                    currentPage === item
+                      ? "border-indigo-500 bg-indigo-600 text-white"
+                      : "border-gray-300 text-gray-600 hover:bg-gray-100"
+                  }`}
+                >
+                  {item}
+                </button>
+              ),
+            )}
+
+          <button
+            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+            disabled={currentPage === totalPages}
+            className="rounded border border-gray-300 px-3 py-1 text-sm text-gray-600 hover:bg-gray-100 disabled:opacity-40"
+          >
+            下一頁
+          </button>
+          <button
+            onClick={() => setCurrentPage(totalPages)}
+            disabled={currentPage === totalPages}
+            className="rounded border border-gray-300 px-2 py-1 text-xs text-gray-600 hover:bg-gray-100 disabled:opacity-40"
+          >
+            &raquo;
+          </button>
+        </div>
+      )}
 
       {/* Player Stats Modal */}
       {modalPlayer && (
