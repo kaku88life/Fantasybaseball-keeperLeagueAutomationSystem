@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth";
+import { SWRProvider } from "@/lib/swr-config";
 import { ToastProvider } from "@/components/Toast";
 import Navbar from "@/components/Navbar";
 import LineNamePrompt from "@/components/LineNamePrompt";
@@ -18,15 +19,17 @@ export default function RootLayout({
   return (
     <html lang="zh-TW">
       <body className="min-h-screen bg-gray-50 text-gray-900">
-        <ToastProvider>
-          <AuthProvider>
-            <Navbar />
-            <LineNamePrompt />
-            <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-              {children}
-            </main>
-          </AuthProvider>
-        </ToastProvider>
+        <SWRProvider>
+          <ToastProvider>
+            <AuthProvider>
+              <Navbar />
+              <LineNamePrompt />
+              <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+                {children}
+              </main>
+            </AuthProvider>
+          </ToastProvider>
+        </SWRProvider>
       </body>
     </html>
   );

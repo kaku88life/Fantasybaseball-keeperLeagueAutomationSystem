@@ -137,6 +137,7 @@ export interface KeptPlayer {
   action: string;
   salary: number;
   position: string;
+  mlb_team: string;
 }
 
 export interface KeeperResultTeam {
@@ -182,6 +183,17 @@ export async function getKeeperOptions(
   year: number,
 ): Promise<import("@/types").PlayerKeeperOptions[]> {
   return request(`/api/teams/${teamId}/keeper-options/${year}`);
+}
+
+export async function getKeeperPageData(
+  teamId: number,
+  year: number,
+): Promise<{
+  roster: import("@/types").Team;
+  options: import("@/types").PlayerKeeperOptions[];
+  selections: import("@/types").KeeperSelectionsWithValidation;
+}> {
+  return request(`/api/teams/${teamId}/keeper-page/${year}`);
 }
 
 export async function getKeeperSelections(
@@ -460,10 +472,29 @@ export async function deleteBuyout(buyoutId: number): Promise<{ message: string 
 
 // ========== Player Database (Public) ==========
 
+export interface PlayerDatabaseParams {
+  page?: number;
+  page_size?: number;
+  search?: string;
+  position?: string;
+  owner?: string;
+  contract?: string;
+  player_type?: string;
+  mlb_team?: string;
+  sort_key?: string;
+  sort_dir?: string;
+}
+
 export async function getPlayerDatabase(
   year: number,
+  params: PlayerDatabaseParams = {},
 ): Promise<import("@/types").PlayerDatabaseResponse> {
-  return request(`/api/players/database/${year}`);
+  const qs = new URLSearchParams();
+  for (const [k, v] of Object.entries(params)) {
+    if (v !== undefined && v !== "" && v !== null) qs.set(k, String(v));
+  }
+  const query = qs.toString();
+  return request(`/api/players/database/${year}${query ? `?${query}` : ""}`);
 }
 
 // ========== Player Rankings (Commissioner) ==========

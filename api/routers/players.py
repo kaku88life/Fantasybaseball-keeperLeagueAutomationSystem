@@ -138,8 +138,20 @@ async def _get_mlb_stats(mlb_id: int) -> dict:
 
 
 @router.get("/database/{year}")
-async def get_player_database(year: int):
-    """Get the full player database for a year.
+async def get_player_database(
+    year: int,
+    page: int = Query(1, ge=1, description="Page number"),
+    page_size: int = Query(200, ge=1, le=500, description="Items per page"),
+    search: str = Query("", description="Search player name"),
+    position: str = Query("", description="Position filter (e.g. SP, C, OF, ALL)"),
+    owner: str = Query("", description="Owner manager name filter"),
+    contract: str = Query("", description="Contract filter: fa, owned, rookie"),
+    player_type: str = Query("", description="Batter or pitcher filter: batter, pitcher"),
+    mlb_team: str = Query("", description="MLB team filter (e.g. NYY, LAD)"),
+    sort_key: str = Query("o_rank", description="Sort column"),
+    sort_dir: str = Query("asc", description="Sort direction: asc, desc"),
+):
+    """Get the player database for a year with server-side filtering and pagination.
 
     Combines league snapshot data (ownership, contracts) with
     player rankings (O_Rank, X_Rank, stats, projections).
@@ -263,15 +275,107 @@ async def get_player_database(year: int):
     # 4. Combine: league players + unowned ranked players
     combined = all_league_players + ranked_players
 
-    # Sort: ranked players first (by o_rank), then unranked
-    combined.sort(key=lambda p: (p["o_rank"] if p["o_rank"] is not None else 99999))
+    # 5. Server-side filtering
+    filtered = combined
+
+    # Search filter
+    if search:
+        q = search.lower()
+        filtered = [p for p in filtered if q in p["name"].lower()]
+
+    # Position filter (supports grouped positions like "IF", "OF")
+    if position and position != "ALL":
+        pos_upper = position.upper()
+        # Position group mappings
+        POSITION_GROUPS = {
+            "IF": {"C", "1B", "2B", "3B", "SS", "IF"},
+            "OF": {"LF", "CF", "RF", "OF"},
+            "SP": {"SP"},
+            "RP": {"RP"},
+            "P": {"SP", "RP", "P"},
+        }
+        match_set = POSITION_GROUPS.get(pos_upper, {pos_upper})
+        def _matches_position(player_pos: str) -> bool:
+            if not player_pos:
+                return False
+            parts = {s.strip().upper() for s in player_pos.split(",")}
+            return bool(parts & match_set)
+        filtered = [p for p in filtered if _matches_position(p["position"])]
+
+    # MLB team filter
+    if mlb_team:
+        filtered = [p for p in filtered if p.get("mlb_team", "").upper() == mlb_team.upper()]
+
+    # Owner filter
+    if owner:
+        filtered = [p for p in filtered if p.get("owner_manager", "") == owner]
+
+    # Contract filter
+    if contract == "fa":
+        filtered = [p for p in filtered
+                     if not p.get("owner_manager")
+                     or p.get("contract_type") in ("", "O")]
+    elif contract == "owned":
+        filtered = [p for p in filtered
+                     if p.get("owner_manager")
+                     and p.get("contract_type") not in ("", "O")]
+    elif contract == "rookie":
+        filtered = [p for p in filtered if p.get("contract_type") == "R"]
+
+    # Player type filter (batter/pitcher)
+    if player_type == "batter":
+        pitcher_pos = {"SP", "RP", "P"}
+        filtered = [p for p in filtered
+                     if not any(s.strip().upper() in pitcher_pos
+                                for s in (p.get("position", "") or "").split(","))]
+    elif player_type == "pitcher":
+        pitcher_pos = {"SP", "RP", "P"}
+        filtered = [p for p in filtered
+                     if any(s.strip().upper() in pitcher_pos
+                            for s in (p.get("position", "") or "").split(","))]
+
+    # 6. Server-side sorting
+    def _sort_val(p: dict):
+        if sort_key in ("o_rank", "ar_rank"):
+            v = p.get(sort_key)
+            return v if v is not None else 99999
+        if sort_key == "name":
+            return p.get("name", "").lower()
+        if sort_key == "salary":
+            return p.get("salary", 0)
+        # Stat keys
+        stats = p.get("stats", {})
+        v = stats.get(sort_key)
+        if v is not None:
+            try:
+                return float(v)
+            except (ValueError, TypeError):
+                return 0
+        return 0
+
+    reverse = sort_dir == "desc"
+    filtered.sort(key=_sort_val, reverse=reverse)
+
+    # 7. Pagination
+    total_count = len(filtered)
+    total_pages = max(1, (total_count + page_size - 1) // page_size)
+    start = (page - 1) * page_size
+    end = start + page_size
+    page_players = filtered[start:end]
+
+    # Also collect unique owners for the owner dropdown
+    all_owners = sorted({p["owner_manager"] for p in combined if p.get("owner_manager")})
 
     return {
         "year": year,
-        "total_count": len(combined),
+        "total_count": total_count,
+        "page": page,
+        "page_size": page_size,
+        "total_pages": total_pages,
         "has_rankings": ranking_status["has_data"],
         "last_fetched_at": ranking_status.get("last_fetched_at"),
-        "players": combined,
+        "owners": all_owners,
+        "players": page_players,
     }
 
 

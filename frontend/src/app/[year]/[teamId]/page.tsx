@@ -1,12 +1,11 @@
 "use client";
 
-import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useCallback, useMemo, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import useSWR from "swr";
 import {
-  getKeeperOptions,
-  getKeeperSelections,
-  getTeamRoster,
+  getKeeperPageData,
   submitKeeperList,
   updateKeeperSelections,
 } from "@/lib/api";
@@ -34,15 +33,41 @@ export default function KeeperSelectionPage() {
   const teamId = Number(params.teamId);
   const { user } = useAuth();
 
-  const [team, setTeam] = useState<Team | null>(null);
-  const [options, setOptions] = useState<PlayerKeeperOptions[]>([]);
+  // SWR: single combined API call (roster + options + selections)
+  const [selectionsLoaded, setSelectionsLoaded] = useState(false);
+  const { data: pageData, error: pageErr, mutate: retryLoad } = useSWR(
+    year && teamId ? `keeper-page-${teamId}-${year}` : null,
+    () => getKeeperPageData(teamId, year),
+    {
+      onSuccess: (data) => {
+        // Initialize selections from server on first load
+        if (!selectionsLoaded) {
+          const sel: Record<string, Selection> = {};
+          for (const s of data.selections.selections) {
+            sel[s.player_name] = {
+              action: s.action,
+              extension_years: s.extension_years,
+            };
+          }
+          setSelections(sel);
+          setServerValidation(data.selections.validation);
+          setIsSubmitted(data.selections.is_submitted);
+          setSelectionsLoaded(true);
+        }
+      },
+    },
+  );
+  const team = pageData?.roster ?? null;
+  const options = pageData?.options ?? [];
+  const [actionError, setActionError] = useState("");
+  const error = pageErr?.message || actionError;
+
   const [selections, setSelections] = useState<Record<string, Selection>>({});
   const [serverValidation, setServerValidation] =
     useState<ValidationResult | null>(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [saving, setSaving] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState("");
   const [saveStatus, setSaveStatus] = useState<
     "idle" | "saving" | "saved" | "error"
   >("idle");
@@ -69,49 +94,6 @@ export default function KeeperSelectionPage() {
   // Use client validation for display
   const displayValidation = clientValidation;
   const fin = displayValidation?.financial_summary;
-
-  // Load data with retry support
-  const loadData = useCallback(async () => {
-    setError("");
-    setTeam(null);
-    try {
-      const [t, o] = await Promise.all([
-        getTeamRoster(teamId, year),
-        getKeeperOptions(teamId, year),
-      ]);
-      setTeam(t);
-      setOptions(o);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to load data");
-    }
-  }, [teamId, year]);
-
-  useEffect(() => {
-    if (!year || !teamId) return;
-    loadData();
-  }, [year, teamId, loadData]);
-
-  // Load saved selections
-  useEffect(() => {
-    if (!year || !teamId || !user) return;
-
-    getKeeperSelections(teamId, year)
-      .then((data) => {
-        const sel: Record<string, Selection> = {};
-        for (const s of data.selections) {
-          sel[s.player_name] = {
-            action: s.action,
-            extension_years: s.extension_years,
-          };
-        }
-        setSelections(sel);
-        setServerValidation(data.validation);
-        setIsSubmitted(data.is_submitted);
-      })
-      .catch(() => {
-        // No saved selections yet
-      });
-  }, [year, teamId, user]);
 
   // Auto-save function
   const autoSave = useCallback(async () => {
@@ -165,7 +147,7 @@ export default function KeeperSelectionPage() {
       setSaveStatus("saved");
       setTimeout(() => setSaveStatus("idle"), 2000);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Save failed");
+      setActionError(e instanceof Error ? e.message : "Save failed");
     } finally {
       setSaving(false);
     }
@@ -206,7 +188,7 @@ export default function KeeperSelectionPage() {
     }
 
     setSubmitting(true);
-    setError("");
+    setActionError("");
     try {
       const sels = Object.entries(autoFilled).map(([name, s]) => ({
         player_name: name,
@@ -217,7 +199,7 @@ export default function KeeperSelectionPage() {
       await submitKeeperList(teamId, year);
       setIsSubmitted(true);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Submit failed");
+      setActionError(e instanceof Error ? e.message : "Submit failed");
     } finally {
       setSubmitting(false);
     }
@@ -259,7 +241,7 @@ export default function KeeperSelectionPage() {
         <p className="text-red-600">{error}</p>
         <div className="mt-4 flex flex-col items-center gap-3">
           <button
-            onClick={loadData}
+            onClick={() => retryLoad()}
             className="rounded bg-indigo-600 px-4 py-2 text-sm text-white hover:bg-indigo-500"
           >
             重試 Retry
@@ -421,6 +403,46 @@ export default function KeeperSelectionPage() {
               </p>
             </div>
           </div>
+
+          {/* Team Concentration (kept players only) */}
+          {(() => {
+            const keptTeamCounts: Record<string, number> = {};
+            for (const p of team.players) {
+              if (!p.mlb_team) continue;
+              const sel = selections[p.name];
+              const ct = p.contract.contract_type;
+              // Count kept players: has keep/extend/rookie action, or mandatory N contract
+              const isKept = sel
+                ? !["release", "release_normal", "fa"].includes(sel.action)
+                : ct === "N"; // N contracts are mandatory keepers if no selection
+              if (!isKept) continue;
+              if (ct === "O") continue; // O contracts become FA
+              keptTeamCounts[p.mlb_team] = (keptTeamCounts[p.mlb_team] || 0) + 1;
+            }
+            const concentrated = Object.entries(keptTeamCounts)
+              .filter(([, c]) => c >= 2)
+              .sort((a, b) => b[1] - a[1]);
+            if (concentrated.length === 0) return null;
+            return (
+              <div className="mt-3 rounded bg-sky-50 p-3">
+                <p className="text-xs text-gray-500">同隊球員集中度 Team Concentration (留用)</p>
+                <div className="mt-1 flex flex-wrap gap-2">
+                  {concentrated.map(([t, c]) => (
+                    <span
+                      key={t}
+                      className={`rounded px-2 py-0.5 text-xs font-bold ${
+                        c >= 3
+                          ? "bg-amber-200 text-amber-800"
+                          : "bg-sky-100 text-sky-700"
+                      }`}
+                    >
+                      {t}: {c}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
         </div>
       )}
 
@@ -478,6 +500,7 @@ export default function KeeperSelectionPage() {
               value={positionFilter}
               onChange={setPositionFilter}
             />
+            <TeamConcentrationBadges players={activePlayers} />
           </div>
           <PlayerTable
             players={activePlayers}
@@ -729,6 +752,9 @@ function PlayerTable({
             <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 sm:px-3">
               守備
             </th>
+            <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 sm:px-3">
+              球隊
+            </th>
             <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 sm:px-3">
               球員 Player
             </th>
@@ -750,7 +776,7 @@ function PlayerTable({
           {displayPlayers.length === 0 && (
             <tr>
               <td
-                colSpan={6}
+                colSpan={7}
                 className="px-3 py-4 text-center text-sm text-gray-400"
               >
                 沒有符合條件的球員 No players match this filter
@@ -786,7 +812,7 @@ function PlayerTable({
               {showGroupHeader && (
                 <tr>
                   <td
-                    colSpan={6}
+                    colSpan={7}
                     className={`px-2 py-1.5 text-xs font-bold sm:px-3 ${groupCfg.style}`}
                   >
                     {groupCfg.label}
@@ -804,6 +830,9 @@ function PlayerTable({
               >
                 <td className="px-2 py-2 sm:px-3">
                   <span className="text-xs">{player.position}</span>
+                </td>
+                <td className="px-2 py-2 text-center sm:px-3">
+                  <span className="text-xs text-gray-500">{player.mlb_team || ""}</span>
                 </td>
                 <td className="px-2 py-2 font-medium sm:px-3">
                   <div className="flex items-center gap-1.5">
@@ -951,4 +980,30 @@ function PlayerTable({
   );
 }
 
-// PositionFilter is now imported from @/components/PositionFilter
+// ---- Team Concentration Badges (all players in the section) ----
+function TeamConcentrationBadges({ players }: { players: import("@/types").Player[] }) {
+  const counts: Record<string, number> = {};
+  for (const p of players) {
+    if (p.mlb_team) {
+      counts[p.mlb_team] = (counts[p.mlb_team] || 0) + 1;
+    }
+  }
+  const concentrated = Object.entries(counts)
+    .filter(([, c]) => c >= 2)
+    .sort((a, b) => b[1] - a[1]);
+  if (concentrated.length === 0) return null;
+  return (
+    <div className="flex flex-wrap gap-1">
+      {concentrated.map(([t, c]) => (
+        <span
+          key={t}
+          className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${
+            c >= 3 ? "bg-amber-200 text-amber-800" : "bg-gray-200 text-gray-600"
+          }`}
+        >
+          {t}:{c}
+        </span>
+      ))}
+    </div>
+  );
+}

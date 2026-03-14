@@ -175,12 +175,14 @@ async def get_keeper_results(year: int):
                     except (ValueError, IndexError):
                         salary = 0
 
-                # Get position from team model
+                # Get position and mlb_team from team model
                 position = ""
+                mlb_team = ""
                 if team_model:
                     for p in team_model.players:
                         if p.name == sel["player_name"]:
                             position = p.position if hasattr(p, "position") else ""
+                            mlb_team = p.mlb_team if hasattr(p, "mlb_team") else ""
                             break
 
                 kept_players.append({
@@ -190,6 +192,7 @@ async def get_keeper_results(year: int):
                     "action": action,
                     "salary": salary,
                     "position": position,
+                    "mlb_team": mlb_team,
                 })
                 keeper_cost += salary
 

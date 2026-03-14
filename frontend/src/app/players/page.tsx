@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import useSWR from "swr";
 import {
   getPlayerDatabase,
   getYears,
@@ -11,7 +12,7 @@ import { useAuth } from "@/lib/auth";
 import ContractBadge from "@/components/ContractBadge";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import PlayerStatsModal from "@/components/PlayerStatsModal";
-import { POSITION_GROUPS, matchesPosition } from "@/components/PositionFilter";
+import { POSITION_GROUPS } from "@/components/PositionFilter";
 import type {
   ContractType,
   PlayerDatabaseEntry,
@@ -82,24 +83,69 @@ export default function PlayersPage() {
   const { user } = useAuth();
   const isCommissioner = user?.is_commissioner ?? false;
 
-  // State
-  const [years, setYears] = useState<number[]>([]);
-  const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
-  const [data, setData] = useState<PlayerDatabaseResponse | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string>("");
+  // SWR cached data
+  const { data: years = [] } = useSWR("years", getYears);
+  const [selectedYear, setSelectedYear] = useState<number>(0);
+  const effectiveYear = selectedYear || (years.length > 0 ? Math.max(...years) : new Date().getFullYear());
 
-  // Filters
+  // Filters (sent to server)
   const [positionFilter, setPositionFilter] = useState("ALL");
   const [mlbTeamFilter, setMlbTeamFilter] = useState("");
   const [ownerFilter, setOwnerFilter] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  // Debounced search for server queries
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(searchQuery), 400);
+    return () => clearTimeout(t);
+  }, [searchQuery]);
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
 
   // Sort
   const [sort, setSort] = useState<SortState>({ key: "o_rank", dir: "asc" });
+
+  // Map owner filter: __FA__ -> contract=fa, else owner=name
+  const serverOwner = ownerFilter === "__FA__" ? "" : ownerFilter;
+  const serverContract = ownerFilter === "__FA__" ? "fa" : "";
+
+  // SWR data fetch with server-side filtering/pagination
+  const swrKey = effectiveYear
+    ? JSON.stringify({
+        ep: `player-db-${effectiveYear}`,
+        page: currentPage,
+        search: debouncedSearch,
+        position: positionFilter === "ALL" ? "" : positionFilter,
+        mlb_team: mlbTeamFilter,
+        owner: serverOwner,
+        contract: serverContract,
+        sort_key: sort.key,
+        sort_dir: sort.dir,
+      })
+    : null;
+  const { data, error: dataErr, isLoading: loading, mutate: mutatePlayerData } = useSWR(
+    swrKey,
+    () =>
+      getPlayerDatabase(effectiveYear, {
+        page: currentPage,
+        page_size: ROWS_PER_PAGE,
+        search: debouncedSearch,
+        position: positionFilter === "ALL" ? "" : positionFilter,
+        mlb_team: mlbTeamFilter,
+        owner: serverOwner,
+        contract: serverContract,
+        sort_key: sort.key,
+        sort_dir: sort.dir,
+      }),
+    { keepPreviousData: true },
+  );
+  const error = dataErr?.message || "";
+
+  // Reset page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [positionFilter, mlbTeamFilter, ownerFilter, debouncedSearch, sort]);
 
   // Stats tab
   const [statsTab, setStatsTab] = useState<"stats" | "projections">("stats");
@@ -111,62 +157,30 @@ export default function PlayersPage() {
   const [sortType, setSortType] = useState("season");
 
   // Commissioner ranking fetch
-  const [rankingStatus, setRankingStatus] = useState<RankingFetchStatus | null>(null);
+  const { data: rankingStatus, mutate: mutateRankingStatus } = useSWR(
+    isCommissioner && effectiveYear ? `ranking-status-${effectiveYear}` : null,
+    () => getRankingFetchStatus(effectiveYear),
+  );
   const [fetching, setFetching] = useState(false);
   const [fetchMessage, setFetchMessage] = useState("");
-
-  // Load years
-  useEffect(() => {
-    getYears()
-      .then((y) => {
-        setYears(y);
-        if (y.length > 0) setSelectedYear(Math.max(...y));
-      })
-      .catch(() => {});
-  }, []);
-
-  // Load player data
-  useEffect(() => {
-    setLoading(true);
-    setError("");
-    getPlayerDatabase(selectedYear)
-      .then((d) => {
-        setData(d);
-        setLoading(false);
-      })
-      .catch((e) => {
-        setError(e.message || "Failed to load player data");
-        setLoading(false);
-      });
-  }, [selectedYear]);
-
-  // Load ranking status for commissioner
-  useEffect(() => {
-    if (!isCommissioner) return;
-    getRankingFetchStatus(selectedYear)
-      .then(setRankingStatus)
-      .catch(() => {});
-  }, [selectedYear, isCommissioner]);
 
   // Handle ranking fetch
   const handleFetchRankings = useCallback(async () => {
     setFetching(true);
     setFetchMessage("");
     try {
-      const result = await fetchYahooRankings(selectedYear, sortType);
+      const result = await fetchYahooRankings(effectiveYear, sortType);
       setFetchMessage(result.message);
-      // Reload data
-      const d = await getPlayerDatabase(selectedYear);
-      setData(d);
-      const status = await getRankingFetchStatus(selectedYear);
-      setRankingStatus(status);
+      // Revalidate cached data
+      mutatePlayerData();
+      mutateRankingStatus();
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : "Fetch failed";
       setFetchMessage(`Error: ${msg}`);
     } finally {
       setFetching(false);
     }
-  }, [selectedYear, sortType]);
+  }, [effectiveYear, sortType, mutatePlayerData, mutateRankingStatus]);
 
   // Sort handler
   const handleSort = useCallback(
@@ -180,106 +194,10 @@ export default function PlayersPage() {
     [],
   );
 
-  // Build unique owner list from data (for owner filter dropdown)
-  const ownerList = useMemo(() => {
-    if (!data) return [];
-    const owners = new Set<string>();
-    for (const p of data.players) {
-      if (p.owner_manager) owners.add(p.owner_manager);
-    }
-    return Array.from(owners).sort();
-  }, [data]);
-
-  // Filter + sort players
-  const filteredPlayers = useMemo(() => {
-    if (!data) return [];
-    let list = data.players;
-
-    // Position filter
-    if (positionFilter !== "ALL") {
-      list = list.filter((p) => matchesPosition(p.position, positionFilter));
-    }
-
-    // MLB team filter
-    if (mlbTeamFilter) {
-      list = list.filter(
-        (p) => p.mlb_team.toUpperCase() === mlbTeamFilter.toUpperCase(),
-      );
-    }
-
-    // Owner filter
-    // FA includes: unowned players + O-contract players becoming FA next year
-    if (ownerFilter === "__FA__") {
-      list = list.filter(
-        (p) => !p.owner_manager || p.next_contract_type === "FA",
-      );
-    } else if (ownerFilter) {
-      list = list.filter((p) => p.owner_manager === ownerFilter);
-    }
-
-    // Search
-    if (searchQuery.trim()) {
-      const q = searchQuery.trim().toLowerCase();
-      list = list.filter(
-        (p) =>
-          p.name.toLowerCase().includes(q) ||
-          p.owner_manager.toLowerCase().includes(q),
-      );
-    }
-
-    // Sort
-    const { key, dir } = sort;
-    const mul = dir === "asc" ? 1 : -1;
-
-    list = [...list].sort((a, b) => {
-      let va: number | string | null = null;
-      let vb: number | string | null = null;
-
-      // Determine values for comparison
-      if (key === "name") {
-        return mul * a.name.localeCompare(b.name);
-      } else if (key === "o_rank") {
-        va = a.o_rank;
-        vb = b.o_rank;
-      } else if (key === "ar_rank") {
-        va = a.ar_rank;
-        vb = b.ar_rank;
-      } else if (key === "salary") {
-        va = a.salary;
-        vb = b.salary;
-      } else {
-        // Stat columns
-        const src = statsTab === "projections" ? "projections" : "stats";
-        va = (a[src] as Record<string, number | undefined>)[key] ?? null;
-        vb = (b[src] as Record<string, number | undefined>)[key] ?? null;
-      }
-
-      // null sorts to end
-      if (va === null && vb === null) return 0;
-      if (va === null) return 1;
-      if (vb === null) return -1;
-
-      if (typeof va === "number" && typeof vb === "number") {
-        return mul * (va - vb);
-      }
-
-      return 0;
-    });
-
-    return list;
-  }, [data, positionFilter, mlbTeamFilter, ownerFilter, searchQuery, sort, statsTab]);
-
-  // Pagination
-  const totalPages = Math.max(1, Math.ceil(filteredPlayers.length / ROWS_PER_PAGE));
-  const paginatedPlayers = useMemo(() => {
-    const start = (currentPage - 1) * ROWS_PER_PAGE;
-    return filteredPlayers.slice(start, start + ROWS_PER_PAGE);
-  }, [filteredPlayers, currentPage]);
-
-  // Reset page when filters change
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [positionFilter, mlbTeamFilter, ownerFilter, searchQuery, sort, statsTab]);
+  // Server provides owner list and pagination
+  const ownerList = data?.owners ?? [];
+  const totalPages = data?.total_pages ?? 1;
+  const paginatedPlayers = data?.players ?? [];
 
   // Sort arrow indicator
   const SortArrow = ({ col }: { col: SortKey }) => {
@@ -355,7 +273,7 @@ export default function PlayersPage() {
         <div className="flex flex-wrap items-center gap-2">
           {/* Year dropdown */}
           <select
-            value={selectedYear}
+            value={effectiveYear}
             onChange={(e) => setSelectedYear(Number(e.target.value))}
             className="rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-indigo-500 focus:ring-indigo-500"
           >
@@ -492,10 +410,10 @@ export default function PlayersPage() {
       {/* Result count + pagination info */}
       <div className="mb-2 flex items-center justify-between text-sm text-gray-500">
         <span>
-          篩選結果 {filteredPlayers.length} / {data?.total_count ?? 0} 位球員
+          篩選結果 {data?.total_count ?? 0} 位球員
           {totalPages > 1 && (
             <span className="ml-2">
-              (第 {currentPage}/{totalPages} 頁，顯示 {(currentPage - 1) * ROWS_PER_PAGE + 1}-{Math.min(currentPage * ROWS_PER_PAGE, filteredPlayers.length)} 筆)
+              (第 {currentPage}/{totalPages} 頁，顯示 {paginatedPlayers.length} 筆)
             </span>
           )}
         </span>

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import useSWR from "swr";
 import {
   getKeeperResults,
   getLeagueSummary,
@@ -44,43 +45,20 @@ export default function YearOverviewPage() {
   const { user } = useAuth();
 
   const [activeTab, setActiveTab] = useState<TabKey>("season-end");
-  const [summary, setSummary] = useState<{
-    year: number;
-    salary_cap: number;
-    teams: TeamSummary[];
-  } | null>(null);
-  const [keeperResults, setKeeperResults] = useState<{
-    year: number;
-    teams: KeeperResultTeam[];
-  } | null>(null);
-  const [keeperLoading, setKeeperLoading] = useState(false);
-  const [dbTeams, setDbTeams] = useState<DBTeam[]>([]);
-  const [years, setYears] = useState<number[]>([]);
-  const [error, setError] = useState("");
 
-  useEffect(() => {
-    getYears().then(setYears).catch(() => {});
-    getTeams().then(setDbTeams).catch(() => {});
-  }, []);
+  // SWR cached data fetches
+  const { data: years = [] } = useSWR("years", getYears);
+  const { data: dbTeams = [] } = useSWR("teams", getTeams);
+  const { data: summary, error: summaryErr } = useSWR(
+    year ? `summary-${year}` : null,
+    () => getLeagueSummary(year),
+  );
+  const { data: keeperResults, isLoading: keeperLoading } = useSWR(
+    activeTab === "keepers" && year ? `keeper-results-${year}` : null,
+    () => getKeeperResults(year),
+  );
 
-  useEffect(() => {
-    if (!year) return;
-    setError("");
-    getLeagueSummary(year)
-      .then(setSummary)
-      .catch((e) => setError(e.message));
-  }, [year]);
-
-  // Load keeper results when tab switches to "keepers"
-  useEffect(() => {
-    if (activeTab !== "keepers" || !year) return;
-    if (keeperResults && keeperResults.year === year) return;
-    setKeeperLoading(true);
-    getKeeperResults(year)
-      .then(setKeeperResults)
-      .catch(() => {})
-      .finally(() => setKeeperLoading(false));
-  }, [activeTab, year, keeperResults]);
+  const error = summaryErr?.message || "";
 
   // Find DB team id by manager name
   const findTeamId = (managerName: string): number | null => {
@@ -197,7 +175,7 @@ export default function YearOverviewPage() {
       )}
       {activeTab === "keepers" && (
         <KeepersTab
-          keeperResults={keeperResults}
+          keeperResults={keeperResults ?? null}
           loading={keeperLoading}
           user={user}
           year={year}
@@ -402,6 +380,17 @@ function KeepersTab({
             (p) => p.next_contract && p.next_contract.includes("/R")
           ).length;
 
+          // Team concentration (2+ players from same MLB team)
+          const teamCounts: Record<string, number> = {};
+          for (const p of team.kept_players) {
+            if (p.mlb_team) {
+              teamCounts[p.mlb_team] = (teamCounts[p.mlb_team] || 0) + 1;
+            }
+          }
+          const concentrated = Object.entries(teamCounts)
+            .filter(([, c]) => c >= 2)
+            .sort((a, b) => b[1] - a[1]);
+
           return (
             <div
               key={team.team_id}
@@ -442,6 +431,20 @@ function KeepersTab({
                   )}
                 </div>
                 <div className="flex items-center gap-2 shrink-0 ml-2">
+                  {concentrated.length > 0 && (
+                    <div className="hidden sm:flex gap-0.5">
+                      {concentrated.map(([t, c]) => (
+                        <span
+                          key={t}
+                          className={`rounded px-1 py-0.5 text-[10px] font-bold ${
+                            c >= 3 ? "bg-amber-200 text-amber-800" : "bg-gray-200 text-gray-600"
+                          }`}
+                        >
+                          {t}:{c}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                   <span className="rounded bg-gray-100 px-2 py-0.5 text-xs font-mono font-medium text-gray-700">
                     {activeCount}/{TOTAL_ROSTER_SLOTS}
                     {farmCount > 0 && (
@@ -514,10 +517,27 @@ function KeepersTab({
                     </div>
                   </div>
 
+                  {/* Team concentration (mobile view) */}
+                  {concentrated.length > 0 && (
+                    <div className="mb-2 flex flex-wrap gap-1 sm:hidden">
+                      {concentrated.map(([t, c]) => (
+                        <span
+                          key={t}
+                          className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${
+                            c >= 3 ? "bg-amber-200 text-amber-800" : "bg-gray-200 text-gray-600"
+                          }`}
+                        >
+                          {t}:{c}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
                   {/* Player list */}
                   <div className="space-y-0.5 overflow-x-auto">
                     <div className="flex items-center gap-1 border-b pb-1 text-xs font-medium text-gray-500 sm:gap-2">
                       <span className="min-w-0 flex-1">球員</span>
+                      <span className="w-10 shrink-0 text-center sm:w-12">球隊</span>
                       <span className="w-10 shrink-0 text-center sm:w-14">位置</span>
                       <span className="w-14 shrink-0 text-center sm:w-16">原合約</span>
                       <span className="w-14 shrink-0 text-center sm:w-16">新合約</span>
@@ -529,6 +549,9 @@ function KeepersTab({
                       >
                         <span className="min-w-0 flex-1 truncate font-medium">
                           {p.player_name}
+                        </span>
+                        <span className="w-10 shrink-0 text-center text-gray-400 sm:w-12">
+                          {p.mlb_team || "-"}
                         </span>
                         <span className="w-10 shrink-0 text-center text-gray-400 sm:w-14">
                           {p.position || "-"}

@@ -103,6 +103,77 @@ async def get_team_roster(team_id: int, year: int):
     return serialize_team(team, db_team_id=db_team["id"])
 
 
+@router.get("/{team_id}/keeper-page/{year}")
+async def get_keeper_page_data(
+    team_id: int,
+    year: int,
+    user: dict = Depends(get_current_user),
+):
+    """Combined endpoint: roster + keeper options + selections in one call."""
+    from src.contract.engine import generate_keeper_options
+
+    team, db_team = _get_team_from_snapshot(year, team_id)
+
+    # 1. Roster
+    roster = serialize_team(team, db_team_id=db_team["id"])
+
+    # 2. Keeper options
+    options_result = []
+    for player in team.players:
+        options = generate_keeper_options(player)
+        option_schemas = []
+        for opt in options:
+            keep_action = _infer_keep_action(opt, player)
+            ext_years = 0
+            if "extend" in keep_action:
+                ext_years = _extract_extension_years(opt)
+                keep_action = "extend"
+            option_schemas.append({
+                "player_name": opt.player_name,
+                "current_contract": opt.current_contract.display,
+                "next_contract": opt.next_contract.display if opt.next_contract else None,
+                "action": opt.action,
+                "salary_change": opt.salary_change,
+                "is_mandatory": opt.is_mandatory,
+                "keep_action": keep_action,
+                "extension_years": ext_years,
+            })
+        options_result.append({
+            "player": serialize_player(player).model_dump(),
+            "options": option_schemas,
+            "is_mandatory_keeper": player.is_mandatory_keeper,
+        })
+
+    # 3. Selections + validation
+    submission = get_submission(year, team_id)
+    is_submitted = submission is not None
+    if not is_submitted:
+        _check_team_access(user, team_id)
+
+    selections_db = get_keeper_selections(year, team_id)
+    selections = [
+        KeeperSelectionResponse(
+            player_name=s["player_name"],
+            current_contract=s["current_contract"],
+            action=s["action"],
+            extension_years=s["extension_years"],
+            next_contract=s["next_contract"],
+        )
+        for s in selections_db
+    ]
+    validation = _validate_selections(year, team_id, selections_db)
+
+    return {
+        "roster": roster,
+        "options": options_result,
+        "selections": KeeperSelectionsWithValidation(
+            selections=selections,
+            validation=validation,
+            is_submitted=is_submitted,
+        ),
+    }
+
+
 @router.get("/{team_id}/keeper-options/{year}")
 async def get_keeper_options(team_id: int, year: int):
     """Get all keeper options for each player on a team."""

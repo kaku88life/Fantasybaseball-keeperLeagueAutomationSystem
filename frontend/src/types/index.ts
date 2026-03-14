@@ -82,8 +82,12 @@ export interface PlayerDatabaseEntry {
 export interface PlayerDatabaseResponse {
   year: number;
   total_count: number;
+  page: number;
+  page_size: number;
+  total_pages: number;
   has_rankings: boolean;
   last_fetched_at: string | null;
+  owners: string[];
   players: PlayerDatabaseEntry[];
 }
 
