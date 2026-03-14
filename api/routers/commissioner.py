@@ -810,6 +810,7 @@ def _fetch_yahoo_players_batch(
 
     all_players: list[dict] = []
     errors: list[str] = []
+    max_retries = 3
 
     for start in range(0, max_players, batch_size):
         try:
@@ -819,7 +820,29 @@ def _fetch_yahoo_players_batch(
                 f";start={start};count={batch_size};sort={sort}"
                 f";sort_type={sort_type};out=stats"
             )
-            data = yahoo_api_get(path)
+
+            # Retry loop for 429 rate limit errors
+            data = None
+            for attempt in range(max_retries):
+                try:
+                    data = yahoo_api_get(path)
+                    break
+                except RuntimeError as api_err:
+                    if "429" in str(api_err):
+                        wait = 5 * (attempt + 1)  # 5s, 10s, 15s backoff
+                        print(
+                            f"[FetchRankings] Rate limited (429) at start={start}, "
+                            f"retry {attempt + 1}/{max_retries} after {wait}s...",
+                            flush=True,
+                        )
+                        time.sleep(wait)
+                    else:
+                        raise
+
+            if data is None:
+                errors.append(f"Batch start={start} sort={sort}: rate limited after {max_retries} retries")
+                print(f"[FetchRankings] Giving up at start={start} after {max_retries} retries", flush=True)
+                break
 
             # Parse the response
             fantasy_content = data.get("fantasy_content", {})
@@ -882,8 +905,8 @@ def _fetch_yahoo_players_batch(
             if batch_count < batch_size:
                 break
 
-            # Rate limiting: 0.3s between requests
-            time.sleep(0.3)
+            # Rate limiting: 0.6s between requests (avoid Yahoo 429)
+            time.sleep(0.6)
 
         except YahooTokenError as e:
             raise HTTPException(status_code=401, detail=f"Yahoo token error: {e}")
