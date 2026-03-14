@@ -479,11 +479,11 @@ export async function fetchYahooRankings(
   sort_type: string;
   errors: string[] | null;
 }> {
-  // Longer timeout for batch Yahoo API calls (~40 requests: OR + AR)
+  // Longer timeout for batch Yahoo API calls (~80 requests: OR + AR x 1000 players)
   return request(
     `/api/commissioner/fetch-rankings/${year}?sort_type=${encodeURIComponent(sortType)}`,
     { method: "POST" },
-    180_000,
+    300_000,
   );
 }
 

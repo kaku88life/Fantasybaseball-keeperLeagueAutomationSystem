@@ -772,7 +772,7 @@ def _parse_yahoo_stats(stats_data: dict, prefix: str = "stat") -> dict:
 
 def _fetch_yahoo_players_batch(
     league_key: str, sort: str, sort_type: str,
-    max_players: int = 500, batch_size: int = 25,
+    max_players: int = 1000, batch_size: int = 25,
 ) -> tuple[list[dict], list[str]]:
     """Fetch players from Yahoo API in batches with a given sort/sort_type.
 

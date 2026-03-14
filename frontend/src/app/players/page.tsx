@@ -469,7 +469,7 @@ export default function PlayersPage() {
                   key={c.key}
                   col={c.key as SortKey}
                   label={c.label}
-                  className="hidden md:table-cell"
+                  className=""
                 />
               ))}
               {PITCHING_COLS.map((c) => (
@@ -477,7 +477,7 @@ export default function PlayersPage() {
                   key={c.key}
                   col={c.key as SortKey}
                   label={c.label}
-                  className="hidden lg:table-cell"
+                  className=""
                 />
               ))}
             </tr>
@@ -565,7 +565,7 @@ export default function PlayersPage() {
                   {HITTING_COLS.map((c) => (
                     <td
                       key={c.key}
-                      className={`hidden whitespace-nowrap px-2 py-1.5 text-right text-xs md:table-cell ${
+                      className={`whitespace-nowrap px-2 py-1.5 text-right text-xs ${
                         pitcher ? "text-gray-300" : "text-gray-700"
                       }`}
                     >
@@ -584,7 +584,7 @@ export default function PlayersPage() {
                   {PITCHING_COLS.map((c) => (
                     <td
                       key={c.key}
-                      className={`hidden whitespace-nowrap px-2 py-1.5 text-right text-xs lg:table-cell ${
+                      className={`whitespace-nowrap px-2 py-1.5 text-right text-xs ${
                         !pitcher ? "text-gray-300" : "text-gray-700"
                       }`}
                     >
