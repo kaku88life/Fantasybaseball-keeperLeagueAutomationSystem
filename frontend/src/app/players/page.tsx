@@ -156,6 +156,9 @@ export default function PlayersPage() {
   // Player stats modal
   const [modalPlayer, setModalPlayer] = useState<{ name: string; position: string } | null>(null);
 
+  // Info guide toggle
+  const [showGuide, setShowGuide] = useState(false);
+
   // Sort type for Yahoo rankings (controls stat time range)
   const [sortType, setSortType] = useState("season");
 
@@ -269,6 +272,99 @@ export default function PlayersPage() {
           {data?.total_count ?? 0} 位球員
           {data?.has_rankings && " (含 Yahoo 排名)"}
         </p>
+      </div>
+
+      {/* Info Guide (collapsible) */}
+      <div className="mb-4">
+        <button
+          onClick={() => setShowGuide((v) => !v)}
+          className="inline-flex items-center gap-1 rounded-md border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-100"
+        >
+          <span className={`inline-block transition-transform ${showGuide ? "rotate-90" : ""}`}>
+            &#9654;
+          </span>
+          資料說明 Info Guide
+        </button>
+
+        {showGuide && (
+          <div className="mt-2 rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-gray-700">
+            <div className="grid gap-4 md:grid-cols-3">
+              {/* Data Sources */}
+              <div>
+                <h3 className="mb-2 font-semibold text-blue-800">
+                  資料來源 Data Source
+                </h3>
+                <ul className="space-y-1 text-xs">
+                  <li>
+                    <span className="font-medium">OR</span> (Overall Rank)
+                    {" "}= Yahoo 預季預測排名
+                  </li>
+                  <li>
+                    <span className="font-medium">AR</span> (Actual Rank)
+                    {" "}= Yahoo 當季實際表現排名
+                  </li>
+                  <li>
+                    <span className="font-medium">上季成績</span>
+                    {" "}= 上一年度 Yahoo 聯盟實際數據
+                  </li>
+                  <li>
+                    <span className="font-medium">當季預測</span>
+                    {" "}= Yahoo 當季預測數據 (Projections)
+                  </li>
+                </ul>
+              </div>
+
+              {/* Column Guide */}
+              <div>
+                <h3 className="mb-2 font-semibold text-blue-800">
+                  欄位說明 Column Guide
+                </h3>
+                <ul className="space-y-1 text-xs">
+                  <li>
+                    <span className="font-medium">2025</span>
+                    {" "}= 當前合約狀態 (A/B/N/O/R)
+                  </li>
+                  <li>
+                    <span className="font-medium">2026</span>
+                    {" "}= 下一年合約狀態
+                    <span className="text-gray-500">
+                      （已繳交隊伍顯示實際選擇，未繳交顯示「待定」）
+                    </span>
+                  </li>
+                  <li>
+                    <span className="font-medium">$</span>
+                    {" "}= 球員薪資
+                  </li>
+                  <li>
+                    <span className="font-medium">歸屬</span>
+                    {" "}= 球員所屬經理，FA 為自由球員
+                  </li>
+                </ul>
+              </div>
+
+              {/* Notes */}
+              <div>
+                <h3 className="mb-2 font-semibold text-blue-800">
+                  注意事項 Notes
+                </h3>
+                <ul className="space-y-1 text-xs">
+                  <li>
+                    所有排名與數據<span className="font-medium">以 Yahoo Fantasy 系統為準</span>，本頁僅供參考
+                  </li>
+                  <li>
+                    部分球員可能未被 Yahoo 收錄排名，OR/AR 將顯示「-」
+                  </li>
+                  <li>
+                    搜尋功能請輸入後按 <kbd className="rounded border border-gray-300 bg-white px-1 py-0.5 font-mono text-[10px]">Enter</kbd> 鍵送出
+                  </li>
+                  <li>
+                    點擊球員名字可查看 MLB 歷年成績
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Controls Row */}
