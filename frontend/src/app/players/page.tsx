@@ -93,12 +93,8 @@ export default function PlayersPage() {
   const [mlbTeamFilter, setMlbTeamFilter] = useState("");
   const [ownerFilter, setOwnerFilter] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  // Debounced search for server queries
-  const [debouncedSearch, setDebouncedSearch] = useState("");
-  useEffect(() => {
-    const t = setTimeout(() => setDebouncedSearch(searchQuery), 400);
-    return () => clearTimeout(t);
-  }, [searchQuery]);
+  // Search triggers on Enter key press
+  const [committedSearch, setCommittedSearch] = useState("");
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -120,7 +116,7 @@ export default function PlayersPage() {
     ? JSON.stringify({
         ep: `player-db-${effectiveYear}`,
         page: currentPage,
-        search: debouncedSearch,
+        search: committedSearch,
         position: serverPosition,
         player_type: serverPlayerType,
         mlb_team: mlbTeamFilter,
@@ -136,7 +132,7 @@ export default function PlayersPage() {
       getPlayerDatabase(effectiveYear, {
         page: currentPage,
         page_size: ROWS_PER_PAGE,
-        search: debouncedSearch,
+        search: committedSearch,
         position: serverPosition,
         player_type: serverPlayerType,
         mlb_team: mlbTeamFilter,
@@ -152,7 +148,7 @@ export default function PlayersPage() {
   // Reset page when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [positionFilter, mlbTeamFilter, ownerFilter, debouncedSearch, sort]);
+  }, [positionFilter, mlbTeamFilter, ownerFilter, committedSearch, sort]);
 
   // Stats tab
   const [statsTab, setStatsTab] = useState<"stats" | "projections">("stats");
@@ -347,12 +343,17 @@ export default function PlayersPage() {
             ))}
           </select>
 
-          {/* Search */}
+          {/* Search (Enter to submit) */}
           <input
             type="text"
-            placeholder="搜尋球員或經理..."
+            placeholder="搜尋球員或經理 (Enter)"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                setCommittedSearch(searchQuery);
+              }
+            }}
             className="w-48 rounded-md border border-gray-300 px-3 py-1.5 text-sm placeholder-gray-400 focus:border-indigo-500 focus:ring-indigo-500"
           />
         </div>
