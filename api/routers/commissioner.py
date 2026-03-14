@@ -638,6 +638,13 @@ _YAHOO_GAME_KEYS: dict[int, str] = {
     2027: "480",  # placeholder, update when known
 }
 
+# Yahoo league_num per year (changes each season for the same keeper league)
+# The full league key is: {game_key}.l.{league_num}
+_YAHOO_LEAGUE_NUMS: dict[int, str] = {
+    2025: "40288",
+    2026: "80910",
+}
+
 # Yahoo stat_id -> our column name mapping
 # Hitting stats
 _HITTING_STAT_MAP: dict[str, str] = {
@@ -948,13 +955,12 @@ async def fetch_yahoo_rankings(
     # === Pass 3: Previous Season Stats — last year stats -> stat_* ===
     prev_year = year - 1
     prev_game_key = _YAHOO_GAME_KEYS.get(prev_year)
+    prev_league_num = _YAHOO_LEAGUE_NUMS.get(prev_year)
     prev_stats_count = 0
     prev_errors: list[str] = []
 
-    if prev_game_key:
-        league_id = os.getenv("YAHOO_LEAGUE_ID", "")
-        league_num = league_id.split(".")[-1] if "." in league_id else league_id
-        prev_league_key = f"{prev_game_key}.l.{league_num}"
+    if prev_game_key and prev_league_num:
+        prev_league_key = f"{prev_game_key}.l.{prev_league_num}"
         print(
             f"[FetchRankings] Pass 3: Fetching previous season ({prev_year}) stats "
             f"from league_key={prev_league_key}...",
@@ -979,8 +985,9 @@ async def fetch_yahoo_rankings(
             prev_errors.append(f"Previous season fetch error: {e}")
             print(f"[FetchRankings] Pass 3: Unexpected error: {e}", flush=True)
     else:
+        reason = "no game key" if not prev_game_key else "no league number"
         print(
-            f"[FetchRankings] Pass 3: Skipped — no game key for year {prev_year}",
+            f"[FetchRankings] Pass 3: Skipped — {reason} for year {prev_year}",
             flush=True,
         )
 
