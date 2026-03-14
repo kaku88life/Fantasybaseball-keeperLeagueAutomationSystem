@@ -1129,6 +1129,60 @@ def bulk_upsert_player_rankings(year: int, players: list[dict]):
         conn.close()
 
 
+def update_last_season_stats(year: int, players: list[dict]):
+    """Update stat_* columns for existing players by matching player_name.
+
+    Used to fill in previous season stats from a different Yahoo league year.
+    Matches by player_name (case-insensitive) against records already in
+    the player_rankings table for the given year.
+
+    Args:
+        year: The target year in the player_rankings table
+        players: list of dicts with player_name and stat_* columns
+    """
+    if not players:
+        return
+
+    conn = get_db()
+    try:
+        updated = 0
+        with conn.cursor() as cur:
+            for p in players:
+                name = p.get("player_name", "")
+                if not name:
+                    continue
+                cur.execute(
+                    """UPDATE player_rankings
+                       SET stat_r = %s, stat_h = %s, stat_hr = %s,
+                           stat_rbi = %s, stat_sb = %s,
+                           stat_avg = %s, stat_ops = %s,
+                           stat_w = %s, stat_sv = %s, stat_hld = %s,
+                           stat_k = %s, stat_era = %s, stat_whip = %s,
+                           stat_qs = %s,
+                           fetched_at = NOW()
+                       WHERE year = %s AND LOWER(player_name) = LOWER(%s)""",
+                    (
+                        p.get("stat_r"), p.get("stat_h"), p.get("stat_hr"),
+                        p.get("stat_rbi"), p.get("stat_sb"),
+                        p.get("stat_avg"), p.get("stat_ops"),
+                        p.get("stat_w"), p.get("stat_sv"), p.get("stat_hld"),
+                        p.get("stat_k"), p.get("stat_era"), p.get("stat_whip"),
+                        p.get("stat_qs"),
+                        year, name,
+                    ),
+                )
+                if cur.rowcount > 0:
+                    updated += 1
+        conn.commit()
+        print(
+            f"[PlayerRankings] Updated last-season stats for {updated}/{len(players)} "
+            f"players (year {year})",
+            flush=True,
+        )
+    finally:
+        conn.close()
+
+
 def update_ar_ranks(year: int, ar_data: dict[str, int]):
     """Update AR (Actual Rank) for players in a given year.
 
