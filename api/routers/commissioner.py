@@ -646,9 +646,10 @@ _YAHOO_LEAGUE_NUMS: dict[int, str] = {
 }
 
 # Yahoo stat_id -> our column name mapping
+# Verified from league settings API: /league/{key}/settings -> stat_categories
 # Hitting stats
 _HITTING_STAT_MAP: dict[str, str] = {
-    "60": "r",      # Runs
+    "7": "r",       # Runs (stat_id=7)
     "8": "h",       # Hits
     "12": "hr",     # Home Runs
     "13": "rbi",    # RBI
@@ -665,7 +666,7 @@ _PITCHING_STAT_MAP: dict[str, str] = {
     "42": "k",      # Strikeouts
     "26": "era",    # ERA
     "27": "whip",   # WHIP
-    "63": "qs",     # Quality Starts
+    "83": "qs",     # Quality Starts (stat_id=83)
 }
 
 
