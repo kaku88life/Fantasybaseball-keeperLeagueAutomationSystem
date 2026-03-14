@@ -1,6 +1,6 @@
 // Contract and Player types matching Python models
 
-export type ContractType = "A" | "B" | "N" | "O" | "R" | "FA";
+export type ContractType = "A" | "B" | "N" | "O" | "R" | "FA" | "TBD";
 
 export interface Contract {
   contract_type: ContractType;
@@ -72,9 +72,11 @@ export interface PlayerDatabaseEntry {
   owner_manager: string;
   yahoo_player_id: string;
   o_rank: number | null;
-  x_rank: number | null;
+  ar_rank: number | null;
   stats: PlayerStatValues;
   projections: PlayerStatValues;
+  next_contract_display: string;
+  next_contract_type: string;
 }
 
 export interface PlayerDatabaseResponse {

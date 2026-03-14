@@ -12,7 +12,13 @@ import httpx
 from fastapi import APIRouter, HTTPException, Query
 
 from config.settings import ROOKIE_IP_THRESHOLD, ROOKIE_PA_THRESHOLD
-from api.database import get_player_rankings, get_ranking_fetch_status, get_snapshot
+from api.database import (
+    get_all_submissions,
+    get_all_teams,
+    get_player_rankings,
+    get_ranking_fetch_status,
+    get_snapshot,
+)
 from api.serializers import dict_to_league_state
 
 router = APIRouter()
@@ -146,6 +152,16 @@ async def get_player_database(year: int):
 
     league_state = dict_to_league_state(snapshot["data"])
 
+    # 1b. Load submission data for next-year contract status
+    submissions = get_all_submissions(year)
+    submitted_managers: set[str] = set()
+    selection_lookup: dict[str, dict] = {}  # "manager::player_name" -> selection
+    for sub in submissions:
+        mgr = sub.get("manager_name", "")
+        submitted_managers.add(mgr)
+        for sel in sub.get("selections", []):
+            selection_lookup[f"{mgr}::{sel['player_name']}"] = sel
+
     # 2. Build player -> owner mapping from league snapshot
     # Flatten all players across all teams
     owner_map: dict[str, dict] = {}  # player_key -> owner info
@@ -168,10 +184,20 @@ async def get_player_database(year: int):
                 "yahoo_player_id": p.yahoo_player_id or "",
                 # Rankings (filled later if available)
                 "o_rank": None,
-                "x_rank": None,
+                "ar_rank": None,
                 "stats": {},
                 "projections": {},
+                # Next year contract status
+                "next_contract_display": "",
+                "next_contract_type": "",
             }
+
+            # Compute next-year (2026) contract status
+            nc_display, nc_type = _compute_next_year_status(
+                player_entry, submitted_managers, selection_lookup,
+            )
+            player_entry["next_contract_display"] = nc_display
+            player_entry["next_contract_type"] = nc_type
 
             all_league_players.append(player_entry)
 
@@ -200,7 +226,7 @@ async def get_player_database(year: int):
         if league_player:
             # Merge ranking data into league player
             league_player["o_rank"] = r.get("o_rank")
-            league_player["x_rank"] = r.get("x_rank")
+            league_player["ar_rank"] = r.get("ar_rank")
 
             # Override position/mlb_team from ranking if league data is empty
             if not league_player["position"] and r.get("position"):
@@ -227,9 +253,11 @@ async def get_player_database(year: int):
                 "owner_manager": "",
                 "yahoo_player_id": player_key,
                 "o_rank": r.get("o_rank"),
-                "x_rank": r.get("x_rank"),
+                "ar_rank": r.get("ar_rank"),
                 "stats": _extract_stats(r, "stat"),
                 "projections": _extract_stats(r, "proj"),
+                "next_contract_display": "",
+                "next_contract_type": "",
             })
 
     # 4. Combine: league players + unowned ranked players
@@ -245,6 +273,75 @@ async def get_player_database(year: int):
         "last_fetched_at": ranking_status.get("last_fetched_at"),
         "players": combined,
     }
+
+
+def _compute_next_year_status(
+    player_entry: dict,
+    submitted_managers: set[str],
+    selection_lookup: dict[str, dict],
+) -> tuple[str, str]:
+    """Compute next-year contract status for a player.
+
+    Returns (next_contract_display, next_contract_type).
+    Logic:
+    - Unowned players -> ("", "")
+    - Submitted team + has selection -> use next_contract from submission
+    - Submitted team + no selection -> auto-released -> ("FA", "FA")
+    - Unsubmitted + O contract -> deterministic FA
+    - Unsubmitted + N(x) -> deterministic mandatory evolution
+    - Unsubmitted + A/B/R -> pending ("待定", "TBD")
+    """
+    owner = player_entry["owner_manager"]
+    if not owner:
+        return ("", "")
+
+    name = player_entry["name"]
+    contract_type = player_entry["contract_type"]
+
+    # Team has submitted keeper selections
+    if owner in submitted_managers:
+        key = f"{owner}::{name}"
+        sel = selection_lookup.get(key)
+        if sel:
+            nc = sel.get("next_contract", "")
+            if not nc or nc == "FA":
+                return ("FA", "FA")
+            nc_type = _parse_contract_type_from_display(nc)
+            return (nc, nc_type)
+        # Player not in selections -> auto-released
+        return ("FA", "FA")
+
+    # Team has NOT submitted — compute based on contract rules
+    if contract_type == "O":
+        return ("FA", "FA")
+
+    if contract_type == "N":
+        ext = player_entry["extension_years"]
+        salary = player_entry["salary"]
+        if ext > 1:
+            return (f"${salary}/N{ext - 1}", "N")
+        else:
+            return (f"${salary}/O", "O")
+
+    # A, B, R contracts are not deterministic without keeper selection
+    if contract_type in ("A", "B", "R"):
+        return ("\u5f85\u5b9a", "TBD")
+
+    # FA or unknown
+    return ("", "")
+
+
+def _parse_contract_type_from_display(display: str) -> str:
+    """Parse contract type letter from display string.
+
+    Examples: '$20/B' -> 'B', '$35/N3' -> 'N', '$5/R' -> 'R', '$20/A' -> 'A'
+    """
+    if "/" not in display:
+        return ""
+    part = display.split("/")[-1]
+    if part.startswith("N"):
+        return "N"
+    return part
 
 
 def _extract_stats(row: dict, prefix: str) -> dict:

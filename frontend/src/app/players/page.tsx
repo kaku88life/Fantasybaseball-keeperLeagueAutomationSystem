@@ -27,9 +27,17 @@ const MLB_TEAMS = [
   "SEA", "STL", "TB", "TEX", "TOR", "WAS",
 ];
 
+// Sort type options for Yahoo API
+const SORT_TYPE_OPTIONS = [
+  { label: "Season", value: "season" },
+  { label: "Last Week", value: "lastweek" },
+  { label: "Last Month", value: "lastmonth" },
+  { label: "Today", value: "date" },
+] as const;
+
 // Sort key type
 type SortKey =
-  | "o_rank" | "x_rank" | "name" | "position" | "mlb_team"
+  | "o_rank" | "ar_rank" | "name" | "position" | "mlb_team"
   | "salary" | "owner_manager"
   | "r" | "h" | "hr" | "rbi" | "sb" | "avg" | "ops"
   | "w" | "sv" | "hld" | "k" | "era" | "whip" | "qs";
@@ -90,6 +98,9 @@ export default function PlayersPage() {
   // Player stats modal
   const [modalPlayer, setModalPlayer] = useState<{ name: string; position: string } | null>(null);
 
+  // Sort type for Yahoo rankings (controls stat time range)
+  const [sortType, setSortType] = useState("season");
+
   // Commissioner ranking fetch
   const [rankingStatus, setRankingStatus] = useState<RankingFetchStatus | null>(null);
   const [fetching, setFetching] = useState(false);
@@ -133,7 +144,7 @@ export default function PlayersPage() {
     setFetching(true);
     setFetchMessage("");
     try {
-      const result = await fetchYahooRankings(selectedYear);
+      const result = await fetchYahooRankings(selectedYear, sortType);
       setFetchMessage(result.message);
       // Reload data
       const d = await getPlayerDatabase(selectedYear);
@@ -146,7 +157,7 @@ export default function PlayersPage() {
     } finally {
       setFetching(false);
     }
-  }, [selectedYear]);
+  }, [selectedYear, sortType]);
 
   // Sort handler
   const handleSort = useCallback(
@@ -207,9 +218,9 @@ export default function PlayersPage() {
       } else if (key === "o_rank") {
         va = a.o_rank;
         vb = b.o_rank;
-      } else if (key === "x_rank") {
-        va = a.x_rank;
-        vb = b.x_rank;
+      } else if (key === "ar_rank") {
+        va = a.ar_rank;
+        vb = b.ar_rank;
       } else if (key === "salary") {
         va = a.salary;
         vb = b.salary;
@@ -347,6 +358,20 @@ export default function PlayersPage() {
             ))}
           </select>
 
+          {/* Sort Type dropdown (stat time range for Yahoo rankings) */}
+          <select
+            value={sortType}
+            onChange={(e) => setSortType(e.target.value)}
+            className="rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-indigo-500 focus:ring-indigo-500"
+            title="Stats time range (used when fetching Yahoo rankings)"
+          >
+            {SORT_TYPE_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+
           {/* Search */}
           <input
             type="text"
@@ -424,15 +449,16 @@ export default function PlayersPage() {
         <table className="min-w-full divide-y divide-gray-200 text-sm">
           <thead className="bg-gray-50">
             <tr>
-              <SortTh col="o_rank" label="#" className="w-10" />
-              <th className="px-2 py-2 text-left text-xs font-medium uppercase text-gray-500">
-                O/X
-              </th>
+              <SortTh col="o_rank" label="OR" className="w-10" />
+              <SortTh col="ar_rank" label="AR" className="w-10" />
               <SortTh col="name" label="球員" />
               <SortTh col="position" label="Pos" />
               <SortTh col="mlb_team" label="MLB" />
               <th className="px-2 py-2 text-left text-xs font-medium uppercase text-gray-500">
-                合約
+                2025
+              </th>
+              <th className="px-2 py-2 text-left text-xs font-medium uppercase text-gray-500">
+                2026
               </th>
               <SortTh col="salary" label="$" />
               <SortTh col="owner_manager" label="歸屬" />
@@ -467,22 +493,14 @@ export default function PlayersPage() {
                   key={`${p.yahoo_player_id || p.name}-${idx}`}
                   className="hover:bg-gray-50"
                 >
-                  {/* Rank */}
+                  {/* OR (Overall Rank) */}
                   <td className="whitespace-nowrap px-2 py-1.5 text-gray-400">
                     {p.o_rank ?? "-"}
                   </td>
 
-                  {/* O/X Rank */}
+                  {/* AR (Actual Rank) */}
                   <td className="whitespace-nowrap px-2 py-1.5 text-xs text-gray-500">
-                    {p.o_rank != null && p.x_rank != null ? (
-                      <span>
-                        {p.o_rank}/{p.x_rank}
-                      </span>
-                    ) : p.o_rank != null ? (
-                      p.o_rank
-                    ) : (
-                      "-"
-                    )}
+                    {p.ar_rank ?? "-"}
                   </td>
 
                   {/* Player name */}
@@ -507,7 +525,7 @@ export default function PlayersPage() {
                     {p.mlb_team || "-"}
                   </td>
 
-                  {/* Contract */}
+                  {/* 2025 Contract */}
                   <td className="whitespace-nowrap px-2 py-1.5">
                     {p.contract_display ? (
                       <ContractBadge
@@ -516,6 +534,18 @@ export default function PlayersPage() {
                       />
                     ) : (
                       <span className="text-xs text-gray-300">FA</span>
+                    )}
+                  </td>
+
+                  {/* 2026 Status */}
+                  <td className="whitespace-nowrap px-2 py-1.5">
+                    {p.next_contract_display ? (
+                      <ContractBadge
+                        type={p.next_contract_type as ContractType}
+                        display={p.next_contract_display}
+                      />
+                    ) : (
+                      <span className="text-xs text-gray-300">-</span>
                     )}
                   </td>
 
@@ -575,7 +605,7 @@ export default function PlayersPage() {
             {filteredPlayers.length === 0 && (
               <tr>
                 <td
-                  colSpan={8 + HITTING_COLS.length + PITCHING_COLS.length}
+                  colSpan={9 + HITTING_COLS.length + PITCHING_COLS.length}
                   className="py-8 text-center text-gray-400"
                 >
                   沒有符合條件的球員

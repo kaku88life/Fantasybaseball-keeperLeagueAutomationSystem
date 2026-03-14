@@ -470,16 +470,21 @@ export async function getPlayerDatabase(
 
 export async function fetchYahooRankings(
   year: number,
+  sortType: string = "season",
 ): Promise<{
   message: string;
   year: number;
   total_fetched: number;
+  ar_fetched: number;
+  sort_type: string;
   errors: string[] | null;
 }> {
-  // Longer timeout for batch Yahoo API calls (~20 requests)
-  return request(`/api/commissioner/fetch-rankings/${year}`, {
-    method: "POST",
-  }, 120_000);
+  // Longer timeout for batch Yahoo API calls (~40 requests: OR + AR)
+  return request(
+    `/api/commissioner/fetch-rankings/${year}?sort_type=${encodeURIComponent(sortType)}`,
+    { method: "POST" },
+    180_000,
+  );
 }
 
 export async function getRankingFetchStatus(

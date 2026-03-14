@@ -24,6 +24,7 @@ from api.database import (
     get_team_buyouts,
     get_user_by_id,
     save_snapshot,
+    update_ar_ranks,
     update_buyout,
     update_team_adjustments,
     upsert_team,
@@ -694,7 +695,7 @@ def _parse_yahoo_player(player_data: list) -> dict:
         "position": "",
         "mlb_team": "",
         "o_rank": None,
-        "x_rank": None,
+        "ar_rank": None,
     }
 
     # player_data is a list of dicts with various info
@@ -769,35 +770,27 @@ def _parse_yahoo_stats(stats_data: dict, prefix: str = "stat") -> dict:
     return result
 
 
-@router.post("/fetch-rankings/{year}")
-async def fetch_yahoo_rankings(
-    year: int,
-    user: dict = Depends(get_current_commissioner),
-):
-    """Fetch player rankings + stats from Yahoo Fantasy API and store in DB.
+def _fetch_yahoo_players_batch(
+    league_key: str, sort: str, sort_type: str,
+    max_players: int = 500, batch_size: int = 25,
+) -> tuple[list[dict], list[str]]:
+    """Fetch players from Yahoo API in batches with a given sort/sort_type.
 
-    This fetches the top 500 players sorted by Overall Rank (O_Rank),
-    including their stats for the previous season and current season projections.
-    Commissioner only. Takes about 10 seconds due to API pagination.
+    Returns (players_list, errors_list).
     """
     import time
     from api.yahoo_service import YahooTokenError, yahoo_api_get
 
-    league_key = _resolve_league_key(year)
-    print(f"[FetchRankings] Starting for year {year}, league_key={league_key}", flush=True)
-
     all_players: list[dict] = []
-    batch_size = 25
-    max_players = 500
     errors: list[str] = []
 
     for start in range(0, max_players, batch_size):
         try:
-            # Fetch players sorted by Overall Rank with stats
+            # Build path with sort and sort_type params
             path = (
                 f"/league/{league_key}/players"
-                f";start={start};count={batch_size};sort=OR"
-                f";out=stats"
+                f";start={start};count={batch_size};sort={sort}"
+                f";sort_type={sort_type};out=stats"
             )
             data = yahoo_api_get(path)
 
@@ -813,7 +806,7 @@ async def fetch_yahoo_rankings(
                     break
 
             if not players_section:
-                print(f"[FetchRankings] No players in batch start={start}", flush=True)
+                print(f"[FetchRankings] No players in batch start={start} (sort={sort})", flush=True)
                 break
 
             # Parse each player
@@ -832,7 +825,7 @@ async def fetch_yahoo_rankings(
                 player_info_list = player_raw[0] if player_raw else []
                 player = _parse_yahoo_player(player_info_list)
 
-                # Extract O_Rank from player info (typically in first item list)
+                # Extract player_key from player info
                 for item in player_info_list:
                     if isinstance(item, dict):
                         if "player_key" in item:
@@ -842,29 +835,24 @@ async def fetch_yahoo_rankings(
                 if len(player_raw) > 1:
                     stats_section = player_raw[1]
                     if isinstance(stats_section, dict):
-                        # Player stats
                         player_stats = stats_section.get("player_stats", {})
                         if player_stats:
                             stats = _parse_yahoo_stats(player_stats, "stat")
                             player.update(stats)
 
-                        # Player projections (may not be present)
-                        # Yahoo API may require separate call for projections
-
-                # O_Rank is the position in sorted results
-                player["o_rank"] = start + batch_count + 1
+                # Rank is the position in sorted results
+                player["_rank"] = start + batch_count + 1
 
                 if player["player_key"] and player["player_name"]:
                     all_players.append(player)
                     batch_count += 1
 
             print(
-                f"[FetchRankings] Batch start={start}: {batch_count} players parsed",
+                f"[FetchRankings] Batch start={start} sort={sort}: {batch_count} players parsed",
                 flush=True,
             )
 
             if batch_count < batch_size:
-                # Last page
                 break
 
             # Rate limiting: 0.3s between requests
@@ -873,31 +861,98 @@ async def fetch_yahoo_rankings(
         except YahooTokenError as e:
             raise HTTPException(status_code=401, detail=f"Yahoo token error: {e}")
         except RuntimeError as e:
-            errors.append(f"Batch start={start}: {e}")
+            errors.append(f"Batch start={start} sort={sort}: {e}")
             print(f"[FetchRankings] Error at start={start}: {e}", flush=True)
             if start == 0:
-                # First batch failed, abort
                 raise HTTPException(status_code=502, detail=f"Yahoo API error: {e}")
             break
         except Exception as e:
-            errors.append(f"Batch start={start}: {e}")
+            errors.append(f"Batch start={start} sort={sort}: {e}")
             print(f"[FetchRankings] Unexpected error at start={start}: {e}", flush=True)
             break
 
-    if not all_players:
+    return all_players, errors
+
+
+# Valid sort_type values for Yahoo Fantasy API
+_VALID_SORT_TYPES = ("season", "date", "lastweek", "lastmonth")
+
+
+@router.post("/fetch-rankings/{year}")
+async def fetch_yahoo_rankings(
+    year: int,
+    sort_type: str = "season",
+    user: dict = Depends(get_current_commissioner),
+):
+    """Fetch player rankings + stats from Yahoo Fantasy API and store in DB.
+
+    Fetches top 500 players in two passes:
+    1. sort=OR (Overall Rank) — Yahoo preseason projected ranking
+    2. sort=AR (Actual Rank) — in-season performance ranking
+
+    The sort_type parameter controls the time range for stats:
+    - season (default): full season stats
+    - lastweek: last week's stats
+    - lastmonth: last month's stats
+    - date: specific date (current day)
+
+    Commissioner only. Takes about 20 seconds due to API pagination.
+    """
+    if sort_type not in _VALID_SORT_TYPES:
         raise HTTPException(
-            status_code=502,
-            detail="No player data returned from Yahoo API",
+            status_code=400,
+            detail=f"Invalid sort_type '{sort_type}'. Must be one of: {', '.join(_VALID_SORT_TYPES)}",
         )
 
-    # Store in database
-    bulk_upsert_player_rankings(year, all_players)
+    league_key = _resolve_league_key(year)
+    print(f"[FetchRankings] Starting for year {year}, league_key={league_key}, sort_type={sort_type}", flush=True)
+
+    # === Pass 1: Overall Rank (OR) ===
+    print("[FetchRankings] Pass 1: Fetching OR (Overall Rank)...", flush=True)
+    or_players, or_errors = _fetch_yahoo_players_batch(
+        league_key, sort="OR", sort_type=sort_type,
+    )
+
+    if not or_players:
+        raise HTTPException(
+            status_code=502,
+            detail="No player data returned from Yahoo API (OR pass)",
+        )
+
+    # Assign o_rank from the sorted position
+    for p in or_players:
+        p["o_rank"] = p.pop("_rank", None)
+
+    # Store OR data in database
+    bulk_upsert_player_rankings(year, or_players)
+
+    # === Pass 2: Actual Rank (AR) ===
+    print("[FetchRankings] Pass 2: Fetching AR (Actual Rank)...", flush=True)
+    ar_players, ar_errors = _fetch_yahoo_players_batch(
+        league_key, sort="AR", sort_type=sort_type,
+    )
+
+    # Build AR rank mapping: player_key -> ar_rank
+    ar_rank_map: dict[str, int] = {}
+    for p in ar_players:
+        ar_rank_map[p["player_key"]] = p.get("_rank", 0)
+
+    # Update AR ranks in database
+    if ar_rank_map:
+        update_ar_ranks(year, ar_rank_map)
+
+    all_errors = or_errors + ar_errors
 
     return {
-        "message": f"Successfully fetched {len(all_players)} player rankings for {year}",
+        "message": (
+            f"Successfully fetched {len(or_players)} OR rankings "
+            f"+ {len(ar_players)} AR rankings for {year} (sort_type={sort_type})"
+        ),
         "year": year,
-        "total_fetched": len(all_players),
-        "errors": errors if errors else None,
+        "total_fetched": len(or_players),
+        "ar_fetched": len(ar_players),
+        "sort_type": sort_type,
+        "errors": all_errors if all_errors else None,
     }
 
 

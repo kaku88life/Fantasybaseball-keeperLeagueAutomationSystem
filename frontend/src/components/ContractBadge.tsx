@@ -7,6 +7,7 @@ const COLORS: Record<ContractType, string> = {
   O: "bg-red-100 text-red-800",
   R: "bg-gray-100 text-gray-800",
   FA: "bg-gray-200 text-gray-500",
+  TBD: "bg-purple-100 text-purple-700",
 };
 
 interface Props {

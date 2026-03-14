@@ -340,6 +340,20 @@ MIGRATIONS: dict[str, list[str]] = {
         "CREATE INDEX IF NOT EXISTS idx_player_rankings_year ON player_rankings(year)",
         "CREATE INDEX IF NOT EXISTS idx_player_rankings_year_orank ON player_rankings(year, o_rank)",
     ],
+    "007_add_ar_rank": [
+        """
+        DO $$
+        BEGIN
+            IF NOT EXISTS (
+                SELECT 1 FROM information_schema.columns
+                WHERE table_name = 'player_rankings' AND column_name = 'ar_rank'
+            ) THEN
+                ALTER TABLE player_rankings ADD COLUMN ar_rank INTEGER;
+            END IF;
+        END $$;
+        """,
+        "CREATE INDEX IF NOT EXISTS idx_player_rankings_year_arrank ON player_rankings(year, ar_rank)",
+    ],
 }
 
 
@@ -1036,8 +1050,9 @@ def bulk_upsert_player_rankings(year: int, players: list[dict]):
     """Bulk insert/update player rankings for a year.
 
     Each player dict should have keys matching column names:
-    player_key, player_name, o_rank, x_rank, position, mlb_team,
+    player_key, player_name, o_rank, ar_rank (optional), position, mlb_team,
     stat_* (actual stats), proj_* (projections).
+    Note: x_rank column still exists in DB for backward compatibility but is no longer written.
     """
     if not players:
         return
@@ -1048,7 +1063,7 @@ def bulk_upsert_player_rankings(year: int, players: list[dict]):
             for p in players:
                 cur.execute(
                     """INSERT INTO player_rankings
-                       (year, player_key, player_name, o_rank, x_rank,
+                       (year, player_key, player_name, o_rank, ar_rank,
                         position, mlb_team,
                         stat_r, stat_h, stat_hr, stat_rbi, stat_sb, stat_avg, stat_ops,
                         stat_w, stat_sv, stat_hld, stat_k, stat_era, stat_whip, stat_qs,
@@ -1066,7 +1081,7 @@ def bulk_upsert_player_rankings(year: int, players: list[dict]):
                        ON CONFLICT(year, player_key) DO UPDATE SET
                         player_name = EXCLUDED.player_name,
                         o_rank = EXCLUDED.o_rank,
-                        x_rank = EXCLUDED.x_rank,
+                        ar_rank = EXCLUDED.ar_rank,
                         position = EXCLUDED.position,
                         mlb_team = EXCLUDED.mlb_team,
                         stat_r = EXCLUDED.stat_r, stat_h = EXCLUDED.stat_h,
@@ -1088,7 +1103,7 @@ def bulk_upsert_player_rankings(year: int, players: list[dict]):
                         fetched_at = NOW()""",
                     (
                         year, p["player_key"], p["player_name"],
-                        p.get("o_rank"), p.get("x_rank"),
+                        p.get("o_rank"), p.get("ar_rank"),
                         p.get("position", ""), p.get("mlb_team", ""),
                         # Hitting stats
                         p.get("stat_r"), p.get("stat_h"), p.get("stat_hr"),
@@ -1110,6 +1125,32 @@ def bulk_upsert_player_rankings(year: int, players: list[dict]):
                 )
         conn.commit()
         print(f"[PlayerRankings] Upserted {len(players)} rankings for year {year}", flush=True)
+    finally:
+        conn.close()
+
+
+def update_ar_ranks(year: int, ar_data: dict[str, int]):
+    """Update AR (Actual Rank) for players in a given year.
+
+    Args:
+        year: The season year
+        ar_data: dict mapping player_key -> ar_rank
+    """
+    if not ar_data:
+        return
+
+    conn = get_db()
+    try:
+        with conn.cursor() as cur:
+            for player_key, ar_rank in ar_data.items():
+                cur.execute(
+                    """UPDATE player_rankings
+                       SET ar_rank = %s
+                       WHERE year = %s AND player_key = %s""",
+                    (ar_rank, year, player_key),
+                )
+        conn.commit()
+        print(f"[PlayerRankings] Updated {len(ar_data)} AR ranks for year {year}", flush=True)
     finally:
         conn.close()
 
