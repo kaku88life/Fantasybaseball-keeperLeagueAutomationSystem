@@ -177,6 +177,7 @@ async def get_player_database(
     # 2. Build player -> owner mapping from league snapshot
     # Flatten all players across all teams
     owner_map: dict[str, dict] = {}  # player_key -> owner info
+    owner_map_by_pid: dict[str, dict] = {}  # player_number (after .p.) -> owner info
     player_name_map: dict[str, dict] = {}  # player_name -> owner info (fallback)
 
     all_league_players: list[dict] = []
@@ -216,6 +217,10 @@ async def get_player_database(
             # Index by player_key for matching with rankings
             if p.yahoo_player_id:
                 owner_map[p.yahoo_player_id] = player_entry
+                # Also index by player number (season-agnostic: "458.p.9758" -> "9758")
+                pid = p.yahoo_player_id.split(".p.")[-1] if ".p." in p.yahoo_player_id else ""
+                if pid:
+                    owner_map_by_pid[pid] = player_entry
             player_name_map[p.name.lower()] = player_entry
 
     # 3. Load rankings if available
@@ -229,10 +234,15 @@ async def get_player_database(
     for r in rankings:
         player_key = r["player_key"]
 
-        # Try to match with league player by player_key
+        # Try to match with league player by player_key (exact match)
         league_player = owner_map.get(player_key)
         if not league_player:
-            # Fallback: match by name
+            # Fallback 1: match by player number (season-agnostic, e.g. "469.p.9758" -> "9758")
+            pid = player_key.split(".p.")[-1] if ".p." in player_key else ""
+            if pid:
+                league_player = owner_map_by_pid.get(pid)
+        if not league_player:
+            # Fallback 2: match by name
             league_player = player_name_map.get(r["player_name"].lower())
 
         if league_player:
