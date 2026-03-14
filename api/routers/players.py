@@ -347,8 +347,8 @@ def _parse_contract_type_from_display(display: str) -> str:
 def _extract_stats(row: dict, prefix: str) -> dict:
     """Extract stat/proj fields from a player_rankings row into a clean dict."""
     result = {}
-    stat_keys = ["r", "h", "hr", "rbi", "sb", "avg", "ops",
-                 "w", "sv", "hld", "k", "era", "whip", "qs"]
+    stat_keys = ["ab", "r", "h", "hr", "rbi", "sb", "avg", "ops",
+                 "ip", "w", "sv", "hld", "k", "era", "whip", "qs"]
     for key in stat_keys:
         val = row.get(f"{prefix}_{key}")
         if val is not None:

@@ -354,6 +354,23 @@ MIGRATIONS: dict[str, list[str]] = {
         """,
         "CREATE INDEX IF NOT EXISTS idx_player_rankings_year_arrank ON player_rankings(year, ar_rank)",
     ],
+    "008_add_ab_ip_columns": [
+        """
+        DO $$
+        BEGIN
+            IF NOT EXISTS (
+                SELECT 1 FROM information_schema.columns
+                WHERE table_name = 'player_rankings' AND column_name = 'stat_ab'
+            ) THEN
+                ALTER TABLE player_rankings
+                    ADD COLUMN stat_ab INTEGER,
+                    ADD COLUMN proj_ab INTEGER,
+                    ADD COLUMN stat_ip REAL,
+                    ADD COLUMN proj_ip REAL;
+            END IF;
+        END $$;
+        """,
+    ],
 }
 
 
@@ -1065,18 +1082,18 @@ def bulk_upsert_player_rankings(year: int, players: list[dict]):
                     """INSERT INTO player_rankings
                        (year, player_key, player_name, o_rank, ar_rank,
                         position, mlb_team,
-                        stat_r, stat_h, stat_hr, stat_rbi, stat_sb, stat_avg, stat_ops,
-                        stat_w, stat_sv, stat_hld, stat_k, stat_era, stat_whip, stat_qs,
-                        proj_r, proj_h, proj_hr, proj_rbi, proj_sb, proj_avg, proj_ops,
-                        proj_w, proj_sv, proj_hld, proj_k, proj_era, proj_whip, proj_qs,
+                        stat_ab, stat_r, stat_h, stat_hr, stat_rbi, stat_sb, stat_avg, stat_ops,
+                        stat_ip, stat_w, stat_sv, stat_hld, stat_k, stat_era, stat_whip, stat_qs,
+                        proj_ab, proj_r, proj_h, proj_hr, proj_rbi, proj_sb, proj_avg, proj_ops,
+                        proj_ip, proj_w, proj_sv, proj_hld, proj_k, proj_era, proj_whip, proj_qs,
                         fetched_at)
                        VALUES (
                         %s, %s, %s, %s, %s,
                         %s, %s,
-                        %s, %s, %s, %s, %s, %s, %s,
-                        %s, %s, %s, %s, %s, %s, %s,
-                        %s, %s, %s, %s, %s, %s, %s,
-                        %s, %s, %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s, %s, %s, %s,
                         NOW())
                        ON CONFLICT(year, player_key) DO UPDATE SET
                         player_name = EXCLUDED.player_name,
@@ -1084,18 +1101,22 @@ def bulk_upsert_player_rankings(year: int, players: list[dict]):
                         ar_rank = EXCLUDED.ar_rank,
                         position = EXCLUDED.position,
                         mlb_team = EXCLUDED.mlb_team,
+                        stat_ab = EXCLUDED.stat_ab,
                         stat_r = EXCLUDED.stat_r, stat_h = EXCLUDED.stat_h,
                         stat_hr = EXCLUDED.stat_hr, stat_rbi = EXCLUDED.stat_rbi,
                         stat_sb = EXCLUDED.stat_sb, stat_avg = EXCLUDED.stat_avg,
                         stat_ops = EXCLUDED.stat_ops,
+                        stat_ip = EXCLUDED.stat_ip,
                         stat_w = EXCLUDED.stat_w, stat_sv = EXCLUDED.stat_sv,
                         stat_hld = EXCLUDED.stat_hld, stat_k = EXCLUDED.stat_k,
                         stat_era = EXCLUDED.stat_era, stat_whip = EXCLUDED.stat_whip,
                         stat_qs = EXCLUDED.stat_qs,
+                        proj_ab = EXCLUDED.proj_ab,
                         proj_r = EXCLUDED.proj_r, proj_h = EXCLUDED.proj_h,
                         proj_hr = EXCLUDED.proj_hr, proj_rbi = EXCLUDED.proj_rbi,
                         proj_sb = EXCLUDED.proj_sb, proj_avg = EXCLUDED.proj_avg,
                         proj_ops = EXCLUDED.proj_ops,
+                        proj_ip = EXCLUDED.proj_ip,
                         proj_w = EXCLUDED.proj_w, proj_sv = EXCLUDED.proj_sv,
                         proj_hld = EXCLUDED.proj_hld, proj_k = EXCLUDED.proj_k,
                         proj_era = EXCLUDED.proj_era, proj_whip = EXCLUDED.proj_whip,
@@ -1106,21 +1127,21 @@ def bulk_upsert_player_rankings(year: int, players: list[dict]):
                         p.get("o_rank"), p.get("ar_rank"),
                         p.get("position", ""), p.get("mlb_team", ""),
                         # Hitting stats
-                        p.get("stat_r"), p.get("stat_h"), p.get("stat_hr"),
-                        p.get("stat_rbi"), p.get("stat_sb"),
+                        p.get("stat_ab"), p.get("stat_r"), p.get("stat_h"),
+                        p.get("stat_hr"), p.get("stat_rbi"), p.get("stat_sb"),
                         p.get("stat_avg"), p.get("stat_ops"),
                         # Pitching stats
-                        p.get("stat_w"), p.get("stat_sv"), p.get("stat_hld"),
-                        p.get("stat_k"), p.get("stat_era"), p.get("stat_whip"),
-                        p.get("stat_qs"),
+                        p.get("stat_ip"), p.get("stat_w"), p.get("stat_sv"),
+                        p.get("stat_hld"), p.get("stat_k"), p.get("stat_era"),
+                        p.get("stat_whip"), p.get("stat_qs"),
                         # Projections hitting
-                        p.get("proj_r"), p.get("proj_h"), p.get("proj_hr"),
-                        p.get("proj_rbi"), p.get("proj_sb"),
+                        p.get("proj_ab"), p.get("proj_r"), p.get("proj_h"),
+                        p.get("proj_hr"), p.get("proj_rbi"), p.get("proj_sb"),
                         p.get("proj_avg"), p.get("proj_ops"),
                         # Projections pitching
-                        p.get("proj_w"), p.get("proj_sv"), p.get("proj_hld"),
-                        p.get("proj_k"), p.get("proj_era"), p.get("proj_whip"),
-                        p.get("proj_qs"),
+                        p.get("proj_ip"), p.get("proj_w"), p.get("proj_sv"),
+                        p.get("proj_hld"), p.get("proj_k"), p.get("proj_era"),
+                        p.get("proj_whip"), p.get("proj_qs"),
                     ),
                 )
         conn.commit()
@@ -1153,21 +1174,21 @@ def update_last_season_stats(year: int, players: list[dict]):
                     continue
                 cur.execute(
                     """UPDATE player_rankings
-                       SET stat_r = %s, stat_h = %s, stat_hr = %s,
+                       SET stat_ab = %s, stat_r = %s, stat_h = %s, stat_hr = %s,
                            stat_rbi = %s, stat_sb = %s,
                            stat_avg = %s, stat_ops = %s,
-                           stat_w = %s, stat_sv = %s, stat_hld = %s,
+                           stat_ip = %s, stat_w = %s, stat_sv = %s, stat_hld = %s,
                            stat_k = %s, stat_era = %s, stat_whip = %s,
                            stat_qs = %s,
                            fetched_at = NOW()
                        WHERE year = %s AND LOWER(player_name) = LOWER(%s)""",
                     (
-                        p.get("stat_r"), p.get("stat_h"), p.get("stat_hr"),
-                        p.get("stat_rbi"), p.get("stat_sb"),
+                        p.get("stat_ab"), p.get("stat_r"), p.get("stat_h"),
+                        p.get("stat_hr"), p.get("stat_rbi"), p.get("stat_sb"),
                         p.get("stat_avg"), p.get("stat_ops"),
-                        p.get("stat_w"), p.get("stat_sv"), p.get("stat_hld"),
-                        p.get("stat_k"), p.get("stat_era"), p.get("stat_whip"),
-                        p.get("stat_qs"),
+                        p.get("stat_ip"), p.get("stat_w"), p.get("stat_sv"),
+                        p.get("stat_hld"), p.get("stat_k"), p.get("stat_era"),
+                        p.get("stat_whip"), p.get("stat_qs"),
                         year, name,
                     ),
                 )

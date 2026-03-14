@@ -42,8 +42,8 @@ const ROWS_PER_PAGE = 200;
 type SortKey =
   | "o_rank" | "ar_rank" | "name"
   | "salary"
-  | "r" | "h" | "hr" | "rbi" | "sb" | "avg" | "ops"
-  | "w" | "sv" | "hld" | "k" | "era" | "whip" | "qs";
+  | "ab" | "r" | "h" | "hr" | "rbi" | "sb" | "avg" | "ops"
+  | "ip" | "w" | "sv" | "hld" | "k" | "era" | "whip" | "qs";
 
 interface SortState {
   key: SortKey;
@@ -52,6 +52,7 @@ interface SortState {
 
 // Stat columns config
 const HITTING_COLS: Array<{ key: string; label: string }> = [
+  { key: "ab", label: "AB" },
   { key: "r", label: "R" },
   { key: "h", label: "H" },
   { key: "hr", label: "HR" },
@@ -62,6 +63,7 @@ const HITTING_COLS: Array<{ key: string; label: string }> = [
 ];
 
 const PITCHING_COLS: Array<{ key: string; label: string }> = [
+  { key: "ip", label: "IP" },
   { key: "w", label: "W" },
   { key: "sv", label: "SV" },
   { key: "hld", label: "HLD" },

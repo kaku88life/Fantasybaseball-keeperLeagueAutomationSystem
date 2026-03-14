@@ -754,6 +754,23 @@ def _parse_yahoo_stats(stats_data: dict, prefix: str = "stat") -> dict:
         if value == "" or value == "-":
             continue
 
+        # stat_id 60 = H/AB (e.g. "179/541") — extract AB from denominator
+        if stat_id == "60" and "/" in str(value):
+            try:
+                ab_str = str(value).split("/")[1]
+                result[f"{prefix}_ab"] = int(float(ab_str))
+            except (ValueError, TypeError, IndexError):
+                pass
+            continue
+
+        # stat_id 50 = IP (Innings Pitched, e.g. "195.1")
+        if stat_id == "50":
+            try:
+                result[f"{prefix}_ip"] = float(value)
+            except (ValueError, TypeError):
+                pass
+            continue
+
         # Check hitting stats
         if stat_id in _HITTING_STAT_MAP:
             col = _HITTING_STAT_MAP[stat_id]
