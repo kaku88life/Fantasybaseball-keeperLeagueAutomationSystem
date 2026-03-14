@@ -206,8 +206,11 @@ export default function PlayersPage() {
     }
 
     // Owner filter
+    // FA includes: unowned players + O-contract players becoming FA next year
     if (ownerFilter === "__FA__") {
-      list = list.filter((p) => !p.owner_manager);
+      list = list.filter(
+        (p) => !p.owner_manager || p.next_contract_type === "FA",
+      );
     } else if (ownerFilter) {
       list = list.filter((p) => p.owner_manager === ownerFilter);
     }
