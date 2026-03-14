@@ -328,7 +328,7 @@ async def _exchange_code_for_jwt(code: str) -> CallbackResponse:
         team_name=team["team_name"] if team else None,
         manager_name=team["manager_name"] if team else None,
         is_commissioner=is_commissioner,
-        line_name=user.get("line_name", ""),
+        line_name=user.get("line_name") or "",
     )
 
     return CallbackResponse(token=jwt_token, user=user_info)
@@ -497,12 +497,12 @@ async def get_current_user_info(user: dict = Depends(get_current_user)):
     return UserInfoSchema(
         user_id=user["id"],
         yahoo_guid=user["yahoo_guid"],
-        yahoo_nickname=user.get("yahoo_nickname", ""),
+        yahoo_nickname=user.get("yahoo_nickname") or "",
         team_id=user.get("team_id"),
         team_name=team["team_name"] if team else None,
         manager_name=team["manager_name"] if team else None,
         is_commissioner=bool(user.get("is_commissioner")),
-        line_name=user.get("line_name", ""),
+        line_name=user.get("line_name") or "",
     )
 
 
