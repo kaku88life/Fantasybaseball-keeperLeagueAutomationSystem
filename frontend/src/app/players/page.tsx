@@ -11,7 +11,7 @@ import { useAuth } from "@/lib/auth";
 import ContractBadge from "@/components/ContractBadge";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import PlayerStatsModal from "@/components/PlayerStatsModal";
-import PositionFilter, { matchesPosition } from "@/components/PositionFilter";
+import { POSITION_GROUPS, matchesPosition } from "@/components/PositionFilter";
 import type {
   ContractType,
   PlayerDatabaseEntry,
@@ -305,8 +305,8 @@ export default function PlayersPage() {
       </div>
 
       {/* Controls Row */}
-      <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex flex-wrap items-center gap-3">
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-wrap items-center gap-2">
           {/* Year dropdown */}
           <select
             value={selectedYear}
@@ -320,13 +320,18 @@ export default function PlayersPage() {
             ))}
           </select>
 
-          {/* Position filter */}
-          <PositionFilter
-            items={data?.players || []}
+          {/* Position dropdown */}
+          <select
             value={positionFilter}
-            onChange={setPositionFilter}
-            showCounts={false}
-          />
+            onChange={(e) => setPositionFilter(e.target.value)}
+            className="rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-indigo-500 focus:ring-indigo-500"
+          >
+            {POSITION_GROUPS.map((pg) => (
+              <option key={pg.value} value={pg.value}>
+                {pg.value === "ALL" ? "All Positions" : pg.label}
+              </option>
+            ))}
+          </select>
 
           {/* MLB Team dropdown */}
           <select
@@ -352,30 +357,28 @@ export default function PlayersPage() {
           />
         </div>
 
-        <div className="flex items-center gap-3">
-          {/* Stats tab toggle */}
-          <div className="flex rounded-md border border-gray-300">
-            <button
-              onClick={() => setStatsTab("stats")}
-              className={`px-3 py-1.5 text-xs font-medium ${
-                statsTab === "stats"
-                  ? "bg-indigo-600 text-white"
-                  : "bg-white text-gray-600 hover:bg-gray-50"
-              } rounded-l-md`}
-            >
-              上季成績
-            </button>
-            <button
-              onClick={() => setStatsTab("projections")}
-              className={`px-3 py-1.5 text-xs font-medium ${
-                statsTab === "projections"
-                  ? "bg-indigo-600 text-white"
-                  : "bg-white text-gray-600 hover:bg-gray-50"
-              } rounded-r-md`}
-            >
-              當季預測
-            </button>
-          </div>
+        {/* Stats tab toggle */}
+        <div className="flex rounded-md border border-gray-300">
+          <button
+            onClick={() => setStatsTab("stats")}
+            className={`px-3 py-1.5 text-xs font-medium ${
+              statsTab === "stats"
+                ? "bg-indigo-600 text-white"
+                : "bg-white text-gray-600 hover:bg-gray-50"
+            } rounded-l-md`}
+          >
+            上季成績
+          </button>
+          <button
+            onClick={() => setStatsTab("projections")}
+            className={`px-3 py-1.5 text-xs font-medium ${
+              statsTab === "projections"
+                ? "bg-indigo-600 text-white"
+                : "bg-white text-gray-600 hover:bg-gray-50"
+            } rounded-r-md`}
+          >
+            當季預測
+          </button>
         </div>
       </div>
 
