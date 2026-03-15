@@ -28,12 +28,14 @@ const MLB_TEAMS = [
   "SEA", "STL", "TB", "TEX", "TOR", "WAS",
 ];
 
-// Sort type options for Yahoo API
+// Sort type options for Yahoo API stats fetch
+// Combines year context + time range into a single dropdown
 const SORT_TYPE_OPTIONS = [
-  { label: "Season", value: "season" },
-  { label: "Last Week", value: "lastweek" },
-  { label: "Last Month", value: "lastmonth" },
-  { label: "Today", value: "date" },
+  { label: "2026 \u6574\u5b63", value: "season" },
+  { label: "2026 \u8fd1\u4e00\u9031", value: "lastweek" },
+  { label: "2026 \u8fd1\u4e00\u6708", value: "lastmonth" },
+  { label: "2026 \u4eca\u65e5", value: "date" },
+  { label: "2025 \u6574\u5b63", value: "prev_season" },
 ] as const;
 
 // Rows per page
@@ -149,9 +151,6 @@ export default function PlayersPage() {
   useEffect(() => {
     setCurrentPage(1);
   }, [positionFilter, mlbTeamFilter, ownerFilter, committedSearch, sort]);
-
-  // Stats tab
-  const [statsTab, setStatsTab] = useState<"stats" | "projections">("stats");
 
   // Player stats modal
   const [modalPlayer, setModalPlayer] = useState<{ name: string; position: string } | null>(null);
@@ -304,13 +303,17 @@ export default function PlayersPage() {
                     {" "}= Yahoo 當季實際表現排名
                   </li>
                   <li>
-                    <span className="font-medium">上季成績</span>
-                    {" "}= 上一年度 Yahoo 聯盟實際數據
+                    <span className="font-medium">成績欄位</span>
+                    {" "}= 由右方下拉選單控制數據來源
                   </li>
-                  <li>
-                    <span className="font-medium">當季預測</span>
-                    {" "}= Yahoo 當季預測數據 (Projections)
-                  </li>
+                </ul>
+                <h4 className="mb-1 mt-2 text-xs font-medium text-blue-700">
+                  成績時間範圍
+                </h4>
+                <ul className="space-y-0.5 text-xs text-gray-600">
+                  <li>2026 整季 = 2026 全季累計成績</li>
+                  <li>2026 近一週 / 近一月 / 今日 = 近期表現</li>
+                  <li>2025 整季 = 上季完整成績</li>
                 </ul>
               </div>
 
@@ -353,6 +356,9 @@ export default function PlayersPage() {
                   </li>
                   <li>
                     部分球員可能未被 Yahoo 收錄排名，OR/AR 將顯示「-」
+                  </li>
+                  <li>
+                    切換成績時間範圍後，需由 Commissioner 重新擷取排名才會更新數據
                   </li>
                   <li>
                     搜尋功能請輸入後按 <kbd className="rounded border border-gray-300 bg-white px-1 py-0.5 font-mono text-[10px]">Enter</kbd> 鍵送出
@@ -454,29 +460,6 @@ export default function PlayersPage() {
           />
         </div>
 
-        {/* Stats tab toggle */}
-        <div className="flex rounded-md border border-gray-300">
-          <button
-            onClick={() => setStatsTab("stats")}
-            className={`px-3 py-1.5 text-xs font-medium ${
-              statsTab === "stats"
-                ? "bg-indigo-600 text-white"
-                : "bg-white text-gray-600 hover:bg-gray-50"
-            } rounded-l-md`}
-          >
-            上季成績
-          </button>
-          <button
-            onClick={() => setStatsTab("projections")}
-            className={`px-3 py-1.5 text-xs font-medium ${
-              statsTab === "projections"
-                ? "bg-indigo-600 text-white"
-                : "bg-white text-gray-600 hover:bg-gray-50"
-            } rounded-r-md`}
-          >
-            當季預測
-          </button>
-        </div>
       </div>
 
       {/* Commissioner: Fetch Rankings */}
@@ -570,8 +553,7 @@ export default function PlayersPage() {
           <tbody className="divide-y divide-gray-100 bg-white">
             {paginatedPlayers.map((p, idx) => {
               const pitcher = isPitcher(p.position);
-              const statSource =
-                statsTab === "projections" ? p.projections : p.stats;
+              const statSource = p.stats;
 
               return (
                 <tr

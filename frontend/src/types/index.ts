@@ -74,7 +74,6 @@ export interface PlayerDatabaseEntry {
   o_rank: number | null;
   ar_rank: number | null;
   stats: PlayerStatValues;
-  projections: PlayerStatValues;
   next_contract_display: string;
   next_contract_type: string;
 }

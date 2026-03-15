@@ -199,7 +199,6 @@ async def get_player_database(
                 "o_rank": None,
                 "ar_rank": None,
                 "stats": {},
-                "projections": {},
                 # Next year contract status
                 "next_contract_display": "",
                 "next_contract_type": "",
@@ -256,9 +255,8 @@ async def get_player_database(
             if r.get("mlb_team"):
                 league_player["mlb_team"] = r["mlb_team"]
 
-            # Stats
+            # Stats (current or previous season actuals from stat_* columns)
             league_player["stats"] = _extract_stats(r, "stat")
-            league_player["projections"] = _extract_stats(r, "proj")
 
             matched_keys.add(player_key)
         else:
@@ -277,7 +275,6 @@ async def get_player_database(
                 "o_rank": r.get("o_rank"),
                 "ar_rank": r.get("ar_rank"),
                 "stats": _extract_stats(r, "stat"),
-                "projections": _extract_stats(r, "proj"),
                 "next_contract_display": "",
                 "next_contract_type": "",
             })

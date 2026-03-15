@@ -925,7 +925,8 @@ def _fetch_yahoo_players_batch(
 
 
 # Valid sort_type values for Yahoo Fantasy API
-_VALID_SORT_TYPES = ("season", "date", "lastweek", "lastmonth")
+# "prev_season" is a custom value: fetches previous year's full season stats
+_VALID_SORT_TYPES = ("season", "date", "lastweek", "lastmonth", "prev_season")
 
 
 @router.post("/fetch-rankings/{year}")
@@ -937,15 +938,16 @@ async def fetch_yahoo_rankings(
     """Fetch player rankings + stats from Yahoo Fantasy API and store in DB.
 
     Three-pass fetch:
-    1. sort=OR (Overall Rank) — current year rankings + season stats -> proj_* columns
+    1. sort=OR (Overall Rank) — current year rankings + projected stats -> proj_* columns
     2. sort=AR (Actual Rank) — in-season performance ranking
-    3. Previous year stats — fetches last season stats -> stat_* columns
+    3. Season stats -> stat_* columns (data source depends on sort_type)
 
-    The sort_type parameter controls the time range for current year stats:
-    - season (default): full season stats
-    - lastweek: last week's stats
-    - lastmonth: last month's stats
-    - date: specific date (current day)
+    The sort_type parameter controls what stats are fetched:
+    - season (default): current year full season stats
+    - lastweek: current year last week stats
+    - lastmonth: current year last month stats
+    - date: current year today's stats
+    - prev_season: previous year full season stats (e.g. 2025 for year=2026)
 
     Commissioner only. Takes about 40-60 seconds due to API pagination.
     """
@@ -993,57 +995,70 @@ async def fetch_yahoo_rankings(
     if ar_rank_map:
         update_ar_ranks(year, ar_rank_map)
 
-    # === Pass 3: Previous Season Stats — last year stats -> stat_* ===
-    prev_year = year - 1
-    prev_game_key = _YAHOO_GAME_KEYS.get(prev_year)
-    prev_league_num = _YAHOO_LEAGUE_NUMS.get(prev_year)
-    prev_stats_count = 0
-    prev_errors: list[str] = []
+    # === Pass 3: Season Stats -> stat_* columns ===
+    # "prev_season" -> fetch previous year's full-season stats (2025)
+    # Otherwise -> fetch current year stats with sort_type time range (2026)
+    stats_count = 0
+    stats_errors: list[str] = []
 
-    if prev_game_key and prev_league_num:
-        prev_league_key = f"{prev_game_key}.l.{prev_league_num}"
+    if sort_type == "prev_season":
+        # Fetch previous year's full-season stats
+        stats_year = year - 1
+        stats_game_key = _YAHOO_GAME_KEYS.get(stats_year)
+        stats_league_num = _YAHOO_LEAGUE_NUMS.get(stats_year)
+        stats_sort_type = "season"
+        stats_label = f"previous season ({stats_year})"
+    else:
+        # Fetch current year stats with the selected time range
+        stats_year = year
+        stats_game_key = _YAHOO_GAME_KEYS.get(stats_year)
+        stats_league_num = _YAHOO_LEAGUE_NUMS.get(stats_year)
+        stats_sort_type = sort_type
+        stats_label = f"current season ({stats_year}, {sort_type})"
+
+    if stats_game_key and stats_league_num:
+        stats_league_key = f"{stats_game_key}.l.{stats_league_num}"
         print(
-            f"[FetchRankings] Pass 3: Fetching previous season ({prev_year}) stats "
-            f"from league_key={prev_league_key}...",
+            f"[FetchRankings] Pass 3: Fetching {stats_label} stats "
+            f"from league_key={stats_league_key}...",
             flush=True,
         )
         try:
-            prev_players, prev_errors = _fetch_yahoo_players_batch(
-                prev_league_key, sort="OR", sort_type="season",
+            stats_players, stats_errors = _fetch_yahoo_players_batch(
+                stats_league_key, sort="OR", sort_type=stats_sort_type,
                 stat_prefix="stat",
             )
-            prev_stats_count = len(prev_players)
-            if prev_players:
-                update_last_season_stats(year, prev_players)
+            stats_count = len(stats_players)
+            if stats_players:
+                update_last_season_stats(year, stats_players)
         except HTTPException:
-            # Previous year league may not be accessible; log but don't fail
-            prev_errors.append(f"Could not fetch previous season ({prev_year}) data")
+            stats_errors.append(f"Could not fetch {stats_label} data")
             print(
-                f"[FetchRankings] Pass 3: Failed to fetch {prev_year} stats (league may not be accessible)",
+                f"[FetchRankings] Pass 3: Failed to fetch {stats_label} stats",
                 flush=True,
             )
         except Exception as e:
-            prev_errors.append(f"Previous season fetch error: {e}")
+            stats_errors.append(f"Stats fetch error: {e}")
             print(f"[FetchRankings] Pass 3: Unexpected error: {e}", flush=True)
     else:
-        reason = "no game key" if not prev_game_key else "no league number"
+        reason = "no game key" if not stats_game_key else "no league number"
         print(
-            f"[FetchRankings] Pass 3: Skipped — {reason} for year {prev_year}",
+            f"[FetchRankings] Pass 3: Skipped — {reason} for year {stats_year}",
             flush=True,
         )
 
-    all_errors = or_errors + ar_errors + prev_errors
+    all_errors = or_errors + ar_errors + stats_errors
 
     return {
         "message": (
             f"Successfully fetched {len(or_players)} OR rankings "
             f"+ {len(ar_players)} AR rankings "
-            f"+ {prev_stats_count} previous season stats for {year} (sort_type={sort_type})"
+            f"+ {stats_count} {stats_label} stats for {year}"
         ),
         "year": year,
         "total_fetched": len(or_players),
         "ar_fetched": len(ar_players),
-        "prev_season_stats": prev_stats_count,
+        "stats_fetched": stats_count,
         "sort_type": sort_type,
         "errors": all_errors if all_errors else None,
     }
