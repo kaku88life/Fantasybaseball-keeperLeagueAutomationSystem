@@ -250,10 +250,10 @@ async def get_player_database(
             league_player["o_rank"] = r.get("o_rank")
             league_player["ar_rank"] = r.get("ar_rank")
 
-            # Override position/mlb_team from ranking if league data is empty
-            if not league_player["position"] and r.get("position"):
+            # Always prefer ranking position/mlb_team (2026 Yahoo data is most current)
+            if r.get("position"):
                 league_player["position"] = r["position"]
-            if not league_player["mlb_team"] and r.get("mlb_team"):
+            if r.get("mlb_team"):
                 league_player["mlb_team"] = r["mlb_team"]
 
             # Stats
