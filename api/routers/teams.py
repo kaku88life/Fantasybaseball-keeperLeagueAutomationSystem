@@ -8,6 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from api.database import (
     get_all_teams,
     get_keeper_selections,
+    get_player_rankings,
     get_snapshot,
     get_submission,
     upsert_keeper_selection,
@@ -29,6 +30,45 @@ from api.serializers import (
 )
 
 router = APIRouter()
+
+
+def _build_position_lookup(year: int) -> dict[str, dict]:
+    """Build a position/mlb_team lookup from player_rankings (2026 Yahoo data)."""
+    rankings = get_player_rankings(year)
+    lookup: dict[str, dict] = {}
+    for r in rankings:
+        pk = r.get("player_key", "")
+        entry = {"position": r.get("position", ""), "mlb_team": r.get("mlb_team", "")}
+        if pk:
+            lookup[pk] = entry
+            # Also index by player number for cross-season matching
+            if ".p." in pk:
+                pid = pk.split(".p.")[-1]
+                lookup[f"pid:{pid}"] = entry
+        # Also index by name (lowercase) as fallback
+        name = r.get("player_name", "")
+        if name:
+            lookup[f"name:{name.lower()}"] = entry
+    return lookup
+
+
+def _enrich_team_positions(team, year: int):
+    """Override player positions with 2026 Yahoo ranking data."""
+    lookup = _build_position_lookup(year)
+    for p in team.players:
+        entry = None
+        if p.yahoo_player_id:
+            entry = lookup.get(p.yahoo_player_id)
+            if not entry and ".p." in p.yahoo_player_id:
+                pid = p.yahoo_player_id.split(".p.")[-1]
+                entry = lookup.get(f"pid:{pid}")
+        if not entry:
+            entry = lookup.get(f"name:{p.name.lower()}")
+        if entry:
+            if entry["position"]:
+                p.position = entry["position"]
+            if entry["mlb_team"]:
+                p.mlb_team = entry["mlb_team"]
 
 
 def _get_team_from_snapshot(year: int, team_id: int):
@@ -70,6 +110,9 @@ def _get_team_from_snapshot(year: int, team_id: int):
                     use_faab=bo["use_faab"],
                     note=bo.get("notes", ""),
                 ))
+
+            # Enrich positions with 2026 Yahoo ranking data
+            _enrich_team_positions(t, year)
 
             return t, db_team
 

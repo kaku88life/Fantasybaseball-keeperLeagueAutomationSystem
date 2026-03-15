@@ -5,13 +5,51 @@ from __future__ import annotations
 
 from fastapi import APIRouter, HTTPException
 
-from api.database import get_all_submissions, get_all_teams, get_snapshot, get_snapshot_years
+from api.database import get_all_submissions, get_all_teams, get_player_rankings, get_snapshot, get_snapshot_years
 from api.schemas import LeagueSettingsSchema, LeagueSnapshotSchema
 from api.serializers import dict_to_league_state, serialize_league_state, serialize_team
 from src.contract.engine import calculate_buyout
 from src.contract.models import ContractType
 
 router = APIRouter()
+
+
+def _build_position_lookup(year: int) -> dict[str, dict]:
+    """Build a position/mlb_team lookup from player_rankings (2026 Yahoo data)."""
+    rankings = get_player_rankings(year)
+    lookup: dict[str, dict] = {}
+    for r in rankings:
+        pk = r.get("player_key", "")
+        entry = {"position": r.get("position", ""), "mlb_team": r.get("mlb_team", "")}
+        if pk:
+            lookup[pk] = entry
+            if ".p." in pk:
+                pid = pk.split(".p.")[-1]
+                lookup[f"pid:{pid}"] = entry
+        name = r.get("player_name", "")
+        if name:
+            lookup[f"name:{name.lower()}"] = entry
+    return lookup
+
+
+def _enrich_league_positions(ls, year: int):
+    """Override all player positions in a LeagueState with 2026 Yahoo data."""
+    lookup = _build_position_lookup(year)
+    for team in ls.teams:
+        for p in team.players:
+            entry = None
+            if p.yahoo_player_id:
+                entry = lookup.get(p.yahoo_player_id)
+                if not entry and ".p." in p.yahoo_player_id:
+                    pid = p.yahoo_player_id.split(".p.")[-1]
+                    entry = lookup.get(f"pid:{pid}")
+            if not entry:
+                entry = lookup.get(f"name:{p.name.lower()}")
+            if entry:
+                if entry["position"]:
+                    p.position = entry["position"]
+                if entry["mlb_team"]:
+                    p.mlb_team = entry["mlb_team"]
 
 
 @router.get("/settings", response_model=LeagueSettingsSchema)
@@ -69,6 +107,7 @@ async def get_league_year(year: int):
         raise HTTPException(status_code=404, detail=f"No data for year {year}")
 
     ls = dict_to_league_state(snap["data"])
+    _enrich_league_positions(ls, year)
     return serialize_league_state(ls)
 
 
@@ -82,6 +121,7 @@ async def get_league_summary(year: int):
         raise HTTPException(status_code=404, detail=f"No data for year {year}")
 
     ls = dict_to_league_state(snap["data"])
+    _enrich_league_positions(ls, year)
 
     # Get line names and team IDs
     line_names = get_team_line_names()
@@ -119,6 +159,7 @@ async def get_keeper_results(year: int):
         raise HTTPException(status_code=404, detail=f"No data for year {year}")
 
     ls = dict_to_league_state(snap["data"])
+    _enrich_league_positions(ls, year)
 
     # Build a map: manager_name -> team model
     team_map = {t.manager_name: t for t in ls.teams}
