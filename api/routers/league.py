@@ -5,11 +5,11 @@ from __future__ import annotations
 
 from fastapi import APIRouter, HTTPException
 
-from api.database import get_all_submissions, get_all_teams, get_player_rankings, get_snapshot, get_snapshot_years
+from api.database import get_all_submissions, get_all_teams, get_player_rankings, get_snapshot, get_snapshot_years, get_team_buyouts
 from api.schemas import LeagueSettingsSchema, LeagueSnapshotSchema
 from api.serializers import dict_to_league_state, serialize_league_state, serialize_team
 from src.contract.engine import calculate_buyout
-from src.contract.models import ContractType
+from src.contract.models import BuyoutRecord, ContractType
 
 router = APIRouter()
 
@@ -50,6 +50,48 @@ def _enrich_league_positions(ls, year: int):
                     p.position = entry["position"]
                 if entry["mlb_team"]:
                     p.mlb_team = entry["mlb_team"]
+
+
+def _enrich_teams_from_db(ls, db_teams: list[dict], year: int):
+    """Load DB-stored buyouts, trade_compensation, and faab_adjustment into team models.
+
+    The league snapshot does NOT contain buyout records (they live in the
+    ``buyouts`` DB table) or commissioner adjustments (trade_compensation,
+    faab_adjustment stored on the ``teams`` table).  This helper mirrors the
+    logic in ``teams.py::_get_team_from_snapshot()`` so that league-level
+    endpoints also reflect the correct financial numbers.
+    """
+    # Map manager_name -> db_team row for quick lookup
+    db_map: dict[str, dict] = {t["manager_name"]: t for t in db_teams}
+    # Map manager_name -> db team_id
+    id_map: dict[str, int] = {t["manager_name"]: t["id"] for t in db_teams}
+
+    for t in ls.teams:
+        db_team = db_map.get(t.manager_name)
+        if not db_team:
+            continue
+
+        # Apply commissioner adjustments (same as _get_team_from_snapshot)
+        db_trade_comp = db_team.get("trade_compensation", 0) or 0
+        db_faab_adj = db_team.get("faab_adjustment", 0) or 0
+        if db_trade_comp != 0:
+            t.trade_compensation = db_trade_comp
+        if db_faab_adj != 0:
+            t.faab_budget = t.faab_budget + db_faab_adj
+
+        # Load buyout records from DB
+        team_id = id_map[t.manager_name]
+        db_buyouts = get_team_buyouts(team_id, year)
+        for bo in db_buyouts:
+            t.buyout_records.append(BuyoutRecord(
+                player_name=bo["player_name"],
+                original_contract=bo["original_contract"],
+                buyout_salary_cost=bo["buyout_salary"],
+                buyout_faab_cost=bo["buyout_faab"],
+                remaining_years=bo["remaining_years"],
+                use_faab=bo["use_faab"],
+                note=bo.get("notes", ""),
+            ))
 
 
 @router.get("/settings", response_model=LeagueSettingsSchema)
@@ -128,6 +170,9 @@ async def get_league_summary(year: int):
     db_teams = _get_all_teams()
     manager_to_team_id = {t["manager_name"]: t["id"] for t in db_teams}
 
+    # Load DB-stored buyouts and commissioner adjustments into team models
+    _enrich_teams_from_db(ls, db_teams, year)
+
     summary = []
     for t in ls.teams:
         team_id = manager_to_team_id.get(t.manager_name)
@@ -161,11 +206,15 @@ async def get_keeper_results(year: int):
     ls = dict_to_league_state(snap["data"])
     _enrich_league_positions(ls, year)
 
-    # Build a map: manager_name -> team model
-    team_map = {t.manager_name: t for t in ls.teams}
-
     # Get all DB teams for ID mapping
     db_teams = get_all_teams()
+
+    # Load DB-stored buyouts and commissioner adjustments into team models
+    _enrich_teams_from_db(ls, db_teams, year)
+
+    # Build a map: manager_name -> team model (AFTER enrichment so buyouts are loaded)
+    team_map = {t.manager_name: t for t in ls.teams}
+
     db_team_map = {t["id"]: t for t in db_teams}
 
     # Get line names
@@ -195,15 +244,21 @@ async def get_keeper_results(year: int):
                 action = sel.get("action", "")
                 if action == "fa":
                     continue
-                if action == "release":
-                    # Calculate buyout cost for N-contract players being released
+                if action in ("release", "release_normal"):
+                    # Calculate buyout cost for N-contract players being released.
+                    # Only deduct CURRENT YEAR's portion (buyout is paid annually).
+                    # Mirrors teams.py _validate_selections() logic.
                     if team_model:
                         for p in team_model.players:
                             if p.name == sel["player_name"]:
                                 if p.contract.contract_type == ContractType.N:
-                                    buyout = calculate_buyout(p, use_faab=True)
-                                    new_buyout_salary_cost += buyout.salary_cap_cost
-                                    new_buyout_faab_cost += buyout.faab_cost
+                                    use_faab = action == "release"
+                                    buyout = calculate_buyout(p, use_faab=use_faab)
+                                    # Per-year cost (from yearly_breakdown[0]), not total
+                                    if buyout.yearly_breakdown:
+                                        year1 = buyout.yearly_breakdown[0]
+                                        new_buyout_salary_cost += year1["salary_cap"]
+                                        new_buyout_faab_cost += year1.get("faab", 0)
                                 break
                     continue
                 # This is a kept player
@@ -238,6 +293,7 @@ async def get_keeper_results(year: int):
                 keeper_cost += salary
 
         # Get team financial info
+        # trade_compensation already applied by _enrich_teams_from_db
         salary_cap = 0
         ranking_bonus = 0
         trade_comp = db_team.get("trade_compensation", 0) or 0
@@ -247,6 +303,7 @@ async def get_keeper_results(year: int):
         if team_model:
             salary_cap = team_model.salary_cap
             ranking_bonus = team_model.ranking_bonus
+            # Now correctly reflects DB buyout records (loaded by _enrich_teams_from_db)
             carryover_buyout_salary = team_model.total_buyout_cost
             carryover_buyout_faab = team_model.total_buyout_faab_cost
 
