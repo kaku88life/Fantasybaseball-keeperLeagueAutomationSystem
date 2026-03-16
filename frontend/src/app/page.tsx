@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import { getYears } from "@/lib/api";
 import LoadingSpinner from "@/components/LoadingSpinner";
+import SeasonCountdown from "@/components/SeasonCountdown";
 
 export default function HomePage() {
   const { user, loading } = useAuth();
@@ -33,6 +34,7 @@ export default function HomePage() {
         >
           Login with Yahoo
         </a>
+        <SeasonCountdown />
       </div>
     );
   }
