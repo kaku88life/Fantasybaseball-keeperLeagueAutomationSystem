@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { getPlayerStats } from "@/lib/api";
 import type { PlayerStats } from "@/types";
 
@@ -10,6 +10,19 @@ interface PlayerStatsModalProps {
   onClose: () => void;
 }
 
+// Level display order
+const LEVEL_ORDER = ["MLB", "AAA", "AA", "A+", "A", "ROK"] as const;
+
+// Level color styling
+const LEVEL_COLORS: Record<string, { bg: string; text: string }> = {
+  MLB: { bg: "bg-blue-100", text: "text-blue-700" },
+  AAA: { bg: "bg-emerald-100", text: "text-emerald-700" },
+  AA: { bg: "bg-amber-100", text: "text-amber-700" },
+  "A+": { bg: "bg-orange-100", text: "text-orange-700" },
+  A: { bg: "bg-purple-100", text: "text-purple-700" },
+  ROK: { bg: "bg-gray-100", text: "text-gray-500" },
+};
+
 export default function PlayerStatsModal({
   playerName,
   position,
@@ -18,10 +31,12 @@ export default function PlayerStatsModal({
   const [stats, setStats] = useState<PlayerStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [levelFilter, setLevelFilter] = useState("ALL");
 
   useEffect(() => {
     setLoading(true);
     setError("");
+    setLevelFilter("ALL");
     getPlayerStats(playerName, position)
       .then((data) => setStats(data))
       .catch((e) => setError(e.message || "Failed to load player stats"))
@@ -52,21 +67,40 @@ export default function PlayerStatsModal({
     [onClose],
   );
 
-  // Level badge styling helper
-  const levelBadge = (level?: string) => {
-    if (!level || level === "MLB") {
-      return <span className="inline-block rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-semibold text-blue-700">MLB</span>;
+  // Collect all available levels from stats data
+  const availableLevels = useMemo(() => {
+    if (!stats) return [];
+    const levels = new Set<string>();
+    for (const s of stats.hitting) {
+      if (s.level) levels.add(s.level);
     }
-    const colors: Record<string, string> = {
-      AAA: "bg-emerald-100 text-emerald-700",
-      AA: "bg-amber-100 text-amber-700",
-      "A+": "bg-orange-100 text-orange-700",
-      A: "bg-purple-100 text-purple-700",
-      ROK: "bg-gray-100 text-gray-500",
-    };
+    for (const s of stats.pitching) {
+      if (s.level) levels.add(s.level);
+    }
+    // Sort by defined order
+    return LEVEL_ORDER.filter((l) => levels.has(l));
+  }, [stats]);
+
+  // Filtered stats
+  const filteredHitting = useMemo(() => {
+    if (!stats) return [];
+    if (levelFilter === "ALL") return stats.hitting;
+    return stats.hitting.filter((s) => s.level === levelFilter);
+  }, [stats, levelFilter]);
+
+  const filteredPitching = useMemo(() => {
+    if (!stats) return [];
+    if (levelFilter === "ALL") return stats.pitching;
+    return stats.pitching.filter((s) => s.level === levelFilter);
+  }, [stats, levelFilter]);
+
+  // Level badge (compact inline)
+  const levelBadge = (level?: string) => {
+    const lv = level || "MLB";
+    const colors = LEVEL_COLORS[lv] ?? { bg: "bg-gray-100", text: "text-gray-500" };
     return (
-      <span className={`inline-block rounded px-1.5 py-0.5 text-[10px] font-semibold ${colors[level] ?? "bg-gray-100 text-gray-500"}`}>
-        {level}
+      <span className={`inline-block rounded px-1.5 py-0.5 text-[10px] font-semibold ${colors.bg} ${colors.text}`}>
+        {lv}
       </span>
     );
   };
@@ -188,11 +222,35 @@ export default function PlayerStatsModal({
                   </div>
                 </div>
               )}
+
+              {/* Level filter dropdown */}
+              {availableLevels.length > 1 && (
+                <div className="mt-3 flex items-center gap-2">
+                  <label className="text-xs font-medium text-gray-500">層級篩選:</label>
+                  <select
+                    value={levelFilter}
+                    onChange={(e) => setLevelFilter(e.target.value)}
+                    className="rounded border border-gray-300 bg-white px-2 py-1 text-xs font-medium text-gray-700 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  >
+                    <option value="ALL">全部層級 ({stats.hitting.length + stats.pitching.length})</option>
+                    {availableLevels.map((lv) => {
+                      const count =
+                        stats.hitting.filter((s) => s.level === lv).length +
+                        stats.pitching.filter((s) => s.level === lv).length;
+                      return (
+                        <option key={lv} value={lv}>
+                          {lv} ({count})
+                        </option>
+                      );
+                    })}
+                  </select>
+                </div>
+              )}
             </div>
 
             <div className="px-4 py-3 space-y-6 sm:px-6 sm:py-4">
               {/* Hitting stats */}
-              {stats.hitting.length > 0 && (
+              {filteredHitting.length > 0 && (
                 <div>
                   <h4 className="mb-2 text-sm font-semibold text-gray-700">
                     打擊成績 Hitting Stats
@@ -218,7 +276,7 @@ export default function PlayerStatsModal({
                         </tr>
                       </thead>
                       <tbody>
-                        {stats.hitting.map((s, i) => (
+                        {filteredHitting.map((s, i) => (
                           <tr
                             key={`${s.season}-${s.team}-${s.level}-${i}`}
                             className={`border-t ${rowBg(s.level)}`}
@@ -274,7 +332,7 @@ export default function PlayerStatsModal({
               )}
 
               {/* Pitching stats */}
-              {stats.pitching.length > 0 && (
+              {filteredPitching.length > 0 && (
                 <div>
                   <h4 className="mb-2 text-sm font-semibold text-gray-700">
                     投球成績 Pitching Stats
@@ -300,7 +358,7 @@ export default function PlayerStatsModal({
                         </tr>
                       </thead>
                       <tbody>
-                        {stats.pitching.map((s, i) => (
+                        {filteredPitching.map((s, i) => (
                           <tr
                             key={`${s.season}-${s.team}-${s.level}-${i}`}
                             className={`border-t ${rowBg(s.level)}`}
@@ -356,9 +414,11 @@ export default function PlayerStatsModal({
               )}
 
               {/* No stats available */}
-              {stats.hitting.length === 0 && stats.pitching.length === 0 && (
+              {filteredHitting.length === 0 && filteredPitching.length === 0 && (
                 <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 text-center text-sm text-gray-500">
-                  無成績紀錄 No stats available (MLB / MiLB)
+                  {levelFilter === "ALL"
+                    ? "無成績紀錄 No stats available (MLB / MiLB)"
+                    : `${levelFilter} 層級無成績紀錄`}
                 </div>
               )}
             </div>

@@ -5,6 +5,7 @@ No authentication required - MLB stats are public data.
 """
 from __future__ import annotations
 
+import asyncio
 import json
 import os
 import time
@@ -209,23 +210,61 @@ async def _search_mlb_player(name: str, position: str = "") -> Optional[dict]:
 async def _get_mlb_stats(mlb_id: int) -> dict:
     """Fetch year-by-year AND career stats for a player from MLB Stats API.
 
-    Uses stats=yearByYear,career to get both in a single API call.
+    Queries MLB (sportId=1) for career stats, plus all MiLB levels for
+    yearByYear stats.  The MLB Stats API does not accept comma-separated
+    sportId values, so we fire parallel requests for each level.
     """
     cache_key = f"stats:{mlb_id}"
     cached = _get_cached(cache_key)
     if cached:
         return cached
 
+    # Sport IDs to query: MLB + MiLB levels
+    MILB_SPORT_IDS = [11, 12, 13, 14, 16]  # AAA, AA, A+, A, ROK
+
     async with httpx.AsyncClient(timeout=10.0) as client:
-        resp = await client.get(
+        # MLB career + yearByYear (default sportId=1)
+        mlb_task = client.get(
             f"{MLB_BASE}/people/{mlb_id}/stats",
             params={
                 "stats": "yearByYear,career",
                 "group": "hitting,pitching",
             },
         )
-        resp.raise_for_status()
-        data = resp.json()
+        # MiLB yearByYear — one request per level, in parallel
+        milb_tasks = [
+            client.get(
+                f"{MLB_BASE}/people/{mlb_id}/stats",
+                params={
+                    "stats": "yearByYear",
+                    "group": "hitting,pitching",
+                    "sportId": sid,
+                },
+            )
+            for sid in MILB_SPORT_IDS
+        ]
+
+        results = await asyncio.gather(mlb_task, *milb_tasks, return_exceptions=True)
+
+    # Start with MLB data
+    mlb_resp = results[0]
+    if isinstance(mlb_resp, Exception):
+        raise mlb_resp
+    mlb_resp.raise_for_status()
+    data = mlb_resp.json()
+
+    # Merge MiLB splits into the data
+    for resp in results[1:]:
+        if isinstance(resp, Exception):
+            continue
+        try:
+            resp.raise_for_status()
+            milb_data = resp.json()
+        except Exception:
+            continue
+        # Append MiLB stat groups into the main stats array
+        for stat_group in milb_data.get("stats", []):
+            data.setdefault("stats", []).append(stat_group)
 
     _set_cached(cache_key, data)
     return data
