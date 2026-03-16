@@ -683,6 +683,18 @@ async def get_player_stats(
     mlb_id = player["id"]
     raw_stats = await _get_mlb_stats(mlb_id)
 
+    # Sport ID -> level label mapping
+    SPORT_LEVEL = {
+        1: "MLB",
+        11: "AAA",
+        12: "AA",
+        13: "A+",
+        14: "A",
+        16: "ROK",
+    }
+    # Include MLB + all MiLB levels
+    INCLUDED_SPORTS = set(SPORT_LEVEL.keys())
+
     # Parse into hitting + pitching season lists AND career totals
     hitting_seasons = []
     pitching_seasons = []
@@ -695,31 +707,34 @@ async def get_player_stats(
 
         for split in stat_group.get("splits", []):
             s = split.get("stat", {})
-
-            # Only include MLB-level stats (sport.id == 1)
             sport_id = split.get("sport", {}).get("id")
-            if sport_id is not None and sport_id != 1:
-                continue
 
-            # Career totals (stat_type == "career")
+            # Career totals — only count MLB (sport_id == 1) for rookie eligibility
             if stat_type == "career":
-                if group_name == "hitting":
-                    career_pa = s.get("plateAppearances", 0)
-                elif group_name == "pitching":
-                    career_ip = _parse_ip(s.get("inningsPitched", "0.0"))
+                if sport_id == 1:
+                    if group_name == "hitting":
+                        career_pa = s.get("plateAppearances", 0)
+                    elif group_name == "pitching":
+                        career_ip = _parse_ip(s.get("inningsPitched", "0.0"))
                 continue
 
             # Year-by-year stats
             if stat_type != "yearByYear":
                 continue
 
+            # Filter to MLB + MiLB levels only (skip winter leagues, college, etc.)
+            if sport_id is not None and sport_id not in INCLUDED_SPORTS:
+                continue
+
             season = split.get("season", "")
             team_name = split.get("team", {}).get("name", "")
+            level = SPORT_LEVEL.get(sport_id, "Other") if sport_id else "MLB"
 
             if group_name == "hitting":
                 hitting_seasons.append({
                     "season": season,
                     "team": team_name,
+                    "level": level,
                     "games": s.get("gamesPlayed", 0),
                     "plate_appearances": s.get("plateAppearances", 0),
                     "at_bats": s.get("atBats", 0),
@@ -737,6 +752,7 @@ async def get_player_stats(
                 pitching_seasons.append({
                     "season": season,
                     "team": team_name,
+                    "level": level,
                     "games": s.get("gamesPlayed", 0),
                     "games_started": s.get("gamesStarted", 0),
                     "wins": s.get("wins", 0),
@@ -750,9 +766,10 @@ async def get_player_stats(
                     "holds": s.get("holds", 0),
                 })
 
-    # Sort by season descending, take last 5 years
-    hitting_seasons.sort(key=lambda x: x["season"], reverse=True)
-    pitching_seasons.sort(key=lambda x: x["season"], reverse=True)
+    # Sort by season descending (newest first), then by level priority
+    _level_order = {"MLB": 0, "AAA": 1, "AA": 2, "A+": 3, "A": 4, "ROK": 5, "Other": 6}
+    hitting_seasons.sort(key=lambda x: (-int(x["season"] or "0"), _level_order.get(x.get("level", ""), 9)))
+    pitching_seasons.sort(key=lambda x: (-int(x["season"] or "0"), _level_order.get(x.get("level", ""), 9)))
 
     # Determine rookie eligibility
     exceeded_pa = career_pa > ROOKIE_PA_THRESHOLD
@@ -768,8 +785,8 @@ async def get_player_stats(
         "age": player.get("currentAge"),
         "bat_side": player.get("batSide", {}).get("code", ""),
         "pitch_hand": player.get("pitchHand", {}).get("code", ""),
-        "hitting": hitting_seasons[:5],
-        "pitching": pitching_seasons[:5],
+        "hitting": hitting_seasons,
+        "pitching": pitching_seasons,
         # Career totals and rookie eligibility
         "career_pa": career_pa,
         "career_ip": round(career_ip, 1),

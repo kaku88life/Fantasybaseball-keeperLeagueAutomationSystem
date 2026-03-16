@@ -290,6 +290,7 @@ export interface LeagueSettings {
 export interface HittingSeason {
   season: string;
   team: string;
+  level?: string;
   games: number;
   plate_appearances: number;
   at_bats: number;
@@ -307,6 +308,7 @@ export interface HittingSeason {
 export interface PitchingSeason {
   season: string;
   team: string;
+  level?: string;
   games: number;
   games_started: number;
   wins: number;

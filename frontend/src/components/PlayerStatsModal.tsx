@@ -52,6 +52,31 @@ export default function PlayerStatsModal({
     [onClose],
   );
 
+  // Level badge styling helper
+  const levelBadge = (level?: string) => {
+    if (!level || level === "MLB") {
+      return <span className="inline-block rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-semibold text-blue-700">MLB</span>;
+    }
+    const colors: Record<string, string> = {
+      AAA: "bg-emerald-100 text-emerald-700",
+      AA: "bg-amber-100 text-amber-700",
+      "A+": "bg-orange-100 text-orange-700",
+      A: "bg-purple-100 text-purple-700",
+      ROK: "bg-gray-100 text-gray-500",
+    };
+    return (
+      <span className={`inline-block rounded px-1.5 py-0.5 text-[10px] font-semibold ${colors[level] ?? "bg-gray-100 text-gray-500"}`}>
+        {level}
+      </span>
+    );
+  };
+
+  // Row background for minor league seasons
+  const rowBg = (level?: string) => {
+    if (!level || level === "MLB") return "hover:bg-gray-50";
+    return "bg-gray-50/50 hover:bg-gray-100/70";
+  };
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
@@ -173,10 +198,11 @@ export default function PlayerStatsModal({
                     打擊成績 Hitting Stats
                   </h4>
                   <div className="overflow-x-auto rounded-lg border">
-                    <table className="w-full min-w-[600px] text-xs sm:text-sm">
+                    <table className="w-full min-w-[650px] text-xs sm:text-sm">
                       <thead className="bg-gray-50 text-[10px] text-gray-500 sm:text-xs">
                         <tr>
                           <th className="px-1.5 py-1.5 text-left sm:px-2 sm:py-2">Year</th>
+                          <th className="px-1.5 py-1.5 text-center sm:px-2 sm:py-2">Lv</th>
                           <th className="px-1.5 py-1.5 text-left sm:px-2 sm:py-2">Team</th>
                           <th className="px-1.5 py-1.5 text-right sm:px-2 sm:py-2">G</th>
                           <th className="px-1.5 py-1.5 text-right sm:px-2 sm:py-2">PA</th>
@@ -194,11 +220,14 @@ export default function PlayerStatsModal({
                       <tbody>
                         {stats.hitting.map((s, i) => (
                           <tr
-                            key={`${s.season}-${s.team}-${i}`}
-                            className="border-t hover:bg-gray-50"
+                            key={`${s.season}-${s.team}-${s.level}-${i}`}
+                            className={`border-t ${rowBg(s.level)}`}
                           >
                             <td className="px-2 py-1.5 font-medium">
                               {s.season}
+                            </td>
+                            <td className="px-2 py-1.5 text-center">
+                              {levelBadge(s.level)}
                             </td>
                             <td className="px-2 py-1.5 text-gray-600 truncate max-w-[120px]">
                               {s.team}
@@ -251,10 +280,11 @@ export default function PlayerStatsModal({
                     投球成績 Pitching Stats
                   </h4>
                   <div className="overflow-x-auto rounded-lg border">
-                    <table className="w-full min-w-[600px] text-xs sm:text-sm">
+                    <table className="w-full min-w-[650px] text-xs sm:text-sm">
                       <thead className="bg-gray-50 text-[10px] text-gray-500 sm:text-xs">
                         <tr>
                           <th className="px-1.5 py-1.5 text-left sm:px-2 sm:py-2">Year</th>
+                          <th className="px-1.5 py-1.5 text-center sm:px-2 sm:py-2">Lv</th>
                           <th className="px-1.5 py-1.5 text-left sm:px-2 sm:py-2">Team</th>
                           <th className="px-1.5 py-1.5 text-right sm:px-2 sm:py-2">G</th>
                           <th className="px-1.5 py-1.5 text-right sm:px-2 sm:py-2">GS</th>
@@ -272,11 +302,14 @@ export default function PlayerStatsModal({
                       <tbody>
                         {stats.pitching.map((s, i) => (
                           <tr
-                            key={`${s.season}-${s.team}-${i}`}
-                            className="border-t hover:bg-gray-50"
+                            key={`${s.season}-${s.team}-${s.level}-${i}`}
+                            className={`border-t ${rowBg(s.level)}`}
                           >
                             <td className="px-2 py-1.5 font-medium">
                               {s.season}
+                            </td>
+                            <td className="px-2 py-1.5 text-center">
+                              {levelBadge(s.level)}
                             </td>
                             <td className="px-2 py-1.5 text-gray-600 truncate max-w-[120px]">
                               {s.team}
@@ -325,7 +358,7 @@ export default function PlayerStatsModal({
               {/* No stats available */}
               {stats.hitting.length === 0 && stats.pitching.length === 0 && (
                 <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 text-center text-sm text-gray-500">
-                  無 MLB 成績紀錄 No MLB stats available
+                  無成績紀錄 No stats available (MLB / MiLB)
                 </div>
               )}
             </div>
