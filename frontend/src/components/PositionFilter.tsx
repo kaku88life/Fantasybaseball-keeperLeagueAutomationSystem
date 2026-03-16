@@ -23,7 +23,7 @@ export const POSITION_GROUPS = [
  * Check if a player position string matches a given filter value.
  */
 const BATTER_POSITIONS = ["C", "1B", "2B", "3B", "SS", "IF", "LF", "CF", "RF", "OF", "UTIL", "DH"];
-const PITCHER_POSITIONS = ["SP", "RP", "P"];
+const PITCHER_POSITIONS = ["SP", "RP", "P", "LHP", "RHP"];
 
 export function matchesPosition(positionStr: string, filter: string): boolean {
   if (filter === "ALL") return true;
@@ -49,6 +49,13 @@ export function matchesPosition(positionStr: string, filter: string): boolean {
   }
   if (filter === "P") {
     return positions.some((p) => PITCHER_POSITIONS.includes(p));
+  }
+  // SP/RP also match LHP/RHP (Pipeline format for prospects)
+  if (filter === "SP") {
+    return positions.some((p) => ["SP", "LHP", "RHP"].includes(p));
+  }
+  if (filter === "RP") {
+    return positions.some((p) => ["RP", "LHP", "RHP"].includes(p));
   }
   return positions.includes(filter);
 }
@@ -94,9 +101,13 @@ export default function PositionFilter({
         if (["LF", "CF", "RF", "OF"].includes(pos)) {
           map["OF"] = (map["OF"] || 0) + 1;
         }
-        if (["SP", "RP", "P"].includes(pos)) {
+        if (["SP", "RP", "P", "LHP", "RHP"].includes(pos)) {
           map["P"] = (map["P"] || 0) + 1;
           isPitcherFlag = true;
+          // LHP/RHP also count under SP (most prospects are starters)
+          if (pos === "LHP" || pos === "RHP") {
+            map["SP"] = (map["SP"] || 0) + 1;
+          }
         }
         if (BATTER_POSITIONS.includes(pos.toUpperCase())) {
           isBatter = true;

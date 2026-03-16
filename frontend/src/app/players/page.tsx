@@ -94,9 +94,12 @@ const PROSPECT_OWNER_OPTIONS = [
   { value: "fa", label: "FA" },
 ] as const;
 
+// Pipeline uses LHP/RHP for prospects; Yahoo uses SP/RP/P
+const ALL_PITCHER_POSITIONS = ["SP", "RP", "P", "LHP", "RHP"];
+
 function isPitcher(position: string): boolean {
   const pos = position.split(",").map((s) => s.trim().toUpperCase());
-  return pos.some((p) => ["SP", "RP", "P"].includes(p));
+  return pos.some((p) => ALL_PITCHER_POSITIONS.includes(p));
 }
 
 export default function PlayersPage() {
@@ -328,15 +331,25 @@ export default function PlayersPage() {
     }
 
     // Position filter
+    // MLB Pipeline uses LHP/RHP; map SP->also match LHP/RHP, RP->also match LHP/RHP
     if (prospectPosFilter !== "ALL") {
       if (prospectPosFilter === "BATTER") {
         list = list.filter((p) => !isPitcher(p.position));
       } else if (prospectPosFilter === "PITCHER") {
         list = list.filter((p) => isPitcher(p.position));
       } else {
+        // Build expanded set: SP also matches LHP/RHP (most prospects are starters)
+        const expandedFilter: string[] = [prospectPosFilter];
+        if (prospectPosFilter === "SP") {
+          expandedFilter.push("LHP", "RHP");
+        } else if (prospectPosFilter === "RP") {
+          expandedFilter.push("LHP", "RHP");
+        } else if (prospectPosFilter === "P") {
+          expandedFilter.push("LHP", "RHP", "SP", "RP");
+        }
         list = list.filter((p) => {
           const positions = p.position.split(/[,/]/).map((s) => s.trim().toUpperCase());
-          return positions.includes(prospectPosFilter);
+          return positions.some((pos) => expandedFilter.includes(pos));
         });
       }
     }
