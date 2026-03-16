@@ -1030,7 +1030,7 @@ async def fetch_yahoo_rankings(
             )
             stats_count = len(stats_players)
             if stats_players:
-                update_last_season_stats(year, stats_players)
+                update_last_season_stats(year, stats_players, sort_type=sort_type)
         except HTTPException:
             stats_errors.append(f"Could not fetch {stats_label} data")
             print(

@@ -182,7 +182,17 @@ export default function PlayersPage() {
   const [showGuide, setShowGuide] = useState(false);
 
   // Sort type for Yahoo rankings (controls stat time range)
-  const [sortType, setSortType] = useState("season");
+  // Defaults to "prev_season" (2025 stats) — synced from API response when data loads
+  const [sortType, setSortType] = useState("prev_season");
+  const [sortTypeInitialized, setSortTypeInitialized] = useState(false);
+
+  // Sync sortType dropdown with stored stats_sort_type on first data load
+  useEffect(() => {
+    if (!sortTypeInitialized && data?.stats_sort_type) {
+      setSortType(data.stats_sort_type);
+      setSortTypeInitialized(true);
+    }
+  }, [data?.stats_sort_type, sortTypeInitialized]);
 
   // Commissioner ranking fetch
   const { data: rankingStatus, mutate: mutateRankingStatus } = useSWR(
@@ -625,6 +635,15 @@ export default function PlayersPage() {
                 </span>
               </div>
 
+              {/* Stats mismatch hint */}
+              {data?.stats_sort_type && sortType !== data.stats_sort_type && (
+                <div className="mb-2 rounded-md bg-amber-50 border border-amber-200 px-3 py-2 text-xs text-amber-700">
+                  目前無「{SORT_TYPE_OPTIONS.find((o) => o.value === sortType)?.label}」的成績數據。
+                  需由 Commissioner 以此選項重新擷取 Yahoo 排名。
+                  已有數據：{SORT_TYPE_OPTIONS.find((o) => o.value === data.stats_sort_type)?.label ?? data.stats_sort_type}
+                </div>
+              )}
+
               {/* Table */}
               <div className="overflow-x-auto rounded-lg border border-gray-200">
                 <table className="min-w-full divide-y divide-gray-200 text-sm">
@@ -672,7 +691,10 @@ export default function PlayersPage() {
                   <tbody className="divide-y divide-gray-100 bg-white">
                     {paginatedPlayers.map((p, idx) => {
                       const pitcher = isPitcher(p.position);
-                      const statSource = p.stats;
+                      // Only show stats when the selected sortType matches what was fetched
+                      const storedSortType = data?.stats_sort_type ?? "prev_season";
+                      const statsMatch = sortType === storedSortType;
+                      const statSource = statsMatch ? p.stats : {};
 
                       return (
                         <tr

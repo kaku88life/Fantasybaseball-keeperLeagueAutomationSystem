@@ -477,6 +477,7 @@ async def get_player_database(
         "total_pages": total_pages,
         "has_rankings": ranking_status["has_data"],
         "last_fetched_at": ranking_status.get("last_fetched_at"),
+        "stats_sort_type": ranking_status.get("stats_sort_type"),
         "owners": all_owners,
         "players": page_players,
     }

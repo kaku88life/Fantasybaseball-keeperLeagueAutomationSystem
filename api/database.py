@@ -371,6 +371,20 @@ MIGRATIONS: dict[str, list[str]] = {
         END $$;
         """,
     ],
+    "009_add_stats_sort_type": [
+        """
+        DO $$
+        BEGIN
+            IF NOT EXISTS (
+                SELECT 1 FROM information_schema.columns
+                WHERE table_name = 'player_rankings' AND column_name = 'stats_sort_type'
+            ) THEN
+                ALTER TABLE player_rankings
+                    ADD COLUMN stats_sort_type TEXT DEFAULT 'prev_season';
+            END IF;
+        END $$;
+        """,
+    ],
 }
 
 
@@ -1150,16 +1164,18 @@ def bulk_upsert_player_rankings(year: int, players: list[dict]):
         conn.close()
 
 
-def update_last_season_stats(year: int, players: list[dict]):
+def update_last_season_stats(year: int, players: list[dict], sort_type: str = "prev_season"):
     """Update stat_* columns for existing players by matching player_name.
 
-    Used to fill in previous season stats from a different Yahoo league year.
+    Used to fill in previous/current season stats from Yahoo API.
     Matches by player_name (case-insensitive) against records already in
     the player_rankings table for the given year.
 
     Args:
         year: The target year in the player_rankings table
         players: list of dicts with player_name and stat_* columns
+        sort_type: Which sort_type was used to fetch these stats
+                   (e.g. "prev_season", "season", "lastweek", "lastmonth", "date")
     """
     if not players:
         return
@@ -1180,6 +1196,7 @@ def update_last_season_stats(year: int, players: list[dict]):
                            stat_ip = %s, stat_w = %s, stat_sv = %s, stat_hld = %s,
                            stat_k = %s, stat_era = %s, stat_whip = %s,
                            stat_qs = %s,
+                           stats_sort_type = %s,
                            fetched_at = NOW()
                        WHERE year = %s AND LOWER(player_name) = LOWER(%s)""",
                     (
@@ -1189,6 +1206,7 @@ def update_last_season_stats(year: int, players: list[dict]):
                         p.get("stat_ip"), p.get("stat_w"), p.get("stat_sv"),
                         p.get("stat_hld"), p.get("stat_k"), p.get("stat_era"),
                         p.get("stat_whip"), p.get("stat_qs"),
+                        sort_type,
                         year, name,
                     ),
                 )
@@ -1242,12 +1260,21 @@ def get_ranking_fetch_status(year: int) -> dict:
             (year,),
         )
         if row and row["total_count"] > 0:
+            # Get the stats_sort_type (same for all rows of a year)
+            sort_row = _fetchone(
+                conn,
+                """SELECT stats_sort_type FROM player_rankings
+                   WHERE year = %s AND stats_sort_type IS NOT NULL
+                   LIMIT 1""",
+                (year,),
+            )
             return {
                 "has_data": True,
                 "total_count": row["total_count"],
                 "last_fetched_at": row["last_fetched_at"].isoformat() if row["last_fetched_at"] else None,
+                "stats_sort_type": sort_row["stats_sort_type"] if sort_row else "prev_season",
             }
-        return {"has_data": False, "total_count": 0, "last_fetched_at": None}
+        return {"has_data": False, "total_count": 0, "last_fetched_at": None, "stats_sort_type": None}
     finally:
         conn.close()
 

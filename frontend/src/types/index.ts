@@ -86,6 +86,7 @@ export interface PlayerDatabaseResponse {
   total_pages: number;
   has_rankings: boolean;
   last_fetched_at: string | null;
+  stats_sort_type: string | null;
   owners: string[];
   players: PlayerDatabaseEntry[];
 }
@@ -95,6 +96,7 @@ export interface RankingFetchStatus {
   has_data: boolean;
   total_count: number;
   last_fetched_at: string | null;
+  stats_sort_type: string | null;
 }
 
 // Top 100 Prospects types
