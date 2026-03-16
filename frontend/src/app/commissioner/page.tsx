@@ -558,7 +558,7 @@ export default function CommissionerDashboard() {
               {!yahooToken.connected && (
                 <a
                   href={`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8002"}/api/auth/yahoo/login`}
-                  className="rounded bg-purple-600 px-2 py-1 text-xs text-white hover:bg-purple-500"
+                  className="rounded bg-indigo-600 px-2 py-1 text-xs text-white hover:bg-indigo-500"
                 >
                   重新登入 Yahoo Re-authorize
                 </a>

@@ -40,19 +40,22 @@ export default function RulesPage() {
       </p>
 
       {/* Tab Navigation */}
-      <div className="mb-6 flex flex-wrap gap-1">
+      <div className="mb-6 flex gap-1 border-b border-gray-200 overflow-x-auto">
         {TABS.map((tab) => (
           <button
             key={tab.id}
             type="button"
             onClick={() => setActiveTab(tab.id)}
-            className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors sm:px-4 sm:py-2 sm:text-sm ${
+            className={`relative whitespace-nowrap px-3 py-2 text-xs font-medium transition-colors sm:px-4 sm:text-sm ${
               activeTab === tab.id
-                ? "bg-indigo-600 text-white"
-                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                ? "text-indigo-600"
+                : "text-gray-500 hover:text-gray-700"
             }`}
           >
             {tab.label}
+            {activeTab === tab.id && (
+              <span className="absolute inset-x-0 bottom-0 h-0.5 bg-indigo-600" />
+            )}
           </button>
         ))}
       </div>

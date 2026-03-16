@@ -114,7 +114,7 @@ export default function UserManagementPage() {
   return (
     <div>
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">用戶管理 User Management</h1>
+        <h1 className="text-xl font-bold sm:text-2xl">用戶管理 User Management</h1>
         <Link
           href="/commissioner"
           className="rounded border px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50"
@@ -155,7 +155,7 @@ export default function UserManagementPage() {
                           type="text"
                           value={lineNameInput}
                           onChange={(e) => setLineNameInput(e.target.value)}
-                          className="w-24 rounded border px-2 py-0.5 text-xs"
+                          className="w-24 rounded border px-2 py-0.5 text-xs focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                           placeholder="LINE 名稱"
                           autoFocus
                           onKeyDown={(e) => {
@@ -244,7 +244,7 @@ export default function UserManagementPage() {
                         if (val) handleAssignTeam(u.id, Number(val));
                       }}
                       disabled={saving === u.id}
-                      className="rounded border px-2 py-1 text-sm"
+                      className="rounded border px-2 py-1 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                     >
                       <option value="">-- 未指派 --</option>
                       {teams.map((t) => (

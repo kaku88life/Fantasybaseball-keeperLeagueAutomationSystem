@@ -79,7 +79,7 @@ export default function LineNamePrompt() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="你的 LINE 顯示名稱"
-            className="mb-3 w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="mb-3 w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
             disabled={saving}
             maxLength={50}
           />
@@ -92,7 +92,7 @@ export default function LineNamePrompt() {
             <button
               type="submit"
               disabled={saving || !name.trim()}
-              className="flex-1 rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+              className="flex-1 rounded bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-50"
             >
               {saving ? "儲存中..." : "確認送出"}
             </button>

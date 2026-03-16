@@ -280,7 +280,7 @@ export default function KeeperSelectionPage() {
           >
             &larr;
           </Link>
-          <h1 className="text-lg font-bold sm:text-2xl">
+          <h1 className="text-xl font-bold sm:text-2xl">
             {team.manager_name} - {year} 留用名單
           </h1>
         </div>

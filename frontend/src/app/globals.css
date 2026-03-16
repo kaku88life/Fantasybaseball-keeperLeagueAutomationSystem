@@ -1,5 +1,53 @@
 @import "tailwindcss";
 
+/* ========== Custom Scrollbar ========== */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #94a3b8;
+}
+
+/* Show scrollbar thumb only on hover for scrollable containers */
+.overflow-x-auto::-webkit-scrollbar-thumb,
+.overflow-y-auto::-webkit-scrollbar-thumb {
+  background-color: transparent;
+}
+
+.overflow-x-auto:hover::-webkit-scrollbar-thumb,
+.overflow-y-auto:hover::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+}
+
+/* ========== Smooth Interactive Transitions ========== */
+input,
+select,
+textarea,
+button {
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+tbody tr {
+  transition: background-color 0.1s ease;
+}
+
+/* ========== Animations ========== */
 @keyframes slide-in {
   from {
     opacity: 0;

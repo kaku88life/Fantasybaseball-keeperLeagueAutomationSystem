@@ -25,7 +25,7 @@ export default function LoginPage() {
       <button
         onClick={handleLogin}
         disabled={loading}
-        className="w-full rounded-lg bg-purple-600 px-6 py-3 text-white hover:bg-purple-500 disabled:opacity-50"
+        className="w-full rounded-lg bg-indigo-600 px-6 py-3 text-white hover:bg-indigo-500 disabled:opacity-50"
       >
         {loading ? "Redirecting to Yahoo..." : "Login with Yahoo"}
       </button>

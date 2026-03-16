@@ -371,7 +371,7 @@ export default function PlayersPage() {
     <div className="mx-auto max-w-[100rem] px-4 py-6">
       {/* Header */}
       <div className="mb-4">
-        <h1 className="text-2xl font-bold text-gray-900">
+        <h1 className="text-xl font-bold text-gray-900 sm:text-2xl">
           {activeTab === "database"
             ? "球員資料庫 Player Database"
             : "百大新秀 Top 100 Prospects"}

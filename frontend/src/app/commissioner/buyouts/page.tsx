@@ -231,7 +231,7 @@ export default function BuyoutsPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Buyout Management</h1>
+            <h1 className="text-xl font-bold text-gray-900 sm:text-2xl">Buyout Management</h1>
             <p className="text-sm text-gray-500 mt-1">
               Manage contract buyout records (mid-season drops and keeper-phase releases)
             </p>
@@ -246,7 +246,7 @@ export default function BuyoutsPage() {
             <select
               value={selectedYear}
               onChange={(e) => setSelectedYear(Number(e.target.value))}
-              className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
+              className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
             >
               {years.map((y) => (
                 <option key={y} value={y}>
@@ -282,7 +282,7 @@ export default function BuyoutsPage() {
               setError("");
               setSuccess("");
             }}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition-colors"
+            className="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-indigo-500 transition-colors"
           >
             + New Buyout Record
           </button>
@@ -290,7 +290,7 @@ export default function BuyoutsPage() {
 
         {/* Create/Edit Form */}
         {showForm && (
-          <div className="mb-6 bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+          <div className="mb-6 bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">
               {editingId ? "Edit Buyout" : "New Buyout Record"}
             </h2>
@@ -303,7 +303,7 @@ export default function BuyoutsPage() {
                 <select
                   value={form.team_id}
                   onChange={(e) => setForm({ ...form, team_id: Number(e.target.value) })}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                   disabled={!!editingId}
                 >
                   <option value={0}>-- Select team --</option>
@@ -324,7 +324,7 @@ export default function BuyoutsPage() {
                   type="text"
                   value={form.player_name}
                   onChange={(e) => setForm({ ...form, player_name: e.target.value })}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                   placeholder="e.g. Justin Steele"
                 />
               </div>
@@ -338,7 +338,7 @@ export default function BuyoutsPage() {
                   type="text"
                   value={form.original_contract}
                   onChange={(e) => setForm({ ...form, original_contract: e.target.value })}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                   placeholder="e.g. $6/N1"
                 />
               </div>
@@ -356,7 +356,7 @@ export default function BuyoutsPage() {
                       buyout_type: e.target.value as "mid_season_drop" | "keeper_release",
                     })
                   }
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 >
                   <option value="mid_season_drop">Mid-season Drop</option>
                   <option value="keeper_release">Keeper Release</option>
@@ -384,7 +384,7 @@ export default function BuyoutsPage() {
                       setForm({ ...form, buyout_salary: val });
                     }
                   }}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                   placeholder="e.g. 6"
                 />
               </div>
@@ -422,7 +422,7 @@ export default function BuyoutsPage() {
                       remaining_years: Math.min(form.remaining_years, val),
                     });
                   }}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
               </div>
 
@@ -439,7 +439,7 @@ export default function BuyoutsPage() {
                   onChange={(e) =>
                     setForm({ ...form, remaining_years: Number(e.target.value) })
                   }
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
               </div>
 
@@ -452,7 +452,7 @@ export default function BuyoutsPage() {
                   type="text"
                   value={form.notes}
                   onChange={(e) => setForm({ ...form, notes: e.target.value })}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                   placeholder="e.g. 2025 mid-season drop"
                 />
               </div>
@@ -475,7 +475,7 @@ export default function BuyoutsPage() {
               <button
                 onClick={handleSubmit}
                 disabled={saving}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                className="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-indigo-500 disabled:opacity-50 transition-colors"
               >
                 {saving ? "Saving..." : editingId ? "Update" : "Create"}
               </button>
@@ -494,7 +494,7 @@ export default function BuyoutsPage() {
         )}
 
         {/* Buyout Records Table */}
-        <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+        <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-200">
             <h2 className="text-lg font-semibold text-gray-900">
               Active Buyout Records ({selectedYear})
@@ -597,7 +597,7 @@ export default function BuyoutsPage() {
 
         {/* Per-team Summary */}
         {buyouts.length > 0 && (
-          <div className="mt-6 bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+          <div className="mt-6 bg-white border border-gray-200 rounded-lg shadow-sm p-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">
               Per-team Buyout Summary
             </h2>

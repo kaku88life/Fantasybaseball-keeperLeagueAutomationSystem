@@ -42,7 +42,7 @@ export default function ImportExcelPage() {
 
   return (
     <div className="mx-auto max-w-lg">
-      <h1 className="mb-6 text-2xl font-bold">匯入 Excel Import</h1>
+      <h1 className="mb-6 text-xl font-bold sm:text-2xl">匯入 Excel Import</h1>
 
       <div className="space-y-4 rounded-lg border bg-white p-6">
         <div>
@@ -51,7 +51,7 @@ export default function ImportExcelPage() {
             type="number"
             value={year}
             onChange={(e) => setYear(Number(e.target.value))}
-            className="w-full rounded border px-3 py-2"
+            className="w-full rounded border px-3 py-2 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
             min={2020}
             max={2030}
           />
@@ -65,7 +65,7 @@ export default function ImportExcelPage() {
             type="file"
             accept=".xlsx,.xlsm"
             onChange={(e) => setFile(e.target.files?.[0] || null)}
-            className="w-full rounded border px-3 py-2"
+            className="w-full rounded border px-3 py-2 file:mr-3 file:rounded file:border-0 file:bg-indigo-50 file:px-3 file:py-1 file:text-sm file:text-indigo-700 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
           />
           <p className="mt-1 text-xs text-gray-400">
             上傳包含各隊名單與合約資料的 Excel 檔案
