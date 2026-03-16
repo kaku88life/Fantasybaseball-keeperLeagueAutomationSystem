@@ -1,0 +1,107 @@
+{
+  "year": 2026,
+  "source": "MLB Pipeline",
+  "updated_at": "2026-03-16",
+  "prospects": [
+    {
+      "rank": 1,
+      "name": "Roki Sasaki",
+      "mlb_team": "LAD",
+      "position": "RHP",
+      "age": 24,
+      "bats": "R",
+      "throws": "R",
+      "eta": "2026"
+    },
+    {
+      "rank": 2,
+      "name": "Jac Caglianone",
+      "mlb_team": "KC",
+      "position": "1B/LHP",
+      "age": 22,
+      "bats": "L",
+      "throws": "L",
+      "eta": "2027"
+    },
+    {
+      "rank": 3,
+      "name": "Travis Bazzana",
+      "mlb_team": "CLE",
+      "position": "2B",
+      "age": 22,
+      "bats": "L",
+      "throws": "R",
+      "eta": "2026"
+    },
+    {
+      "rank": 4,
+      "name": "Charlie Condon",
+      "mlb_team": "COL",
+      "position": "3B/OF",
+      "age": 22,
+      "bats": "R",
+      "throws": "R",
+      "eta": "2027"
+    },
+    {
+      "rank": 5,
+      "name": "Roman Anthony",
+      "mlb_team": "BOS",
+      "position": "OF",
+      "age": 21,
+      "bats": "L",
+      "throws": "R",
+      "eta": "2026"
+    },
+    {
+      "rank": 6,
+      "name": "Sebastian Walcott",
+      "mlb_team": "TEX",
+      "position": "SS",
+      "age": 19,
+      "bats": "R",
+      "throws": "R",
+      "eta": "2028"
+    },
+    {
+      "rank": 7,
+      "name": "Ethan Salas",
+      "mlb_team": "SD",
+      "position": "C",
+      "age": 19,
+      "bats": "L",
+      "throws": "R",
+      "eta": "2027"
+    },
+    {
+      "rank": 8,
+      "name": "Marcelo Mayer",
+      "mlb_team": "BOS",
+      "position": "SS",
+      "age": 23,
+      "bats": "L",
+      "throws": "R",
+      "eta": "2026"
+    },
+    {
+      "rank": 9,
+      "name": "Bubba Chandler",
+      "mlb_team": "PIT",
+      "position": "RHP",
+      "age": 22,
+      "bats": "R",
+      "throws": "R",
+      "eta": "2026"
+    },
+    {
+      "rank": 10,
+      "name": "Leodalis De Vries",
+      "mlb_team": "MIN",
+      "position": "SS",
+      "age": 19,
+      "bats": "S",
+      "throws": "R",
+      "eta": "2028"
+    }
+  ]
+}

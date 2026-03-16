@@ -97,6 +97,32 @@ export interface RankingFetchStatus {
   last_fetched_at: string | null;
 }
 
+// Top 100 Prospects types
+export interface ProspectEntry {
+  rank: number;
+  name: string;
+  mlb_team: string;
+  position: string;
+  age?: number;
+  bats?: string;
+  throws?: string;
+  eta?: string;
+  note?: string;
+  owner_manager: string;
+  contract_type: string;
+  salary: number;
+  contract_display: string;
+  yahoo_player_id: string;
+}
+
+export interface ProspectsResponse {
+  year: number;
+  source: string;
+  updated_at: string;
+  total_count: number;
+  prospects: ProspectEntry[];
+}
+
 export interface Team {
   id: number | null;
   manager_name: string;

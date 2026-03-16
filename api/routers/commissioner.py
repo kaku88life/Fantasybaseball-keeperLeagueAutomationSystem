@@ -1072,3 +1072,24 @@ async def get_ranking_status_endpoint(
     """Get the last fetch time and count for player rankings. Commissioner only."""
     status = get_ranking_fetch_status(year)
     return {"year": year, **status}
+
+
+@router.post("/reload-prospects")
+async def reload_prospects(
+    user: dict = Depends(get_current_commissioner),
+):
+    """Reload top 100 prospects data from JSON file. Commissioner only.
+
+    Clears the in-memory cache and re-reads data/top_100_prospects.json.
+    """
+    from api.routers.players import clear_prospects_cache, _load_prospects_json
+
+    clear_prospects_cache()
+    data = _load_prospects_json()
+    count = len(data.get("prospects", []))
+    return {
+        "message": f"Reloaded {count} prospects for {data.get('year', 'unknown')}",
+        "count": count,
+        "source": data.get("source", ""),
+        "updated_at": data.get("updated_at", ""),
+    }

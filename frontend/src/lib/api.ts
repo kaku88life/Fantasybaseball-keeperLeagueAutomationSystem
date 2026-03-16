@@ -524,6 +524,23 @@ export async function getRankingFetchStatus(
   return request(`/api/commissioner/ranking-status/${year}`);
 }
 
+// ========== Top 100 Prospects ==========
+
+export async function getProspects(
+  year: number,
+): Promise<import("@/types").ProspectsResponse> {
+  return request(`/api/players/prospects/${year}`);
+}
+
+export async function reloadProspects(): Promise<{
+  message: string;
+  count: number;
+  source: string;
+  updated_at: string;
+}> {
+  return request("/api/commissioner/reload-prospects", { method: "POST" });
+}
+
 // ========== Player Stats (MLB Stats API) ==========
 
 export async function getPlayerStats(

@@ -1,12 +1,14 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import useSWR from "swr";
 import {
   getPlayerDatabase,
   getYears,
   fetchYahooRankings,
   getRankingFetchStatus,
+  getProspects,
+  reloadProspects,
 } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import ContractBadge from "@/components/ContractBadge";
@@ -17,8 +19,17 @@ import type {
   ContractType,
   PlayerDatabaseEntry,
   PlayerDatabaseResponse,
+  ProspectEntry,
+  ProspectsResponse,
   RankingFetchStatus,
 } from "@/types";
+
+// Tab definitions
+const TABS = [
+  { id: "database", label: "球員資料庫" },
+  { id: "prospects", label: "百大新秀" },
+] as const;
+type TabId = (typeof TABS)[number]["id"];
 
 // MLB team list (30 teams)
 const MLB_TEAMS = [
@@ -31,11 +42,11 @@ const MLB_TEAMS = [
 // Sort type options for Yahoo API stats fetch
 // Combines year context + time range into a single dropdown
 const SORT_TYPE_OPTIONS = [
-  { label: "2026 \u6574\u5b63", value: "season" },
-  { label: "2026 \u8fd1\u4e00\u9031", value: "lastweek" },
-  { label: "2026 \u8fd1\u4e00\u6708", value: "lastmonth" },
-  { label: "2026 \u4eca\u65e5", value: "date" },
-  { label: "2025 \u6574\u5b63", value: "prev_season" },
+  { label: "2026 整季", value: "season" },
+  { label: "2026 近一週", value: "lastweek" },
+  { label: "2026 近一月", value: "lastmonth" },
+  { label: "2026 今日", value: "date" },
+  { label: "2025 整季", value: "prev_season" },
 ] as const;
 
 // Rows per page
@@ -76,6 +87,13 @@ const PITCHING_COLS: Array<{ key: string; label: string }> = [
   { key: "qs", label: "QS" },
 ];
 
+// Prospect ownership filter options
+const PROSPECT_OWNER_OPTIONS = [
+  { value: "all", label: "全部" },
+  { value: "owned", label: "已持有" },
+  { value: "fa", label: "FA" },
+] as const;
+
 function isPitcher(position: string): boolean {
   const pos = position.split(",").map((s) => s.trim().toUpperCase());
   return pos.some((p) => ["SP", "RP", "P"].includes(p));
@@ -85,12 +103,17 @@ export default function PlayersPage() {
   const { user } = useAuth();
   const isCommissioner = user?.is_commissioner ?? false;
 
+  // Tab state
+  const [activeTab, setActiveTab] = useState<TabId>("database");
+
   // SWR cached data
   const { data: years = [] } = useSWR("years", getYears);
   const [selectedYear, setSelectedYear] = useState<number>(0);
   const effectiveYear = selectedYear || (years.length > 0 ? Math.max(...years) : new Date().getFullYear());
 
-  // Filters (sent to server)
+  // ============================================================
+  // Database tab state
+  // ============================================================
   const [positionFilter, setPositionFilter] = useState("ALL");
   const [mlbTeamFilter, setMlbTeamFilter] = useState("");
   const [ownerFilter, setOwnerFilter] = useState("");
@@ -152,7 +175,7 @@ export default function PlayersPage() {
     setCurrentPage(1);
   }, [positionFilter, mlbTeamFilter, ownerFilter, committedSearch, sort]);
 
-  // Player stats modal
+  // Player stats modal (shared between tabs)
   const [modalPlayer, setModalPlayer] = useState<{ name: string; position: string } | null>(null);
 
   // Info guide toggle
@@ -242,516 +265,838 @@ export default function PlayersPage() {
     return String(val);
   };
 
-  if (loading) {
-    return (
-      <div className="flex min-h-[50vh] items-center justify-center">
-        <LoadingSpinner />
-      </div>
-    );
-  }
+  // ============================================================
+  // Prospects tab state
+  // ============================================================
+  const {
+    data: prospectsData,
+    error: prospectsErr,
+    isLoading: prospectsLoading,
+    mutate: mutateProspects,
+  } = useSWR(
+    activeTab === "prospects" && effectiveYear ? `prospects-${effectiveYear}` : null,
+    () => getProspects(effectiveYear),
+  );
 
-  if (error) {
-    return (
-      <div className="mx-auto max-w-7xl px-4 py-8">
-        <div className="rounded-lg bg-red-50 p-4 text-red-800">
-          {error}
-        </div>
-      </div>
-    );
-  }
+  const [prospectSearch, setProspectSearch] = useState("");
+  const [prospectPosFilter, setProspectPosFilter] = useState("ALL");
+  const [prospectOwnerFilter, setProspectOwnerFilter] = useState<"all" | "owned" | "fa">("all");
 
+  // Commissioner: prospects reload
+  const [prospectsReloading, setProspectsReloading] = useState(false);
+  const [prospectsReloadMsg, setProspectsReloadMsg] = useState("");
+
+  const handleReloadProspects = useCallback(async () => {
+    setProspectsReloading(true);
+    setProspectsReloadMsg("");
+    try {
+      const result = await reloadProspects();
+      setProspectsReloadMsg(result.message);
+      mutateProspects();
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : "Reload failed";
+      setProspectsReloadMsg(`Error: ${msg}`);
+    } finally {
+      setProspectsReloading(false);
+    }
+  }, [mutateProspects]);
+
+  // Client-side filtering for prospects (only ~100 rows, no need for server-side)
+  const filteredProspects = useMemo(() => {
+    if (!prospectsData?.prospects) return [];
+    let list = prospectsData.prospects;
+
+    // Search filter (instant, no Enter needed)
+    if (prospectSearch.trim()) {
+      const q = prospectSearch.trim().toLowerCase();
+      list = list.filter(
+        (p) =>
+          p.name.toLowerCase().includes(q) ||
+          p.mlb_team.toLowerCase().includes(q) ||
+          p.owner_manager.toLowerCase().includes(q),
+      );
+    }
+
+    // Position filter
+    if (prospectPosFilter !== "ALL") {
+      if (prospectPosFilter === "BATTER") {
+        list = list.filter((p) => !isPitcher(p.position));
+      } else if (prospectPosFilter === "PITCHER") {
+        list = list.filter((p) => isPitcher(p.position));
+      } else {
+        list = list.filter((p) => {
+          const positions = p.position.split(/[,/]/).map((s) => s.trim().toUpperCase());
+          return positions.includes(prospectPosFilter);
+        });
+      }
+    }
+
+    // Ownership filter
+    if (prospectOwnerFilter === "owned") {
+      list = list.filter((p) => p.owner_manager && p.owner_manager !== "FA");
+    } else if (prospectOwnerFilter === "fa") {
+      list = list.filter((p) => !p.owner_manager || p.owner_manager === "FA");
+    }
+
+    return list;
+  }, [prospectsData, prospectSearch, prospectPosFilter, prospectOwnerFilter]);
+
+  // ============================================================
+  // Render
+  // ============================================================
   return (
     <div className="mx-auto max-w-[100rem] px-4 py-6">
       {/* Header */}
-      <div className="mb-6">
+      <div className="mb-4">
         <h1 className="text-2xl font-bold text-gray-900">
-          球員資料庫 Player Database
+          {activeTab === "database"
+            ? "球員資料庫 Player Database"
+            : "百大新秀 Top 100 Prospects"}
         </h1>
         <p className="mt-1 text-sm text-gray-500">
-          {data?.total_count ?? 0} 位球員
-          {data?.has_rankings && " (含 Yahoo 排名)"}
+          {activeTab === "database"
+            ? `${data?.total_count ?? 0} 位球員${data?.has_rankings ? " (含 Yahoo 排名)" : ""}`
+            : prospectsData
+              ? `${prospectsData.source} | 更新: ${prospectsData.updated_at} | ${prospectsData.total_count} 名新秀`
+              : "載入中..."}
         </p>
       </div>
 
-      {/* Info Guide (collapsible) */}
-      <div className="mb-4">
-        <button
-          onClick={() => setShowGuide((v) => !v)}
-          className="inline-flex items-center gap-1 rounded-md border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-100"
-        >
-          <span className={`inline-block transition-transform ${showGuide ? "rotate-90" : ""}`}>
-            &#9654;
-          </span>
-          資料說明 Info Guide
-        </button>
+      {/* Tab Navigation */}
+      <div className="mb-5 flex gap-1 border-b border-gray-200">
+        {TABS.map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`relative px-4 py-2.5 text-sm font-medium transition-colors ${
+              activeTab === tab.id
+                ? "text-indigo-600"
+                : "text-gray-500 hover:text-gray-700"
+            }`}
+          >
+            {tab.label}
+            {activeTab === tab.id && (
+              <span className="absolute inset-x-0 bottom-0 h-0.5 bg-indigo-600" />
+            )}
+          </button>
+        ))}
+      </div>
 
-        {showGuide && (
-          <div className="mt-2 rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-gray-700">
-            <div className="grid gap-4 md:grid-cols-3">
-              {/* Data Sources */}
-              <div>
-                <h3 className="mb-2 font-semibold text-blue-800">
-                  資料來源 Data Source
-                </h3>
-                <ul className="space-y-1 text-xs">
-                  <li>
-                    <span className="font-medium">OR</span> (Overall Rank)
-                    {" "}= Yahoo 預季預測排名
-                  </li>
-                  <li>
-                    <span className="font-medium">AR</span> (Actual Rank)
-                    {" "}= Yahoo 當季實際表現排名
-                  </li>
-                  <li>
-                    <span className="font-medium">成績欄位</span>
-                    {" "}= 由右方下拉選單控制數據來源
-                  </li>
-                </ul>
-                <h4 className="mb-1 mt-2 text-xs font-medium text-blue-700">
-                  成績時間範圍
-                </h4>
-                <ul className="space-y-0.5 text-xs text-gray-600">
-                  <li>2026 整季 = 2026 全季累計成績</li>
-                  <li>2026 近一週 / 近一月 / 今日 = 近期表現</li>
-                  <li>2025 整季 = 上季完整成績</li>
-                </ul>
-              </div>
-
-              {/* Column Guide */}
-              <div>
-                <h3 className="mb-2 font-semibold text-blue-800">
-                  欄位說明 Column Guide
-                </h3>
-                <ul className="space-y-1 text-xs">
-                  <li>
-                    <span className="font-medium">2025</span>
-                    {" "}= 當前合約狀態 (A/B/N/O/R)
-                  </li>
-                  <li>
-                    <span className="font-medium">2026</span>
-                    {" "}= 下一年合約狀態
-                    <span className="text-gray-500">
-                      （已繳交隊伍顯示實際選擇，未繳交顯示「待定」）
-                    </span>
-                  </li>
-                  <li>
-                    <span className="font-medium">$</span>
-                    {" "}= 球員薪資
-                  </li>
-                  <li>
-                    <span className="font-medium">歸屬</span>
-                    {" "}= 球員所屬經理，FA 為自由球員
-                  </li>
-                </ul>
-              </div>
-
-              {/* Notes */}
-              <div>
-                <h3 className="mb-2 font-semibold text-blue-800">
-                  注意事項 Notes
-                </h3>
-                <ul className="space-y-1 text-xs">
-                  <li>
-                    所有排名與數據<span className="font-medium">以 Yahoo Fantasy 系統為準</span>，本頁僅供參考
-                  </li>
-                  <li>
-                    部分球員可能未被 Yahoo 收錄排名，OR/AR 將顯示「-」
-                  </li>
-                  <li>
-                    切換成績時間範圍後，需由 Commissioner 重新擷取排名才會更新數據
-                  </li>
-                  <li>
-                    搜尋功能請輸入後按 <kbd className="rounded border border-gray-300 bg-white px-1 py-0.5 font-mono text-[10px]">Enter</kbd> 鍵送出
-                  </li>
-                  <li>
-                    點擊球員名字可查看 MLB 歷年成績
-                  </li>
-                </ul>
-              </div>
+      {/* ========== Database Tab ========== */}
+      {activeTab === "database" && (
+        <>
+          {loading ? (
+            <div className="flex min-h-[50vh] items-center justify-center">
+              <LoadingSpinner />
             </div>
-          </div>
-        )}
-      </div>
-
-      {/* Controls Row */}
-      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-wrap items-center gap-2">
-          {/* Year dropdown */}
-          <select
-            value={effectiveYear}
-            onChange={(e) => setSelectedYear(Number(e.target.value))}
-            className="rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-indigo-500 focus:ring-indigo-500"
-          >
-            {years.map((y) => (
-              <option key={y} value={y}>
-                {y}
-              </option>
-            ))}
-          </select>
-
-          {/* Position dropdown */}
-          <select
-            value={positionFilter}
-            onChange={(e) => setPositionFilter(e.target.value)}
-            className="rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-indigo-500 focus:ring-indigo-500"
-          >
-            {POSITION_GROUPS.map((pg) => (
-              <option key={pg.value} value={pg.value}>
-                {pg.value === "ALL" ? "All Positions" : pg.label}
-              </option>
-            ))}
-          </select>
-
-          {/* MLB Team dropdown */}
-          <select
-            value={mlbTeamFilter}
-            onChange={(e) => setMlbTeamFilter(e.target.value)}
-            className="rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-indigo-500 focus:ring-indigo-500"
-          >
-            <option value="">All Teams</option>
-            {MLB_TEAMS.map((t) => (
-              <option key={t} value={t}>
-                {t}
-              </option>
-            ))}
-          </select>
-
-          {/* Owner dropdown */}
-          <select
-            value={ownerFilter}
-            onChange={(e) => setOwnerFilter(e.target.value)}
-            className="rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-indigo-500 focus:ring-indigo-500"
-          >
-            <option value="">All Owners</option>
-            <option value="__FA__">FA (Free Agent)</option>
-            {ownerList.map((o) => (
-              <option key={o} value={o}>
-                {o}
-              </option>
-            ))}
-          </select>
-
-          {/* Sort Type dropdown (stat time range for Yahoo rankings) */}
-          <select
-            value={sortType}
-            onChange={(e) => setSortType(e.target.value)}
-            className="rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-indigo-500 focus:ring-indigo-500"
-            title="Stats time range (used when fetching Yahoo rankings)"
-          >
-            {SORT_TYPE_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
-
-          {/* Search (Enter to submit) */}
-          <input
-            type="text"
-            placeholder="搜尋球員或經理 (Enter)"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                setCommittedSearch(searchQuery);
-              }
-            }}
-            className="w-48 rounded-md border border-gray-300 px-3 py-1.5 text-sm placeholder-gray-400 focus:border-indigo-500 focus:ring-indigo-500"
-          />
-        </div>
-
-      </div>
-
-      {/* Commissioner: Fetch Rankings */}
-      {isCommissioner && (
-        <div className="mb-4 rounded-lg border border-yellow-200 bg-yellow-50 p-3">
-          <div className="flex flex-wrap items-center gap-3">
-            <span className="rounded bg-yellow-600 px-2 py-0.5 text-xs font-semibold text-white">
-              CM
-            </span>
-            <button
-              onClick={handleFetchRankings}
-              disabled={fetching}
-              className="rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-indigo-500 disabled:opacity-50"
-            >
-              {fetching ? "擷取中..." : "擷取 Yahoo 排名"}
-            </button>
-            {rankingStatus && (
-              <span className="text-xs text-gray-600">
-                {rankingStatus.has_data
-                  ? `${rankingStatus.total_count} 筆 | 上次更新: ${new Date(rankingStatus.last_fetched_at!).toLocaleString("zh-TW")}`
-                  : "尚未擷取排名資料"}
-              </span>
-            )}
-            {fetchMessage && (
-              <span
-                className={`text-xs ${fetchMessage.startsWith("Error") ? "text-red-600" : "text-green-600"}`}
-              >
-                {fetchMessage}
-              </span>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Result count + pagination info */}
-      <div className="mb-2 flex items-center justify-between text-sm text-gray-500">
-        <span>
-          篩選結果 {data?.total_count ?? 0} 位球員
-          {totalPages > 1 && (
-            <span className="ml-2">
-              (第 {currentPage}/{totalPages} 頁，顯示 {paginatedPlayers.length} 筆)
-            </span>
-          )}
-        </span>
-      </div>
-
-      {/* Table */}
-      <div className="overflow-x-auto rounded-lg border border-gray-200">
-        <table className="min-w-full divide-y divide-gray-200 text-sm">
-          <thead className="bg-gray-50">
-            <tr>
-              <SortTh col="o_rank" label="OR" className="w-10" />
-              <SortTh col="ar_rank" label="AR" className="w-10" />
-              <SortTh col="name" label="球員" />
-              <th className="whitespace-nowrap px-2 py-2 text-left text-xs font-medium uppercase text-gray-500">
-                Pos
-              </th>
-              <th className="whitespace-nowrap px-2 py-2 text-left text-xs font-medium uppercase text-gray-500">
-                MLB
-              </th>
-              <th className="px-2 py-2 text-left text-xs font-medium uppercase text-gray-500">
-                2025
-              </th>
-              <th className="px-2 py-2 text-left text-xs font-medium uppercase text-gray-500">
-                2026
-              </th>
-              <SortTh col="salary" label="$" />
-              <th className="whitespace-nowrap px-2 py-2 text-left text-xs font-medium uppercase text-gray-500">
-                歸屬
-              </th>
-
-              {/* Stats columns */}
-              {HITTING_COLS.map((c) => (
-                <SortTh
-                  key={c.key}
-                  col={c.key as SortKey}
-                  label={c.label}
-                  className=""
-                />
-              ))}
-              {PITCHING_COLS.map((c) => (
-                <SortTh
-                  key={c.key}
-                  col={c.key as SortKey}
-                  label={c.label}
-                  className=""
-                />
-              ))}
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100 bg-white">
-            {paginatedPlayers.map((p, idx) => {
-              const pitcher = isPitcher(p.position);
-              const statSource = p.stats;
-
-              return (
-                <tr
-                  key={`${p.yahoo_player_id || p.name}-${idx}`}
-                  className="hover:bg-gray-50"
-                >
-                  {/* OR (Overall Rank) */}
-                  <td className="whitespace-nowrap px-2 py-1.5 text-gray-400">
-                    {p.o_rank ?? "-"}
-                  </td>
-
-                  {/* AR (Actual Rank) */}
-                  <td className="whitespace-nowrap px-2 py-1.5 text-xs text-gray-500">
-                    {p.ar_rank ?? "-"}
-                  </td>
-
-                  {/* Player name */}
-                  <td className="whitespace-nowrap px-2 py-1.5 font-medium">
-                    <button
-                      onClick={() =>
-                        setModalPlayer({ name: p.name, position: p.position })
-                      }
-                      className="text-left text-indigo-600 hover:text-indigo-800 hover:underline"
-                    >
-                      {p.name}
-                    </button>
-                  </td>
-
-                  {/* Position */}
-                  <td className="whitespace-nowrap px-2 py-1.5 text-xs text-gray-600">
-                    {p.position}
-                  </td>
-
-                  {/* MLB Team */}
-                  <td className="whitespace-nowrap px-2 py-1.5 text-xs text-gray-500">
-                    {p.mlb_team || "-"}
-                  </td>
-
-                  {/* 2025 Contract */}
-                  <td className="whitespace-nowrap px-2 py-1.5">
-                    {p.contract_display ? (
-                      <ContractBadge
-                        type={p.contract_type as ContractType}
-                        display={p.contract_display}
-                      />
-                    ) : (
-                      <span className="text-xs text-gray-300">FA</span>
-                    )}
-                  </td>
-
-                  {/* 2026 Status */}
-                  <td className="whitespace-nowrap px-2 py-1.5">
-                    {p.next_contract_display ? (
-                      <ContractBadge
-                        type={p.next_contract_type as ContractType}
-                        display={p.next_contract_display}
-                      />
-                    ) : (
-                      <span className="text-xs text-gray-300">-</span>
-                    )}
-                  </td>
-
-                  {/* Salary */}
-                  <td className="whitespace-nowrap px-2 py-1.5 text-right text-xs">
-                    {p.salary > 0 ? `$${p.salary}` : "-"}
-                  </td>
-
-                  {/* Owner */}
-                  <td className="whitespace-nowrap px-2 py-1.5 text-xs text-gray-600">
-                    {p.owner_manager || (
-                      <span className="text-gray-300">FA</span>
-                    )}
-                  </td>
-
-                  {/* Hitting stats */}
-                  {HITTING_COLS.map((c) => (
-                    <td
-                      key={c.key}
-                      className={`whitespace-nowrap px-2 py-1.5 text-right text-xs ${
-                        pitcher ? "text-gray-300" : "text-gray-700"
-                      }`}
-                    >
-                      {!pitcher
-                        ? formatStat(
-                            statSource[c.key as keyof typeof statSource] as
-                              | number
-                              | undefined,
-                            c.key,
-                          )
-                        : "-"}
-                    </td>
-                  ))}
-
-                  {/* Pitching stats */}
-                  {PITCHING_COLS.map((c) => (
-                    <td
-                      key={c.key}
-                      className={`whitespace-nowrap px-2 py-1.5 text-right text-xs ${
-                        !pitcher ? "text-gray-300" : "text-gray-700"
-                      }`}
-                    >
-                      {pitcher
-                        ? formatStat(
-                            statSource[c.key as keyof typeof statSource] as
-                              | number
-                              | undefined,
-                            c.key,
-                          )
-                        : "-"}
-                    </td>
-                  ))}
-                </tr>
-              );
-            })}
-
-            {paginatedPlayers.length === 0 && (
-              <tr>
-                <td
-                  colSpan={9 + HITTING_COLS.length + PITCHING_COLS.length}
-                  className="py-8 text-center text-gray-400"
-                >
-                  沒有符合條件的球員
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="mt-4 flex items-center justify-center gap-2">
-          <button
-            onClick={() => setCurrentPage(1)}
-            disabled={currentPage === 1}
-            className="rounded border border-gray-300 px-2 py-1 text-xs text-gray-600 hover:bg-gray-100 disabled:opacity-40"
-          >
-            &laquo;
-          </button>
-          <button
-            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-            disabled={currentPage === 1}
-            className="rounded border border-gray-300 px-3 py-1 text-sm text-gray-600 hover:bg-gray-100 disabled:opacity-40"
-          >
-            上一頁
-          </button>
-
-          {/* Page numbers */}
-          {Array.from({ length: totalPages }, (_, i) => i + 1)
-            .filter((p) => {
-              // Show: first, last, and pages near current
-              if (p === 1 || p === totalPages) return true;
-              if (Math.abs(p - currentPage) <= 2) return true;
-              return false;
-            })
-            .reduce<(number | "...")[]>((acc, p, i, arr) => {
-              if (i > 0 && p - (arr[i - 1] as number) > 1) acc.push("...");
-              acc.push(p);
-              return acc;
-            }, [])
-            .map((item, i) =>
-              item === "..." ? (
-                <span key={`ellipsis-${i}`} className="px-1 text-gray-400">
-                  ...
-                </span>
-              ) : (
+          ) : error ? (
+            <div className="rounded-lg bg-red-50 p-4 text-red-800">{error}</div>
+          ) : (
+            <>
+              {/* Info Guide (collapsible) */}
+              <div className="mb-4">
                 <button
-                  key={item}
-                  onClick={() => setCurrentPage(item as number)}
-                  className={`rounded border px-3 py-1 text-sm ${
-                    currentPage === item
-                      ? "border-indigo-500 bg-indigo-600 text-white"
-                      : "border-gray-300 text-gray-600 hover:bg-gray-100"
-                  }`}
+                  onClick={() => setShowGuide((v) => !v)}
+                  className="inline-flex items-center gap-1 rounded-md border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-100"
                 >
-                  {item}
+                  <span className={`inline-block transition-transform ${showGuide ? "rotate-90" : ""}`}>
+                    &#9654;
+                  </span>
+                  資料說明 Info Guide
                 </button>
-              ),
-            )}
 
-          <button
-            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-            disabled={currentPage === totalPages}
-            className="rounded border border-gray-300 px-3 py-1 text-sm text-gray-600 hover:bg-gray-100 disabled:opacity-40"
-          >
-            下一頁
-          </button>
-          <button
-            onClick={() => setCurrentPage(totalPages)}
-            disabled={currentPage === totalPages}
-            className="rounded border border-gray-300 px-2 py-1 text-xs text-gray-600 hover:bg-gray-100 disabled:opacity-40"
-          >
-            &raquo;
-          </button>
-        </div>
+                {showGuide && (
+                  <div className="mt-2 rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-gray-700">
+                    <div className="grid gap-4 md:grid-cols-3">
+                      {/* Data Sources */}
+                      <div>
+                        <h3 className="mb-2 font-semibold text-blue-800">
+                          資料來源 Data Source
+                        </h3>
+                        <ul className="space-y-1 text-xs">
+                          <li>
+                            <span className="font-medium">OR</span> (Overall Rank)
+                            {" "}= Yahoo 預季預測排名
+                          </li>
+                          <li>
+                            <span className="font-medium">AR</span> (Actual Rank)
+                            {" "}= Yahoo 當季實際表現排名
+                          </li>
+                          <li>
+                            <span className="font-medium">成績欄位</span>
+                            {" "}= 由右方下拉選單控制數據來源
+                          </li>
+                        </ul>
+                        <h4 className="mb-1 mt-2 text-xs font-medium text-blue-700">
+                          成績時間範圍
+                        </h4>
+                        <ul className="space-y-0.5 text-xs text-gray-600">
+                          <li>2026 整季 = 2026 全季累計成績</li>
+                          <li>2026 近一週 / 近一月 / 今日 = 近期表現</li>
+                          <li>2025 整季 = 上季完整成績</li>
+                        </ul>
+                      </div>
+
+                      {/* Column Guide */}
+                      <div>
+                        <h3 className="mb-2 font-semibold text-blue-800">
+                          欄位說明 Column Guide
+                        </h3>
+                        <ul className="space-y-1 text-xs">
+                          <li>
+                            <span className="font-medium">2025</span>
+                            {" "}= 當前合約狀態 (A/B/N/O/R)
+                          </li>
+                          <li>
+                            <span className="font-medium">2026</span>
+                            {" "}= 下一年合約狀態
+                            <span className="text-gray-500">
+                              （已繳交隊伍顯示實際選擇，未繳交顯示「待定」）
+                            </span>
+                          </li>
+                          <li>
+                            <span className="font-medium">$</span>
+                            {" "}= 球員薪資
+                          </li>
+                          <li>
+                            <span className="font-medium">歸屬</span>
+                            {" "}= 球員所屬經理，FA 為自由球員
+                          </li>
+                        </ul>
+                      </div>
+
+                      {/* Notes */}
+                      <div>
+                        <h3 className="mb-2 font-semibold text-blue-800">
+                          注意事項 Notes
+                        </h3>
+                        <ul className="space-y-1 text-xs">
+                          <li>
+                            所有排名與數據<span className="font-medium">以 Yahoo Fantasy 系統為準</span>，本頁僅供參考
+                          </li>
+                          <li>
+                            部分球員可能未被 Yahoo 收錄排名，OR/AR 將顯示「-」
+                          </li>
+                          <li>
+                            切換成績時間範圍後，需由 Commissioner 重新擷取排名才會更新數據
+                          </li>
+                          <li>
+                            搜尋功能請輸入後按 <kbd className="rounded border border-gray-300 bg-white px-1 py-0.5 font-mono text-[10px]">Enter</kbd> 鍵送出
+                          </li>
+                          <li>
+                            點擊球員名字可查看 MLB 歷年成績
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Controls Row */}
+              <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex flex-wrap items-center gap-2">
+                  {/* Year dropdown */}
+                  <select
+                    value={effectiveYear}
+                    onChange={(e) => setSelectedYear(Number(e.target.value))}
+                    className="rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  >
+                    {years.map((y) => (
+                      <option key={y} value={y}>
+                        {y}
+                      </option>
+                    ))}
+                  </select>
+
+                  {/* Position dropdown */}
+                  <select
+                    value={positionFilter}
+                    onChange={(e) => setPositionFilter(e.target.value)}
+                    className="rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  >
+                    {POSITION_GROUPS.map((pg) => (
+                      <option key={pg.value} value={pg.value}>
+                        {pg.value === "ALL" ? "All Positions" : pg.label}
+                      </option>
+                    ))}
+                  </select>
+
+                  {/* MLB Team dropdown */}
+                  <select
+                    value={mlbTeamFilter}
+                    onChange={(e) => setMlbTeamFilter(e.target.value)}
+                    className="rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  >
+                    <option value="">All Teams</option>
+                    {MLB_TEAMS.map((t) => (
+                      <option key={t} value={t}>
+                        {t}
+                      </option>
+                    ))}
+                  </select>
+
+                  {/* Owner dropdown */}
+                  <select
+                    value={ownerFilter}
+                    onChange={(e) => setOwnerFilter(e.target.value)}
+                    className="rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  >
+                    <option value="">All Owners</option>
+                    <option value="__FA__">FA (Free Agent)</option>
+                    {ownerList.map((o) => (
+                      <option key={o} value={o}>
+                        {o}
+                      </option>
+                    ))}
+                  </select>
+
+                  {/* Sort Type dropdown (stat time range for Yahoo rankings) */}
+                  <select
+                    value={sortType}
+                    onChange={(e) => setSortType(e.target.value)}
+                    className="rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    title="Stats time range (used when fetching Yahoo rankings)"
+                  >
+                    {SORT_TYPE_OPTIONS.map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
+                    ))}
+                  </select>
+
+                  {/* Search (Enter to submit) */}
+                  <input
+                    type="text"
+                    placeholder="搜尋球員或經理 (Enter)"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        setCommittedSearch(searchQuery);
+                      }
+                    }}
+                    className="w-48 rounded-md border border-gray-300 px-3 py-1.5 text-sm placeholder-gray-400 focus:border-indigo-500 focus:ring-indigo-500"
+                  />
+                </div>
+              </div>
+
+              {/* Commissioner: Fetch Rankings */}
+              {isCommissioner && (
+                <div className="mb-4 rounded-lg border border-yellow-200 bg-yellow-50 p-3">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <span className="rounded bg-yellow-600 px-2 py-0.5 text-xs font-semibold text-white">
+                      CM
+                    </span>
+                    <button
+                      onClick={handleFetchRankings}
+                      disabled={fetching}
+                      className="rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-indigo-500 disabled:opacity-50"
+                    >
+                      {fetching ? "擷取中..." : "擷取 Yahoo 排名"}
+                    </button>
+                    {rankingStatus && (
+                      <span className="text-xs text-gray-600">
+                        {rankingStatus.has_data
+                          ? `${rankingStatus.total_count} 筆 | 上次更新: ${new Date(rankingStatus.last_fetched_at!).toLocaleString("zh-TW")}`
+                          : "尚未擷取排名資料"}
+                      </span>
+                    )}
+                    {fetchMessage && (
+                      <span
+                        className={`text-xs ${fetchMessage.startsWith("Error") ? "text-red-600" : "text-green-600"}`}
+                      >
+                        {fetchMessage}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Result count + pagination info */}
+              <div className="mb-2 flex items-center justify-between text-sm text-gray-500">
+                <span>
+                  篩選結果 {data?.total_count ?? 0} 位球員
+                  {totalPages > 1 && (
+                    <span className="ml-2">
+                      (第 {currentPage}/{totalPages} 頁，顯示 {paginatedPlayers.length} 筆)
+                    </span>
+                  )}
+                </span>
+              </div>
+
+              {/* Table */}
+              <div className="overflow-x-auto rounded-lg border border-gray-200">
+                <table className="min-w-full divide-y divide-gray-200 text-sm">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <SortTh col="o_rank" label="OR" className="w-10" />
+                      <SortTh col="ar_rank" label="AR" className="w-10" />
+                      <SortTh col="name" label="球員" />
+                      <th className="whitespace-nowrap px-2 py-2 text-left text-xs font-medium uppercase text-gray-500">
+                        Pos
+                      </th>
+                      <th className="whitespace-nowrap px-2 py-2 text-left text-xs font-medium uppercase text-gray-500">
+                        MLB
+                      </th>
+                      <th className="px-2 py-2 text-left text-xs font-medium uppercase text-gray-500">
+                        2025
+                      </th>
+                      <th className="px-2 py-2 text-left text-xs font-medium uppercase text-gray-500">
+                        2026
+                      </th>
+                      <SortTh col="salary" label="$" />
+                      <th className="whitespace-nowrap px-2 py-2 text-left text-xs font-medium uppercase text-gray-500">
+                        歸屬
+                      </th>
+
+                      {/* Stats columns */}
+                      {HITTING_COLS.map((c) => (
+                        <SortTh
+                          key={c.key}
+                          col={c.key as SortKey}
+                          label={c.label}
+                          className=""
+                        />
+                      ))}
+                      {PITCHING_COLS.map((c) => (
+                        <SortTh
+                          key={c.key}
+                          col={c.key as SortKey}
+                          label={c.label}
+                          className=""
+                        />
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100 bg-white">
+                    {paginatedPlayers.map((p, idx) => {
+                      const pitcher = isPitcher(p.position);
+                      const statSource = p.stats;
+
+                      return (
+                        <tr
+                          key={`${p.yahoo_player_id || p.name}-${idx}`}
+                          className="hover:bg-gray-50"
+                        >
+                          {/* OR (Overall Rank) */}
+                          <td className="whitespace-nowrap px-2 py-1.5 text-gray-400">
+                            {p.o_rank ?? "-"}
+                          </td>
+
+                          {/* AR (Actual Rank) */}
+                          <td className="whitespace-nowrap px-2 py-1.5 text-xs text-gray-500">
+                            {p.ar_rank ?? "-"}
+                          </td>
+
+                          {/* Player name */}
+                          <td className="whitespace-nowrap px-2 py-1.5 font-medium">
+                            <button
+                              onClick={() =>
+                                setModalPlayer({ name: p.name, position: p.position })
+                              }
+                              className="text-left text-indigo-600 hover:text-indigo-800 hover:underline"
+                            >
+                              {p.name}
+                            </button>
+                          </td>
+
+                          {/* Position */}
+                          <td className="whitespace-nowrap px-2 py-1.5 text-xs text-gray-600">
+                            {p.position}
+                          </td>
+
+                          {/* MLB Team */}
+                          <td className="whitespace-nowrap px-2 py-1.5 text-xs text-gray-500">
+                            {p.mlb_team || "-"}
+                          </td>
+
+                          {/* 2025 Contract */}
+                          <td className="whitespace-nowrap px-2 py-1.5">
+                            {p.contract_display ? (
+                              <ContractBadge
+                                type={p.contract_type as ContractType}
+                                display={p.contract_display}
+                              />
+                            ) : (
+                              <span className="text-xs text-gray-300">FA</span>
+                            )}
+                          </td>
+
+                          {/* 2026 Status */}
+                          <td className="whitespace-nowrap px-2 py-1.5">
+                            {p.next_contract_display ? (
+                              <ContractBadge
+                                type={p.next_contract_type as ContractType}
+                                display={p.next_contract_display}
+                              />
+                            ) : (
+                              <span className="text-xs text-gray-300">-</span>
+                            )}
+                          </td>
+
+                          {/* Salary */}
+                          <td className="whitespace-nowrap px-2 py-1.5 text-right text-xs">
+                            {p.salary > 0 ? `$${p.salary}` : "-"}
+                          </td>
+
+                          {/* Owner */}
+                          <td className="whitespace-nowrap px-2 py-1.5 text-xs text-gray-600">
+                            {p.owner_manager || (
+                              <span className="text-gray-300">FA</span>
+                            )}
+                          </td>
+
+                          {/* Hitting stats */}
+                          {HITTING_COLS.map((c) => (
+                            <td
+                              key={c.key}
+                              className={`whitespace-nowrap px-2 py-1.5 text-right text-xs ${
+                                pitcher ? "text-gray-300" : "text-gray-700"
+                              }`}
+                            >
+                              {!pitcher
+                                ? formatStat(
+                                    statSource[c.key as keyof typeof statSource] as
+                                      | number
+                                      | undefined,
+                                    c.key,
+                                  )
+                                : "-"}
+                            </td>
+                          ))}
+
+                          {/* Pitching stats */}
+                          {PITCHING_COLS.map((c) => (
+                            <td
+                              key={c.key}
+                              className={`whitespace-nowrap px-2 py-1.5 text-right text-xs ${
+                                !pitcher ? "text-gray-300" : "text-gray-700"
+                              }`}
+                            >
+                              {pitcher
+                                ? formatStat(
+                                    statSource[c.key as keyof typeof statSource] as
+                                      | number
+                                      | undefined,
+                                    c.key,
+                                  )
+                                : "-"}
+                            </td>
+                          ))}
+                        </tr>
+                      );
+                    })}
+
+                    {paginatedPlayers.length === 0 && (
+                      <tr>
+                        <td
+                          colSpan={9 + HITTING_COLS.length + PITCHING_COLS.length}
+                          className="py-8 text-center text-gray-400"
+                        >
+                          沒有符合條件的球員
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="mt-4 flex items-center justify-center gap-2">
+                  <button
+                    onClick={() => setCurrentPage(1)}
+                    disabled={currentPage === 1}
+                    className="rounded border border-gray-300 px-2 py-1 text-xs text-gray-600 hover:bg-gray-100 disabled:opacity-40"
+                  >
+                    &laquo;
+                  </button>
+                  <button
+                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                    className="rounded border border-gray-300 px-3 py-1 text-sm text-gray-600 hover:bg-gray-100 disabled:opacity-40"
+                  >
+                    上一頁
+                  </button>
+
+                  {/* Page numbers */}
+                  {Array.from({ length: totalPages }, (_, i) => i + 1)
+                    .filter((p) => {
+                      // Show: first, last, and pages near current
+                      if (p === 1 || p === totalPages) return true;
+                      if (Math.abs(p - currentPage) <= 2) return true;
+                      return false;
+                    })
+                    .reduce<(number | "...")[]>((acc, p, i, arr) => {
+                      if (i > 0 && p - (arr[i - 1] as number) > 1) acc.push("...");
+                      acc.push(p);
+                      return acc;
+                    }, [])
+                    .map((item, i) =>
+                      item === "..." ? (
+                        <span key={`ellipsis-${i}`} className="px-1 text-gray-400">
+                          ...
+                        </span>
+                      ) : (
+                        <button
+                          key={item}
+                          onClick={() => setCurrentPage(item as number)}
+                          className={`rounded border px-3 py-1 text-sm ${
+                            currentPage === item
+                              ? "border-indigo-500 bg-indigo-600 text-white"
+                              : "border-gray-300 text-gray-600 hover:bg-gray-100"
+                          }`}
+                        >
+                          {item}
+                        </button>
+                      ),
+                    )}
+
+                  <button
+                    onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                    disabled={currentPage === totalPages}
+                    className="rounded border border-gray-300 px-3 py-1 text-sm text-gray-600 hover:bg-gray-100 disabled:opacity-40"
+                  >
+                    下一頁
+                  </button>
+                  <button
+                    onClick={() => setCurrentPage(totalPages)}
+                    disabled={currentPage === totalPages}
+                    className="rounded border border-gray-300 px-2 py-1 text-xs text-gray-600 hover:bg-gray-100 disabled:opacity-40"
+                  >
+                    &raquo;
+                  </button>
+                </div>
+              )}
+            </>
+          )}
+        </>
       )}
 
-      {/* Player Stats Modal */}
+      {/* ========== Prospects Tab ========== */}
+      {activeTab === "prospects" && (
+        <>
+          {prospectsLoading ? (
+            <div className="flex min-h-[50vh] items-center justify-center">
+              <LoadingSpinner />
+            </div>
+          ) : prospectsErr ? (
+            <div className="rounded-lg bg-red-50 p-4 text-red-800">
+              {prospectsErr?.message || "Failed to load prospects data"}
+            </div>
+          ) : (
+            <>
+              {/* Controls Row */}
+              <div className="mb-4 flex flex-wrap items-center gap-2">
+                {/* Search (instant, no Enter needed) */}
+                <input
+                  type="text"
+                  placeholder="搜尋新秀名稱 / 球隊 / 經理"
+                  value={prospectSearch}
+                  onChange={(e) => setProspectSearch(e.target.value)}
+                  className="w-56 rounded-md border border-gray-300 px-3 py-1.5 text-sm placeholder-gray-400 focus:border-indigo-500 focus:ring-indigo-500"
+                />
+
+                {/* Position dropdown */}
+                <select
+                  value={prospectPosFilter}
+                  onChange={(e) => setProspectPosFilter(e.target.value)}
+                  className="rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-indigo-500 focus:ring-indigo-500"
+                >
+                  {POSITION_GROUPS.map((pg) => (
+                    <option key={pg.value} value={pg.value}>
+                      {pg.value === "ALL" ? "All Positions" : pg.label}
+                    </option>
+                  ))}
+                </select>
+
+                {/* Ownership filter */}
+                <select
+                  value={prospectOwnerFilter}
+                  onChange={(e) =>
+                    setProspectOwnerFilter(
+                      e.target.value as "all" | "owned" | "fa",
+                    )
+                  }
+                  className="rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-indigo-500 focus:ring-indigo-500"
+                >
+                  {PROSPECT_OWNER_OPTIONS.map((o) => (
+                    <option key={o.value} value={o.value}>
+                      {o.label}
+                    </option>
+                  ))}
+                </select>
+
+                <span className="ml-auto text-sm text-gray-500">
+                  {filteredProspects.length} / {prospectsData?.total_count ?? 0}{" "}
+                  名新秀
+                </span>
+              </div>
+
+              {/* Commissioner: Reload Prospects */}
+              {isCommissioner && (
+                <div className="mb-4 rounded-lg border border-yellow-200 bg-yellow-50 p-3">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <span className="rounded bg-yellow-600 px-2 py-0.5 text-xs font-semibold text-white">
+                      CM
+                    </span>
+                    <button
+                      onClick={handleReloadProspects}
+                      disabled={prospectsReloading}
+                      className="rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-indigo-500 disabled:opacity-50"
+                    >
+                      {prospectsReloading ? "重新載入中..." : "重新載入 JSON"}
+                    </button>
+                    <span className="text-xs text-gray-600">
+                      資料來源: {prospectsData?.source ?? "-"} | 更新日期:{" "}
+                      {prospectsData?.updated_at ?? "-"}
+                    </span>
+                    {prospectsReloadMsg && (
+                      <span
+                        className={`text-xs ${
+                          prospectsReloadMsg.startsWith("Error")
+                            ? "text-red-600"
+                            : "text-green-600"
+                        }`}
+                      >
+                        {prospectsReloadMsg}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Prospects Table */}
+              <div className="overflow-x-auto rounded-lg border border-gray-200">
+                <table className="min-w-full divide-y divide-gray-200 text-sm">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="w-12 whitespace-nowrap px-3 py-2 text-left text-xs font-medium uppercase text-gray-500">
+                        #
+                      </th>
+                      <th className="whitespace-nowrap px-3 py-2 text-left text-xs font-medium uppercase text-gray-500">
+                        球員
+                      </th>
+                      <th className="whitespace-nowrap px-3 py-2 text-left text-xs font-medium uppercase text-gray-500">
+                        Pos
+                      </th>
+                      <th className="whitespace-nowrap px-3 py-2 text-left text-xs font-medium uppercase text-gray-500">
+                        MLB
+                      </th>
+                      <th className="whitespace-nowrap px-3 py-2 text-left text-xs font-medium uppercase text-gray-500">
+                        Age
+                      </th>
+                      <th className="whitespace-nowrap px-3 py-2 text-left text-xs font-medium uppercase text-gray-500">
+                        ETA
+                      </th>
+                      <th className="whitespace-nowrap px-3 py-2 text-left text-xs font-medium uppercase text-gray-500">
+                        歸屬
+                      </th>
+                      <th className="whitespace-nowrap px-3 py-2 text-left text-xs font-medium uppercase text-gray-500">
+                        合約
+                      </th>
+                      <th className="whitespace-nowrap px-3 py-2 text-left text-xs font-medium uppercase text-gray-500">
+                        備註
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100 bg-white">
+                    {filteredProspects.map((p) => (
+                      <tr key={p.rank} className="hover:bg-gray-50">
+                        {/* Rank */}
+                        <td className="whitespace-nowrap px-3 py-2 text-sm font-semibold text-gray-700">
+                          {p.rank}
+                        </td>
+
+                        {/* Player name */}
+                        <td className="whitespace-nowrap px-3 py-2 font-medium">
+                          <button
+                            onClick={() =>
+                              setModalPlayer({
+                                name: p.name,
+                                position: p.position,
+                              })
+                            }
+                            className="text-left text-indigo-600 hover:text-indigo-800 hover:underline"
+                          >
+                            {p.name}
+                          </button>
+                        </td>
+
+                        {/* Position */}
+                        <td className="whitespace-nowrap px-3 py-2 text-xs text-gray-600">
+                          {p.position}
+                        </td>
+
+                        {/* MLB Team */}
+                        <td className="whitespace-nowrap px-3 py-2 text-xs text-gray-500">
+                          {p.mlb_team}
+                        </td>
+
+                        {/* Age */}
+                        <td className="whitespace-nowrap px-3 py-2 text-xs text-gray-500">
+                          {p.age ?? "-"}
+                        </td>
+
+                        {/* ETA */}
+                        <td className="whitespace-nowrap px-3 py-2 text-xs text-gray-500">
+                          {p.eta ?? "-"}
+                        </td>
+
+                        {/* Owner */}
+                        <td className="whitespace-nowrap px-3 py-2 text-xs">
+                          {p.owner_manager &&
+                          p.owner_manager !== "FA" ? (
+                            <span className="font-medium text-gray-700">
+                              {p.owner_manager}
+                            </span>
+                          ) : (
+                            <span className="text-gray-300">FA</span>
+                          )}
+                        </td>
+
+                        {/* Contract */}
+                        <td className="whitespace-nowrap px-3 py-2">
+                          {p.contract_display &&
+                          p.contract_type !== "FA" ? (
+                            <ContractBadge
+                              type={p.contract_type as ContractType}
+                              display={p.contract_display}
+                            />
+                          ) : (
+                            <span className="text-xs text-gray-300">
+                              -
+                            </span>
+                          )}
+                        </td>
+
+                        {/* Note */}
+                        <td className="max-w-[200px] truncate px-3 py-2 text-xs text-gray-500">
+                          {p.note ?? ""}
+                        </td>
+                      </tr>
+                    ))}
+
+                    {filteredProspects.length === 0 && (
+                      <tr>
+                        <td
+                          colSpan={9}
+                          className="py-8 text-center text-gray-400"
+                        >
+                          沒有符合條件的新秀
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
+        </>
+      )}
+
+      {/* Player Stats Modal (shared between tabs) */}
       {modalPlayer && (
         <PlayerStatsModal
           playerName={modalPlayer.name}

@@ -5,7 +5,11 @@ No authentication required - MLB stats are public data.
 """
 from __future__ import annotations
 
+import json
+import os
 import time
+import unicodedata
+from pathlib import Path
 from typing import Optional
 
 import httpx
@@ -20,6 +24,9 @@ from api.database import (
     get_snapshot,
 )
 from api.serializers import dict_to_league_state
+
+# Path to the top 100 prospects JSON data
+_PROSPECTS_JSON = Path(__file__).resolve().parent.parent.parent / "data" / "top_100_prospects.json"
 
 router = APIRouter()
 
@@ -46,6 +53,96 @@ def _set_cached(key: str, data: dict | list) -> None:
 
 
 MLB_BASE = "https://statsapi.mlb.com/api/v1"
+
+
+# ========== Prospect helpers ==========
+
+
+def _normalize_name(name: str) -> str:
+    """Normalize a player name for fuzzy matching.
+
+    Strips accents, removes Jr./Sr./III suffixes, dots, and lowercases.
+    Examples:
+        "Vladimir Guerrero Jr." -> "vladimir guerrero"
+        "C.J. Abrams" -> "cj abrams"
+        "Jose Ramirez" (with accent) -> "jose ramirez"
+    """
+    # Decompose unicode and strip accent marks
+    name = unicodedata.normalize("NFKD", name)
+    name = name.encode("ascii", "ignore").decode("ascii")
+    name = name.lower().strip()
+    # Remove common suffixes
+    for suffix in (" jr.", " jr", " sr.", " sr", " iii", " ii", " iv"):
+        if name.endswith(suffix):
+            name = name[: -len(suffix)].strip()
+    # Remove dots and normalize hyphens
+    name = name.replace(".", "").replace("-", " ")
+    return name
+
+
+def _build_owner_maps(league_state) -> tuple[
+    dict[str, dict], dict[str, dict], dict[str, dict], dict[str, dict]
+]:
+    """Build three-tier player ownership lookup maps from a league state.
+
+    Returns (owner_map, owner_map_by_pid, player_name_map, normalized_name_map):
+      - owner_map: keyed by yahoo player_key (e.g. "469.p.9758")
+      - owner_map_by_pid: keyed by player number after .p. (e.g. "9758")
+      - player_name_map: keyed by player name lowercased
+      - normalized_name_map: keyed by _normalize_name() result
+    """
+    owner_map: dict[str, dict] = {}
+    owner_map_by_pid: dict[str, dict] = {}
+    player_name_map: dict[str, dict] = {}
+
+    for team in league_state.teams:
+        for p in team.players:
+            info = {
+                "name": p.name,
+                "position": p.position,
+                "mlb_team": p.mlb_team,
+                "contract_type": p.contract.contract_type.value,
+                "salary": p.contract.salary,
+                "extension_years": p.contract.extension_years,
+                "contract_display": p.contract.display,
+                "is_keepable": p.contract.is_keepable,
+                "owner_manager": team.manager_name,
+                "yahoo_player_id": p.yahoo_player_id or "",
+            }
+            if p.yahoo_player_id:
+                owner_map[p.yahoo_player_id] = info
+                pid = p.yahoo_player_id.split(".p.")[-1] if ".p." in p.yahoo_player_id else ""
+                if pid:
+                    owner_map_by_pid[pid] = info
+            player_name_map[p.name.lower()] = info
+
+    # Build normalized name map for fuzzy matching
+    normalized_name_map = {_normalize_name(k): v for k, v in player_name_map.items()}
+
+    return owner_map, owner_map_by_pid, player_name_map, normalized_name_map
+
+
+def _load_prospects_json() -> dict:
+    """Load top 100 prospects from JSON file with 24h cache."""
+    cache_key = "prospects_json"
+    cached = _get_cached(cache_key)
+    if cached:
+        return cached
+
+    if not _PROSPECTS_JSON.exists():
+        return {"year": 0, "source": "", "updated_at": "", "prospects": []}
+
+    with open(_PROSPECTS_JSON, "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    _set_cached(cache_key, data)
+    return data
+
+
+def clear_prospects_cache() -> None:
+    """Clear the prospects JSON cache. Called by commissioner reload endpoint."""
+    if "prospects_json" in _cache:
+        del _cache["prospects_json"]
 
 
 def _parse_ip(ip_str: str) -> float:
@@ -175,10 +272,10 @@ async def get_player_database(
             selection_lookup[f"{mgr}::{sel['player_name']}"] = sel
 
     # 2. Build player -> owner mapping from league snapshot
-    # Flatten all players across all teams
-    owner_map: dict[str, dict] = {}  # player_key -> owner info
-    owner_map_by_pid: dict[str, dict] = {}  # player_number (after .p.) -> owner info
-    player_name_map: dict[str, dict] = {}  # player_name -> owner info (fallback)
+    # Flatten all players across all teams with extended fields for database view
+    owner_map: dict[str, dict] = {}
+    owner_map_by_pid: dict[str, dict] = {}
+    player_name_map: dict[str, dict] = {}
 
     all_league_players: list[dict] = []
 
@@ -216,7 +313,6 @@ async def get_player_database(
             # Index by player_key for matching with rankings
             if p.yahoo_player_id:
                 owner_map[p.yahoo_player_id] = player_entry
-                # Also index by player number (season-agnostic: "458.p.9758" -> "9758")
                 pid = p.yahoo_player_id.split(".p.")[-1] if ".p." in p.yahoo_player_id else ""
                 if pid:
                     owner_map_by_pid[pid] = player_entry
@@ -465,6 +561,106 @@ def _extract_stats(row: dict, prefix: str) -> dict:
         if val is not None:
             result[key] = val
     return result
+
+
+@router.get("/prospects/{year}")
+async def get_prospects(year: int):
+    """Get top 100 prospects with ownership cross-reference.
+
+    Reads from data/top_100_prospects.json (manually maintained),
+    then cross-references each prospect against the league snapshot
+    to determine ownership status (which fantasy team owns them).
+    No authentication required - public endpoint.
+    """
+    # 1. Load prospects JSON (cached 24h)
+    prospects_data = _load_prospects_json()
+    if not prospects_data.get("prospects"):
+        return {
+            "year": year,
+            "source": "",
+            "updated_at": "",
+            "total_count": 0,
+            "prospects": [],
+        }
+
+    # 2. Load league snapshot for ownership cross-reference
+    try:
+        snapshot = get_snapshot(year)
+    except Exception:
+        snapshot = None
+    if not snapshot:
+        # No league data — return prospects without ownership info
+        enriched = []
+        for p in prospects_data["prospects"]:
+            enriched.append({
+                "rank": p["rank"],
+                "name": p["name"],
+                "mlb_team": p.get("mlb_team", ""),
+                "position": p.get("position", ""),
+                "age": p.get("age"),
+                "bats": p.get("bats", ""),
+                "throws": p.get("throws", ""),
+                "eta": p.get("eta", ""),
+                "note": p.get("note", ""),
+                "owner_manager": "",
+                "contract_type": "",
+                "salary": 0,
+                "contract_display": "",
+                "yahoo_player_id": "",
+            })
+        return {
+            "year": year,
+            "source": prospects_data.get("source", ""),
+            "updated_at": prospects_data.get("updated_at", ""),
+            "total_count": len(enriched),
+            "prospects": enriched,
+        }
+
+    league_state = dict_to_league_state(snapshot["data"])
+
+    # 3. Build ownership maps using shared helper
+    owner_map, owner_map_by_pid, player_name_map, normalized_name_map = (
+        _build_owner_maps(league_state)
+    )
+
+    # 4. Cross-reference each prospect
+    enriched = []
+    for p in prospects_data["prospects"]:
+        prospect_name = p["name"]
+
+        # Tier 1: exact name match (lowercased)
+        match = player_name_map.get(prospect_name.lower())
+
+        # Tier 2: normalized name match (fuzzy)
+        if not match:
+            match = normalized_name_map.get(_normalize_name(prospect_name))
+
+        # Build enriched entry
+        entry = {
+            "rank": p["rank"],
+            "name": prospect_name,
+            "mlb_team": p.get("mlb_team", ""),
+            "position": p.get("position", ""),
+            "age": p.get("age"),
+            "bats": p.get("bats", ""),
+            "throws": p.get("throws", ""),
+            "eta": p.get("eta", ""),
+            "note": p.get("note", ""),
+            "owner_manager": match["owner_manager"] if match else "",
+            "contract_type": match["contract_type"] if match else "",
+            "salary": match["salary"] if match else 0,
+            "contract_display": match["contract_display"] if match else "",
+            "yahoo_player_id": match["yahoo_player_id"] if match else "",
+        }
+        enriched.append(entry)
+
+    return {
+        "year": year,
+        "source": prospects_data.get("source", ""),
+        "updated_at": prospects_data.get("updated_at", ""),
+        "total_count": len(enriched),
+        "prospects": enriched,
+    }
 
 
 @router.get("/stats")
