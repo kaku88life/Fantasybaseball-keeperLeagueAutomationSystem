@@ -14,7 +14,9 @@ from pathlib import Path
 from typing import Optional
 
 import httpx
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
+
+from api.dependencies import get_optional_user
 
 from config.settings import ROOKIE_IP_THRESHOLD, ROOKIE_PA_THRESHOLD
 from api.database import (
@@ -286,13 +288,20 @@ async def get_player_database(
     mlb_team: str = Query("", description="MLB team filter (e.g. NYY, LAD)"),
     sort_key: str = Query("o_rank", description="Sort column"),
     sort_dir: str = Query("asc", description="Sort direction: asc, desc"),
+    user: Optional[dict] = Depends(get_optional_user),
 ):
     """Get the player database for a year with server-side filtering and pagination.
 
     Combines league snapshot data (ownership, contracts) with
     player rankings (O_Rank, X_Rank, stats, projections).
-    No authentication required - public endpoint.
+    Unauthenticated users see public stats only (no ownership/contract data).
     """
+    is_authenticated = user is not None
+
+    # Disable owner/contract filters for unauthenticated users
+    if not is_authenticated:
+        owner = ""
+        contract = ""
     # 1. Load league snapshot for ownership data
     snapshot = get_snapshot(year)
     if not snapshot:
@@ -508,6 +517,19 @@ async def get_player_database(
     # Also collect unique owners for the owner dropdown
     all_owners = sorted({p["owner_manager"] for p in combined if p.get("owner_manager")})
 
+    # Strip ownership/contract data for unauthenticated users
+    if not is_authenticated:
+        all_owners = []
+        for p in page_players:
+            p["owner_manager"] = ""
+            p["contract_type"] = ""
+            p["salary"] = 0
+            p["extension_years"] = 0
+            p["contract_display"] = ""
+            p["is_keepable"] = False
+            p["next_contract_display"] = ""
+            p["next_contract_type"] = ""
+
     return {
         "year": year,
         "total_count": total_count,
@@ -604,14 +626,18 @@ def _extract_stats(row: dict, prefix: str) -> dict:
 
 
 @router.get("/prospects/{year}")
-async def get_prospects(year: int):
+async def get_prospects(
+    year: int,
+    user: Optional[dict] = Depends(get_optional_user),
+):
     """Get top 100 prospects with ownership cross-reference.
 
     Reads from data/top_100_prospects.json (manually maintained),
     then cross-references each prospect against the league snapshot
     to determine ownership status (which fantasy team owns them).
-    No authentication required - public endpoint.
+    Unauthenticated users see prospect info without ownership data.
     """
+    is_authenticated = user is not None
     # 1. Load prospects JSON (cached 24h)
     prospects_data = _load_prospects_json()
     if not prospects_data.get("prospects"):
@@ -693,6 +719,15 @@ async def get_prospects(year: int):
             "yahoo_player_id": match["yahoo_player_id"] if match else "",
         }
         enriched.append(entry)
+
+    # Strip ownership data for unauthenticated users
+    if not is_authenticated:
+        for entry in enriched:
+            entry["owner_manager"] = ""
+            entry["contract_type"] = ""
+            entry["salary"] = 0
+            entry["contract_display"] = ""
+            entry["yahoo_player_id"] = ""
 
     return {
         "year": year,

@@ -1197,10 +1197,8 @@ function CommissionerLogin() {
     setVerifying(true);
     setError("");
     try {
-      const result = await verifyCommissionerPassword(password.trim());
-      // Store new JWT token with commissioner flag
-      localStorage.setItem("auth_token", result.token);
-      // Refresh auth context to update user.is_commissioner
+      await verifyCommissionerPassword(password.trim());
+      // Backend set new HttpOnly cookie; refresh auth context
       await refresh();
     } catch (e) {
       setError(

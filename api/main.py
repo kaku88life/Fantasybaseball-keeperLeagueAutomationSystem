@@ -54,8 +54,8 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="5-Man MLB Keeper League API",
-    description="Fantasy Baseball Keeper League Automation System",
+    title="Fantasy Baseball 5-Man Keepers API",
+    description="Fantasy Baseball 5-Man Keepers Automation System",
     version="1.0.0",
     lifespan=lifespan,
 )
@@ -112,6 +112,26 @@ app.include_router(commissioner.router, prefix="/api/commissioner", tags=["commi
 app.include_router(validation.router, prefix="/api/validate", tags=["validation"])
 app.include_router(players.router, prefix="/api/players", tags=["players"])
 app.include_router(analytics.router, prefix="/api/analytics", tags=["analytics"])
+
+
+@app.middleware("http")
+async def security_headers_middleware(request: Request, call_next):
+    """Add security headers to all responses."""
+    response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+    # HSTS only in production (HTTPS)
+    if _is_production:
+        response.headers["Strict-Transport-Security"] = (
+            "max-age=31536000; includeSubDomains"
+        )
+    return response
+
+
+_is_production = bool(os.getenv("FRONTEND_URL", "").startswith("https"))
 
 
 @app.middleware("http")

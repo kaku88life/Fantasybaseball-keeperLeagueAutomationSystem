@@ -1,17 +1,39 @@
 """
-Draft and FAAB analytics.
+Draft, FAAB, salary, and contract analytics.
 
-Reads data/yahoo_{year}_draft.json and data/yahoo_{year}_transactions.json
-to compute per-team, per-year statistics for the frontend analytics page.
+Data sources:
+  - data/yahoo_{year}_draft.json         Yahoo draft picks
+  - data/yahoo_{year}_transactions.json   Yahoo transactions (FAAB, trades)
+  - data/historical_keepers.json          2023-2025 keeper lists from Excel
+  - data/2026_contracts_v2.json           2026 contract data (all 500 players)
 """
 from __future__ import annotations
 
 import json
 import math
+import re
 from collections import defaultdict
 from pathlib import Path
 
 DATA_DIR = Path(__file__).resolve().parents[2] / "data"
+
+
+# ------------------------------------------------------------------
+# Manager name normalization (Excel aliases -> Yahoo aliases)
+# ------------------------------------------------------------------
+_MGR_NORMALIZE: dict[str, str] = {
+    "hyc莊翔宇": "hyc莊翔宇",
+    "林小伯": "林小伯",
+    "James Chen": "James Chen",
+    "郭子睿(Rangers)": "郭子睿(Rangers)",
+    "Issac": "Issac",
+}
+
+# Manager succession: old -> new (team takeover)
+_MGR_SUCCESSION: dict[str, str] = {
+    "hyc莊翔宇": "Hank",
+    "林小伯": "Billy WU",
+}
 
 
 def _available_years() -> list[int]:
@@ -539,3 +561,387 @@ def _categorize_position(position: str) -> str:
     if primary in ("DH", "Util"):
         return "DH"
     return primary or "Unknown"
+
+
+# ------------------------------------------------------------------
+# Historical keeper / contract data loaders
+# ------------------------------------------------------------------
+
+def _load_historical_keepers() -> dict[str, dict[str, list[dict]]]:
+    """Load historical keeper data from JSON (parsed from Excel).
+
+    Returns: {"2023": {"Manager": [{"player":..., "salary":..., "contract_type":...}]}}
+    """
+    path = DATA_DIR / "historical_keepers.json"
+    if not path.exists():
+        return {}
+    with open(path, encoding="utf-8") as f:
+        data = json.load(f)
+    # Remove metadata key
+    return {k: v for k, v in data.items() if not k.startswith("_")}
+
+
+def _load_2026_contracts() -> dict[str, list[dict]]:
+    """Load 2026 contracts grouped by manager.
+
+    Returns: {"Manager": [{"player":..., "salary":..., "contract_type":..., "source":...}]}
+    """
+    path = DATA_DIR / "2026_contracts_v2.json"
+    if not path.exists():
+        return {}
+    with open(path, encoding="utf-8") as f:
+        contracts = json.load(f)
+
+    result: dict[str, list[dict]] = {}
+    for team_name, team_data in contracts.get("teams", {}).items():
+        mgr = team_data.get("manager", team_name)
+        players = []
+        for p in team_data.get("players", []):
+            # contract_type is just "N" for N-contracts; extract actual N number
+            # from contract_2026 field (format: "N2/$21" or "O/$20")
+            raw_ct = p.get("contract_type", "")
+            c2026 = p.get("contract_2026", "")
+            contract_type = raw_ct
+            if raw_ct == "N" and c2026:
+                m = re.match(r"(N\d+|O)/", c2026)
+                if m:
+                    contract_type = m.group(1)
+
+            players.append({
+                "player": p.get("name", ""),
+                "salary": p.get("salary", 0),
+                "contract_type": contract_type,
+                "contract_2025": p.get("contract_2025", ""),
+                "contract_2026": c2026,
+                "source": p.get("source", ""),
+                "position": p.get("position", ""),
+            })
+        result[mgr] = players
+    return result
+
+
+def _resolve_manager_name(name: str) -> str:
+    """Resolve manager succession (e.g. hyc莊翔宇 -> Hank)."""
+    return _MGR_SUCCESSION.get(name, name)
+
+
+# ------------------------------------------------------------------
+# Salary Rankings (per year, keepers + draft picks)
+# ------------------------------------------------------------------
+
+def compute_salary_rankings(years: list[int] | None = None) -> dict:
+    """Compute per-year salary rankings (Top 20).
+
+    Data sources:
+      - 2023-2025: historical_keepers.json (keepers only, no draft data for 2023-2024)
+      - 2025 also has yahoo_2025_draft.json (draft picks)
+      - 2026: 2026_contracts_v2.json (all players)
+
+    Returns:
+        {
+            "years": [2023, 2024, 2025, 2026],
+            "rankings": {
+                "2023": [
+                    {"rank": 1, "player": "...", "salary": 60, "contract_type": "B",
+                     "manager": "...", "source": "keeper", "position": ""},
+                    ...
+                ],
+            }
+        }
+    """
+    hist = _load_historical_keepers()
+    contracts_2026 = _load_2026_contracts()
+
+    available = sorted(set(int(y) for y in hist.keys()))
+    if contracts_2026:
+        available.append(2026)
+    available = sorted(set(available))
+
+    if years:
+        available = [y for y in available if y in years]
+
+    rankings: dict[str, list[dict]] = {}
+
+    for year in available:
+        all_players: list[dict] = []
+        year_str = str(year)
+
+        if year <= 2025 and year_str in hist:
+            # Keeper data from Excel
+            for mgr, players in hist[year_str].items():
+                resolved_mgr = _resolve_manager_name(mgr)
+                for p in players:
+                    all_players.append({
+                        "player": p["player"],
+                        "salary": p["salary"],
+                        "contract_type": p["contract_type"],
+                        "manager": resolved_mgr,
+                        "source": "keeper",
+                        "position": p.get("position", ""),
+                    })
+
+            # Add draft picks for years that have Yahoo draft data
+            draft = _load_draft(year)
+            if draft:
+                for pick in draft:
+                    all_players.append({
+                        "player": pick.get("player_name", ""),
+                        "salary": pick.get("cost", 0),
+                        "contract_type": "A",
+                        "manager": pick.get("manager", "Unknown"),
+                        "source": "draft",
+                        "position": pick.get("player_position", ""),
+                    })
+
+        elif year == 2026:
+            # 2026 from contracts JSON
+            for mgr, players in contracts_2026.items():
+                for p in players:
+                    all_players.append({
+                        "player": p["player"],
+                        "salary": p["salary"],
+                        "contract_type": p["contract_type"],
+                        "manager": mgr,
+                        "source": p.get("source", "keeper"),
+                        "position": p.get("position", ""),
+                    })
+
+        # Sort by salary descending, take top 20
+        all_players.sort(key=lambda x: (-x["salary"], x["player"]))
+        top20 = all_players[:20]
+        for i, p in enumerate(top20, 1):
+            p["rank"] = i
+
+        rankings[year_str] = top20
+
+    return {
+        "years": available,
+        "rankings": rankings,
+    }
+
+
+# ------------------------------------------------------------------
+# Contract Total Value Rankings (N-contract tracking)
+# ------------------------------------------------------------------
+
+def compute_contract_values() -> dict:
+    """Compute total contract value for all N-extension contracts.
+
+    Traces N-contract players across 2023-2026 to find the original N value,
+    then calculates: total_value = salary * (N_original + 2)
+    where +2 accounts for the B year and O year.
+
+    Returns:
+        {
+            "contracts": [
+                {
+                    "player": "Vladimir Guerrero Jr.",
+                    "salary": 51,
+                    "original_n": 9,
+                    "total_years": 11,
+                    "total_value": 561,
+                    "first_seen_year": 2023,
+                    "first_seen_contract": "N9",
+                    "current_contract": "N6",
+                    "current_year": 2026,
+                    "manager": "Hank",
+                    "manager_history": ["hyc莊翔宇 (2023)", "Hank (2025)"],
+                    "years_remaining": 7,
+                },
+                ...
+            ]
+        }
+    """
+    hist = _load_historical_keepers()
+    contracts_2026 = _load_2026_contracts()
+
+    # Build a map of player -> [{year, salary, contract_type, manager}]
+    player_history: dict[str, list[dict]] = defaultdict(list)
+
+    # 2023-2025 from historical keepers
+    for year_str, mgr_data in hist.items():
+        year = int(year_str)
+        for mgr, players in mgr_data.items():
+            for p in players:
+                ct = p["contract_type"]
+                if ct.startswith("N"):
+                    player_history[p["player"]].append({
+                        "year": year,
+                        "salary": p["salary"],
+                        "contract_type": ct,
+                        "manager": mgr,
+                    })
+
+    # 2026 from contracts
+    for mgr, players in contracts_2026.items():
+        for p in players:
+            ct = p["contract_type"]
+            if ct.startswith("N"):
+                player_history[p["player"]].append({
+                    "year": 2026,
+                    "salary": p["salary"],
+                    "contract_type": ct,
+                    "manager": mgr,
+                })
+            # Also check contract_2025 field (format: "$51/N7")
+            c2025 = p.get("contract_2025", "")
+            if c2025:
+                m = re.match(r"\$?(\d+)/(N\d+)", c2025.replace("$", ""))
+                if m:
+                    sal = int(m.group(1))
+                    ct25 = m.group(2)
+                    # Only add if we don't already have 2025 data from hist
+                    existing_years = [h["year"] for h in player_history.get(p["player"], [])]
+                    if 2025 not in existing_years:
+                        player_history[p["player"]].append({
+                            "year": 2025,
+                            "salary": sal,
+                            "contract_type": ct25,
+                            "manager": mgr,
+                        })
+
+    # Process each player to find original N and compute total value
+    contracts: list[dict] = []
+
+    for player_name, history in player_history.items():
+        if not history:
+            continue
+
+        # Sort by year
+        history.sort(key=lambda x: x["year"])
+
+        # Find the highest N value (earliest/original extension)
+        max_n = 0
+        first_entry = history[0]
+        current_entry = history[-1]
+
+        for h in history:
+            ct = h["contract_type"]
+            n_val = int(ct[1:]) if ct[1:].isdigit() else 0
+            if n_val > max_n:
+                max_n = n_val
+                first_entry = h
+
+        # Total years = B(1) + N(original) + O(1) = original_N + 2
+        total_years = max_n + 2
+        salary = first_entry["salary"]
+        total_value = salary * total_years
+
+        # Current N remaining
+        current_ct = current_entry["contract_type"]
+        current_n = int(current_ct[1:]) if current_ct[1:].isdigit() else 0
+        years_remaining = current_n + 1  # N remaining + O year
+
+        # Manager history
+        mgr_history = []
+        seen_mgrs = set()
+        for h in history:
+            resolved = _resolve_manager_name(h["manager"])
+            if resolved not in seen_mgrs:
+                seen_mgrs.add(resolved)
+                mgr_history.append(f"{resolved} ({h['year']})")
+
+        contracts.append({
+            "player": player_name,
+            "salary": salary,
+            "original_n": max_n,
+            "total_years": total_years,
+            "total_value": total_value,
+            "first_seen_year": first_entry["year"],
+            "first_seen_contract": first_entry["contract_type"],
+            "current_contract": current_ct,
+            "current_year": current_entry["year"],
+            "manager": _resolve_manager_name(current_entry["manager"]),
+            "manager_history": mgr_history,
+            "years_remaining": years_remaining,
+        })
+
+    # Sort by total_value descending
+    contracts.sort(key=lambda x: (-x["total_value"], x["player"]))
+
+    return {"contracts": contracts}
+
+
+# ------------------------------------------------------------------
+# League Summary / Overview
+# ------------------------------------------------------------------
+
+def compute_league_summary() -> dict:
+    """Compute league-wide summary stats combining all analytics.
+
+    Returns highlights and key stats across all categories for the overview tab.
+    """
+    hist = _load_historical_keepers()
+    contracts_2026 = _load_2026_contracts()
+    available_years = _available_years()
+
+    summary: dict = {
+        "keeper_stats": {},
+        "draft_highlights": {},
+        "contract_highlights": {},
+        "trade_highlights": {},
+    }
+
+    # --- Keeper stats per year ---
+    for year_str, mgr_data in hist.items():
+        year_players = []
+        for mgr, players in mgr_data.items():
+            resolved = _resolve_manager_name(mgr)
+            total_cost = sum(p["salary"] for p in players)
+            year_players.append({
+                "manager": resolved,
+                "keeper_count": len(players),
+                "total_cost": total_cost,
+                "avg_cost": round(total_cost / len(players), 1) if players else 0,
+            })
+        year_players.sort(key=lambda x: -x["total_cost"])
+        summary["keeper_stats"][year_str] = {
+            "teams": year_players,
+            "league_avg_cost": round(
+                sum(t["total_cost"] for t in year_players) / len(year_players), 1
+            ) if year_players else 0,
+            "highest_spender": year_players[0] if year_players else None,
+            "lowest_spender": year_players[-1] if year_players else None,
+        }
+
+    # --- Draft highlights (from yahoo data) ---
+    for year in available_years:
+        draft = _load_draft(year)
+        if not draft:
+            continue
+        year_str = str(year)
+        costs = [p.get("cost", 0) for p in draft]
+        managers_cost: dict[str, int] = defaultdict(int)
+        for p in draft:
+            managers_cost[p.get("manager", "Unknown")] += p.get("cost", 0)
+
+        top_mgr = max(managers_cost.items(), key=lambda x: x[1]) if managers_cost else ("", 0)
+        summary["draft_highlights"][year_str] = {
+            "total_picks": len(draft),
+            "total_spent": sum(costs),
+            "avg_pick_cost": round(sum(costs) / len(costs), 1) if costs else 0,
+            "max_pick": max(costs) if costs else 0,
+            "biggest_spender": {"manager": top_mgr[0], "total": top_mgr[1]},
+        }
+
+    # --- Contract highlights (top 5 all-time) ---
+    cv = compute_contract_values()
+    summary["contract_highlights"] = {
+        "top5": cv["contracts"][:5],
+        "total_n_contracts": len(cv["contracts"]),
+        "total_committed_value": sum(c["total_value"] for c in cv["contracts"]),
+    }
+
+    # --- Trade highlights ---
+    for year in available_years:
+        txs = _load_transactions(year)
+        trade_count = len([tx for tx in txs if tx.get("type") == "trade"])
+        faab_count = len([tx for tx in txs if tx.get("faab_bid") and tx["faab_bid"] > 0])
+        year_str = str(year)
+        summary["trade_highlights"][year_str] = {
+            "trade_count": trade_count,
+            "faab_transactions": faab_count,
+            "total_transactions": len(txs),
+        }
+
+    return summary

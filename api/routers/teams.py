@@ -140,7 +140,7 @@ async def list_teams():
 
 
 @router.get("/{team_id}/roster/{year}", response_model=TeamSchema)
-async def get_team_roster(team_id: int, year: int):
+async def get_team_roster(team_id: int, year: int, _user: dict = Depends(get_current_user)):
     """Get a team's roster for a specific year."""
     team, db_team = _get_team_from_snapshot(year, team_id)
     return serialize_team(team, db_team_id=db_team["id"])
@@ -218,7 +218,7 @@ async def get_keeper_page_data(
 
 
 @router.get("/{team_id}/keeper-options/{year}")
-async def get_keeper_options(team_id: int, year: int):
+async def get_keeper_options(team_id: int, year: int, _user: dict = Depends(get_current_user)):
     """Get all keeper options for each player on a team."""
     from src.contract.engine import ContractTransition, generate_keeper_options
 

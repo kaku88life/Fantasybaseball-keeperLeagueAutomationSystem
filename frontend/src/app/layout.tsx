@@ -7,8 +7,8 @@ import Navbar from "@/components/Navbar";
 import LineNamePrompt from "@/components/LineNamePrompt";
 
 export const metadata: Metadata = {
-  title: "5-Man Keeper League",
-  description: "Fantasy Baseball Keeper League Automation System",
+  title: "Fantasy Baseball 5-Man Keepers",
+  description: "Fantasy Baseball 5-Man Keepers Automation System",
 };
 
 export default function RootLayout({

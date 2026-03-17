@@ -8,7 +8,7 @@ import secrets
 from urllib.parse import urlencode
 
 import requests
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from fastapi.responses import RedirectResponse
 
 from api.database import (
@@ -18,8 +18,20 @@ from api.database import (
     update_user_line_name,
     upsert_user,
 )
-from api.dependencies import create_jwt_token, get_current_user
+from api.dependencies import (
+    clear_auth_cookie,
+    create_jwt_token,
+    get_current_user,
+    set_auth_cookie,
+)
 from api.schemas import CallbackResponse, UpdateLineNameRequest, UserInfoSchema
+
+
+def _mask(value: str, visible: int = 4) -> str:
+    """Mask sensitive string for logging, showing only first N chars."""
+    if not value or len(value) <= visible:
+        return "***"
+    return value[:visible] + "***"
 
 router = APIRouter()
 
@@ -135,7 +147,7 @@ async def yahoo_callback(
     # Handle Yahoo error response (user denied access, etc.)
     if error:
         msg = error_description or error
-        print(f"[AUTH DEBUG] Yahoo returned error: {error} - {error_description}", flush=True)
+        print(f"[AUTH] Yahoo returned error: {error} - {error_description}", flush=True)
         return RedirectResponse(
             f"{frontend_url}/auth/callback?error={quote(msg)}"
         )
@@ -154,9 +166,13 @@ async def yahoo_callback(
 
     try:
         result = await _exchange_code_for_jwt(code)
-        return RedirectResponse(
-            f"{frontend_url}/auth/callback?token={result.token}"
+        # Set HttpOnly cookie and redirect (no token in URL)
+        redirect = RedirectResponse(
+            f"{frontend_url}/auth/callback?auth=ok",
+            status_code=302,
         )
+        set_auth_cookie(redirect, result.token)
+        return redirect
     except HTTPException as e:
         return RedirectResponse(
             f"{frontend_url}/auth/callback?error={quote(str(e.detail))}"
@@ -189,8 +205,8 @@ async def _exchange_code_for_jwt(code: str) -> CallbackResponse:
     access_token = token_data.get("access_token")
     yahoo_guid = token_data.get("xoauth_yahoo_guid", "")
 
-    print(f"[AUTH DEBUG] Token response keys: {list(token_data.keys())}", flush=True)
-    print(f"[AUTH DEBUG] xoauth_yahoo_guid from token: '{yahoo_guid}'", flush=True)
+    print(f"[AUTH] Token response keys: {list(token_data.keys())}", flush=True)
+    print(f"[AUTH] xoauth_yahoo_guid: '{_mask(yahoo_guid)}'", flush=True)
 
     # Decode id_token JWT to extract sub (GUID), nickname, email
     nickname = ""
@@ -203,14 +219,14 @@ async def _exchange_code_for_jwt(code: str) -> CallbackResponse:
             payload_b64 = token_data["id_token"].split(".")[1]
             payload_b64 += "=" * (4 - len(payload_b64) % 4)
             id_payload = json.loads(base64.urlsafe_b64decode(payload_b64))
-            print(f"[AUTH DEBUG] id_token claims: {list(id_payload.keys())}", flush=True)
+            print(f"[AUTH] id_token claims: {list(id_payload.keys())}", flush=True)
             if not yahoo_guid:
                 yahoo_guid = id_payload.get("sub", "")
             nickname = id_payload.get("nickname", id_payload.get("preferred_username", id_payload.get("name", "")))
             email = id_payload.get("email", "")
-            print(f"[AUTH DEBUG] From id_token - GUID: '{yahoo_guid}', nickname: '{nickname}', email: '{email}'", flush=True)
+            print(f"[AUTH] From id_token - GUID: {_mask(yahoo_guid)}, nickname: {nickname}, email: {_mask(email, 3)}", flush=True)
         except Exception as e:
-            print(f"[AUTH DEBUG] Failed to decode id_token: {e}", flush=True)
+            print(f"[AUTH] Failed to decode id_token: {e}", flush=True)
 
     # Fallback: fetch user profile from userinfo endpoint
     if not yahoo_guid or not nickname:
@@ -227,9 +243,9 @@ async def _exchange_code_for_jwt(code: str) -> CallbackResponse:
                 nickname = profile.get("nickname", profile.get("preferred_username", profile.get("name", "")))
             if not email:
                 email = profile.get("email", "")
-            print(f"[AUTH DEBUG] From profile: GUID='{yahoo_guid}', nickname='{nickname}'", flush=True)
+            print(f"[AUTH] From profile: GUID={_mask(yahoo_guid)}, nickname={nickname}", flush=True)
         else:
-            print(f"[AUTH DEBUG] Profile fetch failed: {profile_resp.status_code} (using id_token data only)", flush=True)
+            print(f"[AUTH] Profile fetch failed: {profile_resp.status_code} (using id_token data only)", flush=True)
 
     if not yahoo_guid:
         raise HTTPException(status_code=400, detail="Could not determine Yahoo user ID")
@@ -250,11 +266,11 @@ async def _exchange_code_for_jwt(code: str) -> CallbackResponse:
                     headers={"Authorization": f"Bearer {access_token}"},
                     timeout=10,
                 )
-                print(f"[AUTH DEBUG] Fantasy API {url.split('/')[-1]}: status={fantasy_resp.status_code}", flush=True)
+                print(f"[AUTH] Fantasy API {url.split('/')[-1]}: status={fantasy_resp.status_code}", flush=True)
                 if fantasy_resp.status_code == 200:
                     fu_data = fantasy_resp.json()
                     fu_str = str(fu_data)
-                    print(f"[AUTH DEBUG] Fantasy response: {fu_str[:500]}", flush=True)
+                    print(f"[AUTH] Fantasy response: {fu_str[:500]}", flush=True)
                     # Search for display_name or nickname in the response
                     nickname = _extract_from_nested(fu_data, "display_name")
                     if not nickname:
@@ -262,15 +278,15 @@ async def _exchange_code_for_jwt(code: str) -> CallbackResponse:
                     # Convert fullwidth chars to halfwidth (Yahoo sometimes uses fullwidth)
                     if nickname:
                         nickname = _fullwidth_to_halfwidth(nickname)
-                    print(f"[AUTH DEBUG] Extracted nickname: '{nickname}'", flush=True)
+                    print(f"[AUTH] Extracted nickname: '{nickname}'", flush=True)
             except Exception as e:
-                print(f"[AUTH DEBUG] Fantasy API error: {e}", flush=True)
+                print(f"[AUTH] Fantasy API error: {e}", flush=True)
 
     # Try to match user to a team via Yahoo Fantasy API
     team_id, fantasy_nickname = _match_user_to_team(access_token, yahoo_guid, nickname)
     if not nickname and fantasy_nickname:
         nickname = fantasy_nickname
-        print(f"[AUTH DEBUG] Got nickname from team matching: '{nickname}'", flush=True)
+        print(f"[AUTH] Got nickname from team matching: '{nickname}'", flush=True)
 
     # Check if this user should be commissioner
     existing = get_user_by_guid(yahoo_guid)
@@ -286,7 +302,7 @@ async def _exchange_code_for_jwt(code: str) -> CallbackResponse:
     }
     if email and email.lower() in commissioner_emails:
         is_commissioner = True
-        print(f"[AUTH DEBUG] Auto-granted commissioner for email: {email}", flush=True)
+        print(f"[AUTH] Auto-granted commissioner for email: {_mask(email, 3)}", flush=True)
 
     # Upsert user
     user = upsert_user(
@@ -357,7 +373,7 @@ def _match_user_to_team(access_token: str, yahoo_guid: str, nickname: str) -> tu
         if team_id:
             return team_id, fantasy_nickname
     except Exception as e:
-        print(f"[AUTH DEBUG] _match_via_yahoo_api error: {e}", flush=True)
+        print(f"[AUTH] _match_via_yahoo_api error: {e}", flush=True)
 
     # 3. Fallback: match by nickname
     try:
@@ -365,7 +381,7 @@ def _match_user_to_team(access_token: str, yahoo_guid: str, nickname: str) -> tu
         if team_id:
             return team_id, fantasy_nickname
     except Exception as e:
-        print(f"[AUTH DEBUG] _match_by_nickname error: {e}", flush=True)
+        print(f"[AUTH] _match_by_nickname error: {e}", flush=True)
 
     return None, fantasy_nickname
 
@@ -383,7 +399,7 @@ def _match_via_yahoo_api(access_token: str, yahoo_guid: str) -> tuple[int | None
         timeout=15,
     )
     if resp.status_code != 200:
-        print(f"[AUTH DEBUG] Fantasy leagues API failed: {resp.status_code}", flush=True)
+        print(f"[AUTH] Fantasy leagues API failed: {resp.status_code}", flush=True)
         return None, found_nickname
 
     data = resp.json()
@@ -437,7 +453,7 @@ def _match_via_yahoo_api(access_token: str, yahoo_guid: str) -> tuple[int | None
                                     mgr = mv.get("manager", {})
                                     if mgr.get("guid") == yahoo_guid:
                                         found_nickname = mgr.get("nickname", "")
-                                        print(f"[AUTH DEBUG] Found manager in Fantasy API: nickname='{found_nickname}'", flush=True)
+                                        print(f"[AUTH] Found manager in Fantasy API: nickname='{found_nickname}'", flush=True)
                                         # Found the team! Match to DB team
                                         team_key = ""
                                         for sub2 in team_info:
@@ -553,10 +569,21 @@ async def commissioner_verify(
     # Issue new JWT with commissioner flag
     new_token = create_jwt_token(user["id"], is_commissioner=True)
 
-    return {"message": "Commissioner access granted", "token": new_token}
+    # Set HttpOnly cookie with updated JWT (also return token for backward compat)
+    response = Response(
+        content='{"message": "Commissioner access granted", "token": "' + new_token + '"}',
+        media_type="application/json",
+    )
+    set_auth_cookie(response, new_token)
+    return response
 
 
 @router.post("/logout")
 async def logout():
-    """Logout (client-side token removal, no server state to clear)."""
-    return {"message": "Logged out"}
+    """Logout: clear HttpOnly auth cookie."""
+    response = Response(
+        content='{"message": "Logged out"}',
+        media_type="application/json",
+    )
+    clear_auth_cookie(response)
+    return response

@@ -13,6 +13,7 @@ import {
 import type { KeeperResultTeam } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import LoadingSpinner from "@/components/LoadingSpinner";
+import AuthGate from "@/components/AuthGate";
 import type { DBTeam } from "@/types";
 
 interface TeamSummary {
@@ -40,6 +41,14 @@ function getRanking(bonus: number): number | null {
 type TabKey = "season-end" | "keepers";
 
 export default function YearOverviewPage() {
+  return (
+    <AuthGate>
+      <YearOverviewContent />
+    </AuthGate>
+  );
+}
+
+function YearOverviewContent() {
   const params = useParams();
   const year = Number(params.year);
   const { user } = useAuth();

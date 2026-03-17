@@ -22,21 +22,23 @@ export default function Navbar() {
           {/* Logo + desktop nav links */}
           <div className="flex items-center gap-2 sm:gap-6">
             <Link href="/" className="text-base font-bold sm:text-lg whitespace-nowrap">
-              5-Man Keeper
+              5-Man Keepers
             </Link>
             <div className="hidden sm:flex items-center gap-4">
+              {/* Public links - always visible */}
+              <Link
+                href="/rules"
+                className="text-sm text-gray-300 hover:text-white"
+              >
+                規則 Rules
+              </Link>
               <Link
                 href="/players"
                 className="text-sm text-gray-300 hover:text-white"
               >
                 球員 Players
               </Link>
-              <Link
-                href="/analytics"
-                className="text-sm text-gray-300 hover:text-white"
-              >
-                統計 Stats
-              </Link>
+              {/* Auth-only links */}
               {user && (
                 <>
                   <Link
@@ -46,21 +48,19 @@ export default function Navbar() {
                     聯盟 League
                   </Link>
                   <Link
-                    href="/rules"
+                    href="/analytics"
                     className="text-sm text-gray-300 hover:text-white"
                   >
-                    規則 Rules
+                    統計 Stats
                   </Link>
-                  <Link
-                    href="/commissioner"
-                    className={`text-sm ${
-                      user.is_commissioner
-                        ? "text-yellow-400 hover:text-yellow-300"
-                        : "text-gray-300 hover:text-white"
-                    }`}
-                  >
-                    Commissioner
-                  </Link>
+                  {user.is_commissioner && (
+                    <Link
+                      href="/commissioner"
+                      className="text-sm text-yellow-400 hover:text-yellow-300"
+                    >
+                      Commissioner
+                    </Link>
+                  )}
                 </>
               )}
             </div>
@@ -133,6 +133,14 @@ export default function Navbar() {
       {menuOpen && (
         <div className="border-t border-gray-700 sm:hidden">
           <div className="px-4 py-3 space-y-1">
+            {/* Public links */}
+            <Link
+              href="/rules"
+              className="block rounded px-3 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-white"
+              onClick={() => setMenuOpen(false)}
+            >
+              規則 Rules
+            </Link>
             <Link
               href="/players"
               className="block rounded px-3 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-white"
@@ -140,13 +148,7 @@ export default function Navbar() {
             >
               球員 Players
             </Link>
-            <Link
-              href="/analytics"
-              className="block rounded px-3 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-white"
-              onClick={() => setMenuOpen(false)}
-            >
-              統計 Stats
-            </Link>
+            {/* Auth-only links */}
             {user && (
               <>
                 <Link
@@ -157,23 +159,21 @@ export default function Navbar() {
                   聯盟 League
                 </Link>
                 <Link
-                  href="/rules"
+                  href="/analytics"
                   className="block rounded px-3 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-white"
                   onClick={() => setMenuOpen(false)}
                 >
-                  規則 Rules
+                  統計 Stats
                 </Link>
-                <Link
-                  href="/commissioner"
-                  className={`block rounded px-3 py-2 text-sm ${
-                    user.is_commissioner
-                      ? "text-yellow-400 hover:bg-gray-800 hover:text-yellow-300"
-                      : "text-gray-300 hover:bg-gray-800 hover:text-white"
-                  }`}
-                  onClick={() => setMenuOpen(false)}
-                >
-                  Commissioner
-                </Link>
+                {user.is_commissioner && (
+                  <Link
+                    href="/commissioner"
+                    className="block rounded px-3 py-2 text-sm text-yellow-400 hover:bg-gray-800 hover:text-yellow-300"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    Commissioner
+                  </Link>
+                )}
               </>
             )}
           </div>

@@ -105,6 +105,7 @@ function isPitcher(position: string): boolean {
 export default function PlayersPage() {
   const { user } = useAuth();
   const isCommissioner = user?.is_commissioner ?? false;
+  const isAuth = !!user;
 
   // Tab state
   const [activeTab, setActiveTab] = useState<TabId>("database");
@@ -460,31 +461,39 @@ export default function PlayersPage() {
                         </ul>
                       </div>
 
-                      {/* Column Guide */}
+                      {/* Column Guide (auth-only columns hidden for public) */}
                       <div>
                         <h3 className="mb-2 font-semibold text-blue-800">
                           欄位說明 Column Guide
                         </h3>
                         <ul className="space-y-1 text-xs">
-                          <li>
-                            <span className="font-medium">2025</span>
-                            {" "}= 當前合約狀態 (A/B/N/O/R)
-                          </li>
-                          <li>
-                            <span className="font-medium">2026</span>
-                            {" "}= 下一年合約狀態
-                            <span className="text-gray-500">
-                              （已繳交隊伍顯示實際選擇，未繳交顯示「待定」）
-                            </span>
-                          </li>
-                          <li>
-                            <span className="font-medium">$</span>
-                            {" "}= 球員薪資
-                          </li>
-                          <li>
-                            <span className="font-medium">歸屬</span>
-                            {" "}= 球員所屬經理，FA 為自由球員
-                          </li>
+                          {isAuth ? (
+                            <>
+                              <li>
+                                <span className="font-medium">2025</span>
+                                {" "}= 當前合約狀態 (A/B/N/O/R)
+                              </li>
+                              <li>
+                                <span className="font-medium">2026</span>
+                                {" "}= 下一年合約狀態
+                                <span className="text-gray-500">
+                                  （已繳交隊伍顯示實際選擇，未繳交顯示「待定」）
+                                </span>
+                              </li>
+                              <li>
+                                <span className="font-medium">$</span>
+                                {" "}= 球員薪資
+                              </li>
+                              <li>
+                                <span className="font-medium">歸屬</span>
+                                {" "}= 球員所屬經理，FA 為自由球員
+                              </li>
+                            </>
+                          ) : (
+                            <li className="text-gray-500">
+                              登入後可查看合約、薪資、歸屬等欄位
+                            </li>
+                          )}
                         </ul>
                       </div>
 
@@ -515,6 +524,24 @@ export default function PlayersPage() {
                   </div>
                 )}
               </div>
+
+              {/* Login hint banner (unauthenticated) */}
+              {!isAuth && (
+                <div className="mb-4 flex items-center gap-3 rounded-lg border border-indigo-200 bg-indigo-50 px-4 py-3">
+                  <svg className="h-5 w-5 flex-shrink-0 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+                  </svg>
+                  <span className="text-sm text-indigo-700">
+                    登入後可查看球員持有狀態與合約資訊
+                  </span>
+                  <a
+                    href={`${process.env.NEXT_PUBLIC_API_URL || "https://localhost:8002"}/api/auth/yahoo/login`}
+                    className="ml-auto whitespace-nowrap rounded-md bg-indigo-600 px-3 py-1 text-xs font-medium text-white hover:bg-indigo-500"
+                  >
+                    Login with Yahoo
+                  </a>
+                </div>
+              )}
 
               {/* Controls Row */}
               <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -559,20 +586,22 @@ export default function PlayersPage() {
                     ))}
                   </select>
 
-                  {/* Owner dropdown */}
-                  <select
-                    value={ownerFilter}
-                    onChange={(e) => setOwnerFilter(e.target.value)}
-                    className="rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-indigo-500 focus:ring-indigo-500"
-                  >
-                    <option value="">All Owners</option>
-                    <option value="__FA__">FA (Free Agent)</option>
-                    {ownerList.map((o) => (
-                      <option key={o} value={o}>
-                        {o}
-                      </option>
-                    ))}
-                  </select>
+                  {/* Owner dropdown (auth only) */}
+                  {isAuth && (
+                    <select
+                      value={ownerFilter}
+                      onChange={(e) => setOwnerFilter(e.target.value)}
+                      className="rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    >
+                      <option value="">All Owners</option>
+                      <option value="__FA__">FA (Free Agent)</option>
+                      {ownerList.map((o) => (
+                        <option key={o} value={o}>
+                          {o}
+                        </option>
+                      ))}
+                    </select>
+                  )}
 
                   {/* Sort Type dropdown (stat time range for Yahoo rankings) */}
                   <select
@@ -591,7 +620,7 @@ export default function PlayersPage() {
                   {/* Search (Enter to submit) */}
                   <input
                     type="text"
-                    placeholder="搜尋球員或經理 (Enter)"
+                    placeholder={isAuth ? "搜尋球員或經理 (Enter)" : "搜尋球員 (Enter)"}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     onKeyDown={(e) => {
@@ -671,16 +700,22 @@ export default function PlayersPage() {
                       <th className="whitespace-nowrap px-2 py-2 text-left text-xs font-medium uppercase text-gray-500">
                         MLB
                       </th>
-                      <th className="px-2 py-2 text-left text-xs font-medium uppercase text-gray-500">
-                        2025
-                      </th>
-                      <th className="px-2 py-2 text-left text-xs font-medium uppercase text-gray-500">
-                        2026
-                      </th>
-                      <SortTh col="salary" label="$" />
-                      <th className="whitespace-nowrap px-2 py-2 text-left text-xs font-medium uppercase text-gray-500">
-                        歸屬
-                      </th>
+                      {isAuth && (
+                        <th className="px-2 py-2 text-left text-xs font-medium uppercase text-gray-500">
+                          2025
+                        </th>
+                      )}
+                      {isAuth && (
+                        <th className="px-2 py-2 text-left text-xs font-medium uppercase text-gray-500">
+                          2026
+                        </th>
+                      )}
+                      {isAuth && <SortTh col="salary" label="$" />}
+                      {isAuth && (
+                        <th className="whitespace-nowrap px-2 py-2 text-left text-xs font-medium uppercase text-gray-500">
+                          歸屬
+                        </th>
+                      )}
 
                       {/* Stats columns */}
                       {HITTING_COLS.map((c) => (
@@ -746,41 +781,49 @@ export default function PlayersPage() {
                             {p.mlb_team || "-"}
                           </td>
 
-                          {/* 2025 Contract */}
-                          <td className="whitespace-nowrap px-2 py-1.5">
-                            {p.contract_display ? (
-                              <ContractBadge
-                                type={p.contract_type as ContractType}
-                                display={p.contract_display}
-                              />
-                            ) : (
-                              <span className="text-xs text-gray-300">FA</span>
-                            )}
-                          </td>
+                          {/* 2025 Contract (auth only) */}
+                          {isAuth && (
+                            <td className="whitespace-nowrap px-2 py-1.5">
+                              {p.contract_display ? (
+                                <ContractBadge
+                                  type={p.contract_type as ContractType}
+                                  display={p.contract_display}
+                                />
+                              ) : (
+                                <span className="text-xs text-gray-300">FA</span>
+                              )}
+                            </td>
+                          )}
 
-                          {/* 2026 Status */}
-                          <td className="whitespace-nowrap px-2 py-1.5">
-                            {p.next_contract_display ? (
-                              <ContractBadge
-                                type={p.next_contract_type as ContractType}
-                                display={p.next_contract_display}
-                              />
-                            ) : (
-                              <span className="text-xs text-gray-300">-</span>
-                            )}
-                          </td>
+                          {/* 2026 Status (auth only) */}
+                          {isAuth && (
+                            <td className="whitespace-nowrap px-2 py-1.5">
+                              {p.next_contract_display ? (
+                                <ContractBadge
+                                  type={p.next_contract_type as ContractType}
+                                  display={p.next_contract_display}
+                                />
+                              ) : (
+                                <span className="text-xs text-gray-300">-</span>
+                              )}
+                            </td>
+                          )}
 
-                          {/* Salary */}
-                          <td className="whitespace-nowrap px-2 py-1.5 text-right text-xs">
-                            {p.salary > 0 ? `$${p.salary}` : "-"}
-                          </td>
+                          {/* Salary (auth only) */}
+                          {isAuth && (
+                            <td className="whitespace-nowrap px-2 py-1.5 text-right text-xs">
+                              {p.salary > 0 ? `$${p.salary}` : "-"}
+                            </td>
+                          )}
 
-                          {/* Owner */}
-                          <td className="whitespace-nowrap px-2 py-1.5 text-xs text-gray-600">
-                            {p.owner_manager || (
-                              <span className="text-gray-300">FA</span>
-                            )}
-                          </td>
+                          {/* Owner (auth only) */}
+                          {isAuth && (
+                            <td className="whitespace-nowrap px-2 py-1.5 text-xs text-gray-600">
+                              {p.owner_manager || (
+                                <span className="text-gray-300">FA</span>
+                              )}
+                            </td>
+                          )}
 
                           {/* Hitting stats */}
                           {HITTING_COLS.map((c) => (
@@ -826,7 +869,7 @@ export default function PlayersPage() {
                     {paginatedPlayers.length === 0 && (
                       <tr>
                         <td
-                          colSpan={9 + HITTING_COLS.length + PITCHING_COLS.length}
+                          colSpan={(isAuth ? 9 : 5) + HITTING_COLS.length + PITCHING_COLS.length}
                           className="py-8 text-center text-gray-400"
                         >
                           沒有符合條件的球員
@@ -927,7 +970,7 @@ export default function PlayersPage() {
                 {/* Search (instant, no Enter needed) */}
                 <input
                   type="text"
-                  placeholder="搜尋新秀名稱 / 球隊 / 經理"
+                  placeholder={isAuth ? "搜尋新秀名稱 / 球隊 / 經理" : "搜尋新秀名稱 / 球隊"}
                   value={prospectSearch}
                   onChange={(e) => setProspectSearch(e.target.value)}
                   className="w-56 rounded-md border border-gray-300 px-3 py-1.5 text-sm placeholder-gray-400 focus:border-indigo-500 focus:ring-indigo-500"
@@ -946,28 +989,48 @@ export default function PlayersPage() {
                   ))}
                 </select>
 
-                {/* Ownership filter */}
-                <select
-                  value={prospectOwnerFilter}
-                  onChange={(e) =>
-                    setProspectOwnerFilter(
-                      e.target.value as "all" | "owned" | "fa",
-                    )
-                  }
-                  className="rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-indigo-500 focus:ring-indigo-500"
-                >
-                  {PROSPECT_OWNER_OPTIONS.map((o) => (
-                    <option key={o.value} value={o.value}>
-                      {o.label}
-                    </option>
-                  ))}
-                </select>
+                {/* Ownership filter (auth only) */}
+                {isAuth && (
+                  <select
+                    value={prospectOwnerFilter}
+                    onChange={(e) =>
+                      setProspectOwnerFilter(
+                        e.target.value as "all" | "owned" | "fa",
+                      )
+                    }
+                    className="rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  >
+                    {PROSPECT_OWNER_OPTIONS.map((o) => (
+                      <option key={o.value} value={o.value}>
+                        {o.label}
+                      </option>
+                    ))}
+                  </select>
+                )}
 
                 <span className="ml-auto text-sm text-gray-500">
                   {filteredProspects.length} / {prospectsData?.total_count ?? 0}{" "}
                   名新秀
                 </span>
               </div>
+
+              {/* Login hint banner for prospects (unauthenticated) */}
+              {!isAuth && (
+                <div className="mb-4 flex items-center gap-3 rounded-lg border border-indigo-200 bg-indigo-50 px-4 py-3">
+                  <svg className="h-5 w-5 flex-shrink-0 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+                  </svg>
+                  <span className="text-sm text-indigo-700">
+                    登入後可查看新秀持有狀態與合約資訊
+                  </span>
+                  <a
+                    href={`${process.env.NEXT_PUBLIC_API_URL || "https://localhost:8002"}/api/auth/yahoo/login`}
+                    className="ml-auto whitespace-nowrap rounded-md bg-indigo-600 px-3 py-1 text-xs font-medium text-white hover:bg-indigo-500"
+                  >
+                    Login with Yahoo
+                  </a>
+                </div>
+              )}
 
               {/* Commissioner: Reload Prospects */}
               {isCommissioner && (
@@ -1025,12 +1088,16 @@ export default function PlayersPage() {
                       <th className="whitespace-nowrap px-3 py-2 text-left text-xs font-medium uppercase text-gray-500">
                         ETA
                       </th>
-                      <th className="whitespace-nowrap px-3 py-2 text-left text-xs font-medium uppercase text-gray-500">
-                        歸屬
-                      </th>
-                      <th className="whitespace-nowrap px-3 py-2 text-left text-xs font-medium uppercase text-gray-500">
-                        合約
-                      </th>
+                      {isAuth && (
+                        <th className="whitespace-nowrap px-3 py-2 text-left text-xs font-medium uppercase text-gray-500">
+                          歸屬
+                        </th>
+                      )}
+                      {isAuth && (
+                        <th className="whitespace-nowrap px-3 py-2 text-left text-xs font-medium uppercase text-gray-500">
+                          合約
+                        </th>
+                      )}
                       <th className="whitespace-nowrap px-3 py-2 text-left text-xs font-medium uppercase text-gray-500">
                         備註
                       </th>
@@ -1079,32 +1146,36 @@ export default function PlayersPage() {
                           {p.eta ?? "-"}
                         </td>
 
-                        {/* Owner */}
-                        <td className="whitespace-nowrap px-3 py-2 text-xs">
-                          {p.owner_manager &&
-                          p.owner_manager !== "FA" ? (
-                            <span className="font-medium text-gray-700">
-                              {p.owner_manager}
-                            </span>
-                          ) : (
-                            <span className="text-gray-300">FA</span>
-                          )}
-                        </td>
+                        {/* Owner (auth only) */}
+                        {isAuth && (
+                          <td className="whitespace-nowrap px-3 py-2 text-xs">
+                            {p.owner_manager &&
+                            p.owner_manager !== "FA" ? (
+                              <span className="font-medium text-gray-700">
+                                {p.owner_manager}
+                              </span>
+                            ) : (
+                              <span className="text-gray-300">FA</span>
+                            )}
+                          </td>
+                        )}
 
-                        {/* Contract */}
-                        <td className="whitespace-nowrap px-3 py-2">
-                          {p.contract_display &&
-                          p.contract_type !== "FA" ? (
-                            <ContractBadge
-                              type={p.contract_type as ContractType}
-                              display={p.contract_display}
-                            />
-                          ) : (
-                            <span className="text-xs text-gray-300">
-                              -
-                            </span>
-                          )}
-                        </td>
+                        {/* Contract (auth only) */}
+                        {isAuth && (
+                          <td className="whitespace-nowrap px-3 py-2">
+                            {p.contract_display &&
+                            p.contract_type !== "FA" ? (
+                              <ContractBadge
+                                type={p.contract_type as ContractType}
+                                display={p.contract_display}
+                              />
+                            ) : (
+                              <span className="text-xs text-gray-300">
+                                -
+                              </span>
+                            )}
+                          </td>
+                        )}
 
                         {/* Note */}
                         <td className="max-w-[200px] truncate px-3 py-2 text-xs text-gray-500">
@@ -1116,7 +1187,7 @@ export default function PlayersPage() {
                     {filteredProspects.length === 0 && (
                       <tr>
                         <td
-                          colSpan={9}
+                          colSpan={isAuth ? 9 : 7}
                           className="py-8 text-center text-gray-400"
                         >
                           沒有符合條件的新秀

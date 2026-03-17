@@ -9,24 +9,15 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8002";
 /** Default request timeout in milliseconds (30 seconds — allows for Zeabur cold start) */
 const REQUEST_TIMEOUT_MS = 30_000;
 
-function getToken(): string | null {
-  if (typeof window === "undefined") return null;
-  return localStorage.getItem("auth_token");
-}
-
 async function request<T>(
   path: string,
   options: RequestInit = {},
   timeoutMs: number = REQUEST_TIMEOUT_MS,
 ): Promise<T> {
-  const token = getToken();
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     ...(options.headers as Record<string, string>),
   };
-  if (token) {
-    headers["Authorization"] = `Bearer ${token}`;
-  }
 
   // AbortController for timeout
   const controller = new AbortController();
@@ -37,6 +28,7 @@ async function request<T>(
     res = await fetch(`${API_BASE}${path}`, {
       ...options,
       headers,
+      credentials: "include",   // Send HttpOnly auth cookie
       signal: controller.signal,
     });
   } catch (err) {
@@ -335,13 +327,12 @@ export async function importExcel(file: File, year: number): Promise<{
   teams: string[];
   message: string;
 }> {
-  const token = getToken();
   const formData = new FormData();
   formData.append("file", file);
 
   const res = await fetch(`${API_BASE}/api/commissioner/import-excel?year=${year}`, {
     method: "POST",
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    credentials: "include",   // Send HttpOnly auth cookie
     body: formData,
   });
 
@@ -715,6 +706,99 @@ export interface TradeStatsResponse {
 export async function getTradeStats(years?: number[]): Promise<TradeStatsResponse> {
   const params = years?.length ? `?years=${years.join(",")}` : "";
   return request(`/api/analytics/trade-stats${params}`);
+}
+
+// --- Salary Rankings ---
+
+export interface SalaryRankingEntry {
+  rank: number;
+  player: string;
+  salary: number;
+  contract_type: string;
+  manager: string;
+  source: string;
+  position: string;
+}
+
+export interface SalaryRankingsResponse {
+  years: number[];
+  rankings: Record<string, SalaryRankingEntry[]>;
+}
+
+export async function getSalaryRankings(years?: number[]): Promise<SalaryRankingsResponse> {
+  const params = years?.length ? `?years=${years.join(",")}` : "";
+  return request(`/api/analytics/salary-rankings${params}`);
+}
+
+// --- Contract Values ---
+
+export interface ContractValue {
+  player: string;
+  salary: number;
+  original_n: number;
+  total_years: number;
+  total_value: number;
+  first_seen_year: number;
+  first_seen_contract: string;
+  current_contract: string;
+  current_year: number;
+  manager: string;
+  manager_history: string[];
+  years_remaining: number;
+}
+
+export interface ContractValuesResponse {
+  contracts: ContractValue[];
+}
+
+export async function getContractValues(): Promise<ContractValuesResponse> {
+  return request("/api/analytics/contract-values");
+}
+
+// --- League Summary ---
+
+export interface LeagueSummaryResponse {
+  keeper_stats: Record<
+    string,
+    {
+      teams: Array<{
+        manager: string;
+        keeper_count: number;
+        total_cost: number;
+        avg_cost: number;
+      }>;
+      league_avg_cost: number;
+      highest_spender: { manager: string; total_cost: number } | null;
+      lowest_spender: { manager: string; total_cost: number } | null;
+    }
+  >;
+  draft_highlights: Record<
+    string,
+    {
+      total_picks: number;
+      total_spent: number;
+      avg_pick_cost: number;
+      max_pick: number;
+      biggest_spender: { manager: string; total: number };
+    }
+  >;
+  contract_highlights: {
+    top5: ContractValue[];
+    total_n_contracts: number;
+    total_committed_value: number;
+  };
+  trade_highlights: Record<
+    string,
+    {
+      trade_count: number;
+      faab_transactions: number;
+      total_transactions: number;
+    }
+  >;
+}
+
+export async function getLeagueAnalyticsSummary(): Promise<LeagueSummaryResponse> {
+  return request("/api/analytics/league-summary");
 }
 
 // ========== Validation ==========

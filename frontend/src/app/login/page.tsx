@@ -17,7 +17,7 @@ export default function LoginPage() {
     <div className="mx-auto max-w-sm py-20 text-center">
       <h1 className="mb-2 text-2xl font-bold">Login</h1>
       <p className="mb-8 text-gray-600">
-        Sign in with your Yahoo account to access the keeper league system.
+        Sign in with your Yahoo account to access the keepers league system.
       </p>
 
       <button

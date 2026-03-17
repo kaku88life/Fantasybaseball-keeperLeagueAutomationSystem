@@ -3,7 +3,9 @@ Fantasy Baseball Keeper League - League Data Routes (read-only)
 """
 from __future__ import annotations
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
+
+from api.dependencies import get_current_user
 
 from api.database import get_all_submissions, get_all_teams, get_player_rankings, get_snapshot, get_snapshot_years, get_team_buyouts
 from api.schemas import LeagueSettingsSchema, LeagueSnapshotSchema
@@ -142,7 +144,7 @@ async def list_years() -> list[int]:
 
 
 @router.get("/{year}", response_model=LeagueSnapshotSchema)
-async def get_league_year(year: int):
+async def get_league_year(year: int, _user: dict = Depends(get_current_user)):
     """Return league snapshot for a specific year."""
     snap = get_snapshot(year)
     if not snap:
@@ -154,7 +156,7 @@ async def get_league_year(year: int):
 
 
 @router.get("/{year}/summary")
-async def get_league_summary(year: int):
+async def get_league_summary(year: int, _user: dict = Depends(get_current_user)):
     """Return a summary of all teams for a year."""
     from api.database import get_team_line_names, get_all_teams as _get_all_teams
 
@@ -197,7 +199,7 @@ async def get_league_summary(year: int):
 
 
 @router.get("/{year}/keeper-results")
-async def get_keeper_results(year: int):
+async def get_keeper_results(year: int, _user: dict = Depends(get_current_user)):
     """Return keeper selection results for all submitted teams (public endpoint)."""
     snap = get_snapshot(year)
     if not snap:

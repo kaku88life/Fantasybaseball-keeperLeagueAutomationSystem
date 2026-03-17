@@ -1,10 +1,10 @@
 """
 Fantasy Baseball Keeper League - League Rules Configuration
-5-Man Keep 盟 聯盟規則設定
+Fantasy Baseball 5-Man Keepers 聯盟規則設定
 """
 
 # ========== League Basic Info ==========
-LEAGUE_NAME = "5-Man Keep盟"
+LEAGUE_NAME = "Fantasy Baseball 5-Man Keepers"
 TOTAL_TEAMS = 16
 SCORING_FORMAT = "H2H 7x7"
 HITTING_CATS = ["R", "H", "HR", "RBI", "SB", "AVG", "OPS"]

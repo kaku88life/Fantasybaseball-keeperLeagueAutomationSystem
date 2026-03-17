@@ -10,11 +10,11 @@ import {
 import type { UserInfo } from "@/types";
 import { getCurrentUser } from "@/lib/api";
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8002";
+
 interface AuthContextType {
   user: UserInfo | null;
   loading: boolean;
-  login: (token: string, user: UserInfo) => void;
-  loginWithToken: (token: string) => Promise<void>;
   logout: () => void;
   refresh: () => Promise<void>;
   updateUser: (partial: Partial<UserInfo>) => void;
@@ -23,8 +23,6 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType>({
   user: null,
   loading: true,
-  login: () => {},
-  loginWithToken: async () => {},
   logout: () => {},
   refresh: async () => {},
   updateUser: () => {},
@@ -35,17 +33,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   const refresh = useCallback(async () => {
-    const token = localStorage.getItem("auth_token");
-    if (!token) {
-      setUser(null);
-      setLoading(false);
-      return;
+    // Clean up any legacy localStorage tokens from before cookie migration
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("auth_token");
     }
     try {
+      // Auth is handled by HttpOnly cookie (sent automatically via credentials: 'include')
       const u = await getCurrentUser();
       setUser(u);
     } catch {
-      localStorage.removeItem("auth_token");
       setUser(null);
     } finally {
       setLoading(false);
@@ -56,19 +52,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     refresh();
   }, [refresh]);
 
-  const login = useCallback((token: string, u: UserInfo) => {
-    localStorage.setItem("auth_token", token);
-    setUser(u);
-  }, []);
-
-  const loginWithToken = useCallback(async (token: string) => {
-    localStorage.setItem("auth_token", token);
-    const u = await getCurrentUser();
-    setUser(u);
-  }, []);
-
-  const logout = useCallback(() => {
-    localStorage.removeItem("auth_token");
+  const logout = useCallback(async () => {
+    try {
+      // Call backend to clear HttpOnly cookie
+      await fetch(`${API_BASE}/api/auth/logout`, {
+        method: "POST",
+        credentials: "include",
+      });
+    } catch {
+      // Ignore network errors on logout
+    }
+    // Clean up legacy localStorage token if any
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("auth_token");
+    }
     setUser(null);
   }, []);
 
@@ -77,7 +74,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, loginWithToken, logout, refresh, updateUser }}>
+    <AuthContext.Provider value={{ user, loading, logout, refresh, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

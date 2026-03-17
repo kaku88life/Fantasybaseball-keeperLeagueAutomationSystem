@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { getLeagueSettings } from "@/lib/api";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import type { LeagueSettings } from "@/types";
@@ -11,6 +11,7 @@ const TABS = [
   { id: "transaction", label: "球員異動" },
   { id: "keeper", label: "留用與買斷" },
   { id: "other", label: "其他規則" },
+  { id: "diy", label: "自建系統" },
 ] as const;
 
 type TabId = (typeof TABS)[number]["id"];
@@ -36,7 +37,7 @@ export default function RulesPage() {
     <div className="mx-auto max-w-3xl pb-10">
       <h1 className="mb-2 text-xl font-bold sm:text-2xl">League Rules</h1>
       <p className="mb-4 text-sm text-gray-500">
-        5-Man MLB Keeper League 聯盟規則總覽（2025.02.26 版）
+        Fantasy Baseball 5-Man Keepers 聯盟規則總覽（2025.02.26 版）
       </p>
 
       {/* Tab Navigation */}
@@ -635,6 +636,414 @@ export default function RulesPage() {
           </section>
         </div>
       )}
+
+      {/* ==================== Tab 6: 自建系統 ==================== */}
+      {activeTab === "diy" && <DIYSection />}
+    </div>
+  );
+}
+
+// ============================================================
+// DIY Section - Build Your Own League System
+// ============================================================
+
+/** Prompt template for one-click copy */
+function buildPrompt(config: {
+  teams: number;
+  hittingCats: string;
+  pitchingCats: string;
+  salaryCap: number;
+  faabBudget: number;
+  keeperMax: number;
+  contractSystem: string;
+  platform: string;
+}) {
+  return `Please help me build a Fantasy Baseball Keepers League Automation System with the following specifications:
+
+## League Configuration
+- Number of teams: ${config.teams}
+- Scoring format: H2H (Head-to-Head) Categories
+- Hitting categories: ${config.hittingCats}
+- Pitching categories: ${config.pitchingCats}
+- Platform: ${config.platform}
+
+## Financial System
+- Salary cap: $${config.salaryCap}
+- FAAB (Free Agent Acquisition Budget): $${config.faabBudget}
+- Auction draft
+
+## Keeper / Contract System
+${config.contractSystem}
+- Maximum keepers per team: ${config.keeperMax}
+
+## Technical Requirements
+- Backend: FastAPI (Python) with PostgreSQL
+- Frontend: Next.js + React + Tailwind CSS
+- Authentication: ${config.platform} OAuth2 + JWT
+- Deployment: Docker-ready
+
+## Features Needed
+1. Keeper selection interface with real-time validation
+2. Contract tracking and automatic progression (A->B->O or A->B->N(x)->O)
+3. Salary cap management with buyout calculations
+4. Player database with rankings integration
+5. Commissioner dashboard for data import and management
+6. Season countdown and league overview
+
+Please provide the project structure, key files, and step-by-step implementation guide.
+Reference project: https://github.com/kaku88life/Fantasybaseball-keeperLeagueAutomationSystem`;
+}
+
+function DIYSection() {
+  // Form state for prompt generator
+  const [teams, setTeams] = useState(16);
+  const [hittingCats, setHittingCats] = useState("R, H, HR, RBI, SB, AVG, OPS");
+  const [pitchingCats, setPitchingCats] = useState("W, SV, HLD, K, ERA, WHIP, QS");
+  const [salaryCap, setSalaryCap] = useState(300);
+  const [faabBudget, setFaabBudget] = useState(100);
+  const [keeperMax, setKeeperMax] = useState(15);
+  const [contractSystem, setContractSystem] = useState(
+    "- Contract types: A (year 1) -> B (year 2) -> O (option/final year) -> FA\n- Extension: B can extend N years at +$5/year\n- Rookie contracts (R) for farm system, max 2 per team"
+  );
+  const [platform, setPlatform] = useState("Yahoo Fantasy");
+  const [copied, setCopied] = useState(false);
+
+  const prompt = buildPrompt({
+    teams, hittingCats, pitchingCats, salaryCap, faabBudget,
+    keeperMax, contractSystem, platform,
+  });
+
+  const handleCopy = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(prompt);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Fallback for older browsers
+      const textarea = document.createElement("textarea");
+      textarea.value = prompt;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textarea);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  }, [prompt]);
+
+  return (
+    <div className="space-y-6">
+      {/* Intro */}
+      <section className="rounded-lg border bg-gradient-to-br from-indigo-50 to-white p-5">
+        <h2 className="mb-2 text-lg font-semibold">
+          打造你自己的 Keepers League 系統
+        </h2>
+        <p className="text-sm text-gray-600">
+          本系統完全開源，歡迎其他想要經營 Keepers League 的球迷參考、Fork 或直接使用。
+          以下提供完整的建置引導，讓你可以快速建立屬於自己的聯盟管理系統。
+        </p>
+      </section>
+
+      {/* GitHub Link */}
+      <section className="rounded-lg border bg-white p-5">
+        <h2 className="mb-1 text-lg font-semibold">原始碼 Source Code</h2>
+        <p className="mb-4 text-xs text-gray-400">GitHub Repository</p>
+        <a
+          href="https://github.com/kaku88life/Fantasybaseball-keeperLeagueAutomationSystem"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-900 px-5 py-3 text-sm font-medium text-white transition-colors hover:bg-gray-800"
+        >
+          <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+            <path fillRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clipRule="evenodd" />
+          </svg>
+          kaku88life/Fantasybaseball-keeperLeagueAutomationSystem
+        </a>
+        <div className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
+          <div className="rounded bg-gray-50 p-3">
+            <p className="font-medium text-gray-700">Backend</p>
+            <p className="text-xs text-gray-500">FastAPI (Python) + PostgreSQL</p>
+          </div>
+          <div className="rounded bg-gray-50 p-3">
+            <p className="font-medium text-gray-700">Frontend</p>
+            <p className="text-xs text-gray-500">Next.js 15 + React 19 + Tailwind CSS v4</p>
+          </div>
+          <div className="rounded bg-gray-50 p-3">
+            <p className="font-medium text-gray-700">Authentication</p>
+            <p className="text-xs text-gray-500">Yahoo OAuth2 + JWT</p>
+          </div>
+          <div className="rounded bg-gray-50 p-3">
+            <p className="font-medium text-gray-700">Deployment</p>
+            <p className="text-xs text-gray-500">Docker + Zeabur / Vercel / Railway</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Setup Guide */}
+      <section className="rounded-lg border bg-white p-5">
+        <h2 className="mb-1 text-lg font-semibold">建置指南 Setup Guide</h2>
+        <p className="mb-4 text-xs text-gray-400">Step-by-step guide</p>
+        <ol className="space-y-4 text-sm">
+          <li className="flex gap-3">
+            <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-indigo-100 text-xs font-bold text-indigo-600">1</span>
+            <div>
+              <p className="font-medium text-gray-800">Fork & Clone</p>
+              <p className="text-xs text-gray-500">
+                從 GitHub 上 Fork 專案到你的帳號，然後 clone 到本地開發環境。
+              </p>
+              <code className="mt-1 block rounded bg-gray-100 px-3 py-1.5 text-xs text-gray-700">
+                git clone https://github.com/YOUR_USERNAME/Fantasybaseball-keeperLeagueAutomationSystem.git
+              </code>
+            </div>
+          </li>
+          <li className="flex gap-3">
+            <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-indigo-100 text-xs font-bold text-indigo-600">2</span>
+            <div>
+              <p className="font-medium text-gray-800">設定環境變數</p>
+              <p className="text-xs text-gray-500">
+                複製 <code className="rounded bg-gray-100 px-1">.env.example</code> 為 <code className="rounded bg-gray-100 px-1">.env</code>，
+                填入你的 Yahoo API 憑證和資料庫連線資訊。
+              </p>
+              <code className="mt-1 block rounded bg-gray-100 px-3 py-1.5 text-xs text-gray-700">
+                cp .env.example .env
+              </code>
+            </div>
+          </li>
+          <li className="flex gap-3">
+            <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-indigo-100 text-xs font-bold text-indigo-600">3</span>
+            <div>
+              <p className="font-medium text-gray-800">取得 Yahoo API 憑證</p>
+              <p className="text-xs text-gray-500">
+                前往{" "}
+                <a href="https://developer.yahoo.com/apps/" target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:underline">
+                  Yahoo Developer Portal
+                </a>
+                {" "}建立應用程式，取得 Client ID 和 Client Secret。
+              </p>
+            </div>
+          </li>
+          <li className="flex gap-3">
+            <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-indigo-100 text-xs font-bold text-indigo-600">4</span>
+            <div>
+              <p className="font-medium text-gray-800">安裝依賴 & 啟動</p>
+              <div className="mt-1 space-y-1">
+                <code className="block rounded bg-gray-100 px-3 py-1.5 text-xs text-gray-700">
+                  pip install -r requirements.txt
+                </code>
+                <code className="block rounded bg-gray-100 px-3 py-1.5 text-xs text-gray-700">
+                  cd frontend && npm install && npm run dev
+                </code>
+              </div>
+            </div>
+          </li>
+          <li className="flex gap-3">
+            <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-indigo-100 text-xs font-bold text-indigo-600">5</span>
+            <div>
+              <p className="font-medium text-gray-800">修改聯盟規則</p>
+              <p className="text-xs text-gray-500">
+                根據你的聯盟規則修改 <code className="rounded bg-gray-100 px-1">config/settings.py</code>（隊伍數、薪資帽、合約類型等）。
+                前端驗證常數在 <code className="rounded bg-gray-100 px-1">frontend/src/lib/validation.ts</code>。
+              </p>
+            </div>
+          </li>
+          <li className="flex gap-3">
+            <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-indigo-100 text-xs font-bold text-indigo-600">6</span>
+            <div>
+              <p className="font-medium text-gray-800">部署</p>
+              <p className="text-xs text-gray-500">
+                專案內含 Dockerfile，可部署至 Zeabur、Railway、Render 等平台。
+                前端可獨立部署至 Vercel。
+              </p>
+            </div>
+          </li>
+        </ol>
+      </section>
+
+      {/* Important Notes */}
+      <section className="rounded-lg border border-red-200 bg-red-50 p-5">
+        <h2 className="mb-1 text-lg font-semibold text-red-800">注意事項 Important</h2>
+        <p className="mb-3 text-xs text-red-400">Security & Configuration Notes</p>
+        <ul className="space-y-2 text-sm text-red-700">
+          <li className="flex gap-2">
+            <svg className="mt-0.5 h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <span>
+              <strong>.env 檔案必須加入 .gitignore</strong> — 包含 Yahoo API 金鑰、JWT 密鑰、資料庫密碼等敏感資訊，絕對不要提交到 Git。
+            </span>
+          </li>
+          <li className="flex gap-2">
+            <svg className="mt-0.5 h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <span>
+              <strong>oauth2.json 也需要 .gitignore</strong> — Yahoo OAuth token 快取檔案，包含 access token 和 refresh token。
+            </span>
+          </li>
+          <li className="flex gap-2">
+            <svg className="mt-0.5 h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <span>
+              <strong>JWT_SECRET_KEY 務必自行產生</strong> — 使用 <code className="rounded bg-red-100 px-1 text-xs">python -c &quot;import secrets; print(secrets.token_hex(32))&quot;</code>
+            </span>
+          </li>
+          <li className="flex gap-2">
+            <svg className="mt-0.5 h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <span>
+              <strong>資料庫檔案 (.db) 不要提交</strong> — SQLite 資料庫為本地開發用，生產環境使用 PostgreSQL 雲端服務。
+            </span>
+          </li>
+        </ul>
+        <div className="mt-4 rounded bg-white p-3">
+          <p className="mb-1 text-xs font-medium text-gray-700">.gitignore 建議新增項目：</p>
+          <pre className="rounded bg-gray-900 p-3 text-xs text-green-400 overflow-x-auto">{`.env
+.env.local
+oauth2.json
+*.db
+certs/
+__pycache__/
+node_modules/
+.next/`}</pre>
+        </div>
+      </section>
+
+      {/* One-click Prompt Generator */}
+      <section className="rounded-lg border bg-white p-5">
+        <h2 className="mb-1 text-lg font-semibold">AI 提示詞產生器</h2>
+        <p className="mb-4 text-xs text-gray-400">
+          One-click Prompt Generator — 根據你的聯盟設定，產生可直接貼給 AI 的建置提示詞
+        </p>
+
+        {/* Config form */}
+        <div className="mb-6 grid gap-4 sm:grid-cols-2">
+          <div>
+            <label className="mb-1 block text-xs font-medium text-gray-600">隊伍數量</label>
+            <input
+              type="number"
+              min={4}
+              max={30}
+              value={teams}
+              onChange={(e) => setTeams(Number(e.target.value))}
+              className="w-full rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-indigo-500 focus:ring-indigo-500"
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-xs font-medium text-gray-600">平台</label>
+            <select
+              value={platform}
+              onChange={(e) => setPlatform(e.target.value)}
+              className="w-full rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-indigo-500 focus:ring-indigo-500"
+            >
+              <option>Yahoo Fantasy</option>
+              <option>ESPN Fantasy</option>
+              <option>CBS Sports</option>
+              <option>Fantrax</option>
+            </select>
+          </div>
+          <div>
+            <label className="mb-1 block text-xs font-medium text-gray-600">薪資帽 ($)</label>
+            <input
+              type="number"
+              min={100}
+              max={1000}
+              value={salaryCap}
+              onChange={(e) => setSalaryCap(Number(e.target.value))}
+              className="w-full rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-indigo-500 focus:ring-indigo-500"
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-xs font-medium text-gray-600">FAAB 預算 ($)</label>
+            <input
+              type="number"
+              min={50}
+              max={500}
+              value={faabBudget}
+              onChange={(e) => setFaabBudget(Number(e.target.value))}
+              className="w-full rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-indigo-500 focus:ring-indigo-500"
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-xs font-medium text-gray-600">最大留用人數</label>
+            <input
+              type="number"
+              min={5}
+              max={25}
+              value={keeperMax}
+              onChange={(e) => setKeeperMax(Number(e.target.value))}
+              className="w-full rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-indigo-500 focus:ring-indigo-500"
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-xs font-medium text-gray-600">打擊數據類別</label>
+            <input
+              type="text"
+              value={hittingCats}
+              onChange={(e) => setHittingCats(e.target.value)}
+              className="w-full rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-indigo-500 focus:ring-indigo-500"
+            />
+          </div>
+          <div className="sm:col-span-2">
+            <label className="mb-1 block text-xs font-medium text-gray-600">投球數據類別</label>
+            <input
+              type="text"
+              value={pitchingCats}
+              onChange={(e) => setPitchingCats(e.target.value)}
+              className="w-full rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-indigo-500 focus:ring-indigo-500"
+            />
+          </div>
+          <div className="sm:col-span-2">
+            <label className="mb-1 block text-xs font-medium text-gray-600">合約系統描述</label>
+            <textarea
+              rows={3}
+              value={contractSystem}
+              onChange={(e) => setContractSystem(e.target.value)}
+              className="w-full rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-indigo-500 focus:ring-indigo-500"
+            />
+          </div>
+        </div>
+
+        {/* Generated prompt preview */}
+        <div className="relative">
+          <div className="mb-2 flex items-center justify-between">
+            <p className="text-xs font-medium text-gray-600">產生的提示詞 Generated Prompt</p>
+            <button
+              onClick={handleCopy}
+              className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
+                copied
+                  ? "bg-green-100 text-green-700"
+                  : "bg-indigo-600 text-white hover:bg-indigo-500"
+              }`}
+            >
+              {copied ? (
+                <>
+                  <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  已複製
+                </>
+              ) : (
+                <>
+                  <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                  </svg>
+                  複製提示詞
+                </>
+              )}
+            </button>
+          </div>
+          <pre className="max-h-80 overflow-auto rounded-lg bg-gray-900 p-4 text-xs leading-relaxed text-gray-300">
+            {prompt}
+          </pre>
+        </div>
+
+        <p className="mt-4 text-xs text-gray-400">
+          將上方提示詞貼到 Claude、ChatGPT 或其他 AI 工具，即可獲得客製化的建置指引。
+          搭配本專案原始碼作為參考，可以大幅加速開發流程。
+        </p>
+      </section>
     </div>
   );
 }

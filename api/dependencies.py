@@ -2,13 +2,14 @@
 Fantasy Baseball Keeper League - FastAPI Dependencies
 
 JWT authentication and database dependency injection.
+Supports both HttpOnly cookie and Authorization header for JWT tokens.
 """
 from __future__ import annotations
 
 import os
 from typing import Optional
 
-from fastapi import Depends, Header, HTTPException, status
+from fastapi import Depends, Header, HTTPException, Request, Response, status
 from jose import JWTError, jwt
 
 from api.database import get_user_by_id
@@ -26,6 +27,10 @@ elif _jwt_secret == "dev-secret-change-in-production":
 JWT_SECRET = _jwt_secret
 JWT_ALGORITHM = "HS256"
 JWT_EXPIRE_DAYS = 30
+
+# Cookie configuration
+AUTH_COOKIE_NAME = "auth_token"
+_is_production = bool(os.getenv("FRONTEND_URL", "").startswith("https"))
 
 
 def create_jwt_token(user_id: int, is_commissioner: bool = False) -> str:
@@ -52,15 +57,56 @@ def decode_jwt_token(token: str) -> dict:
         )
 
 
-async def get_current_user(authorization: Optional[str] = Header(None)) -> dict:
-    """Dependency: extract current user from JWT token in Authorization header."""
-    if not authorization or not authorization.startswith("Bearer "):
+def set_auth_cookie(response: Response, token: str) -> None:
+    """Set HttpOnly auth cookie on a response."""
+    response.set_cookie(
+        key=AUTH_COOKIE_NAME,
+        value=token,
+        httponly=True,
+        secure=True,              # Works on localhost in modern browsers
+        samesite="none",          # Required for cross-origin (frontend != backend)
+        max_age=JWT_EXPIRE_DAYS * 86400,
+        path="/",
+    )
+
+
+def clear_auth_cookie(response: Response) -> None:
+    """Clear auth cookie from a response."""
+    response.delete_cookie(
+        key=AUTH_COOKIE_NAME,
+        httponly=True,
+        secure=True,
+        samesite="none",
+        path="/",
+    )
+
+
+def _extract_token(request: Request, authorization: Optional[str]) -> Optional[str]:
+    """Extract JWT token from cookie (priority) or Authorization header (fallback)."""
+    # 1. Try HttpOnly cookie first
+    cookie_token = request.cookies.get(AUTH_COOKIE_NAME)
+    if cookie_token:
+        return cookie_token
+
+    # 2. Fallback to Authorization header (backward compatibility)
+    if authorization and authorization.startswith("Bearer "):
+        return authorization.split(" ", 1)[1]
+
+    return None
+
+
+async def get_current_user(
+    request: Request,
+    authorization: Optional[str] = Header(None),
+) -> dict:
+    """Dependency: extract current user from HttpOnly cookie or Authorization header."""
+    token = _extract_token(request, authorization)
+    if not token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Missing or invalid Authorization header",
+            detail="Missing authentication token",
         )
 
-    token = authorization.split(" ", 1)[1]
     payload = decode_jwt_token(token)
 
     user_id = int(payload["sub"])
@@ -85,12 +131,15 @@ async def get_current_commissioner(
     return user
 
 
-async def get_optional_user(authorization: Optional[str] = Header(None)) -> Optional[dict]:
+async def get_optional_user(
+    request: Request,
+    authorization: Optional[str] = Header(None),
+) -> Optional[dict]:
     """Dependency: optionally extract current user (returns None if no auth)."""
-    if not authorization or not authorization.startswith("Bearer "):
+    token = _extract_token(request, authorization)
+    if not token:
         return None
     try:
-        token = authorization.split(" ", 1)[1]
         payload = decode_jwt_token(token)
         user_id = int(payload["sub"])
         return get_user_by_id(user_id)
