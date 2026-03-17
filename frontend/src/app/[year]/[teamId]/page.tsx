@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useCallback, useMemo, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import useSWR from "swr";
@@ -34,14 +34,16 @@ export default function KeeperSelectionPage() {
   const { user } = useAuth();
 
   // SWR: single combined API call (roster + options + selections)
-  const [selectionsLoaded, setSelectionsLoaded] = useState(false);
+  // Track which year+team combo was last initialized to reset on navigation
+  const [loadedKey, setLoadedKey] = useState("");
+  const currentKey = `${teamId}-${year}`;
   const { data: pageData, error: pageErr, mutate: retryLoad } = useSWR(
     year && teamId ? `keeper-page-${teamId}-${year}` : null,
     () => getKeeperPageData(teamId, year),
     {
       onSuccess: (data) => {
-        // Initialize selections from server on first load
-        if (!selectionsLoaded) {
+        // Initialize selections from server on first load or when year/team changes
+        if (loadedKey !== currentKey) {
           const sel: Record<string, Selection> = {};
           for (const s of data.selections.selections) {
             sel[s.player_name] = {
@@ -51,8 +53,8 @@ export default function KeeperSelectionPage() {
           }
           setSelections(sel);
           setServerValidation(data.selections.validation);
-          setIsSubmitted(data.selections.is_submitted);
-          setSelectionsLoaded(true);
+          setLocalSubmitted(false);
+          setLoadedKey(currentKey);
         }
       },
     },
@@ -65,7 +67,9 @@ export default function KeeperSelectionPage() {
   const [selections, setSelections] = useState<Record<string, Selection>>({});
   const [serverValidation, setServerValidation] =
     useState<ValidationResult | null>(null);
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  // Derive isSubmitted from server data directly; localSubmitted is for optimistic UI after submit
+  const [localSubmitted, setLocalSubmitted] = useState(false);
+  const isSubmitted = localSubmitted || (pageData?.selections?.is_submitted ?? false);
   const [saving, setSaving] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [saveStatus, setSaveStatus] = useState<
@@ -76,6 +80,15 @@ export default function KeeperSelectionPage() {
     position: string;
   } | null>(null);
   const [positionFilter, setPositionFilter] = useState<string>("ALL");
+
+  // Reset local state when year/team changes (e.g. client-side navigation between years)
+  useEffect(() => {
+    setLocalSubmitted(false);
+    setSelections({});
+    setServerValidation(null);
+    setSaveStatus("idle");
+    setActionError("");
+  }, [year, teamId]);
 
   const isOwnTeam = user?.team_id === teamId;
   const canEdit = !!(isOwnTeam || user?.is_commissioner) && !isSubmitted;
@@ -197,7 +210,7 @@ export default function KeeperSelectionPage() {
       }));
       await updateKeeperSelections(teamId, year, sels);
       await submitKeeperList(teamId, year);
-      setIsSubmitted(true);
+      setLocalSubmitted(true);
     } catch (e) {
       setActionError(e instanceof Error ? e.message : "Submit failed");
     } finally {
