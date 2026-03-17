@@ -1,6 +1,7 @@
 """
-APScheduler-based daily reminder scheduler.
+APScheduler-based keeper reminder scheduler.
 Runs inside the FastAPI process during keeper selection period.
+Sends LINE group reminders every N days (default: 3) at configured hour.
 """
 from __future__ import annotations
 
@@ -9,8 +10,9 @@ from datetime import datetime
 
 KEEPER_REMINDER_START = os.getenv("KEEPER_REMINDER_START", "")
 KEEPER_REMINDER_END = os.getenv("KEEPER_REMINDER_END", "")
-REMINDER_CRON_HOUR = int(os.getenv("REMINDER_CRON_HOUR", "9"))
+REMINDER_CRON_HOUR = int(os.getenv("REMINDER_CRON_HOUR", "12"))
 REMINDER_CRON_TZ = os.getenv("REMINDER_CRON_TZ", "Asia/Taipei")
+REMINDER_INTERVAL_DAYS = int(os.getenv("REMINDER_INTERVAL_DAYS", "3"))
 
 _scheduler = None
 
@@ -27,11 +29,14 @@ def _daily_reminder_job():
         return
 
     year = datetime.now().year
-    print(f"[Scheduler] Running daily keeper reminder for year {year}...")
+    # Cooldown = interval_days * 24 - 1 hour margin to avoid timezone drift
+    cooldown = max(REMINDER_INTERVAL_DAYS * 24 - 1, 23)
+    print(f"[Scheduler] Running keeper reminder check for year {year} "
+          f"(interval: every {REMINDER_INTERVAL_DAYS} days, cooldown: {cooldown}h)...")
 
     try:
         from src.notification.reminder import send_reminders
-        result = send_reminders(year, sent_by="scheduler", cooldown_hours=24)
+        result = send_reminders(year, sent_by="scheduler", cooldown_hours=cooldown)
         pending_count = len(result["pending_managers"])
         if result["sent_to_group"]:
             print(f"[Scheduler] LINE group reminder sent. "
@@ -70,8 +75,9 @@ def start_scheduler():
         replace_existing=True,
     )
     _scheduler.start()
-    print(f"[Scheduler] Started. Daily reminder at {REMINDER_CRON_HOUR}:00 {REMINDER_CRON_TZ}")
-    print(f"[Scheduler] Period: {KEEPER_REMINDER_START} ~ {KEEPER_REMINDER_END or 'no end'}")
+    print(f"[Scheduler] Started. Reminder check daily at {REMINDER_CRON_HOUR}:00 {REMINDER_CRON_TZ}")
+    print(f"[Scheduler] Sends every {REMINDER_INTERVAL_DAYS} days "
+          f"(period: {KEEPER_REMINDER_START} ~ {KEEPER_REMINDER_END or 'no end'})")
 
 
 def stop_scheduler():
