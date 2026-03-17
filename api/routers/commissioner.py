@@ -1093,3 +1093,49 @@ async def reload_prospects(
         "source": data.get("source", ""),
         "updated_at": data.get("updated_at", ""),
     }
+
+
+@router.post("/rookie-monitor/{year}/check")
+async def check_rookie_callups_endpoint(
+    year: int,
+    user: dict = Depends(get_current_commissioner),
+):
+    """Manually trigger rookie call-up check. Commissioner only.
+
+    Scans all R-contract players for MLB debuts or roster additions,
+    sends LINE notification for newly detected call-ups.
+    """
+    from src.notification.rookie_monitor import send_callup_notifications
+
+    try:
+        result = send_callup_notifications(year)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Rookie monitor error: {e}")
+
+
+@router.get("/rookie-monitor/{year}/log")
+async def get_rookie_callup_log(
+    year: int,
+    user: dict = Depends(get_current_commissioner),
+):
+    """Get rookie call-up notification log for a season. Commissioner only."""
+    from api.database import get_db
+
+    conn = get_db()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                """SELECT player_name, player_key, mlb_team,
+                          owner_manager, owner_team_id,
+                          callup_date, detection_source, notified_at
+                   FROM rookie_callup_log
+                   WHERE year = %s
+                   ORDER BY notified_at DESC""",
+                (year,),
+            )
+            cols = [d[0] for d in cur.description]
+            rows = [dict(zip(cols, r)) for r in cur.fetchall()]
+        return {"year": year, "callups": rows, "count": len(rows)}
+    finally:
+        conn.close()

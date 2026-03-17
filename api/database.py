@@ -385,6 +385,25 @@ MIGRATIONS: dict[str, list[str]] = {
         END $$;
         """,
     ],
+    "010_rookie_callup_log": [
+        """
+        CREATE TABLE IF NOT EXISTS rookie_callup_log (
+            id SERIAL PRIMARY KEY,
+            player_name TEXT NOT NULL,
+            player_key TEXT,
+            mlb_team TEXT,
+            owner_manager TEXT,
+            owner_team_id INTEGER,
+            year INTEGER NOT NULL,
+            callup_date DATE,
+            detection_source TEXT DEFAULT 'mlb_api',
+            notified BOOLEAN DEFAULT FALSE,
+            notified_at TIMESTAMPTZ,
+            created_at TIMESTAMPTZ DEFAULT NOW()
+        )
+        """,
+        "CREATE INDEX IF NOT EXISTS idx_rookie_callup_player_year ON rookie_callup_log(player_name, year)",
+    ],
 }
 
 
@@ -1275,6 +1294,55 @@ def get_ranking_fetch_status(year: int) -> dict:
                 "stats_sort_type": sort_row["stats_sort_type"] if sort_row else "prev_season",
             }
         return {"has_data": False, "total_count": 0, "last_fetched_at": None, "stats_sort_type": None}
+    finally:
+        conn.close()
+
+
+# ── Rookie Call-up Log ──────────────────────────────────────────
+
+
+def get_notified_callups(year: int) -> set[str]:
+    """Return set of player_names already notified for this year."""
+    conn = get_db()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT player_name FROM rookie_callup_log WHERE year = %s AND notified = TRUE",
+                (year,),
+            )
+            return {row[0] for row in cur.fetchall()}
+    finally:
+        conn.close()
+
+
+def record_callup(
+    player_name: str,
+    year: int,
+    *,
+    player_key: str = "",
+    mlb_team: str = "",
+    owner_manager: str = "",
+    owner_team_id: int = 0,
+    callup_date: str | None = None,
+    detection_source: str = "mlb_api",
+) -> int:
+    """Insert a rookie call-up record and return its id."""
+    conn = get_db()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                """INSERT INTO rookie_callup_log
+                   (player_name, player_key, mlb_team, owner_manager,
+                    owner_team_id, year, callup_date, detection_source,
+                    notified, notified_at)
+                   VALUES (%s, %s, %s, %s, %s, %s, %s, %s, TRUE, NOW())
+                   RETURNING id""",
+                (player_name, player_key, mlb_team, owner_manager,
+                 owner_team_id, year, callup_date, detection_source),
+            )
+            row_id = cur.fetchone()[0]
+        conn.commit()
+        return row_id
     finally:
         conn.close()
 
