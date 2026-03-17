@@ -593,6 +593,130 @@ export async function disconnectYahooToken(): Promise<{ message: string }> {
   return request("/api/commissioner/yahoo-token", { method: "DELETE" });
 }
 
+// ========== Analytics ==========
+
+export async function getDraftStats(years?: number[]): Promise<DraftStatsResponse> {
+  const params = years?.length ? `?years=${years.join(",")}` : "";
+  return request(`/api/analytics/draft-stats${params}`);
+}
+
+export async function getFaabStats(years?: number[]): Promise<FaabStatsResponse> {
+  const params = years?.length ? `?years=${years.join(",")}` : "";
+  return request(`/api/analytics/faab-stats${params}`);
+}
+
+export async function getPositionPreference(
+  years?: number[],
+  minCost: number = 20,
+): Promise<PositionPreferenceResponse> {
+  const yearParam = years?.length ? `years=${years.join(",")}&` : "";
+  return request(`/api/analytics/position-preference?${yearParam}min_cost=${minCost}`);
+}
+
+export async function fetchDraftData(year: number): Promise<{
+  year: number;
+  league_key: string;
+  files_written: string[];
+  draft_picks?: number;
+  transactions?: number;
+  faab_budget?: number;
+}> {
+  return request(`/api/commissioner/fetch-draft-data/${year}`, { method: "POST" });
+}
+
+export async function getAvailableDraftYears(): Promise<{ years: number[] }> {
+  return request("/api/commissioner/draft-data/available-years");
+}
+
+export interface DraftPick {
+  player: string;
+  cost: number;
+  round: number;
+  pick: number;
+  position: string;
+}
+
+export interface DraftStatsResponse {
+  years: number[];
+  teams: Record<string, {
+    yearly: Record<string, {
+      top_picks: DraftPick[];
+      top10_total: number;
+      total_spent: number;
+      players_drafted: number;
+    }>;
+  }>;
+  yearly_summary: Record<string, {
+    team_count: number;
+    league_max: { cost: number; player: string; manager: string };
+  }>;
+}
+
+export interface FaabStatsResponse {
+  years: number[];
+  teams: Record<string, {
+    yearly: Record<string, {
+      total_faab_spent: number;
+      faab_budget: number;
+      remaining: number;
+      remaining_pct: number;
+      num_pickups: number;
+      avg_bid: number;
+      max_bid: number;
+      max_bid_player: string;
+    }>;
+  }>;
+  yearly_summary: Record<string, {
+    faab_budget: number;
+    total_league_faab_spent: number;
+    avg_team_faab_spent: number;
+    team_count: number;
+  }>;
+}
+
+export interface PositionPreferenceResponse {
+  years: number[];
+  min_cost: number;
+  teams: Record<string, {
+    yearly: Record<string, {
+      picks: Array<{ player: string; position: string; pos_category: string; cost: number }>;
+      position_breakdown: Record<string, number>;
+      total_picks: number;
+      total_spent: number;
+    }>;
+    career_position_breakdown: Record<string, number>;
+  }>;
+  league_position_breakdown: Record<string, number>;
+}
+
+export interface TradeDetail {
+  partner: string;
+  received: string[];
+  sent: string[];
+  timestamp: string;
+}
+
+export interface TradeStatsResponse {
+  years: number[];
+  teams: Record<string, {
+    yearly: Record<string, {
+      trade_count: number;
+      players_received: string[];
+      players_sent: string[];
+      trades: TradeDetail[];
+    }>;
+  }>;
+  yearly_summary: Record<string, {
+    total_trades: number;
+    team_count: number;
+  }>;
+}
+
+export async function getTradeStats(years?: number[]): Promise<TradeStatsResponse> {
+  const params = years?.length ? `?years=${years.join(",")}` : "";
+  return request(`/api/analytics/trade-stats${params}`);
+}
+
 // ========== Validation ==========
 
 export async function calculateBuyout(

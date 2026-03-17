@@ -1095,6 +1095,85 @@ async def reload_prospects(
     }
 
 
+@router.post("/fetch-draft-data/{year}")
+async def fetch_draft_data(
+    year: int,
+    user: dict = Depends(get_current_commissioner),
+):
+    """Fetch draft + transaction + league settings from Yahoo for a year.
+
+    Stores data as JSON files in data/ directory for analytics.
+    Commissioner only (requires Yahoo token).
+    """
+    import json as json_module
+    from pathlib import Path
+    from api.yahoo_service import (
+        discover_league_keys,
+        fetch_draft_results,
+        fetch_league_settings,
+        fetch_transactions_full,
+    )
+
+    data_dir = Path(__file__).resolve().parents[2] / "data"
+
+    # Discover league keys
+    try:
+        keys = discover_league_keys()
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"Yahoo API error: {e}")
+
+    if year not in keys:
+        raise HTTPException(
+            status_code=404,
+            detail=f"No league found for year {year}. Available: {sorted(keys.keys())}",
+        )
+
+    league_key = keys[year]
+    results = {"year": year, "league_key": league_key, "files_written": []}
+
+    # Fetch draft results
+    try:
+        draft = fetch_draft_results(league_key)
+        path = data_dir / f"yahoo_{year}_draft.json"
+        path.write_text(json_module.dumps(draft, indent=2, ensure_ascii=False), encoding="utf-8")
+        results["files_written"].append(str(path.name))
+        results["draft_picks"] = len(draft)
+    except Exception as e:
+        results["draft_error"] = str(e)
+
+    # Fetch league settings
+    try:
+        settings = fetch_league_settings(league_key)
+        path = data_dir / f"yahoo_{year}_league_settings.json"
+        path.write_text(json_module.dumps(settings, indent=2, ensure_ascii=False), encoding="utf-8")
+        results["files_written"].append(str(path.name))
+        results["faab_budget"] = settings.get("faab_budget", "unknown")
+    except Exception as e:
+        results["settings_error"] = str(e)
+
+    # Fetch transactions
+    try:
+        txs = fetch_transactions_full(league_key)
+        path = data_dir / f"yahoo_{year}_transactions.json"
+        path.write_text(json_module.dumps(txs, indent=2, ensure_ascii=False), encoding="utf-8")
+        results["files_written"].append(str(path.name))
+        results["transactions"] = len(txs.get("transactions", []))
+    except Exception as e:
+        results["transactions_error"] = str(e)
+
+    return results
+
+
+@router.get("/draft-data/available-years")
+async def get_available_draft_years(
+    user: dict = Depends(get_current_commissioner),
+):
+    """List years with available draft data files."""
+    from src.analytics.draft_stats import _available_years
+    years = _available_years()
+    return {"years": years}
+
+
 @router.post("/rookie-monitor/{year}/check")
 async def check_rookie_callups_endpoint(
     year: int,

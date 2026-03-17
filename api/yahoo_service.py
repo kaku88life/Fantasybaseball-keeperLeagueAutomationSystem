@@ -198,6 +198,259 @@ def yahoo_api_get(path: str) -> dict:
     return resp.json()
 
 
+def discover_league_keys() -> dict[int, str]:
+    """Discover all 5-Man Keep league keys across years using DB-backed token."""
+    import re
+
+    data = yahoo_api_get("/users;use_login=1/games;game_codes=mlb/leagues")
+    raw = json.dumps(data, ensure_ascii=False)
+
+    gk_to_season = {
+        "346": 2013, "357": 2014, "370": 2015, "378": 2016,
+        "388": 2017, "398": 2018, "404": 2019, "412": 2020,
+        "422": 2023, "431": 2024, "458": 2025, "469": 2026,
+    }
+
+    league_keys: dict[int, str] = {}
+    for gk, season in gk_to_season.items():
+        pattern = rf"{gk}\.l\.(\d+)"
+        for match in re.finditer(pattern, raw):
+            league_key = f"{gk}.l.{match.group(1)}"
+            idx = raw.find(league_key)
+            nearby = raw[idx : idx + 400]
+            if "5-Man" in nearby or "Keeper" in nearby:
+                league_keys[season] = league_key
+
+    return league_keys
+
+
+def fetch_draft_results(league_key: str) -> list[dict]:
+    """Fetch draft results with auction prices for a given league key."""
+    data = yahoo_api_get(f"/league/{league_key}/draftresults")
+    dr_data = data["fantasy_content"]["league"][1]["draft_results"]
+    count = dr_data.get("count", 0)
+
+    # Also fetch team info to map team_key -> manager
+    teams_data = yahoo_api_get(f"/league/{league_key}/teams")
+    teams_raw = teams_data["fantasy_content"]["league"][1]["teams"]
+    team_count = teams_raw.get("count", 0)
+    key_to_mgr = {}
+    for i in range(team_count):
+        team_raw = teams_raw[str(i)]["team"]
+        team_info = _parse_yahoo_team(team_raw)
+        key_to_mgr[team_info["team_key"]] = team_info["manager"]
+
+    results = []
+    for i in range(count):
+        pick = dr_data[str(i)]["draft_result"]
+        tk = pick.get("team_key", "")
+        pk = pick.get("player_key", "")
+
+        results.append({
+            "round": int(pick.get("round", 0)),
+            "pick": int(pick.get("pick", 0)),
+            "team_key": tk,
+            "player_key": pk,
+            "cost": int(pick.get("cost", 0)),
+            "player_name": "",  # will be resolved below
+            "manager": key_to_mgr.get(tk, ""),
+        })
+
+    # Batch-resolve player names and positions
+    player_keys = list({r["player_key"] for r in results if r["player_key"]})
+    player_info = _batch_resolve_players(league_key, player_keys)
+    for r in results:
+        info = player_info.get(r["player_key"], {})
+        r["player_name"] = info.get("name", r["player_key"])
+        r["player_position"] = info.get("position", "")
+
+    return results
+
+
+def fetch_league_settings(league_key: str) -> dict:
+    """Fetch league settings including FAAB budget."""
+    data = yahoo_api_get(f"/league/{league_key}/settings")
+    settings = data["fantasy_content"]["league"][1]["settings"][0]
+
+    faab_budget = 100  # default
+    # Look for waiver settings
+    if "waiver_rule" in settings:
+        # Some leagues store budget in different places
+        pass
+
+    # Check max_adds or budget
+    for key in ("budget", "salary_cap", "waiver_budget"):
+        if key in settings:
+            try:
+                faab_budget = int(settings[key])
+            except (ValueError, TypeError):
+                pass
+
+    return {
+        "faab_budget": faab_budget,
+        "settings_raw": settings,
+    }
+
+
+def fetch_transactions_full(league_key: str) -> dict:
+    """Fetch all transactions with full player details for a league."""
+    data = yahoo_api_get(f"/league/{league_key}/transactions")
+    tx_data = data["fantasy_content"]["league"][1]["transactions"]
+    count = tx_data.get("count", 0)
+
+    transactions = []
+    for i in range(count):
+        tx_raw = tx_data[str(i)]["transaction"]
+        meta = tx_raw[0] if isinstance(tx_raw, list) else tx_raw
+        players_section = tx_raw[1] if isinstance(tx_raw, list) and len(tx_raw) > 1 else {}
+
+        tx_entry = {
+            "transaction_id": meta.get("transaction_id", ""),
+            "type": meta.get("type", ""),
+            "status": meta.get("status", ""),
+            "timestamp": meta.get("timestamp", ""),
+            "faab_bid": None,
+            "players": [],
+        }
+
+        if "faab_bid" in meta:
+            tx_entry["faab_bid"] = int(meta["faab_bid"])
+
+        if "players" in players_section:
+            players_data = players_section["players"]
+            p_count = players_data.get("count", 0)
+            for j in range(p_count):
+                p_raw = players_data[str(j)]["player"]
+                player_info = _parse_tx_player(p_raw)
+                tx_entry["players"].append(player_info)
+
+        transactions.append(tx_entry)
+
+    return {"transactions": transactions}
+
+
+def _parse_yahoo_team(team_raw) -> dict:
+    """Parse team info from Yahoo's nested list/dict format."""
+    info = {"name": "", "team_key": "", "manager": ""}
+    items = team_raw if isinstance(team_raw, list) else [team_raw]
+    for item in items:
+        if isinstance(item, dict):
+            if "name" in item:
+                info["name"] = item["name"]
+            if "team_key" in item:
+                info["team_key"] = item["team_key"]
+            if "managers" in item:
+                mgrs = item["managers"]
+                if isinstance(mgrs, list) and mgrs:
+                    info["manager"] = mgrs[0]["manager"].get("nickname", "")
+        elif isinstance(item, list):
+            for sub in item:
+                if isinstance(sub, dict):
+                    if "name" in sub:
+                        info["name"] = sub["name"]
+                    if "team_key" in sub:
+                        info["team_key"] = sub["team_key"]
+                    if "managers" in sub:
+                        mgrs = sub["managers"]
+                        if isinstance(mgrs, list) and mgrs:
+                            info["manager"] = mgrs[0]["manager"].get("nickname", "")
+    return info
+
+
+def _batch_resolve_players(league_key: str, player_keys: list[str]) -> dict[str, dict]:
+    """Resolve player names and positions in batches of 25."""
+    result = {}
+    batch_size = 25
+
+    for i in range(0, len(player_keys), batch_size):
+        batch = player_keys[i:i + batch_size]
+        keys_str = ",".join(batch)
+        try:
+            data = yahoo_api_get(f"/league/{league_key}/players;player_keys={keys_str}")
+            players_data = data["fantasy_content"]["league"][1]["players"]
+            p_count = players_data.get("count", 0)
+            for j in range(p_count):
+                p_raw = players_data[str(j)]["player"]
+                info = _parse_player_basic(p_raw)
+                result[info["player_key"]] = info
+        except Exception as e:
+            print(f"[YahooService] Player batch resolve failed: {e}", flush=True)
+
+    return result
+
+
+def _parse_player_basic(player_raw) -> dict:
+    """Parse basic player info (name, position, key) from Yahoo format."""
+    info = {"player_key": "", "name": "", "position": ""}
+    items = player_raw[0] if isinstance(player_raw, list) else [player_raw]
+
+    for item in items:
+        if isinstance(item, dict):
+            if "player_key" in item:
+                info["player_key"] = item["player_key"]
+            if "name" in item:
+                name_data = item["name"]
+                info["name"] = name_data.get("full", "")
+            if "display_position" in item:
+                info["position"] = item["display_position"]
+            if "eligible_positions" in item:
+                positions = item["eligible_positions"]
+                if isinstance(positions, list):
+                    pos_list = []
+                    for p in positions:
+                        if isinstance(p, dict) and "position" in p:
+                            pos_list.append(p["position"])
+                    if pos_list:
+                        info["position"] = ",".join(pos_list)
+
+    return info
+
+
+def _parse_tx_player(player_raw) -> dict:
+    """Parse player info from transaction data."""
+    info_list = player_raw[0] if isinstance(player_raw, list) else [player_raw]
+    tx_data = player_raw[1] if isinstance(player_raw, list) and len(player_raw) > 1 else {}
+
+    player = {
+        "name": "",
+        "player_key": "",
+        "position": "",
+        "editorial_team": "",
+        "transaction_type": "",
+        "source_type": "",
+        "destination_type": "",
+        "source_team_key": "",
+        "destination_team_key": "",
+        "source_team_name": "",
+        "destination_team_name": "",
+    }
+
+    for item in info_list:
+        if isinstance(item, dict):
+            if "player_key" in item:
+                player["player_key"] = item["player_key"]
+            if "name" in item:
+                player["name"] = item["name"].get("full", "")
+            if "display_position" in item:
+                player["position"] = item["display_position"]
+            if "editorial_team_abbr" in item:
+                player["editorial_team"] = item["editorial_team_abbr"]
+
+    if isinstance(tx_data, dict) and "transaction_data" in tx_data:
+        td = tx_data["transaction_data"]
+        if isinstance(td, list):
+            td = td[0] if td else {}
+        player["transaction_type"] = td.get("type", "")
+        player["source_type"] = td.get("source_type", "")
+        player["destination_type"] = td.get("destination_type", "")
+        player["source_team_key"] = td.get("source_team_key", "")
+        player["destination_team_key"] = td.get("destination_team_key", "")
+        player["source_team_name"] = td.get("source_team_name", "")
+        player["destination_team_name"] = td.get("destination_team_name", "")
+
+    return player
+
+
 def get_token_status() -> dict:
     """
     Get current Yahoo token connection status for dashboard display.

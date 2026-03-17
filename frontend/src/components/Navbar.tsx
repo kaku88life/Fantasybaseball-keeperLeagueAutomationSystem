@@ -31,6 +31,12 @@ export default function Navbar() {
               >
                 球員 Players
               </Link>
+              <Link
+                href="/analytics"
+                className="text-sm text-gray-300 hover:text-white"
+              >
+                統計 Stats
+              </Link>
               {user && (
                 <>
                   <Link
@@ -133,6 +139,13 @@ export default function Navbar() {
               onClick={() => setMenuOpen(false)}
             >
               球員 Players
+            </Link>
+            <Link
+              href="/analytics"
+              className="block rounded px-3 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-white"
+              onClick={() => setMenuOpen(false)}
+            >
+              統計 Stats
             </Link>
             {user && (
               <>
