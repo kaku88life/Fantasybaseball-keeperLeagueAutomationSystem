@@ -2,14 +2,24 @@
 APScheduler-based keeper reminder scheduler.
 Runs inside the FastAPI process during keeper selection period.
 Sends LINE group reminders every N days (default: 3) at configured hour.
+
+Yearly auto-mode: set REMINDER_MONTH / REMINDER_START_DAY / REMINDER_END_DAY
+to define a fixed annual window (e.g. March 1-15 every year).
 """
 from __future__ import annotations
 
 import os
 from datetime import datetime
 
+# --- New: fixed annual window (preferred) ---
+REMINDER_MONTH = int(os.getenv("REMINDER_MONTH", "3"))          # default March
+REMINDER_START_DAY = int(os.getenv("REMINDER_START_DAY", "1"))   # default 1st
+REMINDER_END_DAY = int(os.getenv("REMINDER_END_DAY", "15"))      # default 15th
+
+# --- Legacy: explicit date range (overrides annual window if set) ---
 KEEPER_REMINDER_START = os.getenv("KEEPER_REMINDER_START", "")
 KEEPER_REMINDER_END = os.getenv("KEEPER_REMINDER_END", "")
+
 REMINDER_CRON_HOUR = int(os.getenv("REMINDER_CRON_HOUR", "12"))
 REMINDER_CRON_TZ = os.getenv("REMINDER_CRON_TZ", "Asia/Taipei")
 REMINDER_INTERVAL_DAYS = int(os.getenv("REMINDER_INTERVAL_DAYS", "3"))
@@ -17,18 +27,44 @@ REMINDER_INTERVAL_DAYS = int(os.getenv("REMINDER_INTERVAL_DAYS", "3"))
 _scheduler = None
 
 
+def _is_in_reminder_period(today: datetime) -> tuple[bool, str]:
+    """Check if today falls within the reminder period.
+
+    Returns (is_active, reason_if_inactive).
+
+    Priority: if KEEPER_REMINDER_START is set, use explicit date range (legacy).
+    Otherwise, use the fixed annual window (REMINDER_MONTH / START_DAY / END_DAY).
+    """
+    today_str = today.strftime("%Y-%m-%d")
+
+    # Legacy mode: explicit date strings
+    if KEEPER_REMINDER_START:
+        if today_str < KEEPER_REMINDER_START:
+            return False, f"Not yet in reminder period (start: {KEEPER_REMINDER_START})"
+        if KEEPER_REMINDER_END and today_str > KEEPER_REMINDER_END:
+            return False, f"Past reminder period (end: {KEEPER_REMINDER_END})"
+        return True, ""
+
+    # Annual window mode: fixed month/day range every year
+    if today.month != REMINDER_MONTH:
+        return False, f"Not in reminder month (current: {today.month}, target: {REMINDER_MONTH})"
+    if today.day < REMINDER_START_DAY:
+        return False, f"Before reminder start day (current: {today.day}, start: {REMINDER_START_DAY})"
+    if today.day > REMINDER_END_DAY:
+        return False, f"Past reminder end day (current: {today.day}, end: {REMINDER_END_DAY})"
+    return True, ""
+
+
 def _daily_reminder_job():
-    """Daily job: send reminders if within the configured date range."""
-    today = datetime.now().strftime("%Y-%m-%d")
+    """Daily job: send reminders if within the configured period."""
+    now = datetime.now()
+    active, reason = _is_in_reminder_period(now)
 
-    if KEEPER_REMINDER_START and today < KEEPER_REMINDER_START:
-        print(f"[Scheduler] Not yet in reminder period (start: {KEEPER_REMINDER_START})")
-        return
-    if KEEPER_REMINDER_END and today > KEEPER_REMINDER_END:
-        print(f"[Scheduler] Past reminder period (end: {KEEPER_REMINDER_END})")
+    if not active:
+        print(f"[Scheduler] {reason}")
         return
 
-    year = datetime.now().year
+    year = now.year
     # Cooldown = interval_days * 24 - 1 hour margin to avoid timezone drift
     cooldown = max(REMINDER_INTERVAL_DAYS * 24 - 1, 23)
     print(f"[Scheduler] Running keeper reminder check for year {year} "
@@ -53,12 +89,21 @@ def _daily_reminder_job():
 
 
 def start_scheduler():
-    """Start the background scheduler. No-op if KEEPER_REMINDER_START is not set."""
+    """Start the background scheduler.
+
+    Enabled when either:
+    - KEEPER_REMINDER_START is set (legacy explicit range), or
+    - REMINDER_MONTH/START_DAY/END_DAY are set (annual window, enabled by default)
+    """
     global _scheduler
 
-    if not KEEPER_REMINDER_START:
-        print("[Scheduler] KEEPER_REMINDER_START not set, scheduler disabled.")
-        return
+    # Determine mode
+    if KEEPER_REMINDER_START:
+        mode = "legacy"
+        period_desc = f"{KEEPER_REMINDER_START} ~ {KEEPER_REMINDER_END or 'no end'}"
+    else:
+        mode = "annual"
+        period_desc = f"every year {REMINDER_MONTH}/{REMINDER_START_DAY} ~ {REMINDER_MONTH}/{REMINDER_END_DAY}"
 
     try:
         from apscheduler.schedulers.background import BackgroundScheduler
@@ -75,9 +120,10 @@ def start_scheduler():
         replace_existing=True,
     )
     _scheduler.start()
-    print(f"[Scheduler] Started. Reminder check daily at {REMINDER_CRON_HOUR}:00 {REMINDER_CRON_TZ}")
+    print(f"[Scheduler] Started ({mode} mode). "
+          f"Check daily at {REMINDER_CRON_HOUR}:00 {REMINDER_CRON_TZ}")
     print(f"[Scheduler] Sends every {REMINDER_INTERVAL_DAYS} days "
-          f"(period: {KEEPER_REMINDER_START} ~ {KEEPER_REMINDER_END or 'no end'})")
+          f"(period: {period_desc})")
 
 
 def stop_scheduler():
