@@ -66,8 +66,9 @@ export default function HomePage() {
           5-Man <span className="text-indigo-600">Keepers</span>
         </h1>
         <p className="mx-auto mb-6 max-w-xl text-base text-gray-500 sm:text-lg">
-          16 支隊伍的 Keepers 合約制 Fantasy Baseball聯盟<br>結合薪資帽、競標選秀、FAAB
-          與獨特的合約系統<br>打造最接近真實 GM 體驗的FantasyBaseball聯盟。
+          16 支隊伍的 Keepers 合約制 Fantasy Baseball 聯盟<br />
+          結合薪資帽、競標選秀、FAAB 與獨特的合約系統<br />
+          打造最接近真實 GM 體驗的 Fantasy Baseball 聯盟。
         </p>
         <a
           href={`${apiBase}/api/auth/yahoo/login`}
