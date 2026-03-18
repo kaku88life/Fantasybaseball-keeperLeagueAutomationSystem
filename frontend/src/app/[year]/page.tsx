@@ -460,14 +460,30 @@ function KeepersTab({
                       <span className="text-blue-600"> +{farmCount}R</span>
                     )}
                   </span>
-                  <span
-                    className={`text-xs font-bold ${
-                      team.available_salary < 20
-                        ? "text-red-600"
-                        : "text-green-700"
-                    }`}
-                  >
-                    ${team.available_salary}
+                  <span className="text-xs font-bold">
+                    <span
+                      className={
+                        team.available_salary < 20
+                          ? "text-red-600"
+                          : "text-green-700"
+                      }
+                    >
+                      ${team.available_salary}
+                    </span>
+                    {team.buyout_faab_cost > 0 && (
+                      <span className="text-gray-400">
+                        {" / "}
+                        <span
+                          className={
+                            team.available_faab < 50
+                              ? "text-orange-600"
+                              : "text-green-700"
+                          }
+                        >
+                          F${team.available_faab}
+                        </span>
+                      </span>
+                    )}
                   </span>
                   <span className="rounded bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
                     已繳交
@@ -480,6 +496,7 @@ function KeepersTab({
                 <div className="border-t px-4 pb-4 pt-3">
                   {/* Financial summary */}
                   <div className="mb-3 grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+                    {/* -- Salary Cap section -- */}
                     <div className="flex justify-between">
                       <span className="text-gray-500">留用薪資:</span>
                       <span className="font-medium">${team.keeper_cost}</span>
@@ -490,7 +507,9 @@ function KeepersTab({
                     </div>
                     {team.buyout_cost > 0 && (
                       <div className="flex justify-between">
-                        <span className="text-gray-500">買斷成本:</span>
+                        <span className="text-gray-500">
+                          買斷{team.buyout_faab_cost > 0 ? " (薪資帽)" : ""}:
+                        </span>
                         <span className="text-red-600">
                           -${team.buyout_cost}
                         </span>
@@ -524,6 +543,37 @@ function KeepersTab({
                         ${team.available_salary}
                       </span>
                     </div>
+
+                    {/* -- FAAB section (only when buyout has FAAB cost) -- */}
+                    {team.buyout_faab_cost > 0 && (
+                      <>
+                        <div className="col-span-2 mt-1.5 mb-0.5">
+                          <span className="font-medium text-gray-600">FAAB</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-500">FAAB 預算:</span>
+                          <span>${team.faab_budget}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-500">買斷 (FAAB):</span>
+                          <span className="text-red-600">
+                            -${team.buyout_faab_cost}
+                          </span>
+                        </div>
+                        <div className="col-span-2 flex justify-between border-t pt-1">
+                          <span className="text-gray-500">可用 FAAB:</span>
+                          <span
+                            className={`font-bold ${
+                              team.available_faab < 50
+                                ? "text-orange-600"
+                                : "text-green-700"
+                            }`}
+                          >
+                            ${team.available_faab}
+                          </span>
+                        </div>
+                      </>
+                    )}
                   </div>
 
                   {/* Team concentration (mobile view) */}
