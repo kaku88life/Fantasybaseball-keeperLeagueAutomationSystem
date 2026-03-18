@@ -276,7 +276,7 @@ function YearSelector({
   return (
     <div className="mb-2 flex items-center gap-1.5">
       <span className="text-[10px] font-medium text-gray-400 sm:text-xs">年度</span>
-      <div className="flex gap-0.5">
+      <div className="flex flex-wrap gap-0.5">
         {years.map((y) => (
           <button
             key={y}

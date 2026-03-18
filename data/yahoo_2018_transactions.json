@@ -1,0 +1,2867 @@
+{
+  "transactions": [
+    {
+      "transaction_id": "143",
+      "type": "commish",
+      "status": "successful",
+      "timestamp": "1595435571",
+      "faab_bid": null,
+      "players": []
+    },
+    {
+      "transaction_id": "142",
+      "type": "commish",
+      "status": "successful",
+      "timestamp": "1595435571",
+      "faab_bid": null,
+      "players": []
+    },
+    {
+      "transaction_id": "141",
+      "type": "commish",
+      "status": "successful",
+      "timestamp": "1595435571",
+      "faab_bid": null,
+      "players": []
+    },
+    {
+      "transaction_id": "140",
+      "type": "commish",
+      "status": "successful",
+      "timestamp": "1595435571",
+      "faab_bid": null,
+      "players": []
+    },
+    {
+      "transaction_id": "139",
+      "type": "commish",
+      "status": "successful",
+      "timestamp": "1595435571",
+      "faab_bid": null,
+      "players": []
+    },
+    {
+      "transaction_id": "138",
+      "type": "commish",
+      "status": "successful",
+      "timestamp": "1595435571",
+      "faab_bid": null,
+      "players": []
+    },
+    {
+      "transaction_id": "137",
+      "type": "commish",
+      "status": "successful",
+      "timestamp": "1595435571",
+      "faab_bid": null,
+      "players": []
+    },
+    {
+      "transaction_id": "136",
+      "type": "commish",
+      "status": "successful",
+      "timestamp": "1595435571",
+      "faab_bid": null,
+      "players": []
+    },
+    {
+      "transaction_id": "135",
+      "type": "commish",
+      "status": "successful",
+      "timestamp": "1595435571",
+      "faab_bid": null,
+      "players": []
+    },
+    {
+      "transaction_id": "134",
+      "type": "commish",
+      "status": "successful",
+      "timestamp": "1595435571",
+      "faab_bid": null,
+      "players": []
+    },
+    {
+      "transaction_id": "133",
+      "type": "commish",
+      "status": "successful",
+      "timestamp": "1595435571",
+      "faab_bid": null,
+      "players": []
+    },
+    {
+      "transaction_id": "132",
+      "type": "commish",
+      "status": "successful",
+      "timestamp": "1595435571",
+      "faab_bid": null,
+      "players": []
+    },
+    {
+      "transaction_id": "131",
+      "type": "commish",
+      "status": "successful",
+      "timestamp": "1595435571",
+      "faab_bid": null,
+      "players": []
+    },
+    {
+      "transaction_id": "130",
+      "type": "commish",
+      "status": "successful",
+      "timestamp": "1595435571",
+      "faab_bid": null,
+      "players": []
+    },
+    {
+      "transaction_id": "129",
+      "type": "commish",
+      "status": "successful",
+      "timestamp": "1595435571",
+      "faab_bid": null,
+      "players": []
+    },
+    {
+      "transaction_id": "128",
+      "type": "commish",
+      "status": "successful",
+      "timestamp": "1595435571",
+      "faab_bid": null,
+      "players": []
+    },
+    {
+      "transaction_id": "127",
+      "type": "commish",
+      "status": "successful",
+      "timestamp": "1595435571",
+      "faab_bid": null,
+      "players": []
+    },
+    {
+      "transaction_id": "126",
+      "type": "commish",
+      "status": "successful",
+      "timestamp": "1595435571",
+      "faab_bid": null,
+      "players": []
+    },
+    {
+      "transaction_id": "125",
+      "type": "commish",
+      "status": "successful",
+      "timestamp": "1595435571",
+      "faab_bid": null,
+      "players": []
+    },
+    {
+      "transaction_id": "124",
+      "type": "commish",
+      "status": "successful",
+      "timestamp": "1595435571",
+      "faab_bid": null,
+      "players": []
+    },
+    {
+      "transaction_id": "123",
+      "type": "commish",
+      "status": "successful",
+      "timestamp": "1595435571",
+      "faab_bid": null,
+      "players": []
+    },
+    {
+      "transaction_id": "122",
+      "type": "commish",
+      "status": "successful",
+      "timestamp": "1595435571",
+      "faab_bid": null,
+      "players": []
+    },
+    {
+      "transaction_id": "121",
+      "type": "commish",
+      "status": "successful",
+      "timestamp": "1595435571",
+      "faab_bid": null,
+      "players": []
+    },
+    {
+      "transaction_id": "120",
+      "type": "commish",
+      "status": "successful",
+      "timestamp": "1595435571",
+      "faab_bid": null,
+      "players": []
+    },
+    {
+      "transaction_id": "119",
+      "type": "commish",
+      "status": "successful",
+      "timestamp": "1595435571",
+      "faab_bid": null,
+      "players": []
+    },
+    {
+      "transaction_id": "118",
+      "type": "commish",
+      "status": "successful",
+      "timestamp": "1595435571",
+      "faab_bid": null,
+      "players": []
+    },
+    {
+      "transaction_id": "117",
+      "type": "commish",
+      "status": "successful",
+      "timestamp": "1595435571",
+      "faab_bid": null,
+      "players": []
+    },
+    {
+      "transaction_id": "116",
+      "type": "commish",
+      "status": "successful",
+      "timestamp": "1595434851",
+      "faab_bid": null,
+      "players": []
+    },
+    {
+      "transaction_id": "115",
+      "type": "commish",
+      "status": "successful",
+      "timestamp": "1595434851",
+      "faab_bid": null,
+      "players": []
+    },
+    {
+      "transaction_id": "114",
+      "type": "commish",
+      "status": "successful",
+      "timestamp": "1595434851",
+      "faab_bid": null,
+      "players": []
+    },
+    {
+      "transaction_id": "113",
+      "type": "commish",
+      "status": "successful",
+      "timestamp": "1595434851",
+      "faab_bid": null,
+      "players": []
+    },
+    {
+      "transaction_id": "112",
+      "type": "commish",
+      "status": "successful",
+      "timestamp": "1595434851",
+      "faab_bid": null,
+      "players": []
+    },
+    {
+      "transaction_id": "111",
+      "type": "commish",
+      "status": "successful",
+      "timestamp": "1595434851",
+      "faab_bid": null,
+      "players": []
+    },
+    {
+      "transaction_id": "110",
+      "type": "commish",
+      "status": "successful",
+      "timestamp": "1595434851",
+      "faab_bid": null,
+      "players": []
+    },
+    {
+      "transaction_id": "109",
+      "type": "commish",
+      "status": "successful",
+      "timestamp": "1595434851",
+      "faab_bid": null,
+      "players": []
+    },
+    {
+      "transaction_id": "108",
+      "type": "commish",
+      "status": "successful",
+      "timestamp": "1595434851",
+      "faab_bid": null,
+      "players": []
+    },
+    {
+      "transaction_id": "107",
+      "type": "commish",
+      "status": "successful",
+      "timestamp": "1595434851",
+      "faab_bid": null,
+      "players": []
+    },
+    {
+      "transaction_id": "106",
+      "type": "commish",
+      "status": "successful",
+      "timestamp": "1595434851",
+      "faab_bid": null,
+      "players": []
+    },
+    {
+      "transaction_id": "105",
+      "type": "commish",
+      "status": "successful",
+      "timestamp": "1595434851",
+      "faab_bid": null,
+      "players": []
+    },
+    {
+      "transaction_id": "104",
+      "type": "commish",
+      "status": "successful",
+      "timestamp": "1595434851",
+      "faab_bid": null,
+      "players": []
+    },
+    {
+      "transaction_id": "103",
+      "type": "commish",
+      "status": "successful",
+      "timestamp": "1595434851",
+      "faab_bid": null,
+      "players": []
+    },
+    {
+      "transaction_id": "102",
+      "type": "commish",
+      "status": "successful",
+      "timestamp": "1595434851",
+      "faab_bid": null,
+      "players": []
+    },
+    {
+      "transaction_id": "101",
+      "type": "commish",
+      "status": "successful",
+      "timestamp": "1595434851",
+      "faab_bid": null,
+      "players": []
+    },
+    {
+      "transaction_id": "100",
+      "type": "commish",
+      "status": "successful",
+      "timestamp": "1595434851",
+      "faab_bid": null,
+      "players": []
+    },
+    {
+      "transaction_id": "99",
+      "type": "commish",
+      "status": "successful",
+      "timestamp": "1595434851",
+      "faab_bid": null,
+      "players": []
+    },
+    {
+      "transaction_id": "98",
+      "type": "commish",
+      "status": "successful",
+      "timestamp": "1595434851",
+      "faab_bid": null,
+      "players": []
+    },
+    {
+      "transaction_id": "97",
+      "type": "commish",
+      "status": "successful",
+      "timestamp": "1595434851",
+      "faab_bid": null,
+      "players": []
+    },
+    {
+      "transaction_id": "96",
+      "type": "commish",
+      "status": "successful",
+      "timestamp": "1595434851",
+      "faab_bid": null,
+      "players": []
+    },
+    {
+      "transaction_id": "95",
+      "type": "add",
+      "status": "successful",
+      "timestamp": "1595401944",
+      "faab_bid": 1,
+      "players": [
+        {
+          "name": "Jake Fraley",
+          "player_key": "398.p.11568",
+          "position": "CF,RF",
+          "editorial_team": "TB",
+          "transaction_type": "add",
+          "source_type": "waivers",
+          "destination_type": "team",
+          "source_team_key": "",
+          "destination_team_key": "398.l.27913.t.13",
+          "source_team_name": "",
+          "destination_team_name": "Oakland Athletics"
+        }
+      ]
+    },
+    {
+      "transaction_id": "94",
+      "type": "add/drop",
+      "status": "successful",
+      "timestamp": "1595315540",
+      "faab_bid": 2,
+      "players": [
+        {
+          "name": "Ryan Mountcastle",
+          "player_key": "398.p.10429",
+          "position": "1B,SS,LF",
+          "editorial_team": "BAL",
+          "transaction_type": "add",
+          "source_type": "waivers",
+          "destination_type": "team",
+          "source_team_key": "",
+          "destination_team_key": "398.l.27913.t.2",
+          "source_team_name": "",
+          "destination_team_name": "SD Padres"
+        },
+        {
+          "name": "Chris Archer",
+          "player_key": "398.p.8849",
+          "position": "SP",
+          "editorial_team": "MIN",
+          "transaction_type": "drop",
+          "source_type": "team",
+          "destination_type": "waivers",
+          "source_team_key": "398.l.27913.t.2",
+          "destination_team_key": "",
+          "source_team_name": "SD Padres",
+          "destination_team_name": ""
+        }
+      ]
+    },
+    {
+      "transaction_id": "93",
+      "type": "add",
+      "status": "successful",
+      "timestamp": "1595056331",
+      "faab_bid": 1,
+      "players": [
+        {
+          "name": "Andrew Miller",
+          "player_key": "398.p.7847",
+          "position": "RP",
+          "editorial_team": "STL",
+          "transaction_type": "add",
+          "source_type": "waivers",
+          "destination_type": "team",
+          "source_team_key": "",
+          "destination_team_key": "398.l.27913.t.7",
+          "source_team_name": "",
+          "destination_team_name": "Houston Astros"
+        }
+      ]
+    },
+    {
+      "transaction_id": "92",
+      "type": "add",
+      "status": "successful",
+      "timestamp": "1594969968",
+      "faab_bid": 1,
+      "players": [
+        {
+          "name": "Jesse Winker",
+          "player_key": "398.p.9561",
+          "position": "LF,CF,RF",
+          "editorial_team": "NYM",
+          "transaction_type": "add",
+          "source_type": "waivers",
+          "destination_type": "team",
+          "source_team_key": "",
+          "destination_team_key": "398.l.27913.t.4",
+          "source_team_name": "",
+          "destination_team_name": "Philly Phillies 2020"
+        }
+      ]
+    },
+    {
+      "transaction_id": "90",
+      "type": "add/drop",
+      "status": "successful",
+      "timestamp": "1594883570",
+      "faab_bid": 1,
+      "players": [
+        {
+          "name": "Ryan Helsley",
+          "player_key": "398.p.10946",
+          "position": "RP",
+          "editorial_team": "BAL",
+          "transaction_type": "add",
+          "source_type": "waivers",
+          "destination_type": "team",
+          "source_team_key": "",
+          "destination_team_key": "398.l.27913.t.14",
+          "source_team_name": "",
+          "destination_team_name": "St. Louis Cardinals"
+        },
+        {
+          "name": "Rafael Montero",
+          "player_key": "398.p.9598",
+          "position": "RP",
+          "editorial_team": "NYY",
+          "transaction_type": "drop",
+          "source_type": "team",
+          "destination_type": "waivers",
+          "source_team_key": "398.l.27913.t.14",
+          "destination_team_key": "",
+          "source_team_name": "St. Louis Cardinals",
+          "destination_team_name": ""
+        }
+      ]
+    },
+    {
+      "transaction_id": "89",
+      "type": "add",
+      "status": "successful",
+      "timestamp": "1594738375",
+      "faab_bid": 1,
+      "players": [
+        {
+          "name": "Yusei Kikuchi",
+          "player_key": "398.p.11263",
+          "position": "SP",
+          "editorial_team": "LAA",
+          "transaction_type": "add",
+          "source_type": "waivers",
+          "destination_type": "team",
+          "source_team_key": "",
+          "destination_team_key": "398.l.27913.t.8",
+          "source_team_name": "",
+          "destination_team_name": "New York Yankee"
+        }
+      ]
+    },
+    {
+      "transaction_id": "88",
+      "type": "add",
+      "status": "successful",
+      "timestamp": "1594738375",
+      "faab_bid": 1,
+      "players": [
+        {
+          "name": "Adam Wainwright",
+          "player_key": "398.p.7048",
+          "position": "SP",
+          "editorial_team": "STL",
+          "transaction_type": "add",
+          "source_type": "waivers",
+          "destination_type": "team",
+          "source_team_key": "",
+          "destination_team_key": "398.l.27913.t.8",
+          "source_team_name": "",
+          "destination_team_name": "New York Yankee"
+        }
+      ]
+    },
+    {
+      "transaction_id": "87",
+      "type": "add/drop",
+      "status": "successful",
+      "timestamp": "1586675536",
+      "faab_bid": 1,
+      "players": [
+        {
+          "name": "Anthony Santander",
+          "player_key": "398.p.10666",
+          "position": "LF,CF,RF",
+          "editorial_team": "TOR",
+          "transaction_type": "add",
+          "source_type": "waivers",
+          "destination_type": "team",
+          "source_team_key": "",
+          "destination_team_key": "398.l.27913.t.2",
+          "source_team_name": "",
+          "destination_team_name": "SD Padres"
+        },
+        {
+          "name": "José Martínez",
+          "player_key": "398.p.10399",
+          "position": "RF",
+          "editorial_team": "NYM",
+          "transaction_type": "drop",
+          "source_type": "team",
+          "destination_type": "waivers",
+          "source_team_key": "398.l.27913.t.2",
+          "destination_team_key": "",
+          "source_team_name": "SD Padres",
+          "destination_team_name": ""
+        }
+      ]
+    },
+    {
+      "transaction_id": "86",
+      "type": "add/drop",
+      "status": "successful",
+      "timestamp": "1586675536",
+      "faab_bid": 1,
+      "players": [
+        {
+          "name": "Corey Knebel",
+          "player_key": "398.p.9712",
+          "position": "RP",
+          "editorial_team": "PHI",
+          "transaction_type": "add",
+          "source_type": "waivers",
+          "destination_type": "team",
+          "source_team_key": "",
+          "destination_team_key": "398.l.27913.t.2",
+          "source_team_name": "",
+          "destination_team_name": "SD Padres"
+        },
+        {
+          "name": "James Karinchak",
+          "player_key": "398.p.11632",
+          "position": "RP",
+          "editorial_team": "ATL",
+          "transaction_type": "drop",
+          "source_type": "team",
+          "destination_type": "waivers",
+          "source_team_key": "398.l.27913.t.2",
+          "destination_team_key": "",
+          "source_team_name": "SD Padres",
+          "destination_team_name": ""
+        }
+      ]
+    },
+    {
+      "transaction_id": "85",
+      "type": "add",
+      "status": "successful",
+      "timestamp": "1585897931",
+      "faab_bid": 1,
+      "players": [
+        {
+          "name": "Rafael Montero",
+          "player_key": "398.p.9598",
+          "position": "RP",
+          "editorial_team": "NYY",
+          "transaction_type": "add",
+          "source_type": "waivers",
+          "destination_type": "team",
+          "source_team_key": "",
+          "destination_team_key": "398.l.27913.t.14",
+          "source_team_name": "",
+          "destination_team_name": "St. Louis Cardinals"
+        }
+      ]
+    },
+    {
+      "transaction_id": "84",
+      "type": "add/drop",
+      "status": "successful",
+      "timestamp": "1585553047",
+      "faab_bid": 1,
+      "players": [
+        {
+          "name": "Michael Fulmer",
+          "player_key": "398.p.10179",
+          "position": "SP",
+          "editorial_team": "SF",
+          "transaction_type": "add",
+          "source_type": "waivers",
+          "destination_type": "team",
+          "source_team_key": "",
+          "destination_team_key": "398.l.27913.t.14",
+          "source_team_name": "",
+          "destination_team_name": "St. Louis Cardinals"
+        },
+        {
+          "name": "Andrew Miller",
+          "player_key": "398.p.7847",
+          "position": "RP",
+          "editorial_team": "STL",
+          "transaction_type": "drop",
+          "source_type": "team",
+          "destination_type": "waivers",
+          "source_team_key": "398.l.27913.t.14",
+          "destination_team_key": "",
+          "source_team_name": "St. Louis Cardinals",
+          "destination_team_name": ""
+        }
+      ]
+    },
+    {
+      "transaction_id": "83",
+      "type": "add",
+      "status": "successful",
+      "timestamp": "1585074875",
+      "faab_bid": 1,
+      "players": [
+        {
+          "name": "Ryne Stanek",
+          "player_key": "398.p.10606",
+          "position": "SP,RP",
+          "editorial_team": "STL",
+          "transaction_type": "add",
+          "source_type": "waivers",
+          "destination_type": "team",
+          "source_team_key": "",
+          "destination_team_key": "398.l.27913.t.10",
+          "source_team_name": "",
+          "destination_team_name": "Minnesota D2D"
+        }
+      ]
+    },
+    {
+      "transaction_id": "82",
+      "type": "add",
+      "status": "successful",
+      "timestamp": "1585074875",
+      "faab_bid": 1,
+      "players": [
+        {
+          "name": "Alex Wood",
+          "player_key": "398.p.9415",
+          "position": "SP,RP",
+          "editorial_team": "ATH",
+          "transaction_type": "add",
+          "source_type": "waivers",
+          "destination_type": "team",
+          "source_team_key": "",
+          "destination_team_key": "398.l.27913.t.10",
+          "source_team_name": "",
+          "destination_team_name": "Minnesota D2D"
+        }
+      ]
+    },
+    {
+      "transaction_id": "81",
+      "type": "add/drop",
+      "status": "successful",
+      "timestamp": "1584947532",
+      "faab_bid": 1,
+      "players": [
+        {
+          "name": "James Karinchak",
+          "player_key": "398.p.11632",
+          "position": "RP",
+          "editorial_team": "ATL",
+          "transaction_type": "add",
+          "source_type": "waivers",
+          "destination_type": "team",
+          "source_team_key": "",
+          "destination_team_key": "398.l.27913.t.2",
+          "source_team_name": "",
+          "destination_team_name": "SD Padres"
+        },
+        {
+          "name": "Brusdar Graterol",
+          "player_key": "398.p.11112",
+          "position": "RP",
+          "editorial_team": "LAD",
+          "transaction_type": "drop",
+          "source_type": "team",
+          "destination_type": "waivers",
+          "source_team_key": "398.l.27913.t.2",
+          "destination_team_key": "",
+          "source_team_name": "SD Padres",
+          "destination_team_name": ""
+        }
+      ]
+    },
+    {
+      "transaction_id": "80",
+      "type": "add/drop",
+      "status": "successful",
+      "timestamp": "1584947532",
+      "faab_bid": 1,
+      "players": [
+        {
+          "name": "Tzu-Wei Lin",
+          "player_key": "398.p.10744",
+          "position": "SS,OF",
+          "editorial_team": "MIN",
+          "transaction_type": "add",
+          "source_type": "waivers",
+          "destination_type": "team",
+          "source_team_key": "",
+          "destination_team_key": "398.l.27913.t.16",
+          "source_team_name": "",
+          "destination_team_name": "Texas Rangers"
+        },
+        {
+          "name": "Yoan López",
+          "player_key": "398.p.10110",
+          "position": "RP",
+          "editorial_team": "MIA",
+          "transaction_type": "drop",
+          "source_type": "team",
+          "destination_type": "waivers",
+          "source_team_key": "398.l.27913.t.16",
+          "destination_team_key": "",
+          "source_team_name": "Texas Rangers",
+          "destination_team_name": ""
+        }
+      ]
+    },
+    {
+      "transaction_id": "79",
+      "type": "add/drop",
+      "status": "successful",
+      "timestamp": "1584861132",
+      "faab_bid": 1,
+      "players": [
+        {
+          "name": "Josh Rojas",
+          "player_key": "398.p.11623",
+          "position": "2B,LF,RF",
+          "editorial_team": "KC",
+          "transaction_type": "add",
+          "source_type": "waivers",
+          "destination_type": "team",
+          "source_team_key": "",
+          "destination_team_key": "398.l.27913.t.9",
+          "source_team_name": "",
+          "destination_team_name": "Milwaukee Brewers"
+        },
+        {
+          "name": "Corey Knebel",
+          "player_key": "398.p.9712",
+          "position": "RP",
+          "editorial_team": "PHI",
+          "transaction_type": "drop",
+          "source_type": "team",
+          "destination_type": "waivers",
+          "source_team_key": "398.l.27913.t.9",
+          "destination_team_key": "",
+          "source_team_name": "Milwaukee Brewers",
+          "destination_team_name": ""
+        }
+      ]
+    },
+    {
+      "transaction_id": "78",
+      "type": "add/drop",
+      "status": "successful",
+      "timestamp": "1584774734",
+      "faab_bid": 1,
+      "players": [
+        {
+          "name": "Ty Buttrey",
+          "player_key": "398.p.10163",
+          "position": "RP",
+          "editorial_team": "SEA",
+          "transaction_type": "add",
+          "source_type": "waivers",
+          "destination_type": "team",
+          "source_team_key": "",
+          "destination_team_key": "398.l.27913.t.2",
+          "source_team_name": "",
+          "destination_team_name": "SD Padres"
+        },
+        {
+          "name": "Andrés Muñoz",
+          "player_key": "398.p.11526",
+          "position": "RP",
+          "editorial_team": "SEA",
+          "transaction_type": "drop",
+          "source_type": "team",
+          "destination_type": "waivers",
+          "source_team_key": "398.l.27913.t.2",
+          "destination_team_key": "",
+          "source_team_name": "SD Padres",
+          "destination_team_name": ""
+        }
+      ]
+    },
+    {
+      "transaction_id": "77",
+      "type": "add/drop",
+      "status": "successful",
+      "timestamp": "1584688330",
+      "faab_bid": 1,
+      "players": [
+        {
+          "name": "Victor Reyes",
+          "player_key": "398.p.10836",
+          "position": "LF,CF,RF",
+          "editorial_team": "CWS",
+          "transaction_type": "add",
+          "source_type": "waivers",
+          "destination_type": "team",
+          "source_team_key": "",
+          "destination_team_key": "398.l.27913.t.13",
+          "source_team_name": "",
+          "destination_team_name": "Oakland Athletics"
+        },
+        {
+          "name": "Anthony Santander",
+          "player_key": "398.p.10666",
+          "position": "LF,CF,RF",
+          "editorial_team": "TOR",
+          "transaction_type": "drop",
+          "source_type": "team",
+          "destination_type": "waivers",
+          "source_team_key": "398.l.27913.t.13",
+          "destination_team_key": "",
+          "source_team_name": "Oakland Athletics",
+          "destination_team_name": ""
+        }
+      ]
+    },
+    {
+      "transaction_id": "76",
+      "type": "trade",
+      "status": "successful",
+      "timestamp": "1584601932",
+      "faab_bid": null,
+      "players": [
+        {
+          "name": "George Springer",
+          "player_key": "398.p.9339",
+          "position": "CF,RF",
+          "editorial_team": "TOR",
+          "transaction_type": "trade",
+          "source_type": "team",
+          "destination_type": "team",
+          "source_team_key": "398.l.27913.t.2",
+          "destination_team_key": "398.l.27913.t.12",
+          "source_team_name": "SD Padres",
+          "destination_team_name": "Chicago White Sox"
+        },
+        {
+          "name": "Chris Paddack",
+          "player_key": "398.p.10575",
+          "position": "SP",
+          "editorial_team": "MIA",
+          "transaction_type": "trade",
+          "source_type": "team",
+          "destination_type": "team",
+          "source_team_key": "398.l.27913.t.12",
+          "destination_team_key": "398.l.27913.t.2",
+          "source_team_name": "Chicago White Sox",
+          "destination_team_name": "SD Padres"
+        }
+      ]
+    },
+    {
+      "transaction_id": "74",
+      "type": "add",
+      "status": "successful",
+      "timestamp": "1584515533",
+      "faab_bid": 1,
+      "players": [
+        {
+          "name": "Alex Reyes",
+          "player_key": "398.p.9892",
+          "position": "RP",
+          "editorial_team": "STL",
+          "transaction_type": "add",
+          "source_type": "waivers",
+          "destination_type": "team",
+          "source_team_key": "",
+          "destination_team_key": "398.l.27913.t.3",
+          "source_team_name": "",
+          "destination_team_name": "Atlanta Braves2"
+        }
+      ]
+    },
+    {
+      "transaction_id": "73",
+      "type": "add",
+      "status": "successful",
+      "timestamp": "1584515533",
+      "faab_bid": 1,
+      "players": [
+        {
+          "name": "Tony Gonsolin",
+          "player_key": "398.p.11331",
+          "position": "SP,RP",
+          "editorial_team": "LAD",
+          "transaction_type": "add",
+          "source_type": "waivers",
+          "destination_type": "team",
+          "source_team_key": "",
+          "destination_team_key": "398.l.27913.t.11",
+          "source_team_name": "",
+          "destination_team_name": "New York Mets"
+        }
+      ]
+    },
+    {
+      "transaction_id": "72",
+      "type": "add",
+      "status": "successful",
+      "timestamp": "1584515533",
+      "faab_bid": 1,
+      "players": [
+        {
+          "name": "Matt Magill",
+          "player_key": "398.p.9382",
+          "position": "RP",
+          "editorial_team": "SEA",
+          "transaction_type": "add",
+          "source_type": "waivers",
+          "destination_type": "team",
+          "source_team_key": "",
+          "destination_team_key": "398.l.27913.t.14",
+          "source_team_name": "",
+          "destination_team_name": "St. Louis Cardinals"
+        }
+      ]
+    },
+    {
+      "transaction_id": "71",
+      "type": "add/drop",
+      "status": "successful",
+      "timestamp": "1584515533",
+      "faab_bid": 1,
+      "players": [
+        {
+          "name": "Roberto Pérez",
+          "player_key": "398.p.9761",
+          "position": "C",
+          "editorial_team": "BOS",
+          "transaction_type": "add",
+          "source_type": "waivers",
+          "destination_type": "team",
+          "source_team_key": "",
+          "destination_team_key": "398.l.27913.t.6",
+          "source_team_name": "",
+          "destination_team_name": "Cleveland Indians"
+        },
+        {
+          "name": "Ty Buttrey",
+          "player_key": "398.p.10163",
+          "position": "RP",
+          "editorial_team": "SEA",
+          "transaction_type": "drop",
+          "source_type": "team",
+          "destination_type": "waivers",
+          "source_team_key": "398.l.27913.t.6",
+          "destination_team_key": "",
+          "source_team_name": "Cleveland Indians",
+          "destination_team_name": ""
+        }
+      ]
+    },
+    {
+      "transaction_id": "63",
+      "type": "add/drop",
+      "status": "successful",
+      "timestamp": "1584429136",
+      "faab_bid": null,
+      "players": [
+        {
+          "name": "Nick Wittgren",
+          "player_key": "398.p.10130",
+          "position": "RP",
+          "editorial_team": "KC",
+          "transaction_type": "add",
+          "source_type": "waivers",
+          "destination_type": "team",
+          "source_team_key": "",
+          "destination_team_key": "398.l.27913.t.6",
+          "source_team_name": "",
+          "destination_team_name": "Cleveland Indians"
+        },
+        {
+          "name": "Joakim Soria",
+          "player_key": "398.p.7964",
+          "position": "RP",
+          "editorial_team": "TOR",
+          "transaction_type": "drop",
+          "source_type": "team",
+          "destination_type": "waivers",
+          "source_team_key": "398.l.27913.t.6",
+          "destination_team_key": "",
+          "source_team_name": "Cleveland Indians",
+          "destination_team_name": ""
+        }
+      ]
+    },
+    {
+      "transaction_id": "62",
+      "type": "add/drop",
+      "status": "successful",
+      "timestamp": "1584429136",
+      "faab_bid": null,
+      "players": [
+        {
+          "name": "Domingo Santana",
+          "player_key": "398.p.9753",
+          "position": "LF,RF",
+          "editorial_team": "CLE",
+          "transaction_type": "add",
+          "source_type": "waivers",
+          "destination_type": "team",
+          "source_team_key": "",
+          "destination_team_key": "398.l.27913.t.6",
+          "source_team_name": "",
+          "destination_team_name": "Cleveland Indians"
+        },
+        {
+          "name": "Stephen Piscotty",
+          "player_key": "398.p.9628",
+          "position": "RF",
+          "editorial_team": "ATH",
+          "transaction_type": "drop",
+          "source_type": "team",
+          "destination_type": "waivers",
+          "source_team_key": "398.l.27913.t.6",
+          "destination_team_key": "",
+          "source_team_name": "Cleveland Indians",
+          "destination_team_name": ""
+        }
+      ]
+    },
+    {
+      "transaction_id": "61",
+      "type": "add",
+      "status": "successful",
+      "timestamp": "1584429136",
+      "faab_bid": 1,
+      "players": [
+        {
+          "name": "Evan White",
+          "player_key": "398.p.10942",
+          "position": "1B",
+          "editorial_team": "SEA",
+          "transaction_type": "add",
+          "source_type": "waivers",
+          "destination_type": "team",
+          "source_team_key": "",
+          "destination_team_key": "398.l.27913.t.3",
+          "source_team_name": "",
+          "destination_team_name": "Atlanta Braves2"
+        }
+      ]
+    },
+    {
+      "transaction_id": "60",
+      "type": "add",
+      "status": "successful",
+      "timestamp": "1584429136",
+      "faab_bid": 1,
+      "players": [
+        {
+          "name": "Julio Rodríguez",
+          "player_key": "398.p.11384",
+          "position": "RF",
+          "editorial_team": "SEA",
+          "transaction_type": "add",
+          "source_type": "waivers",
+          "destination_type": "team",
+          "source_team_key": "",
+          "destination_team_key": "398.l.27913.t.3",
+          "source_team_name": "",
+          "destination_team_name": "Atlanta Braves2"
+        }
+      ]
+    },
+    {
+      "transaction_id": "59",
+      "type": "add",
+      "status": "successful",
+      "timestamp": "1584429136",
+      "faab_bid": 1,
+      "players": [
+        {
+          "name": "Freddy Galvis",
+          "player_key": "398.p.9132",
+          "position": "2B,SS",
+          "editorial_team": "PHI",
+          "transaction_type": "add",
+          "source_type": "waivers",
+          "destination_type": "team",
+          "source_team_key": "",
+          "destination_team_key": "398.l.27913.t.1",
+          "source_team_name": "",
+          "destination_team_name": "Cincinnati Reds"
+        }
+      ]
+    },
+    {
+      "transaction_id": "58",
+      "type": "add",
+      "status": "successful",
+      "timestamp": "1584429136",
+      "faab_bid": 1,
+      "players": [
+        {
+          "name": "Mauricio Dubón",
+          "player_key": "398.p.10524",
+          "position": "2B,SS,CF",
+          "editorial_team": "ATL",
+          "transaction_type": "add",
+          "source_type": "waivers",
+          "destination_type": "team",
+          "source_team_key": "",
+          "destination_team_key": "398.l.27913.t.3",
+          "source_team_name": "",
+          "destination_team_name": "Atlanta Braves2"
+        }
+      ]
+    },
+    {
+      "transaction_id": "57",
+      "type": "add",
+      "status": "successful",
+      "timestamp": "1584429136",
+      "faab_bid": 1,
+      "players": [
+        {
+          "name": "Jordan Montgomery",
+          "player_key": "398.p.10660",
+          "position": "SP",
+          "editorial_team": "TEX",
+          "transaction_type": "add",
+          "source_type": "waivers",
+          "destination_type": "team",
+          "source_team_key": "",
+          "destination_team_key": "398.l.27913.t.7",
+          "source_team_name": "",
+          "destination_team_name": "Houston Astros"
+        }
+      ]
+    },
+    {
+      "transaction_id": "56",
+      "type": "add",
+      "status": "successful",
+      "timestamp": "1584429136",
+      "faab_bid": 1,
+      "players": [
+        {
+          "name": "Hanser Alberto",
+          "player_key": "398.p.9975",
+          "position": "2B,3B",
+          "editorial_team": "CWS",
+          "transaction_type": "add",
+          "source_type": "waivers",
+          "destination_type": "team",
+          "source_team_key": "",
+          "destination_team_key": "398.l.27913.t.7",
+          "source_team_name": "",
+          "destination_team_name": "Houston Astros"
+        }
+      ]
+    },
+    {
+      "transaction_id": "55",
+      "type": "add",
+      "status": "successful",
+      "timestamp": "1584429136",
+      "faab_bid": 1,
+      "players": [
+        {
+          "name": "Wade Miley",
+          "player_key": "398.p.9017",
+          "position": "SP",
+          "editorial_team": "CIN",
+          "transaction_type": "add",
+          "source_type": "waivers",
+          "destination_type": "team",
+          "source_team_key": "",
+          "destination_team_key": "398.l.27913.t.14",
+          "source_team_name": "",
+          "destination_team_name": "St. Louis Cardinals"
+        }
+      ]
+    },
+    {
+      "transaction_id": "54",
+      "type": "add",
+      "status": "successful",
+      "timestamp": "1584429136",
+      "faab_bid": 1,
+      "players": [
+        {
+          "name": "Jon Lester",
+          "player_key": "398.p.7790",
+          "position": "SP",
+          "editorial_team": "STL",
+          "transaction_type": "add",
+          "source_type": "waivers",
+          "destination_type": "team",
+          "source_team_key": "",
+          "destination_team_key": "398.l.27913.t.14",
+          "source_team_name": "",
+          "destination_team_name": "St. Louis Cardinals"
+        }
+      ]
+    },
+    {
+      "transaction_id": "53",
+      "type": "add",
+      "status": "successful",
+      "timestamp": "1584429136",
+      "faab_bid": 1,
+      "players": [
+        {
+          "name": "Jay Bruce",
+          "player_key": "398.p.8171",
+          "position": "1B,LF,RF",
+          "editorial_team": "NYY",
+          "transaction_type": "add",
+          "source_type": "waivers",
+          "destination_type": "team",
+          "source_team_key": "",
+          "destination_team_key": "398.l.27913.t.4",
+          "source_team_name": "",
+          "destination_team_name": "Philly Phillies 2020"
+        }
+      ]
+    },
+    {
+      "transaction_id": "52",
+      "type": "add",
+      "status": "successful",
+      "timestamp": "1584429136",
+      "faab_bid": 1,
+      "players": [
+        {
+          "name": "Jake Arrieta",
+          "player_key": "398.p.8623",
+          "position": "SP",
+          "editorial_team": "CHC",
+          "transaction_type": "add",
+          "source_type": "waivers",
+          "destination_type": "team",
+          "source_team_key": "",
+          "destination_team_key": "398.l.27913.t.4",
+          "source_team_name": "",
+          "destination_team_name": "Philly Phillies 2020"
+        }
+      ]
+    },
+    {
+      "transaction_id": "51",
+      "type": "add/drop",
+      "status": "successful",
+      "timestamp": "1584429136",
+      "faab_bid": 1,
+      "players": [
+        {
+          "name": "Teoscar Hernández",
+          "player_key": "398.p.10366",
+          "position": "LF,CF,RF",
+          "editorial_team": "LAD",
+          "transaction_type": "add",
+          "source_type": "waivers",
+          "destination_type": "team",
+          "source_team_key": "",
+          "destination_team_key": "398.l.27913.t.5",
+          "source_team_name": "",
+          "destination_team_name": "Chicago Cubs"
+        },
+        {
+          "name": "Kole Calhoun",
+          "player_key": "398.p.9191",
+          "position": "RF",
+          "editorial_team": "CLE",
+          "transaction_type": "drop",
+          "source_type": "team",
+          "destination_type": "waivers",
+          "source_team_key": "398.l.27913.t.5",
+          "destination_team_key": "",
+          "source_team_name": "Chicago Cubs",
+          "destination_team_name": ""
+        }
+      ]
+    },
+    {
+      "transaction_id": "50",
+      "type": "add/drop",
+      "status": "successful",
+      "timestamp": "1584429136",
+      "faab_bid": 1,
+      "players": [
+        {
+          "name": "Zach Plesac",
+          "player_key": "398.p.11590",
+          "position": "SP",
+          "editorial_team": "LAA",
+          "transaction_type": "add",
+          "source_type": "waivers",
+          "destination_type": "team",
+          "source_team_key": "",
+          "destination_team_key": "398.l.27913.t.12",
+          "source_team_name": "",
+          "destination_team_name": "Chicago White Sox"
+        },
+        {
+          "name": "Yoshi Hirano",
+          "player_key": "398.p.10837",
+          "position": "RP",
+          "editorial_team": "SEA",
+          "transaction_type": "drop",
+          "source_type": "team",
+          "destination_type": "waivers",
+          "source_team_key": "398.l.27913.t.12",
+          "destination_team_key": "",
+          "source_team_name": "Chicago White Sox",
+          "destination_team_name": ""
+        }
+      ]
+    },
+    {
+      "transaction_id": "49",
+      "type": "add/drop",
+      "status": "successful",
+      "timestamp": "1584429136",
+      "faab_bid": 1,
+      "players": [
+        {
+          "name": "Pedro Báez",
+          "player_key": "398.p.9695",
+          "position": "RP",
+          "editorial_team": "HOU",
+          "transaction_type": "add",
+          "source_type": "waivers",
+          "destination_type": "team",
+          "source_team_key": "",
+          "destination_team_key": "398.l.27913.t.12",
+          "source_team_name": "",
+          "destination_team_name": "Chicago White Sox"
+        },
+        {
+          "name": "Jackie Bradley Jr.",
+          "player_key": "398.p.9338",
+          "position": "CF",
+          "editorial_team": "KC",
+          "transaction_type": "drop",
+          "source_type": "team",
+          "destination_type": "waivers",
+          "source_team_key": "398.l.27913.t.12",
+          "destination_team_key": "",
+          "source_team_name": "Chicago White Sox",
+          "destination_team_name": ""
+        }
+      ]
+    },
+    {
+      "transaction_id": "48",
+      "type": "add/drop",
+      "status": "successful",
+      "timestamp": "1584429136",
+      "faab_bid": 1,
+      "players": [
+        {
+          "name": "Sergio Romo",
+          "player_key": "398.p.8282",
+          "position": "RP",
+          "editorial_team": "SF",
+          "transaction_type": "add",
+          "source_type": "waivers",
+          "destination_type": "team",
+          "source_team_key": "",
+          "destination_team_key": "398.l.27913.t.12",
+          "source_team_name": "",
+          "destination_team_name": "Chicago White Sox"
+        },
+        {
+          "name": "Buster Posey",
+          "player_key": "398.p.8578",
+          "position": "C",
+          "editorial_team": "SF",
+          "transaction_type": "drop",
+          "source_type": "team",
+          "destination_type": "waivers",
+          "source_team_key": "398.l.27913.t.12",
+          "destination_team_key": "",
+          "source_team_name": "Chicago White Sox",
+          "destination_team_name": ""
+        }
+      ]
+    },
+    {
+      "transaction_id": "47",
+      "type": "add/drop",
+      "status": "successful",
+      "timestamp": "1584429136",
+      "faab_bid": 1,
+      "players": [
+        {
+          "name": "Chris Taylor",
+          "player_key": "398.p.9771",
+          "position": "2B,SS,LF,CF",
+          "editorial_team": "LAA",
+          "transaction_type": "add",
+          "source_type": "waivers",
+          "destination_type": "team",
+          "source_team_key": "",
+          "destination_team_key": "398.l.27913.t.12",
+          "source_team_name": "",
+          "destination_team_name": "Chicago White Sox"
+        },
+        {
+          "name": "Nathaniel Lowe",
+          "player_key": "398.p.11090",
+          "position": "1B",
+          "editorial_team": "CIN",
+          "transaction_type": "drop",
+          "source_type": "team",
+          "destination_type": "waivers",
+          "source_team_key": "398.l.27913.t.12",
+          "destination_team_key": "",
+          "source_team_name": "Chicago White Sox",
+          "destination_team_name": ""
+        }
+      ]
+    },
+    {
+      "transaction_id": "46",
+      "type": "add",
+      "status": "successful",
+      "timestamp": "1584429136",
+      "faab_bid": 2,
+      "players": [
+        {
+          "name": "Sean Newcomb",
+          "player_key": "398.p.9868",
+          "position": "SP,RP",
+          "editorial_team": "CWS",
+          "transaction_type": "add",
+          "source_type": "waivers",
+          "destination_type": "team",
+          "source_team_key": "",
+          "destination_team_key": "398.l.27913.t.9",
+          "source_team_name": "",
+          "destination_team_name": "Milwaukee Brewers"
+        }
+      ]
+    },
+    {
+      "transaction_id": "45",
+      "type": "add",
+      "status": "successful",
+      "timestamp": "1584429135",
+      "faab_bid": 2,
+      "players": [
+        {
+          "name": "Brusdar Graterol",
+          "player_key": "398.p.11112",
+          "position": "RP",
+          "editorial_team": "LAD",
+          "transaction_type": "add",
+          "source_type": "waivers",
+          "destination_type": "team",
+          "source_team_key": "",
+          "destination_team_key": "398.l.27913.t.2",
+          "source_team_name": "",
+          "destination_team_name": "SD Padres"
+        }
+      ]
+    },
+    {
+      "transaction_id": "44",
+      "type": "add/drop",
+      "status": "successful",
+      "timestamp": "1584429135",
+      "faab_bid": 2,
+      "players": [
+        {
+          "name": "Matt Shoemaker",
+          "player_key": "398.p.9534",
+          "position": "SP",
+          "editorial_team": "MIN",
+          "transaction_type": "add",
+          "source_type": "waivers",
+          "destination_type": "team",
+          "source_team_key": "",
+          "destination_team_key": "398.l.27913.t.12",
+          "source_team_name": "",
+          "destination_team_name": "Chicago White Sox"
+        },
+        {
+          "name": "Alex Wood",
+          "player_key": "398.p.9415",
+          "position": "SP,RP",
+          "editorial_team": "ATH",
+          "transaction_type": "drop",
+          "source_type": "team",
+          "destination_type": "waivers",
+          "source_team_key": "398.l.27913.t.12",
+          "destination_team_key": "",
+          "source_team_name": "Chicago White Sox",
+          "destination_team_name": ""
+        }
+      ]
+    },
+    {
+      "transaction_id": "43",
+      "type": "add/drop",
+      "status": "successful",
+      "timestamp": "1584429135",
+      "faab_bid": 2,
+      "players": [
+        {
+          "name": "Kwang Hyun Kim",
+          "player_key": "398.p.11719",
+          "position": "SP,RP",
+          "editorial_team": "STL",
+          "transaction_type": "add",
+          "source_type": "waivers",
+          "destination_type": "team",
+          "source_team_key": "",
+          "destination_team_key": "398.l.27913.t.12",
+          "source_team_name": "",
+          "destination_team_name": "Chicago White Sox"
+        },
+        {
+          "name": "Kyle Seager",
+          "player_key": "398.p.8984",
+          "position": "3B",
+          "editorial_team": "SEA",
+          "transaction_type": "drop",
+          "source_type": "team",
+          "destination_type": "waivers",
+          "source_team_key": "398.l.27913.t.12",
+          "destination_team_key": "",
+          "source_team_name": "Chicago White Sox",
+          "destination_team_name": ""
+        }
+      ]
+    },
+    {
+      "transaction_id": "42",
+      "type": "add",
+      "status": "successful",
+      "timestamp": "1584429135",
+      "faab_bid": 4,
+      "players": [
+        {
+          "name": "Trevor May",
+          "player_key": "398.p.9783",
+          "position": "RP",
+          "editorial_team": "ATH",
+          "transaction_type": "add",
+          "source_type": "waivers",
+          "destination_type": "team",
+          "source_team_key": "",
+          "destination_team_key": "398.l.27913.t.9",
+          "source_team_name": "",
+          "destination_team_name": "Milwaukee Brewers"
+        }
+      ]
+    },
+    {
+      "transaction_id": "41",
+      "type": "add",
+      "status": "successful",
+      "timestamp": "1584429135",
+      "faab_bid": 6,
+      "players": [
+        {
+          "name": "Jarred Kelenic",
+          "player_key": "398.p.11382",
+          "position": "CF",
+          "editorial_team": "CWS",
+          "transaction_type": "add",
+          "source_type": "waivers",
+          "destination_type": "team",
+          "source_team_key": "",
+          "destination_team_key": "398.l.27913.t.2",
+          "source_team_name": "",
+          "destination_team_name": "SD Padres"
+        }
+      ]
+    },
+    {
+      "transaction_id": "38",
+      "type": "commish",
+      "status": "successful",
+      "timestamp": "1584204412",
+      "faab_bid": null,
+      "players": []
+    },
+    {
+      "transaction_id": "30",
+      "type": "commish",
+      "status": "successful",
+      "timestamp": "1583423802",
+      "faab_bid": null,
+      "players": []
+    },
+    {
+      "transaction_id": "29",
+      "type": "commish",
+      "status": "successful",
+      "timestamp": "1583423802",
+      "faab_bid": null,
+      "players": []
+    },
+    {
+      "transaction_id": "28",
+      "type": "commish",
+      "status": "successful",
+      "timestamp": "1583423802",
+      "faab_bid": null,
+      "players": []
+    },
+    {
+      "transaction_id": "27",
+      "type": "commish",
+      "status": "successful",
+      "timestamp": "1583423802",
+      "faab_bid": null,
+      "players": []
+    },
+    {
+      "transaction_id": "26",
+      "type": "commish",
+      "status": "successful",
+      "timestamp": "1583423802",
+      "faab_bid": null,
+      "players": []
+    },
+    {
+      "transaction_id": "25",
+      "type": "commish",
+      "status": "successful",
+      "timestamp": "1583423802",
+      "faab_bid": null,
+      "players": []
+    },
+    {
+      "transaction_id": "24",
+      "type": "commish",
+      "status": "successful",
+      "timestamp": "1583423802",
+      "faab_bid": null,
+      "players": []
+    },
+    {
+      "transaction_id": "23",
+      "type": "commish",
+      "status": "successful",
+      "timestamp": "1583423802",
+      "faab_bid": null,
+      "players": []
+    },
+    {
+      "transaction_id": "22",
+      "type": "commish",
+      "status": "successful",
+      "timestamp": "1583423802",
+      "faab_bid": null,
+      "players": []
+    },
+    {
+      "transaction_id": "20",
+      "type": "commish",
+      "status": "successful",
+      "timestamp": "1583422624",
+      "faab_bid": null,
+      "players": []
+    },
+    {
+      "transaction_id": "19",
+      "type": "commish",
+      "status": "successful",
+      "timestamp": "1583422624",
+      "faab_bid": null,
+      "players": []
+    },
+    {
+      "transaction_id": "8",
+      "type": "commish",
+      "status": "successful",
+      "timestamp": "1582376520",
+      "faab_bid": null,
+      "players": []
+    },
+    {
+      "transaction_id": "7",
+      "type": "commish",
+      "status": "successful",
+      "timestamp": "1582125430",
+      "faab_bid": null,
+      "players": []
+    },
+    {
+      "transaction_id": "6",
+      "type": "commish",
+      "status": "successful",
+      "timestamp": "1582125430",
+      "faab_bid": null,
+      "players": []
+    },
+    {
+      "transaction_id": "3",
+      "type": "commish",
+      "status": "successful",
+      "timestamp": "1581520121",
+      "faab_bid": null,
+      "players": []
+    },
+    {
+      "transaction_id": "2",
+      "type": "commish",
+      "status": "successful",
+      "timestamp": "1581520120",
+      "faab_bid": null,
+      "players": []
+    }
+  ],
+  "player_history": {
+    "398.p.11568": [
+      {
+        "transaction_id": "95",
+        "type": "add",
+        "timestamp": "1595401944",
+        "transaction_type": "add",
+        "source_type": "waivers",
+        "destination_type": "team",
+        "source_team_key": "",
+        "destination_team_key": "398.l.27913.t.13",
+        "source_team_name": "",
+        "destination_team_name": "Oakland Athletics",
+        "faab_bid": 1,
+        "player_name": "Jake Fraley"
+      }
+    ],
+    "398.p.10429": [
+      {
+        "transaction_id": "94",
+        "type": "add/drop",
+        "timestamp": "1595315540",
+        "transaction_type": "add",
+        "source_type": "waivers",
+        "destination_type": "team",
+        "source_team_key": "",
+        "destination_team_key": "398.l.27913.t.2",
+        "source_team_name": "",
+        "destination_team_name": "SD Padres",
+        "faab_bid": 2,
+        "player_name": "Ryan Mountcastle"
+      }
+    ],
+    "398.p.8849": [
+      {
+        "transaction_id": "94",
+        "type": "add/drop",
+        "timestamp": "1595315540",
+        "transaction_type": "drop",
+        "source_type": "team",
+        "destination_type": "waivers",
+        "source_team_key": "398.l.27913.t.2",
+        "destination_team_key": "",
+        "source_team_name": "SD Padres",
+        "destination_team_name": "",
+        "faab_bid": 2,
+        "player_name": "Chris Archer"
+      }
+    ],
+    "398.p.7847": [
+      {
+        "transaction_id": "93",
+        "type": "add",
+        "timestamp": "1595056331",
+        "transaction_type": "add",
+        "source_type": "waivers",
+        "destination_type": "team",
+        "source_team_key": "",
+        "destination_team_key": "398.l.27913.t.7",
+        "source_team_name": "",
+        "destination_team_name": "Houston Astros",
+        "faab_bid": 1,
+        "player_name": "Andrew Miller"
+      },
+      {
+        "transaction_id": "84",
+        "type": "add/drop",
+        "timestamp": "1585553047",
+        "transaction_type": "drop",
+        "source_type": "team",
+        "destination_type": "waivers",
+        "source_team_key": "398.l.27913.t.14",
+        "destination_team_key": "",
+        "source_team_name": "St. Louis Cardinals",
+        "destination_team_name": "",
+        "faab_bid": 1,
+        "player_name": "Andrew Miller"
+      }
+    ],
+    "398.p.9561": [
+      {
+        "transaction_id": "92",
+        "type": "add",
+        "timestamp": "1594969968",
+        "transaction_type": "add",
+        "source_type": "waivers",
+        "destination_type": "team",
+        "source_team_key": "",
+        "destination_team_key": "398.l.27913.t.4",
+        "source_team_name": "",
+        "destination_team_name": "Philly Phillies 2020",
+        "faab_bid": 1,
+        "player_name": "Jesse Winker"
+      }
+    ],
+    "398.p.10946": [
+      {
+        "transaction_id": "90",
+        "type": "add/drop",
+        "timestamp": "1594883570",
+        "transaction_type": "add",
+        "source_type": "waivers",
+        "destination_type": "team",
+        "source_team_key": "",
+        "destination_team_key": "398.l.27913.t.14",
+        "source_team_name": "",
+        "destination_team_name": "St. Louis Cardinals",
+        "faab_bid": 1,
+        "player_name": "Ryan Helsley"
+      }
+    ],
+    "398.p.9598": [
+      {
+        "transaction_id": "90",
+        "type": "add/drop",
+        "timestamp": "1594883570",
+        "transaction_type": "drop",
+        "source_type": "team",
+        "destination_type": "waivers",
+        "source_team_key": "398.l.27913.t.14",
+        "destination_team_key": "",
+        "source_team_name": "St. Louis Cardinals",
+        "destination_team_name": "",
+        "faab_bid": 1,
+        "player_name": "Rafael Montero"
+      },
+      {
+        "transaction_id": "85",
+        "type": "add",
+        "timestamp": "1585897931",
+        "transaction_type": "add",
+        "source_type": "waivers",
+        "destination_type": "team",
+        "source_team_key": "",
+        "destination_team_key": "398.l.27913.t.14",
+        "source_team_name": "",
+        "destination_team_name": "St. Louis Cardinals",
+        "faab_bid": 1,
+        "player_name": "Rafael Montero"
+      }
+    ],
+    "398.p.11263": [
+      {
+        "transaction_id": "89",
+        "type": "add",
+        "timestamp": "1594738375",
+        "transaction_type": "add",
+        "source_type": "waivers",
+        "destination_type": "team",
+        "source_team_key": "",
+        "destination_team_key": "398.l.27913.t.8",
+        "source_team_name": "",
+        "destination_team_name": "New York Yankee",
+        "faab_bid": 1,
+        "player_name": "Yusei Kikuchi"
+      }
+    ],
+    "398.p.7048": [
+      {
+        "transaction_id": "88",
+        "type": "add",
+        "timestamp": "1594738375",
+        "transaction_type": "add",
+        "source_type": "waivers",
+        "destination_type": "team",
+        "source_team_key": "",
+        "destination_team_key": "398.l.27913.t.8",
+        "source_team_name": "",
+        "destination_team_name": "New York Yankee",
+        "faab_bid": 1,
+        "player_name": "Adam Wainwright"
+      }
+    ],
+    "398.p.10666": [
+      {
+        "transaction_id": "87",
+        "type": "add/drop",
+        "timestamp": "1586675536",
+        "transaction_type": "add",
+        "source_type": "waivers",
+        "destination_type": "team",
+        "source_team_key": "",
+        "destination_team_key": "398.l.27913.t.2",
+        "source_team_name": "",
+        "destination_team_name": "SD Padres",
+        "faab_bid": 1,
+        "player_name": "Anthony Santander"
+      },
+      {
+        "transaction_id": "77",
+        "type": "add/drop",
+        "timestamp": "1584688330",
+        "transaction_type": "drop",
+        "source_type": "team",
+        "destination_type": "waivers",
+        "source_team_key": "398.l.27913.t.13",
+        "destination_team_key": "",
+        "source_team_name": "Oakland Athletics",
+        "destination_team_name": "",
+        "faab_bid": 1,
+        "player_name": "Anthony Santander"
+      }
+    ],
+    "398.p.10399": [
+      {
+        "transaction_id": "87",
+        "type": "add/drop",
+        "timestamp": "1586675536",
+        "transaction_type": "drop",
+        "source_type": "team",
+        "destination_type": "waivers",
+        "source_team_key": "398.l.27913.t.2",
+        "destination_team_key": "",
+        "source_team_name": "SD Padres",
+        "destination_team_name": "",
+        "faab_bid": 1,
+        "player_name": "José Martínez"
+      }
+    ],
+    "398.p.9712": [
+      {
+        "transaction_id": "86",
+        "type": "add/drop",
+        "timestamp": "1586675536",
+        "transaction_type": "add",
+        "source_type": "waivers",
+        "destination_type": "team",
+        "source_team_key": "",
+        "destination_team_key": "398.l.27913.t.2",
+        "source_team_name": "",
+        "destination_team_name": "SD Padres",
+        "faab_bid": 1,
+        "player_name": "Corey Knebel"
+      },
+      {
+        "transaction_id": "79",
+        "type": "add/drop",
+        "timestamp": "1584861132",
+        "transaction_type": "drop",
+        "source_type": "team",
+        "destination_type": "waivers",
+        "source_team_key": "398.l.27913.t.9",
+        "destination_team_key": "",
+        "source_team_name": "Milwaukee Brewers",
+        "destination_team_name": "",
+        "faab_bid": 1,
+        "player_name": "Corey Knebel"
+      }
+    ],
+    "398.p.11632": [
+      {
+        "transaction_id": "86",
+        "type": "add/drop",
+        "timestamp": "1586675536",
+        "transaction_type": "drop",
+        "source_type": "team",
+        "destination_type": "waivers",
+        "source_team_key": "398.l.27913.t.2",
+        "destination_team_key": "",
+        "source_team_name": "SD Padres",
+        "destination_team_name": "",
+        "faab_bid": 1,
+        "player_name": "James Karinchak"
+      },
+      {
+        "transaction_id": "81",
+        "type": "add/drop",
+        "timestamp": "1584947532",
+        "transaction_type": "add",
+        "source_type": "waivers",
+        "destination_type": "team",
+        "source_team_key": "",
+        "destination_team_key": "398.l.27913.t.2",
+        "source_team_name": "",
+        "destination_team_name": "SD Padres",
+        "faab_bid": 1,
+        "player_name": "James Karinchak"
+      }
+    ],
+    "398.p.10179": [
+      {
+        "transaction_id": "84",
+        "type": "add/drop",
+        "timestamp": "1585553047",
+        "transaction_type": "add",
+        "source_type": "waivers",
+        "destination_type": "team",
+        "source_team_key": "",
+        "destination_team_key": "398.l.27913.t.14",
+        "source_team_name": "",
+        "destination_team_name": "St. Louis Cardinals",
+        "faab_bid": 1,
+        "player_name": "Michael Fulmer"
+      }
+    ],
+    "398.p.10606": [
+      {
+        "transaction_id": "83",
+        "type": "add",
+        "timestamp": "1585074875",
+        "transaction_type": "add",
+        "source_type": "waivers",
+        "destination_type": "team",
+        "source_team_key": "",
+        "destination_team_key": "398.l.27913.t.10",
+        "source_team_name": "",
+        "destination_team_name": "Minnesota D2D",
+        "faab_bid": 1,
+        "player_name": "Ryne Stanek"
+      }
+    ],
+    "398.p.9415": [
+      {
+        "transaction_id": "82",
+        "type": "add",
+        "timestamp": "1585074875",
+        "transaction_type": "add",
+        "source_type": "waivers",
+        "destination_type": "team",
+        "source_team_key": "",
+        "destination_team_key": "398.l.27913.t.10",
+        "source_team_name": "",
+        "destination_team_name": "Minnesota D2D",
+        "faab_bid": 1,
+        "player_name": "Alex Wood"
+      },
+      {
+        "transaction_id": "44",
+        "type": "add/drop",
+        "timestamp": "1584429135",
+        "transaction_type": "drop",
+        "source_type": "team",
+        "destination_type": "waivers",
+        "source_team_key": "398.l.27913.t.12",
+        "destination_team_key": "",
+        "source_team_name": "Chicago White Sox",
+        "destination_team_name": "",
+        "faab_bid": 2,
+        "player_name": "Alex Wood"
+      }
+    ],
+    "398.p.11112": [
+      {
+        "transaction_id": "81",
+        "type": "add/drop",
+        "timestamp": "1584947532",
+        "transaction_type": "drop",
+        "source_type": "team",
+        "destination_type": "waivers",
+        "source_team_key": "398.l.27913.t.2",
+        "destination_team_key": "",
+        "source_team_name": "SD Padres",
+        "destination_team_name": "",
+        "faab_bid": 1,
+        "player_name": "Brusdar Graterol"
+      },
+      {
+        "transaction_id": "45",
+        "type": "add",
+        "timestamp": "1584429135",
+        "transaction_type": "add",
+        "source_type": "waivers",
+        "destination_type": "team",
+        "source_team_key": "",
+        "destination_team_key": "398.l.27913.t.2",
+        "source_team_name": "",
+        "destination_team_name": "SD Padres",
+        "faab_bid": 2,
+        "player_name": "Brusdar Graterol"
+      }
+    ],
+    "398.p.10744": [
+      {
+        "transaction_id": "80",
+        "type": "add/drop",
+        "timestamp": "1584947532",
+        "transaction_type": "add",
+        "source_type": "waivers",
+        "destination_type": "team",
+        "source_team_key": "",
+        "destination_team_key": "398.l.27913.t.16",
+        "source_team_name": "",
+        "destination_team_name": "Texas Rangers",
+        "faab_bid": 1,
+        "player_name": "Tzu-Wei Lin"
+      }
+    ],
+    "398.p.10110": [
+      {
+        "transaction_id": "80",
+        "type": "add/drop",
+        "timestamp": "1584947532",
+        "transaction_type": "drop",
+        "source_type": "team",
+        "destination_type": "waivers",
+        "source_team_key": "398.l.27913.t.16",
+        "destination_team_key": "",
+        "source_team_name": "Texas Rangers",
+        "destination_team_name": "",
+        "faab_bid": 1,
+        "player_name": "Yoan López"
+      }
+    ],
+    "398.p.11623": [
+      {
+        "transaction_id": "79",
+        "type": "add/drop",
+        "timestamp": "1584861132",
+        "transaction_type": "add",
+        "source_type": "waivers",
+        "destination_type": "team",
+        "source_team_key": "",
+        "destination_team_key": "398.l.27913.t.9",
+        "source_team_name": "",
+        "destination_team_name": "Milwaukee Brewers",
+        "faab_bid": 1,
+        "player_name": "Josh Rojas"
+      }
+    ],
+    "398.p.10163": [
+      {
+        "transaction_id": "78",
+        "type": "add/drop",
+        "timestamp": "1584774734",
+        "transaction_type": "add",
+        "source_type": "waivers",
+        "destination_type": "team",
+        "source_team_key": "",
+        "destination_team_key": "398.l.27913.t.2",
+        "source_team_name": "",
+        "destination_team_name": "SD Padres",
+        "faab_bid": 1,
+        "player_name": "Ty Buttrey"
+      },
+      {
+        "transaction_id": "71",
+        "type": "add/drop",
+        "timestamp": "1584515533",
+        "transaction_type": "drop",
+        "source_type": "team",
+        "destination_type": "waivers",
+        "source_team_key": "398.l.27913.t.6",
+        "destination_team_key": "",
+        "source_team_name": "Cleveland Indians",
+        "destination_team_name": "",
+        "faab_bid": 1,
+        "player_name": "Ty Buttrey"
+      }
+    ],
+    "398.p.11526": [
+      {
+        "transaction_id": "78",
+        "type": "add/drop",
+        "timestamp": "1584774734",
+        "transaction_type": "drop",
+        "source_type": "team",
+        "destination_type": "waivers",
+        "source_team_key": "398.l.27913.t.2",
+        "destination_team_key": "",
+        "source_team_name": "SD Padres",
+        "destination_team_name": "",
+        "faab_bid": 1,
+        "player_name": "Andrés Muñoz"
+      }
+    ],
+    "398.p.10836": [
+      {
+        "transaction_id": "77",
+        "type": "add/drop",
+        "timestamp": "1584688330",
+        "transaction_type": "add",
+        "source_type": "waivers",
+        "destination_type": "team",
+        "source_team_key": "",
+        "destination_team_key": "398.l.27913.t.13",
+        "source_team_name": "",
+        "destination_team_name": "Oakland Athletics",
+        "faab_bid": 1,
+        "player_name": "Victor Reyes"
+      }
+    ],
+    "398.p.9339": [
+      {
+        "transaction_id": "76",
+        "type": "trade",
+        "timestamp": "1584601932",
+        "transaction_type": "trade",
+        "source_type": "team",
+        "destination_type": "team",
+        "source_team_key": "398.l.27913.t.2",
+        "destination_team_key": "398.l.27913.t.12",
+        "source_team_name": "SD Padres",
+        "destination_team_name": "Chicago White Sox",
+        "faab_bid": null,
+        "player_name": "George Springer"
+      }
+    ],
+    "398.p.10575": [
+      {
+        "transaction_id": "76",
+        "type": "trade",
+        "timestamp": "1584601932",
+        "transaction_type": "trade",
+        "source_type": "team",
+        "destination_type": "team",
+        "source_team_key": "398.l.27913.t.12",
+        "destination_team_key": "398.l.27913.t.2",
+        "source_team_name": "Chicago White Sox",
+        "destination_team_name": "SD Padres",
+        "faab_bid": null,
+        "player_name": "Chris Paddack"
+      }
+    ],
+    "398.p.9892": [
+      {
+        "transaction_id": "74",
+        "type": "add",
+        "timestamp": "1584515533",
+        "transaction_type": "add",
+        "source_type": "waivers",
+        "destination_type": "team",
+        "source_team_key": "",
+        "destination_team_key": "398.l.27913.t.3",
+        "source_team_name": "",
+        "destination_team_name": "Atlanta Braves2",
+        "faab_bid": 1,
+        "player_name": "Alex Reyes"
+      }
+    ],
+    "398.p.11331": [
+      {
+        "transaction_id": "73",
+        "type": "add",
+        "timestamp": "1584515533",
+        "transaction_type": "add",
+        "source_type": "waivers",
+        "destination_type": "team",
+        "source_team_key": "",
+        "destination_team_key": "398.l.27913.t.11",
+        "source_team_name": "",
+        "destination_team_name": "New York Mets",
+        "faab_bid": 1,
+        "player_name": "Tony Gonsolin"
+      }
+    ],
+    "398.p.9382": [
+      {
+        "transaction_id": "72",
+        "type": "add",
+        "timestamp": "1584515533",
+        "transaction_type": "add",
+        "source_type": "waivers",
+        "destination_type": "team",
+        "source_team_key": "",
+        "destination_team_key": "398.l.27913.t.14",
+        "source_team_name": "",
+        "destination_team_name": "St. Louis Cardinals",
+        "faab_bid": 1,
+        "player_name": "Matt Magill"
+      }
+    ],
+    "398.p.9761": [
+      {
+        "transaction_id": "71",
+        "type": "add/drop",
+        "timestamp": "1584515533",
+        "transaction_type": "add",
+        "source_type": "waivers",
+        "destination_type": "team",
+        "source_team_key": "",
+        "destination_team_key": "398.l.27913.t.6",
+        "source_team_name": "",
+        "destination_team_name": "Cleveland Indians",
+        "faab_bid": 1,
+        "player_name": "Roberto Pérez"
+      }
+    ],
+    "398.p.10130": [
+      {
+        "transaction_id": "63",
+        "type": "add/drop",
+        "timestamp": "1584429136",
+        "transaction_type": "add",
+        "source_type": "waivers",
+        "destination_type": "team",
+        "source_team_key": "",
+        "destination_team_key": "398.l.27913.t.6",
+        "source_team_name": "",
+        "destination_team_name": "Cleveland Indians",
+        "faab_bid": null,
+        "player_name": "Nick Wittgren"
+      }
+    ],
+    "398.p.7964": [
+      {
+        "transaction_id": "63",
+        "type": "add/drop",
+        "timestamp": "1584429136",
+        "transaction_type": "drop",
+        "source_type": "team",
+        "destination_type": "waivers",
+        "source_team_key": "398.l.27913.t.6",
+        "destination_team_key": "",
+        "source_team_name": "Cleveland Indians",
+        "destination_team_name": "",
+        "faab_bid": null,
+        "player_name": "Joakim Soria"
+      }
+    ],
+    "398.p.9753": [
+      {
+        "transaction_id": "62",
+        "type": "add/drop",
+        "timestamp": "1584429136",
+        "transaction_type": "add",
+        "source_type": "waivers",
+        "destination_type": "team",
+        "source_team_key": "",
+        "destination_team_key": "398.l.27913.t.6",
+        "source_team_name": "",
+        "destination_team_name": "Cleveland Indians",
+        "faab_bid": null,
+        "player_name": "Domingo Santana"
+      }
+    ],
+    "398.p.9628": [
+      {
+        "transaction_id": "62",
+        "type": "add/drop",
+        "timestamp": "1584429136",
+        "transaction_type": "drop",
+        "source_type": "team",
+        "destination_type": "waivers",
+        "source_team_key": "398.l.27913.t.6",
+        "destination_team_key": "",
+        "source_team_name": "Cleveland Indians",
+        "destination_team_name": "",
+        "faab_bid": null,
+        "player_name": "Stephen Piscotty"
+      }
+    ],
+    "398.p.10942": [
+      {
+        "transaction_id": "61",
+        "type": "add",
+        "timestamp": "1584429136",
+        "transaction_type": "add",
+        "source_type": "waivers",
+        "destination_type": "team",
+        "source_team_key": "",
+        "destination_team_key": "398.l.27913.t.3",
+        "source_team_name": "",
+        "destination_team_name": "Atlanta Braves2",
+        "faab_bid": 1,
+        "player_name": "Evan White"
+      }
+    ],
+    "398.p.11384": [
+      {
+        "transaction_id": "60",
+        "type": "add",
+        "timestamp": "1584429136",
+        "transaction_type": "add",
+        "source_type": "waivers",
+        "destination_type": "team",
+        "source_team_key": "",
+        "destination_team_key": "398.l.27913.t.3",
+        "source_team_name": "",
+        "destination_team_name": "Atlanta Braves2",
+        "faab_bid": 1,
+        "player_name": "Julio Rodríguez"
+      }
+    ],
+    "398.p.9132": [
+      {
+        "transaction_id": "59",
+        "type": "add",
+        "timestamp": "1584429136",
+        "transaction_type": "add",
+        "source_type": "waivers",
+        "destination_type": "team",
+        "source_team_key": "",
+        "destination_team_key": "398.l.27913.t.1",
+        "source_team_name": "",
+        "destination_team_name": "Cincinnati Reds",
+        "faab_bid": 1,
+        "player_name": "Freddy Galvis"
+      }
+    ],
+    "398.p.10524": [
+      {
+        "transaction_id": "58",
+        "type": "add",
+        "timestamp": "1584429136",
+        "transaction_type": "add",
+        "source_type": "waivers",
+        "destination_type": "team",
+        "source_team_key": "",
+        "destination_team_key": "398.l.27913.t.3",
+        "source_team_name": "",
+        "destination_team_name": "Atlanta Braves2",
+        "faab_bid": 1,
+        "player_name": "Mauricio Dubón"
+      }
+    ],
+    "398.p.10660": [
+      {
+        "transaction_id": "57",
+        "type": "add",
+        "timestamp": "1584429136",
+        "transaction_type": "add",
+        "source_type": "waivers",
+        "destination_type": "team",
+        "source_team_key": "",
+        "destination_team_key": "398.l.27913.t.7",
+        "source_team_name": "",
+        "destination_team_name": "Houston Astros",
+        "faab_bid": 1,
+        "player_name": "Jordan Montgomery"
+      }
+    ],
+    "398.p.9975": [
+      {
+        "transaction_id": "56",
+        "type": "add",
+        "timestamp": "1584429136",
+        "transaction_type": "add",
+        "source_type": "waivers",
+        "destination_type": "team",
+        "source_team_key": "",
+        "destination_team_key": "398.l.27913.t.7",
+        "source_team_name": "",
+        "destination_team_name": "Houston Astros",
+        "faab_bid": 1,
+        "player_name": "Hanser Alberto"
+      }
+    ],
+    "398.p.9017": [
+      {
+        "transaction_id": "55",
+        "type": "add",
+        "timestamp": "1584429136",
+        "transaction_type": "add",
+        "source_type": "waivers",
+        "destination_type": "team",
+        "source_team_key": "",
+        "destination_team_key": "398.l.27913.t.14",
+        "source_team_name": "",
+        "destination_team_name": "St. Louis Cardinals",
+        "faab_bid": 1,
+        "player_name": "Wade Miley"
+      }
+    ],
+    "398.p.7790": [
+      {
+        "transaction_id": "54",
+        "type": "add",
+        "timestamp": "1584429136",
+        "transaction_type": "add",
+        "source_type": "waivers",
+        "destination_type": "team",
+        "source_team_key": "",
+        "destination_team_key": "398.l.27913.t.14",
+        "source_team_name": "",
+        "destination_team_name": "St. Louis Cardinals",
+        "faab_bid": 1,
+        "player_name": "Jon Lester"
+      }
+    ],
+    "398.p.8171": [
+      {
+        "transaction_id": "53",
+        "type": "add",
+        "timestamp": "1584429136",
+        "transaction_type": "add",
+        "source_type": "waivers",
+        "destination_type": "team",
+        "source_team_key": "",
+        "destination_team_key": "398.l.27913.t.4",
+        "source_team_name": "",
+        "destination_team_name": "Philly Phillies 2020",
+        "faab_bid": 1,
+        "player_name": "Jay Bruce"
+      }
+    ],
+    "398.p.8623": [
+      {
+        "transaction_id": "52",
+        "type": "add",
+        "timestamp": "1584429136",
+        "transaction_type": "add",
+        "source_type": "waivers",
+        "destination_type": "team",
+        "source_team_key": "",
+        "destination_team_key": "398.l.27913.t.4",
+        "source_team_name": "",
+        "destination_team_name": "Philly Phillies 2020",
+        "faab_bid": 1,
+        "player_name": "Jake Arrieta"
+      }
+    ],
+    "398.p.10366": [
+      {
+        "transaction_id": "51",
+        "type": "add/drop",
+        "timestamp": "1584429136",
+        "transaction_type": "add",
+        "source_type": "waivers",
+        "destination_type": "team",
+        "source_team_key": "",
+        "destination_team_key": "398.l.27913.t.5",
+        "source_team_name": "",
+        "destination_team_name": "Chicago Cubs",
+        "faab_bid": 1,
+        "player_name": "Teoscar Hernández"
+      }
+    ],
+    "398.p.9191": [
+      {
+        "transaction_id": "51",
+        "type": "add/drop",
+        "timestamp": "1584429136",
+        "transaction_type": "drop",
+        "source_type": "team",
+        "destination_type": "waivers",
+        "source_team_key": "398.l.27913.t.5",
+        "destination_team_key": "",
+        "source_team_name": "Chicago Cubs",
+        "destination_team_name": "",
+        "faab_bid": 1,
+        "player_name": "Kole Calhoun"
+      }
+    ],
+    "398.p.11590": [
+      {
+        "transaction_id": "50",
+        "type": "add/drop",
+        "timestamp": "1584429136",
+        "transaction_type": "add",
+        "source_type": "waivers",
+        "destination_type": "team",
+        "source_team_key": "",
+        "destination_team_key": "398.l.27913.t.12",
+        "source_team_name": "",
+        "destination_team_name": "Chicago White Sox",
+        "faab_bid": 1,
+        "player_name": "Zach Plesac"
+      }
+    ],
+    "398.p.10837": [
+      {
+        "transaction_id": "50",
+        "type": "add/drop",
+        "timestamp": "1584429136",
+        "transaction_type": "drop",
+        "source_type": "team",
+        "destination_type": "waivers",
+        "source_team_key": "398.l.27913.t.12",
+        "destination_team_key": "",
+        "source_team_name": "Chicago White Sox",
+        "destination_team_name": "",
+        "faab_bid": 1,
+        "player_name": "Yoshi Hirano"
+      }
+    ],
+    "398.p.9695": [
+      {
+        "transaction_id": "49",
+        "type": "add/drop",
+        "timestamp": "1584429136",
+        "transaction_type": "add",
+        "source_type": "waivers",
+        "destination_type": "team",
+        "source_team_key": "",
+        "destination_team_key": "398.l.27913.t.12",
+        "source_team_name": "",
+        "destination_team_name": "Chicago White Sox",
+        "faab_bid": 1,
+        "player_name": "Pedro Báez"
+      }
+    ],
+    "398.p.9338": [
+      {
+        "transaction_id": "49",
+        "type": "add/drop",
+        "timestamp": "1584429136",
+        "transaction_type": "drop",
+        "source_type": "team",
+        "destination_type": "waivers",
+        "source_team_key": "398.l.27913.t.12",
+        "destination_team_key": "",
+        "source_team_name": "Chicago White Sox",
+        "destination_team_name": "",
+        "faab_bid": 1,
+        "player_name": "Jackie Bradley Jr."
+      }
+    ],
+    "398.p.8282": [
+      {
+        "transaction_id": "48",
+        "type": "add/drop",
+        "timestamp": "1584429136",
+        "transaction_type": "add",
+        "source_type": "waivers",
+        "destination_type": "team",
+        "source_team_key": "",
+        "destination_team_key": "398.l.27913.t.12",
+        "source_team_name": "",
+        "destination_team_name": "Chicago White Sox",
+        "faab_bid": 1,
+        "player_name": "Sergio Romo"
+      }
+    ],
+    "398.p.8578": [
+      {
+        "transaction_id": "48",
+        "type": "add/drop",
+        "timestamp": "1584429136",
+        "transaction_type": "drop",
+        "source_type": "team",
+        "destination_type": "waivers",
+        "source_team_key": "398.l.27913.t.12",
+        "destination_team_key": "",
+        "source_team_name": "Chicago White Sox",
+        "destination_team_name": "",
+        "faab_bid": 1,
+        "player_name": "Buster Posey"
+      }
+    ],
+    "398.p.9771": [
+      {
+        "transaction_id": "47",
+        "type": "add/drop",
+        "timestamp": "1584429136",
+        "transaction_type": "add",
+        "source_type": "waivers",
+        "destination_type": "team",
+        "source_team_key": "",
+        "destination_team_key": "398.l.27913.t.12",
+        "source_team_name": "",
+        "destination_team_name": "Chicago White Sox",
+        "faab_bid": 1,
+        "player_name": "Chris Taylor"
+      }
+    ],
+    "398.p.11090": [
+      {
+        "transaction_id": "47",
+        "type": "add/drop",
+        "timestamp": "1584429136",
+        "transaction_type": "drop",
+        "source_type": "team",
+        "destination_type": "waivers",
+        "source_team_key": "398.l.27913.t.12",
+        "destination_team_key": "",
+        "source_team_name": "Chicago White Sox",
+        "destination_team_name": "",
+        "faab_bid": 1,
+        "player_name": "Nathaniel Lowe"
+      }
+    ],
+    "398.p.9868": [
+      {
+        "transaction_id": "46",
+        "type": "add",
+        "timestamp": "1584429136",
+        "transaction_type": "add",
+        "source_type": "waivers",
+        "destination_type": "team",
+        "source_team_key": "",
+        "destination_team_key": "398.l.27913.t.9",
+        "source_team_name": "",
+        "destination_team_name": "Milwaukee Brewers",
+        "faab_bid": 2,
+        "player_name": "Sean Newcomb"
+      }
+    ],
+    "398.p.9534": [
+      {
+        "transaction_id": "44",
+        "type": "add/drop",
+        "timestamp": "1584429135",
+        "transaction_type": "add",
+        "source_type": "waivers",
+        "destination_type": "team",
+        "source_team_key": "",
+        "destination_team_key": "398.l.27913.t.12",
+        "source_team_name": "",
+        "destination_team_name": "Chicago White Sox",
+        "faab_bid": 2,
+        "player_name": "Matt Shoemaker"
+      }
+    ],
+    "398.p.11719": [
+      {
+        "transaction_id": "43",
+        "type": "add/drop",
+        "timestamp": "1584429135",
+        "transaction_type": "add",
+        "source_type": "waivers",
+        "destination_type": "team",
+        "source_team_key": "",
+        "destination_team_key": "398.l.27913.t.12",
+        "source_team_name": "",
+        "destination_team_name": "Chicago White Sox",
+        "faab_bid": 2,
+        "player_name": "Kwang Hyun Kim"
+      }
+    ],
+    "398.p.8984": [
+      {
+        "transaction_id": "43",
+        "type": "add/drop",
+        "timestamp": "1584429135",
+        "transaction_type": "drop",
+        "source_type": "team",
+        "destination_type": "waivers",
+        "source_team_key": "398.l.27913.t.12",
+        "destination_team_key": "",
+        "source_team_name": "Chicago White Sox",
+        "destination_team_name": "",
+        "faab_bid": 2,
+        "player_name": "Kyle Seager"
+      }
+    ],
+    "398.p.9783": [
+      {
+        "transaction_id": "42",
+        "type": "add",
+        "timestamp": "1584429135",
+        "transaction_type": "add",
+        "source_type": "waivers",
+        "destination_type": "team",
+        "source_team_key": "",
+        "destination_team_key": "398.l.27913.t.9",
+        "source_team_name": "",
+        "destination_team_name": "Milwaukee Brewers",
+        "faab_bid": 4,
+        "player_name": "Trevor May"
+      }
+    ],
+    "398.p.11382": [
+      {
+        "transaction_id": "41",
+        "type": "add",
+        "timestamp": "1584429135",
+        "transaction_type": "add",
+        "source_type": "waivers",
+        "destination_type": "team",
+        "source_team_key": "",
+        "destination_team_key": "398.l.27913.t.2",
+        "source_team_name": "",
+        "destination_team_name": "SD Padres",
+        "faab_bid": 6,
+        "player_name": "Jarred Kelenic"
+      }
+    ]
+  }
+}
