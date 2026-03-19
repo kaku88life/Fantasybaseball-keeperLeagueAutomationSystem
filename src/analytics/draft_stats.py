@@ -67,7 +67,23 @@ def _build_position_lookup() -> dict[str, str]:
         except Exception:
             pass
 
-    # Source 2: players DB table (has yahoo position data)
+    # Source 2: historical keepers (has position for many players across years)
+    hist_path = DATA_DIR / "historical_keepers.json"
+    if hist_path.exists():
+        try:
+            with open(hist_path, encoding="utf-8") as f:
+                hist = json.load(f)
+            for _year, managers in hist.items():
+                for _mgr, players in managers.items():
+                    for p in players:
+                        name = p.get("player", "")
+                        pos = p.get("position", "")
+                        if name and pos and name not in lookup:
+                            lookup[name] = pos
+        except Exception:
+            pass
+
+    # Source 3: players DB table (has yahoo position data)
     try:
         from api.database import get_db
         conn = get_db()
@@ -365,6 +381,9 @@ def compute_position_preference(years: list[int] | None = None, min_cost: int = 
     # Build position lookup from contracts/DB for fallback
     pos_lookup = _build_position_lookup()
 
+    # Load keeper data to exclude keeper players
+    hist = _load_historical_keepers()
+
     all_teams: dict[str, dict] = defaultdict(lambda: {"yearly": {}, "career_pos": defaultdict(int)})
     league_pos: dict[str, int] = defaultdict(int)
 
@@ -375,6 +394,15 @@ def compute_position_preference(years: list[int] | None = None, min_cost: int = 
 
         year_str = str(year)
 
+        # Build keeper set: players with non-A contracts are keepers
+        keeper_players: set[str] = set()
+        if year_str in hist:
+            for _mgr, players in hist[year_str].items():
+                for p in players:
+                    ct = p.get("contract_type", "A")
+                    if ct != "A":
+                        keeper_players.add(p["player"])
+
         for pick in draft:
             cost = pick.get("cost", 0)
             if cost < min_cost:
@@ -382,6 +410,10 @@ def compute_position_preference(years: list[int] | None = None, min_cost: int = 
 
             mgr = pick.get("manager", "Unknown")
             player = pick.get("player_name", "")
+
+            # Skip keeper players - only analyze actual draft picks
+            if player in keeper_players:
+                continue
             # Use draft data position first, then fallback to lookup
             position = pick.get("player_position", "") or pos_lookup.get(player, "")
 
@@ -574,7 +606,7 @@ def _categorize_position(position: str) -> str:
         return "OF"
     if primary in ("SP",):
         return "SP"
-    if primary in ("RP",):
+    if primary in ("RP", "P"):
         return "RP"
     if primary in ("DH", "Util"):
         return "DH"
@@ -880,6 +912,10 @@ def compute_contract_values() -> dict:
             "manager_history": mgr_history,
             "years_remaining": years_remaining,
         })
+
+    # Exclude players with legal issues (frozen contracts, not paying salary)
+    _excluded_players = {"Wander Franco"}
+    contracts = [c for c in contracts if c["player"] not in _excluded_players]
 
     # Sort by total_value descending
     contracts.sort(key=lambda x: (-x["total_value"], x["player"]))
