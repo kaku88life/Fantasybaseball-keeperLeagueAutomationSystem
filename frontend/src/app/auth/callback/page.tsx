@@ -34,44 +34,56 @@ function CallbackHandler() {
       window.history.replaceState({}, "", "/auth/callback?auth=ok");
     }
 
-    // Try cookie-based auth first; if it fails, use the URL token as fallback
-    // (iOS Safari ITP blocks cookies set during cross-origin redirects)
-    refresh()
-      .then(() => {
+    const authenticate = async () => {
+      // Strategy 1: Cookie-based auth (works on desktop browsers)
+      try {
+        await refresh();
         showToast("Welcome to Fantasy Baseball 5-Man Keepers!", "success");
         router.push("/");
-      })
-      .catch(async () => {
-        if (!fallbackToken) {
-          setError(
-            "Authentication cookie was blocked by your browser. Please disable tracking prevention or try a different browser."
-          );
-          return;
-        }
+        return;
+      } catch {
+        // Cookie was likely blocked by iOS Safari ITP
+      }
 
-        // Fallback: send token to backend to set cookie via same-origin request
-        try {
-          const res = await fetch(`${API_BASE}/api/auth/set-cookie`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include",
-            body: JSON.stringify({ token: fallbackToken }),
-          });
+      if (!fallbackToken) {
+        setError("Authentication cookie was blocked. Please try a different browser.");
+        return;
+      }
 
-          if (!res.ok) {
-            throw new Error("Failed to set authentication cookie");
-          }
-
-          // Cookie should now be set; retry auth refresh
+      // Strategy 2: Ask backend to set cookie via same-origin POST
+      try {
+        const res = await fetch(`${API_BASE}/api/auth/set-cookie`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ token: fallbackToken }),
+        });
+        if (res.ok) {
           await refresh();
           showToast("Welcome to Fantasy Baseball 5-Man Keepers!", "success");
           router.push("/");
-        } catch (e) {
-          setError(
-            e instanceof Error ? e.message : "Failed to complete authentication"
-          );
+          return;
         }
-      });
+      } catch {
+        // set-cookie also failed (LINE browser blocks cross-origin cookies entirely)
+      }
+
+      // Strategy 3: localStorage fallback (iOS Safari / LINE browser)
+      // Store token in localStorage; api.ts will add it as Authorization header
+      try {
+        localStorage.setItem("auth_token_fallback", fallbackToken);
+        await refresh();
+        showToast("Welcome to Fantasy Baseball 5-Man Keepers!", "success");
+        router.push("/");
+      } catch (e) {
+        localStorage.removeItem("auth_token_fallback");
+        setError(
+          e instanceof Error ? e.message : "Failed to complete authentication"
+        );
+      }
+    };
+
+    authenticate();
   }, [searchParams, refresh, router, showToast]);
 
   if (error) {

@@ -19,6 +19,15 @@ async function request<T>(
     ...(options.headers as Record<string, string>),
   };
 
+  // iOS Safari / LINE browser fallback: add Authorization header from localStorage
+  // when cross-origin cookies are blocked by ITP
+  if (typeof window !== "undefined") {
+    const fallbackToken = localStorage.getItem("auth_token_fallback");
+    if (fallbackToken && !headers["Authorization"]) {
+      headers["Authorization"] = `Bearer ${fallbackToken}`;
+    }
+  }
+
   // AbortController for timeout
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);

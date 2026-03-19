@@ -33,12 +33,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   const refresh = useCallback(async () => {
-    // Clean up any legacy localStorage tokens from before cookie migration
+    // Clean up legacy localStorage token (old key from before cookie migration)
     if (typeof window !== "undefined") {
       localStorage.removeItem("auth_token");
     }
     try {
-      // Auth is handled by HttpOnly cookie (sent automatically via credentials: 'include')
+      // Auth: HttpOnly cookie (primary) or Authorization header via localStorage fallback (iOS)
       const u = await getCurrentUser();
       setUser(u);
     } catch {
@@ -62,9 +62,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch {
       // Ignore network errors on logout
     }
-    // Clean up legacy localStorage token if any
     if (typeof window !== "undefined") {
       localStorage.removeItem("auth_token");
+      localStorage.removeItem("auth_token_fallback");
     }
     setUser(null);
   }, []);
