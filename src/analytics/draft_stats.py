@@ -243,7 +243,9 @@ def compute_faab_stats(years: list[int] | None = None) -> dict:
     for year in years:
         txs = _load_transactions(year)
         meta = _load_league_meta(year)
-        faab_budget = meta.get("faab_budget", 100)  # default $100
+        # FAAB budget: $200 for 2023-2024, $100 for 2025+
+        default_faab = 200 if year <= 2024 else 100
+        faab_budget = meta.get("faab_budget", default_faab)
 
         year_str = str(year)
         team_faab: dict[str, dict] = defaultdict(
@@ -706,9 +708,25 @@ def compute_salary_rankings(years: list[int] | None = None) -> dict:
                         "position": p.get("position", ""),
                     })
 
+        # Deduplicate: if same player appears as both keeper and draft,
+        # keep the one with the more advanced contract (keeper > draft)
+        # Contract priority: N > O > B > A > R > FA
+        _ct_priority = {"FA": 0, "R": 1, "A": 2, "B": 3, "O": 4}
+        def _contract_rank(ct: str) -> int:
+            if ct.startswith("N"):
+                return 5 + int(ct[1:]) if len(ct) > 1 and ct[1:].isdigit() else 5
+            return _ct_priority.get(ct, 2)
+
+        seen: dict[str, dict] = {}
+        for p in all_players:
+            name = p["player"]
+            if name not in seen or _contract_rank(p["contract_type"]) > _contract_rank(seen[name]["contract_type"]):
+                seen[name] = p
+        unique_players = list(seen.values())
+
         # Sort by salary descending, take top 20
-        all_players.sort(key=lambda x: (-x["salary"], x["player"]))
-        top20 = all_players[:20]
+        unique_players.sort(key=lambda x: (-x["salary"], x["player"]))
+        top20 = unique_players[:20]
         for i, p in enumerate(top20, 1):
             p["rank"] = i
 
