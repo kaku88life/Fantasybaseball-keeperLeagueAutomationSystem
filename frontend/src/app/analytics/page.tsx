@@ -196,21 +196,23 @@ function AnalyticsContent() {
     activeTab === "contract" ? "analytics-contract" : null,
     () => getContractValues(),
   );
+  // Only fetch 2023+ data for draft/FAAB/position/trade tabs
+  const recentYears = [2023, 2024, 2025];
   const { data: draftData, isLoading: draftLoading } = useSWR<DraftStatsResponse>(
     activeTab === "draft" ? "analytics-draft" : null,
-    () => getDraftStats(),
+    () => getDraftStats(recentYears),
   );
   const { data: faabData, isLoading: faabLoading } = useSWR<FaabStatsResponse>(
     activeTab === "faab" ? "analytics-faab" : null,
-    () => getFaabStats(),
+    () => getFaabStats(recentYears),
   );
   const { data: posData, isLoading: posLoading } = useSWR<PositionPreferenceResponse>(
     activeTab === "position" ? "analytics-position" : null,
-    () => getPositionPreference(),
+    () => getPositionPreference(recentYears),
   );
   const { data: tradeData, isLoading: tradeLoading } = useSWR<TradeStatsResponse>(
     activeTab === "trade" ? "analytics-trade" : null,
-    () => getTradeStats(),
+    () => getTradeStats(recentYears),
   );
   const { data: summaryData, isLoading: summaryLoading } = useSWR<LeagueSummaryResponse>(
     activeTab === "summary" ? "analytics-summary" : null,
@@ -382,7 +384,7 @@ function SalaryRankingsTab({ data }: { data: SalaryRankingsResponse }) {
 // ========== Contract Values ==========
 
 function ContractValuesTab({ data }: { data: ContractValuesResponse }) {
-  const contracts = data.contracts;
+  const contracts = data.contracts.slice(0, 20); // Top 20 only
   const maxValue = contracts.length > 0 ? contracts[0].total_value : 1;
 
   return (
@@ -390,6 +392,11 @@ function ContractValuesTab({ data }: { data: ContractValuesResponse }) {
       <p className="mb-2 text-[11px] text-gray-400">
         所有 N 約（延長合約）的總合約價值排名。年薪 x (B + N + O)
       </p>
+      {data.contracts.length > 20 && (
+        <p className="mb-2 text-[10px] text-gray-300">
+          顯示前 20 大合約（共 {data.contracts.length} 份）
+        </p>
+      )}
 
       <div className="overflow-x-auto rounded-lg border border-gray-200">
         <table className="min-w-full divide-y divide-gray-200 text-xs sm:text-sm">
@@ -431,14 +438,16 @@ function ContractValuesTab({ data }: { data: ContractValuesResponse }) {
                     ${c.total_value}
                   </td>
                   <td className="hidden px-3 py-2 md:table-cell">
-                    <div className="relative h-4 w-28 rounded-full bg-gray-100 overflow-hidden">
+                    <div className="relative h-4 w-28 rounded-full bg-gray-100 overflow-hidden" title={`${Math.round(pctComplete)}% 已執行`}>
+                      {/* Full contract bar (light) */}
                       <div
-                        className="absolute inset-y-0 left-0 rounded-full bg-indigo-500 opacity-30"
+                        className="absolute inset-y-0 left-0 rounded-full bg-indigo-200"
                         style={{ width: `${(c.total_value / maxValue) * 100}%` }}
                       />
+                      {/* Executed portion (dark, within the contract bar) */}
                       <div
                         className="absolute inset-y-0 left-0 rounded-full bg-indigo-600"
-                        style={{ width: `${(c.total_value / maxValue) * pctComplete}%` }}
+                        style={{ width: `${(c.total_value / maxValue) * (pctComplete / 100)}%` }}
                       />
                     </div>
                     <div className="mt-0.5 text-[9px] text-gray-400">
@@ -465,7 +474,7 @@ function ContractValuesTab({ data }: { data: ContractValuesResponse }) {
 
       {contracts.length > 0 && (
         <div className="mt-2 text-[10px] text-gray-400">
-          共 {contracts.length} 份 N 約，承諾金額 ${contracts.reduce((s, c) => s + c.total_value, 0).toLocaleString()}
+          前 {contracts.length} 大合約，承諾金額 ${contracts.reduce((s, c) => s + c.total_value, 0).toLocaleString()}
         </div>
       )}
     </div>

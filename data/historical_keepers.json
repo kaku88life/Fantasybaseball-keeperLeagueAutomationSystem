@@ -1,0 +1,2858 @@
+{
+  "2023": {
+    "楊善合": [
+      {
+        "player": "Vinnie Pasquantino",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "1B"
+      },
+      {
+        "player": "Sean Murphy",
+        "salary": 11,
+        "contract_type": "N2",
+        "position": "C"
+      },
+      {
+        "player": "Nicky Lopez",
+        "salary": 10,
+        "contract_type": "B",
+        "position": "RF"
+      },
+      {
+        "player": "Matt Chapman",
+        "salary": 16,
+        "contract_type": "O",
+        "position": "3B"
+      },
+      {
+        "player": "Felix Bautista",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "2B"
+      },
+      {
+        "player": "Edward Olivares",
+        "salary": 2,
+        "contract_type": "O",
+        "position": "OF"
+      },
+      {
+        "player": "Scott Barlow",
+        "salary": 10,
+        "contract_type": "B",
+        "position": "1B"
+      },
+      {
+        "player": "Zack Greinke",
+        "salary": 14,
+        "contract_type": "B",
+        "position": "P"
+      },
+      {
+        "player": "Logan Webb",
+        "salary": 16,
+        "contract_type": "N3",
+        "position": "P"
+      },
+      {
+        "player": "Kenley Jansen",
+        "salary": 27,
+        "contract_type": "N2",
+        "position": "P"
+      }
+    ],
+    "TIMMY LIU": [
+      {
+        "player": "Xander Bogaerts Bos",
+        "salary": 41,
+        "contract_type": "N1",
+        "position": "SS"
+      },
+      {
+        "player": "Marcus Semien",
+        "salary": 21,
+        "contract_type": "N3",
+        "position": "2B"
+      },
+      {
+        "player": "Aaron Judge",
+        "salary": 21,
+        "contract_type": "N1",
+        "position": "RF"
+      },
+      {
+        "player": "Alex Verdugo",
+        "salary": 16,
+        "contract_type": "N2",
+        "position": "OF"
+      },
+      {
+        "player": "Mike Trout",
+        "salary": 60,
+        "contract_type": "B",
+        "position": "OF"
+      },
+      {
+        "player": "Manny Machado",
+        "salary": 49,
+        "contract_type": "B",
+        "position": "3B"
+      },
+      {
+        "player": "Zac Gallen",
+        "salary": 11,
+        "contract_type": "B",
+        "position": "SP"
+      },
+      {
+        "player": "Spencer Strider",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "SP"
+      },
+      {
+        "player": "Kyle Wright",
+        "salary": 5,
+        "contract_type": "B",
+        "position": "SP"
+      },
+      {
+        "player": "Daniel Bard",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "RP"
+      }
+    ],
+    "林剛": [
+      {
+        "player": "Aaron Nola",
+        "salary": 32,
+        "contract_type": "N1",
+        "position": "SP"
+      },
+      {
+        "player": "Austin Meadow",
+        "salary": 16,
+        "contract_type": "N1",
+        "position": "LF/RF"
+      },
+      {
+        "player": "Dansby Swanson",
+        "salary": 11,
+        "contract_type": "N1",
+        "position": "SS"
+      },
+      {
+        "player": "Matt Olson",
+        "salary": 17,
+        "contract_type": "O",
+        "position": "1B"
+      },
+      {
+        "player": "DJ LeMahieu",
+        "salary": 14,
+        "contract_type": "O",
+        "position": "1B/2B/3B"
+      },
+      {
+        "player": "Brandon Nimmo",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "CF"
+      },
+      {
+        "player": "Jeff McNeil",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "2B,LF,RF"
+      },
+      {
+        "player": "Whit Merrifield",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "2B,CF,RF"
+      },
+      {
+        "player": "William Contreras",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "C"
+      },
+      {
+        "player": "Ke'Bryan Hayes",
+        "salary": 11,
+        "contract_type": "N2",
+        "position": "3B"
+      }
+    ],
+    "hyc莊翔宇": [
+      {
+        "player": "Vladimir Guerrero Jr.",
+        "salary": 51,
+        "contract_type": "N9",
+        "position": ""
+      },
+      {
+        "player": "Ozzie Albies",
+        "salary": 22,
+        "contract_type": "N1",
+        "position": ""
+      },
+      {
+        "player": "Austin Riley",
+        "salary": 33,
+        "contract_type": "N5",
+        "position": ""
+      },
+      {
+        "player": "Bo Bichette",
+        "salary": 37,
+        "contract_type": "N4",
+        "position": ""
+      },
+      {
+        "player": "Michael Harris II",
+        "salary": 5,
+        "contract_type": "B",
+        "position": ""
+      },
+      {
+        "player": "MJ Meledndez",
+        "salary": 2,
+        "contract_type": "B",
+        "position": ""
+      },
+      {
+        "player": "Gunnar Henderson",
+        "salary": 1,
+        "contract_type": "B",
+        "position": ""
+      },
+      {
+        "player": "Sandy Alcantara",
+        "salary": 33,
+        "contract_type": "N5",
+        "position": ""
+      },
+      {
+        "player": "Julio Urías",
+        "salary": 25,
+        "contract_type": "N4",
+        "position": ""
+      },
+      {
+        "player": "Alek Manoah",
+        "salary": 21,
+        "contract_type": "N4",
+        "position": ""
+      }
+    ],
+    "Leo": [
+      {
+        "player": "Adolis García",
+        "salary": 15,
+        "contract_type": "B",
+        "position": "CF,RF"
+      },
+      {
+        "player": "Tommy Edman",
+        "salary": 11,
+        "contract_type": "N1",
+        "position": "2B,SS"
+      },
+      {
+        "player": "Gleyber Torres",
+        "salary": 21,
+        "contract_type": "N2",
+        "position": "2B"
+      },
+      {
+        "player": "Jake McCarthy",
+        "salary": 3,
+        "contract_type": "B",
+        "position": "LF,CF,RF"
+      },
+      {
+        "player": "Gerrit Cole",
+        "salary": 52,
+        "contract_type": "B",
+        "position": "SP"
+      },
+      {
+        "player": "Corbin Burnes",
+        "salary": 46,
+        "contract_type": "O",
+        "position": "SP"
+      },
+      {
+        "player": "Jordan Montgomery",
+        "salary": 1,
+        "contract_type": "O",
+        "position": "SP"
+      },
+      {
+        "player": "Jacob deGrom",
+        "salary": 42,
+        "contract_type": "B",
+        "position": "SP"
+      },
+      {
+        "player": "Christian Walker",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "1B"
+      },
+      {
+        "player": "Thairo Estrada",
+        "salary": 2,
+        "contract_type": "B",
+        "position": "2B,SS,LF"
+      }
+    ],
+    "Eddie Chen": [
+      {
+        "player": "Teoscar Hernandez",
+        "salary": 27,
+        "contract_type": "O",
+        "position": "OF"
+      },
+      {
+        "player": "Mike Clevinger",
+        "salary": 23,
+        "contract_type": "O",
+        "position": "SP"
+      },
+      {
+        "player": "Taylor Ward",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "OF"
+      },
+      {
+        "player": "Wander Franco",
+        "salary": 34,
+        "contract_type": "N6",
+        "position": "SS"
+      },
+      {
+        "player": "Shane Baz",
+        "salary": 1,
+        "contract_type": "O",
+        "position": "SP"
+      },
+      {
+        "player": "Nolan Arenado",
+        "salary": 35,
+        "contract_type": "B",
+        "position": "3B"
+      },
+      {
+        "player": "Andrew Heaney",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "SP"
+      },
+      {
+        "player": "Jordan Romano",
+        "salary": 25,
+        "contract_type": "B",
+        "position": "RP"
+      },
+      {
+        "player": "Emmanuel Clase",
+        "salary": 19,
+        "contract_type": "B",
+        "position": "RP"
+      },
+      {
+        "player": "Edwardo Cabrera",
+        "salary": 2,
+        "contract_type": "B",
+        "position": "SP"
+      }
+    ],
+    "Yu-Che Chang": [
+      {
+        "player": "Trea Turner",
+        "salary": 28,
+        "contract_type": "N1",
+        "position": "SS"
+      },
+      {
+        "player": "Trey Mancini",
+        "salary": 16,
+        "contract_type": "O",
+        "position": "1B, LF, RF"
+      },
+      {
+        "player": "Lucas Giolito",
+        "salary": 16,
+        "contract_type": "N2",
+        "position": "SP"
+      },
+      {
+        "player": "Brendan Rodgers",
+        "salary": 10,
+        "contract_type": "N1",
+        "position": "2B, SS"
+      },
+      {
+        "player": "Justin Verlander",
+        "salary": 30,
+        "contract_type": "B",
+        "position": "SP"
+      },
+      {
+        "player": "Tony Gonsolin",
+        "salary": 3,
+        "contract_type": "B",
+        "position": "SP"
+      },
+      {
+        "player": "Evan Phillips",
+        "salary": 2,
+        "contract_type": "B",
+        "position": "RP"
+      },
+      {
+        "player": "Reid Detmers",
+        "salary": 2,
+        "contract_type": "B",
+        "position": "SP"
+      },
+      {
+        "player": "Gabriel Moreno",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "C"
+      }
+    ],
+    "林小伯": [
+      {
+        "player": "Shohei Ohtani",
+        "salary": 20,
+        "contract_type": "N3",
+        "position": "Util"
+      },
+      {
+        "player": "Andrew Vaughn",
+        "salary": 13,
+        "contract_type": "N2",
+        "position": "1B-OF"
+      },
+      {
+        "player": "Josh Hader",
+        "salary": 16,
+        "contract_type": "O",
+        "position": "RP"
+      },
+      {
+        "player": "Kyle Schwarber",
+        "salary": 9,
+        "contract_type": "O",
+        "position": "LF"
+      },
+      {
+        "player": "Will Smith",
+        "salary": 13,
+        "contract_type": "N1",
+        "position": "C"
+      },
+      {
+        "player": "Brandon Woodruff",
+        "salary": 16,
+        "contract_type": "N2",
+        "position": "SP"
+      },
+      {
+        "player": "Corbin Carroll",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "LF"
+      },
+      {
+        "player": "George Kirby",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "SP"
+      },
+      {
+        "player": "Daulton Varsho",
+        "salary": 11,
+        "contract_type": "B",
+        "position": "C-CF"
+      },
+      {
+        "player": "Jesus Luzardo",
+        "salary": 10,
+        "contract_type": "B",
+        "position": "SP"
+      },
+      {
+        "player": "Sal Frelick",
+        "salary": 1,
+        "contract_type": "R",
+        "position": "CF"
+      }
+    ],
+    "James Chen": [
+      {
+        "player": "Julio Rodríguez",
+        "salary": 31,
+        "contract_type": "B",
+        "position": ""
+      },
+      {
+        "player": "Oneil Cruz",
+        "salary": 5,
+        "contract_type": "B",
+        "position": "C"
+      },
+      {
+        "player": "Dylan Cease",
+        "salary": 17,
+        "contract_type": "N3",
+        "position": "SP"
+      },
+      {
+        "player": "Shane McClanahan",
+        "salary": 18,
+        "contract_type": "N3",
+        "position": "SP"
+      },
+      {
+        "player": "Luis Castillo",
+        "salary": 26,
+        "contract_type": "B",
+        "position": "LF"
+      },
+      {
+        "player": "Dustin May",
+        "salary": 11,
+        "contract_type": "B",
+        "position": "CF"
+      },
+      {
+        "player": "Jhoan Duran",
+        "salary": 2,
+        "contract_type": "B",
+        "position": "CF"
+      },
+      {
+        "player": "Ryan Helsley",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "3B"
+      },
+      {
+        "player": "Clayton Kershaw",
+        "salary": 23,
+        "contract_type": "B",
+        "position": "RF"
+      },
+      {
+        "player": "Riley Greene",
+        "salary": 10,
+        "contract_type": "B",
+        "position": "SP"
+      }
+    ],
+    "Chih-Wei": [
+      {
+        "player": "Salvador Perez",
+        "salary": 16,
+        "contract_type": "N2",
+        "position": "C"
+      },
+      {
+        "player": "Bobby Witt Jr.",
+        "salary": 2,
+        "contract_type": "B",
+        "position": "IF"
+      },
+      {
+        "player": "Juan Soto",
+        "salary": 33,
+        "contract_type": "N4",
+        "position": "LF"
+      },
+      {
+        "player": "Ronald Acuña Jr.",
+        "salary": 35,
+        "contract_type": "N4",
+        "position": "CF"
+      },
+      {
+        "player": "Yordan Alvarez",
+        "salary": 11,
+        "contract_type": "N1",
+        "position": "OF"
+      },
+      {
+        "player": "Elly De La Cruz",
+        "salary": 1,
+        "contract_type": "A",
+        "position": "3B"
+      },
+      {
+        "player": "Grayson Rodriguez",
+        "salary": 1,
+        "contract_type": "A",
+        "position": "SP"
+      },
+      {
+        "player": "Nick Lodolo",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "SP"
+      },
+      {
+        "player": "Zack Wheeler",
+        "salary": 30,
+        "contract_type": "B",
+        "position": "SP"
+      },
+      {
+        "player": "Tyler Anderson",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "SP"
+      }
+    ],
+    "Ponpon": [
+      {
+        "player": "Javier Baez",
+        "salary": 27,
+        "contract_type": "N1",
+        "position": ""
+      },
+      {
+        "player": "Michael Kopech",
+        "salary": 18,
+        "contract_type": "N2",
+        "position": ""
+      },
+      {
+        "player": "David Bednar",
+        "salary": 4,
+        "contract_type": "B",
+        "position": ""
+      },
+      {
+        "player": "Paul Goldschmidt",
+        "salary": 40,
+        "contract_type": "N1",
+        "position": ""
+      },
+      {
+        "player": "Mike Soroka",
+        "salary": 11,
+        "contract_type": "N2",
+        "position": ""
+      },
+      {
+        "player": "Noah Syndergaard",
+        "salary": 8,
+        "contract_type": "N1",
+        "position": ""
+      },
+      {
+        "player": "Pete Fairbanks",
+        "salary": 2,
+        "contract_type": "B",
+        "position": ""
+      },
+      {
+        "player": "Anthony Rendon",
+        "salary": 3,
+        "contract_type": "B",
+        "position": ""
+      },
+      {
+        "player": "Anthony Santander",
+        "salary": 4,
+        "contract_type": "B",
+        "position": ""
+      },
+      {
+        "player": "Chris Sale",
+        "salary": 22,
+        "contract_type": "B",
+        "position": ""
+      }
+    ],
+    "郭子睿(Rangers)": [
+      {
+        "player": "Max Muncy",
+        "salary": 17,
+        "contract_type": "N1",
+        "position": "IF"
+      },
+      {
+        "player": "Jose Leclerc",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "RP"
+      },
+      {
+        "player": "José Ramírez",
+        "salary": 21,
+        "contract_type": "O",
+        "position": "2B"
+      },
+      {
+        "player": "J.T. Realmuto",
+        "salary": 20,
+        "contract_type": "O",
+        "position": "C"
+      },
+      {
+        "player": "Bryan Reynolds",
+        "salary": 16,
+        "contract_type": "N3",
+        "position": "LF"
+      },
+      {
+        "player": "Andrés Giménez",
+        "salary": 2,
+        "contract_type": "B",
+        "position": "2B"
+      },
+      {
+        "player": "Lars Nootbaar",
+        "salary": 2,
+        "contract_type": "B",
+        "position": "OF"
+      },
+      {
+        "player": "Lance Lynn",
+        "salary": 6,
+        "contract_type": "O",
+        "position": "SP"
+      },
+      {
+        "player": "Josh Bell",
+        "salary": 13,
+        "contract_type": "O",
+        "position": "1B"
+      },
+      {
+        "player": "Sony Gray",
+        "salary": 7,
+        "contract_type": "O",
+        "position": "SP"
+      }
+    ],
+    "Javier": [
+      {
+        "player": "Jose Berrios",
+        "salary": 25,
+        "contract_type": "N1",
+        "position": "SP"
+      },
+      {
+        "player": "Ian Happ",
+        "salary": 11,
+        "contract_type": "B",
+        "position": "IF"
+      },
+      {
+        "player": "Cal Raleigh",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "C"
+      },
+      {
+        "player": "Nico Horner",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "2B"
+      },
+      {
+        "player": "Clay Holmes",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "RP"
+      },
+      {
+        "player": "Robbie Ray",
+        "salary": 30,
+        "contract_type": "B",
+        "position": "SP"
+      },
+      {
+        "player": "Mookie Betts",
+        "salary": 53,
+        "contract_type": "B",
+        "position": "OF"
+      },
+      {
+        "player": "Manuel Margot",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "OF"
+      },
+      {
+        "player": "Braxton Garrett",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "SP"
+      },
+      {
+        "player": "Jose Suarez",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "SP"
+      }
+    ],
+    "Issac": [
+      {
+        "player": "Fernando Tatis Jr",
+        "salary": 26,
+        "contract_type": "N4",
+        "position": "SS"
+      },
+      {
+        "player": "Willy Adames",
+        "salary": 6,
+        "contract_type": "N1",
+        "position": "SS"
+      },
+      {
+        "player": "Adley Rutschman",
+        "salary": 2,
+        "contract_type": "B",
+        "position": "C"
+      },
+      {
+        "player": "CJ Abrams",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "SS"
+      },
+      {
+        "player": "Kyle Tucker",
+        "salary": 20,
+        "contract_type": "N1",
+        "position": "RF"
+      },
+      {
+        "player": "Peter Alonso",
+        "salary": 11,
+        "contract_type": "O",
+        "position": "1B"
+      },
+      {
+        "player": "Kevin Gausman",
+        "salary": 14,
+        "contract_type": "N1",
+        "position": "SP"
+      },
+      {
+        "player": "Carlos Rodon",
+        "salary": 11,
+        "contract_type": "N2",
+        "position": "SP"
+      },
+      {
+        "player": "Steven Kwan",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "OF"
+      },
+      {
+        "player": "Tyler O'Neill",
+        "salary": 7,
+        "contract_type": "N1",
+        "position": "OF"
+      },
+      {
+        "player": "Brett Baty",
+        "salary": 1,
+        "contract_type": "R",
+        "position": "NA"
+      },
+      {
+        "player": "Hunter Brown",
+        "salary": 1,
+        "contract_type": "R",
+        "position": "NA"
+      }
+    ],
+    "Tony林芳民": [],
+    "ywchiou": [
+      {
+        "player": "Framber Valdez",
+        "salary": 20,
+        "contract_type": "B",
+        "position": "SP"
+      },
+      {
+        "player": "Cristian Javier",
+        "salary": 9,
+        "contract_type": "B",
+        "position": "SP"
+      },
+      {
+        "player": "Jeremy Pena",
+        "salary": 5,
+        "contract_type": "B",
+        "position": "SS"
+      },
+      {
+        "player": "CJ Cron",
+        "salary": 5,
+        "contract_type": "O",
+        "position": "1B"
+      },
+      {
+        "player": "Luis Garcia",
+        "salary": 1,
+        "contract_type": "O",
+        "position": "SP"
+      },
+      {
+        "player": "Jazz Chisholm",
+        "salary": 20,
+        "contract_type": "B",
+        "position": "2B"
+      },
+      {
+        "player": "Alejando Kirk",
+        "salary": 2,
+        "contract_type": "B",
+        "position": "C"
+      }
+    ]
+  },
+  "2024": {
+    "楊善合": [
+      {
+        "player": "Vinnie Pasquantino",
+        "salary": 11,
+        "contract_type": "N2",
+        "position": "1B"
+      },
+      {
+        "player": "Sean Murphy",
+        "salary": 11,
+        "contract_type": "N1",
+        "position": "C"
+      },
+      {
+        "player": "Masataka Yoshida",
+        "salary": 21,
+        "contract_type": "B",
+        "position": "LF"
+      },
+      {
+        "player": "Maikel Garcia",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "3B"
+      },
+      {
+        "player": "Kerry Carpenter",
+        "salary": 2,
+        "contract_type": "B",
+        "position": "OF"
+      },
+      {
+        "player": "Logan Webb",
+        "salary": 16,
+        "contract_type": "N2",
+        "position": "P"
+      },
+      {
+        "player": "Cole Ragans",
+        "salary": 3,
+        "contract_type": "B",
+        "position": "P"
+      },
+      {
+        "player": "Kenley Jansen",
+        "salary": 27,
+        "contract_type": "N1",
+        "position": "P"
+      },
+      {
+        "player": "Felix Bautista",
+        "salary": 6,
+        "contract_type": "N1",
+        "position": "P"
+      },
+      {
+        "player": "Ryan Pressly",
+        "salary": 25,
+        "contract_type": "B",
+        "position": "P"
+      }
+    ],
+    "TIMMY LIU": [
+      {
+        "player": "Xander Bogaerts",
+        "salary": 41,
+        "contract_type": "O",
+        "position": "SS"
+      },
+      {
+        "player": "Marcus Semien",
+        "salary": 21,
+        "contract_type": "N2",
+        "position": "2B"
+      },
+      {
+        "player": "Aaron Judge",
+        "salary": 21,
+        "contract_type": "O",
+        "position": "RF"
+      },
+      {
+        "player": "Alex Verdugo",
+        "salary": 16,
+        "contract_type": "N1",
+        "position": "OF"
+      },
+      {
+        "player": "Ha-Seong Kim",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "3B"
+      },
+      {
+        "player": "Zac Gallen",
+        "salary": 21,
+        "contract_type": "N2",
+        "position": "SP"
+      },
+      {
+        "player": "Spencer Strider",
+        "salary": 21,
+        "contract_type": "N4",
+        "position": "SP"
+      },
+      {
+        "player": "Spencer Steer",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "SP"
+      },
+      {
+        "player": "Edwin Díaz",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "RP"
+      },
+      {
+        "player": "Tarik Skubal",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "SP"
+      }
+    ],
+    "林剛": [
+      {
+        "player": "Aaron Nola",
+        "salary": 32,
+        "contract_type": "O",
+        "position": "SP"
+      },
+      {
+        "player": "Dansby Swanson",
+        "salary": 11,
+        "contract_type": "O",
+        "position": "SS"
+      },
+      {
+        "player": "Ke'Bryan Hayes",
+        "salary": 11,
+        "contract_type": "N1",
+        "position": "3B"
+      },
+      {
+        "player": "Brandon Nimmo",
+        "salary": 11,
+        "contract_type": "N2",
+        "position": "CF"
+      },
+      {
+        "player": "William Contreras",
+        "salary": 16,
+        "contract_type": "N3",
+        "position": "C"
+      },
+      {
+        "player": "Royce Lewis",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "3B"
+      },
+      {
+        "player": "Marcell Ozuna",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "LF"
+      },
+      {
+        "player": "Zach Eflin",
+        "salary": 2,
+        "contract_type": "B",
+        "position": "SP"
+      },
+      {
+        "player": "Ryan Mountcastle",
+        "salary": 5,
+        "contract_type": "B",
+        "position": "1B"
+      },
+      {
+        "player": "Kodai Senga",
+        "salary": 24,
+        "contract_type": "B",
+        "position": "SP"
+      }
+    ],
+    "hyc莊翔宇": [
+      {
+        "player": "Vladimir Guerrero Jr.",
+        "salary": 51,
+        "contract_type": "N8",
+        "position": ""
+      },
+      {
+        "player": "Ozzie Albies",
+        "salary": 22,
+        "contract_type": "O",
+        "position": ""
+      },
+      {
+        "player": "Austin Riley",
+        "salary": 33,
+        "contract_type": "N4",
+        "position": ""
+      },
+      {
+        "player": "Bo Bichette",
+        "salary": 37,
+        "contract_type": "N3",
+        "position": ""
+      },
+      {
+        "player": "Michael Harris II",
+        "salary": 30,
+        "contract_type": "N5",
+        "position": ""
+      },
+      {
+        "player": "Christian Encarnacion-Strand",
+        "salary": 1,
+        "contract_type": "B",
+        "position": ""
+      },
+      {
+        "player": "Gunnar Henderson",
+        "salary": 26,
+        "contract_type": "N5",
+        "position": ""
+      },
+      {
+        "player": "Sandy Alcantara",
+        "salary": 33,
+        "contract_type": "N5",
+        "position": ""
+      },
+      {
+        "player": "Matt McLain",
+        "salary": 1,
+        "contract_type": "B",
+        "position": ""
+      },
+      {
+        "player": "Alek Manoah",
+        "salary": 21,
+        "contract_type": "N3",
+        "position": ""
+      }
+    ],
+    "Leo": [
+      {
+        "player": "Adolis García",
+        "salary": 25,
+        "contract_type": "N2",
+        "position": "CF,RF"
+      },
+      {
+        "player": "Tommy Edman",
+        "salary": 11,
+        "contract_type": "O",
+        "position": "2B,SS"
+      },
+      {
+        "player": "Gleyber Torres",
+        "salary": 21,
+        "contract_type": "N1",
+        "position": "2B"
+      },
+      {
+        "player": "Gerrit Cole",
+        "salary": 52,
+        "contract_type": "O",
+        "position": "SP"
+      },
+      {
+        "player": "Christian Walker",
+        "salary": 6,
+        "contract_type": "N1",
+        "position": "1B"
+      },
+      {
+        "player": "Thairo Estrada",
+        "salary": 7,
+        "contract_type": "N1",
+        "position": "2B,SS,LF"
+      },
+      {
+        "player": "Michael King",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "SP,RP"
+      },
+      {
+        "player": "Lourdes Gurriel",
+        "salary": 10,
+        "contract_type": "B",
+        "position": "LF"
+      },
+      {
+        "player": "Yennier Cano",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "RP"
+      },
+      {
+        "player": "Hector Neris",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "RP"
+      }
+    ],
+    "Eddie Chen": [
+      {
+        "player": "Edwardo Cabrera",
+        "salary": 7,
+        "contract_type": "N1",
+        "position": "SP"
+      },
+      {
+        "player": "Pablo Lopez",
+        "salary": 9,
+        "contract_type": "B",
+        "position": "SP"
+      },
+      {
+        "player": "Andrew Heaney",
+        "salary": 1,
+        "contract_type": "O",
+        "position": "SP"
+      },
+      {
+        "player": "Emmanuel Clase",
+        "salary": 19,
+        "contract_type": "O",
+        "position": "RP"
+      },
+      {
+        "player": "Mitch Garver",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "C"
+      },
+      {
+        "player": "Christopher Morel",
+        "salary": 5,
+        "contract_type": "B",
+        "position": "2B"
+      },
+      {
+        "player": "Alex Bregman",
+        "salary": 29,
+        "contract_type": "B",
+        "position": "3B"
+      },
+      {
+        "player": "Taylor Ward",
+        "salary": 1,
+        "contract_type": "O",
+        "position": "OF"
+      },
+      {
+        "player": "Seiya Suzuki",
+        "salary": 15,
+        "contract_type": "B",
+        "position": "OF"
+      }
+    ],
+    "Yu-Che Chang": [
+      {
+        "player": "Trea Turner",
+        "salary": 28,
+        "contract_type": "O",
+        "position": "SS"
+      },
+      {
+        "player": "Brendan Rodgers",
+        "salary": 10,
+        "contract_type": "O",
+        "position": "2B"
+      },
+      {
+        "player": "Gabriel Moreno",
+        "salary": 11,
+        "contract_type": "N2",
+        "position": "C"
+      },
+      {
+        "player": "Edouard Julien",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "2B"
+      },
+      {
+        "player": "Gavin Lux",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "2B, OF"
+      },
+      {
+        "player": "Jarren Duran",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "LF, CF"
+      },
+      {
+        "player": "Walker Buehler",
+        "salary": 7,
+        "contract_type": "B",
+        "position": "SP"
+      },
+      {
+        "player": "Merrill Kelly",
+        "salary": 9,
+        "contract_type": "B",
+        "position": "SP"
+      },
+      {
+        "player": "Tanner Bibee",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "SP"
+      },
+      {
+        "player": "Bailey Ober",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "SP"
+      }
+    ],
+    "林小伯": [
+      {
+        "player": "Shohei Ohtani",
+        "salary": 20,
+        "contract_type": "N2",
+        "position": "Util"
+      },
+      {
+        "player": "Corbin Carroll",
+        "salary": 21,
+        "contract_type": "N4",
+        "position": "CF"
+      },
+      {
+        "player": "George Kirby",
+        "salary": 11,
+        "contract_type": "N2",
+        "position": "SP"
+      },
+      {
+        "player": "Josh Jung",
+        "salary": 20,
+        "contract_type": "B",
+        "position": "3B"
+      },
+      {
+        "player": "Christian Yelich",
+        "salary": 17,
+        "contract_type": "B",
+        "position": "LF"
+      },
+      {
+        "player": "MJ Melendez",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "LF"
+      },
+      {
+        "player": "Spencer Torkelson",
+        "salary": 2,
+        "contract_type": "B",
+        "position": "1B"
+      },
+      {
+        "player": "Brandon Pffadt",
+        "salary": 7,
+        "contract_type": "B",
+        "position": "SP"
+      },
+      {
+        "player": "Will Smith",
+        "salary": 13,
+        "contract_type": "O",
+        "position": "C"
+      },
+      {
+        "player": "Jesus Luzardo",
+        "salary": 10,
+        "contract_type": "O",
+        "position": "SP"
+      }
+    ],
+    "James Chen": [
+      {
+        "player": "Julio Rodríguez",
+        "salary": 46,
+        "contract_type": "N3",
+        "position": "CF"
+      },
+      {
+        "player": "Oneil Cruz",
+        "salary": 15,
+        "contract_type": "N2",
+        "position": "SS"
+      },
+      {
+        "player": "Dylan Cease",
+        "salary": 17,
+        "contract_type": "N2",
+        "position": "SP"
+      },
+      {
+        "player": "Shane McClanahan",
+        "salary": 18,
+        "contract_type": "N2",
+        "position": "SP"
+      },
+      {
+        "player": "Luis Castillo",
+        "salary": 26,
+        "contract_type": "O",
+        "position": "SP"
+      },
+      {
+        "player": "Mitch Keller",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "SP"
+      },
+      {
+        "player": "Jhoan Duran",
+        "salary": 12,
+        "contract_type": "N2",
+        "position": "RP"
+      },
+      {
+        "player": "Ryan Helsley",
+        "salary": 11,
+        "contract_type": "N2",
+        "position": "RP"
+      },
+      {
+        "player": "Brusdar Gratrol",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "RP"
+      },
+      {
+        "player": "Jorge Soler",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "RF"
+      }
+    ],
+    "Chih-Wei": [
+      {
+        "player": "Bobby Witt Jr.",
+        "salary": 32,
+        "contract_type": "N6",
+        "position": "SS"
+      },
+      {
+        "player": "Elly De La Cruz",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "3B"
+      },
+      {
+        "player": "Juan Soto",
+        "salary": 33,
+        "contract_type": "N3",
+        "position": "LF"
+      },
+      {
+        "player": "Ronald Acuña Jr.",
+        "salary": 35,
+        "contract_type": "N3",
+        "position": "CF"
+      },
+      {
+        "player": "Yordan Alvarez",
+        "salary": 11,
+        "contract_type": "O",
+        "position": "OF"
+      },
+      {
+        "player": "Jordan Walker",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "RF"
+      },
+      {
+        "player": "Grayson Rodriguez",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "SP"
+      },
+      {
+        "player": "Kyle Bradish",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "SP"
+      },
+      {
+        "player": "Gavin Williams",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "SP"
+      },
+      {
+        "player": "Zack Wheeler",
+        "salary": 30,
+        "contract_type": "O",
+        "position": "SP"
+      }
+    ],
+    "Ponpon": [
+      {
+        "player": "Paul Goldschmidt",
+        "salary": 40,
+        "contract_type": "O",
+        "position": "1B"
+      },
+      {
+        "player": "Pete Fairbanks",
+        "salary": 7,
+        "contract_type": "N1",
+        "position": "RP"
+      },
+      {
+        "player": "David Bednar",
+        "salary": 9,
+        "contract_type": "N1",
+        "position": "RP"
+      },
+      {
+        "player": "Chris Sale",
+        "salary": 22,
+        "contract_type": "O",
+        "position": "SP"
+      },
+      {
+        "player": "Anthony Santander",
+        "salary": 9,
+        "contract_type": "N1",
+        "position": "1B/LF/RF"
+      },
+      {
+        "player": "Isaac Paredes",
+        "salary": 2,
+        "contract_type": "B",
+        "position": "1B/2B/3B"
+      },
+      {
+        "player": "James Outman",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "LF/CF"
+      },
+      {
+        "player": "Logan O'Hoppe",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "C"
+      },
+      {
+        "player": "Eduardo Rodriguez",
+        "salary": 7,
+        "contract_type": "B",
+        "position": "SP"
+      },
+      {
+        "player": "Jason Adam",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "RP"
+      }
+    ],
+    "郭子睿(Rangers)": [
+      {
+        "player": "Max Muncy",
+        "salary": 17,
+        "contract_type": "O",
+        "position": "IF"
+      },
+      {
+        "player": "Bryan Reynolds",
+        "salary": 16,
+        "contract_type": "N2",
+        "position": "LF"
+      },
+      {
+        "player": "Jose Leclerc",
+        "salary": 6,
+        "contract_type": "N1",
+        "position": "RP"
+      },
+      {
+        "player": "Corey Seager",
+        "salary": 39,
+        "contract_type": "B",
+        "position": "SS"
+      },
+      {
+        "player": "Jonah Heim",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "C"
+      },
+      {
+        "player": "Nolan Jones",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "OF"
+      },
+      {
+        "player": "Tanner Scott",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "RP"
+      },
+      {
+        "player": "Bryce Harper",
+        "salary": 31,
+        "contract_type": "B",
+        "position": "OF"
+      },
+      {
+        "player": "Freddy Peralta",
+        "salary": 24,
+        "contract_type": "B",
+        "position": "SP"
+      },
+      {
+        "player": "Nathan Eovaldi",
+        "salary": 11,
+        "contract_type": "B",
+        "position": "SP"
+      }
+    ],
+    "Javier": [
+      {
+        "player": "Jose Berrios",
+        "salary": 25,
+        "contract_type": "O",
+        "position": "SP"
+      },
+      {
+        "player": "Ian Happ",
+        "salary": 11,
+        "contract_type": "O",
+        "position": "IF"
+      },
+      {
+        "player": "Cal Raleigh",
+        "salary": 11,
+        "contract_type": "N2",
+        "position": "C"
+      },
+      {
+        "player": "Nico Hoerner",
+        "salary": 11,
+        "contract_type": "N2",
+        "position": "2B"
+      },
+      {
+        "player": "Braxton Garrett",
+        "salary": 1,
+        "contract_type": "O",
+        "position": "SP"
+      },
+      {
+        "player": "Cody Bellinger",
+        "salary": 9,
+        "contract_type": "B",
+        "position": "1B/OF"
+      },
+      {
+        "player": "Mookie Betts",
+        "salary": 58,
+        "contract_type": "N1",
+        "position": "SS/OF"
+      },
+      {
+        "player": "Lane Thomas",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "OF"
+      },
+      {
+        "player": "Zack Gelof",
+        "salary": 3,
+        "contract_type": "B",
+        "position": "2B"
+      },
+      {
+        "player": "Justin Steele",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "SP"
+      }
+    ],
+    "Issac": [
+      {
+        "player": "Fernando Tatis Jr",
+        "salary": 26,
+        "contract_type": "N3",
+        "position": "RF"
+      },
+      {
+        "player": "Josh Naylor",
+        "salary": 2,
+        "contract_type": "B",
+        "position": "1B"
+      },
+      {
+        "player": "Adley Rutschman",
+        "salary": 17,
+        "contract_type": "N3",
+        "position": "C"
+      },
+      {
+        "player": "CJ Abrams",
+        "salary": 16,
+        "contract_type": "N3",
+        "position": "SS"
+      },
+      {
+        "player": "Kyle Tucker",
+        "salary": 20,
+        "contract_type": "O",
+        "position": "RF"
+      },
+      {
+        "player": "Nolan Gorman",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "2B"
+      },
+      {
+        "player": "Kevin Gausman",
+        "salary": 14,
+        "contract_type": "O",
+        "position": "SP"
+      },
+      {
+        "player": "Bobby Miller",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "SP"
+      },
+      {
+        "player": "Eury Perez",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "SP"
+      },
+      {
+        "player": "Hunter Brown",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "SP"
+      }
+    ],
+    "Tony林芳民": [
+      {
+        "player": "Rhys Hoskins",
+        "salary": 21,
+        "contract_type": "O",
+        "position": "1B"
+      },
+      {
+        "player": "Brandon Lowe",
+        "salary": 12,
+        "contract_type": "O",
+        "position": "1B,2B,OF"
+      },
+      {
+        "player": "Tyler Glasnow",
+        "salary": 16,
+        "contract_type": "O",
+        "position": "SP"
+      },
+      {
+        "player": "Hunter Greene",
+        "salary": 6,
+        "contract_type": "N1",
+        "position": "SP"
+      },
+      {
+        "player": "Freddie Freeman",
+        "salary": 50,
+        "contract_type": "N1",
+        "position": "1B"
+      },
+      {
+        "player": "Luis Robert Jr.",
+        "salary": 16,
+        "contract_type": "N2",
+        "position": "CF"
+      },
+      {
+        "player": "Triston Casas",
+        "salary": 11,
+        "contract_type": "N2",
+        "position": "1B"
+      },
+      {
+        "player": "Jose Altuve",
+        "salary": 29,
+        "contract_type": "B",
+        "position": "2B"
+      },
+      {
+        "player": "Trevor Story",
+        "salary": 17,
+        "contract_type": "B",
+        "position": "SS"
+      },
+      {
+        "player": "Randy Arozarena",
+        "salary": 31,
+        "contract_type": "B",
+        "position": "LF  RF"
+      }
+    ],
+    "ywchiou": [
+      {
+        "player": "Framber Valdez",
+        "salary": 20,
+        "contract_type": "O",
+        "position": "SP"
+      },
+      {
+        "player": "Cristian Javier",
+        "salary": 9,
+        "contract_type": "O",
+        "position": "SP"
+      },
+      {
+        "player": "Yandy Diaz",
+        "salary": 3,
+        "contract_type": "B",
+        "position": "1B/3B"
+      },
+      {
+        "player": "Luis Arraez",
+        "salary": 15,
+        "contract_type": "B",
+        "position": "2B"
+      },
+      {
+        "player": "Yanier Diaz",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "C"
+      },
+      {
+        "player": "Jake Burger",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "3B"
+      },
+      {
+        "player": "Chas McCormick",
+        "salary": 2,
+        "contract_type": "B",
+        "position": "OF"
+      },
+      {
+        "player": "Josh Lowe",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "OF"
+      }
+    ]
+  },
+  "2025": {
+    "楊善合": [
+      {
+        "player": "Vinnie Pasquantino",
+        "salary": 11,
+        "contract_type": "N1",
+        "position": "1B"
+      },
+      {
+        "player": "Sean Murphy",
+        "salary": 11,
+        "contract_type": "O",
+        "position": "C"
+      },
+      {
+        "player": "Logan Webb",
+        "salary": 16,
+        "contract_type": "N1",
+        "position": "P"
+      },
+      {
+        "player": "Kenley Jansen",
+        "salary": 27,
+        "contract_type": "O",
+        "position": "P"
+      },
+      {
+        "player": "Felix Bautista",
+        "salary": 6,
+        "contract_type": "O",
+        "position": "P"
+      },
+      {
+        "player": "Salvador Perez",
+        "salary": 9,
+        "contract_type": "B",
+        "position": "C"
+      },
+      {
+        "player": "Brent Rooker",
+        "salary": 7,
+        "contract_type": "B",
+        "position": "LF"
+      },
+      {
+        "player": "Seth Lugo",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "P"
+      },
+      {
+        "player": "Michael Wacha",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "P"
+      },
+      {
+        "player": "Cole Ragans",
+        "salary": 13,
+        "contract_type": "N2",
+        "position": "P"
+      }
+    ],
+    "TIMMY LIU": [
+      {
+        "player": "Marcus Semien",
+        "salary": 21,
+        "contract_type": "N1",
+        "position": "2B"
+      },
+      {
+        "player": "Michael Busch",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "1B"
+      },
+      {
+        "player": "Zac Gallen",
+        "salary": 21,
+        "contract_type": "N1",
+        "position": "SP"
+      },
+      {
+        "player": "Spencer Strider",
+        "salary": 21,
+        "contract_type": "N3",
+        "position": "SP"
+      },
+      {
+        "player": "Spencer Steer",
+        "salary": 11,
+        "contract_type": "N2",
+        "position": "1B/LF"
+      },
+      {
+        "player": "Edwin Díaz",
+        "salary": 16,
+        "contract_type": "N3",
+        "position": "RP"
+      },
+      {
+        "player": "Tarik Skubal",
+        "salary": 21,
+        "contract_type": "N4",
+        "position": "SP"
+      },
+      {
+        "player": "Ranger Suárez",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "SP"
+      },
+      {
+        "player": "Brice Turang",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "2B"
+      },
+      {
+        "player": "Jurickson Profar",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "OF"
+      }
+    ],
+    "林剛": [
+      {
+        "player": "Brandon Nimmo",
+        "salary": 11,
+        "contract_type": "N1",
+        "position": "LF,CF"
+      },
+      {
+        "player": "William Contreras",
+        "salary": 16,
+        "contract_type": "N2",
+        "position": "C"
+      },
+      {
+        "player": "Royce Lewis",
+        "salary": 11,
+        "contract_type": "N2",
+        "position": "3B"
+      },
+      {
+        "player": "Marcell Ozuna",
+        "salary": 11,
+        "contract_type": "N2",
+        "position": "LF"
+      },
+      {
+        "player": "Zach Eflin",
+        "salary": 7,
+        "contract_type": "N1",
+        "position": "P"
+      },
+      {
+        "player": "Justin Martinez",
+        "salary": 2,
+        "contract_type": "B",
+        "position": "RP"
+      },
+      {
+        "player": "Dylan Crews",
+        "salary": 6,
+        "contract_type": "B",
+        "position": "RF"
+      },
+      {
+        "player": "Jake Burger",
+        "salary": 3,
+        "contract_type": "B",
+        "position": "1B,3B"
+      },
+      {
+        "player": "Ryan Walker",
+        "salary": 2,
+        "contract_type": "B",
+        "position": "P"
+      },
+      {
+        "player": "Junior Caminero",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "3B"
+      }
+    ],
+    "Hank": [
+      {
+        "player": "Vladimir Guerrero Jr.",
+        "salary": 51,
+        "contract_type": "N7",
+        "position": ""
+      },
+      {
+        "player": "Austin Riley",
+        "salary": 33,
+        "contract_type": "N3",
+        "position": ""
+      },
+      {
+        "player": "Bo Bichette",
+        "salary": 37,
+        "contract_type": "N2",
+        "position": ""
+      },
+      {
+        "player": "Michael Harris II",
+        "salary": 30,
+        "contract_type": "N4",
+        "position": ""
+      },
+      {
+        "player": "Gunnar Henderson",
+        "salary": 26,
+        "contract_type": "N4",
+        "position": ""
+      },
+      {
+        "player": "Sandy Alcantara",
+        "salary": 33,
+        "contract_type": "N4",
+        "position": ""
+      },
+      {
+        "player": "Alek Manoah",
+        "salary": 21,
+        "contract_type": "N2",
+        "position": ""
+      }
+    ],
+    "Leo": [
+      {
+        "player": "Gleyber Torres",
+        "salary": 21,
+        "contract_type": "O",
+        "position": "2B"
+      },
+      {
+        "player": "Christian Walker",
+        "salary": 6,
+        "contract_type": "O",
+        "position": "1B"
+      },
+      {
+        "player": "Kyle Schwarber",
+        "salary": 19,
+        "contract_type": "B",
+        "position": "LF"
+      },
+      {
+        "player": "Eugenio Suárez",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "3B"
+      },
+      {
+        "player": "Michael King",
+        "salary": 16,
+        "contract_type": "N3",
+        "position": "SP"
+      },
+      {
+        "player": "Bryce Miller",
+        "salary": 22,
+        "contract_type": "B",
+        "position": "SP"
+      },
+      {
+        "player": "Cristopher Sánchez",
+        "salary": 10,
+        "contract_type": "B",
+        "position": "SP"
+      }
+    ],
+    "Eddie Chen": [
+      {
+        "player": "Edwardo Cabrera",
+        "salary": 7,
+        "contract_type": "O",
+        "position": "SP"
+      },
+      {
+        "player": "Matt Chapman",
+        "salary": 5,
+        "contract_type": "B",
+        "position": "3B"
+      },
+      {
+        "player": "Christopher Morel",
+        "salary": 5,
+        "contract_type": "o",
+        "position": "Util"
+      },
+      {
+        "player": "Seiya Suzuki",
+        "salary": 20,
+        "contract_type": "N1",
+        "position": "RF"
+      },
+      {
+        "player": "Blake Snell",
+        "salary": 36,
+        "contract_type": "B",
+        "position": "SP"
+      },
+      {
+        "player": "Kyle Harrison",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "SP"
+      },
+      {
+        "player": "Xavier Edwards",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "2B"
+      },
+      {
+        "player": "Pablo Lopez",
+        "salary": 14,
+        "contract_type": "N1",
+        "position": "SP"
+      },
+      {
+        "player": "Luis Severino",
+        "salary": 2,
+        "contract_type": "B",
+        "position": "SP"
+      }
+    ],
+    "Yu-Che Chang": [
+      {
+        "player": "Gabriel Moreno",
+        "salary": 11,
+        "contract_type": "N1",
+        "position": "C"
+      },
+      {
+        "player": "Jarren Duran",
+        "salary": 21,
+        "contract_type": "N4",
+        "position": "LF, CF"
+      },
+      {
+        "player": "Tanner Bibee",
+        "salary": 6,
+        "contract_type": "N1",
+        "position": "SP"
+      },
+      {
+        "player": "Bailey Ober",
+        "salary": 6,
+        "contract_type": "N1",
+        "position": "SP"
+      },
+      {
+        "player": "Brenton Doyle",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "CF"
+      },
+      {
+        "player": "Heliot Ramos",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "LF, CF, RF"
+      },
+      {
+        "player": "Teoscar Hernández",
+        "salary": 20,
+        "contract_type": "B",
+        "position": "LF, RF"
+      },
+      {
+        "player": "Tanner Houck",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "SP"
+      },
+      {
+        "player": "Yoshinobu Yamamoto",
+        "salary": 38,
+        "contract_type": "B",
+        "position": "SP"
+      },
+      {
+        "player": "Jacob deGrom",
+        "salary": 20,
+        "contract_type": "B",
+        "position": "SP"
+      }
+    ],
+    "Billy WU": [
+      {
+        "player": "Shohei Ohtani",
+        "salary": 20,
+        "contract_type": "N1",
+        "position": "Util"
+      },
+      {
+        "player": "Corbin Carroll",
+        "salary": 21,
+        "contract_type": "N3",
+        "position": "CF"
+      },
+      {
+        "player": "George Kirby",
+        "salary": 11,
+        "contract_type": "N1",
+        "position": "SP"
+      },
+      {
+        "player": "Shota Imanaga",
+        "salary": 22,
+        "contract_type": "B",
+        "position": "SP"
+      },
+      {
+        "player": "Jackson Merrill",
+        "salary": 8,
+        "contract_type": "B",
+        "position": "CF"
+      },
+      {
+        "player": "Jesús Sánchez",
+        "salary": 2,
+        "contract_type": "B",
+        "position": "LF, CF, RF"
+      },
+      {
+        "player": "Otto Lopez",
+        "salary": 2,
+        "contract_type": "B",
+        "position": "2B, SS"
+      },
+      {
+        "player": "Jack Flaherty",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "SP"
+      },
+      {
+        "player": "Riley Greene",
+        "salary": 20,
+        "contract_type": "B",
+        "position": "LF, CF, RF"
+      },
+      {
+        "player": "Colton Cowser",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "LF, CF, RF"
+      }
+    ],
+    "James Chen": [
+      {
+        "player": "Julio Rodríguez",
+        "salary": 46,
+        "contract_type": "N2",
+        "position": "CF"
+      },
+      {
+        "player": "Oneil Cruz",
+        "salary": 15,
+        "contract_type": "N1",
+        "position": "SS"
+      },
+      {
+        "player": "Dylan Cease",
+        "salary": 17,
+        "contract_type": "N1",
+        "position": "SP"
+      },
+      {
+        "player": "Shane McClanahan",
+        "salary": 18,
+        "contract_type": "N1",
+        "position": "SP"
+      },
+      {
+        "player": "Jhoan Duran",
+        "salary": 12,
+        "contract_type": "N1",
+        "position": "RP"
+      },
+      {
+        "player": "Ryan Helsley",
+        "salary": 11,
+        "contract_type": "N1",
+        "position": "RP"
+      },
+      {
+        "player": "Ketel Marte",
+        "salary": 18,
+        "contract_type": "B",
+        "position": "2B"
+      },
+      {
+        "player": "Paul Skenes",
+        "salary": 15,
+        "contract_type": "B",
+        "position": "SP"
+      },
+      {
+        "player": "Bryan Woo",
+        "salary": 15,
+        "contract_type": "B",
+        "position": "SP"
+      },
+      {
+        "player": "Alec Bohm",
+        "salary": 11,
+        "contract_type": "B",
+        "position": "3B"
+      }
+    ],
+    "Chih-Wei": [
+      {
+        "player": "Bobby Witt Jr.",
+        "salary": 32,
+        "contract_type": "N5",
+        "position": "SS"
+      },
+      {
+        "player": "Elly De La Cruz",
+        "salary": 31,
+        "contract_type": "N6",
+        "position": "3B"
+      },
+      {
+        "player": "Juan Soto",
+        "salary": 33,
+        "contract_type": "N2",
+        "position": "LF"
+      },
+      {
+        "player": "Ronald Acuña Jr.",
+        "salary": 35,
+        "contract_type": "N2",
+        "position": "CF"
+      },
+      {
+        "player": "Jackson Chourio",
+        "salary": 2,
+        "contract_type": "B",
+        "position": "OF"
+      },
+      {
+        "player": "Jackson Holliday",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "2B"
+      },
+      {
+        "player": "Mark Vientos",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "1B"
+      },
+      {
+        "player": "Grayson Rodriguez",
+        "salary": 6,
+        "contract_type": "N1",
+        "position": "SP"
+      },
+      {
+        "player": "Shane Baz",
+        "salary": 4,
+        "contract_type": "B",
+        "position": "SP"
+      },
+      {
+        "player": "Mason Miller",
+        "salary": 11,
+        "contract_type": "B",
+        "position": "RP"
+      }
+    ],
+    "Ponpon": [
+      {
+        "player": "Anthony Santander",
+        "salary": 9,
+        "contract_type": "O",
+        "position": "1B/LF/RF"
+      },
+      {
+        "player": "Pete Fairbanks",
+        "salary": 7,
+        "contract_type": "O",
+        "position": "RP"
+      },
+      {
+        "player": "Robert Suarez",
+        "salary": 10,
+        "contract_type": "B",
+        "position": "RP"
+      },
+      {
+        "player": "Willy Adames",
+        "salary": 10,
+        "contract_type": "B",
+        "position": "SS"
+      },
+      {
+        "player": "Anthony Volpe",
+        "salary": 3,
+        "contract_type": "B",
+        "position": "SS"
+      },
+      {
+        "player": "Drew Rasmussen",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "SP"
+      },
+      {
+        "player": "Shane Bieber",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "SP"
+      },
+      {
+        "player": "Garrett Crochet",
+        "salary": 9,
+        "contract_type": "B",
+        "position": "SP"
+      },
+      {
+        "player": "Luis Gil",
+        "salary": 3,
+        "contract_type": "B",
+        "position": "SP"
+      },
+      {
+        "player": "Taj Bradley",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "SP"
+      }
+    ],
+    "郭子睿(Rangers)": [
+      {
+        "player": "Bryan Reynolds",
+        "salary": 16,
+        "contract_type": "N1",
+        "position": "LF"
+      },
+      {
+        "player": "Evan Carter",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "OF"
+      },
+      {
+        "player": "Shohei Ohtani",
+        "salary": 22,
+        "contract_type": "B",
+        "position": "SP"
+      },
+      {
+        "player": "Nathan Eovaldi",
+        "salary": 11,
+        "contract_type": "O",
+        "position": "SP"
+      },
+      {
+        "player": "Corey Seager",
+        "salary": 39,
+        "contract_type": "O",
+        "position": "SS"
+      },
+      {
+        "player": "Tanner Scott",
+        "salary": 6,
+        "contract_type": "N1",
+        "position": "RP"
+      },
+      {
+        "player": "Devin Williams",
+        "salary": 5,
+        "contract_type": "B",
+        "position": "RP"
+      },
+      {
+        "player": "Josh Jung",
+        "salary": 20,
+        "contract_type": "O",
+        "position": "3B"
+      },
+      {
+        "player": "Adolis García",
+        "salary": 25,
+        "contract_type": "N1",
+        "position": "CF,RF"
+      },
+      {
+        "player": "Spencer Schwellenbach",
+        "salary": 3,
+        "contract_type": "B",
+        "position": "SP"
+      }
+    ],
+    "Javier": [
+      {
+        "player": "Nico Hoerner",
+        "salary": 11,
+        "contract_type": "N1",
+        "position": "2B"
+      },
+      {
+        "player": "Clarke Schmidt",
+        "salary": 2,
+        "contract_type": "B",
+        "position": "SP"
+      },
+      {
+        "player": "Mookie Betts",
+        "salary": 58,
+        "contract_type": "O",
+        "position": "SS/OF"
+      },
+      {
+        "player": "Cody Bellinger",
+        "salary": 14,
+        "contract_type": "N1",
+        "position": "1B/OF"
+      },
+      {
+        "player": "Ronel Blanco",
+        "salary": 11,
+        "contract_type": "B",
+        "position": "SP"
+      },
+      {
+        "player": "Cal Raleigh",
+        "salary": 11,
+        "contract_type": "N1",
+        "position": "C"
+      },
+      {
+        "player": "Zach Neto",
+        "salary": 3,
+        "contract_type": "B",
+        "position": "SS"
+      },
+      {
+        "player": "Austin Wells",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "C"
+      },
+      {
+        "player": "Jazz Chisholm Jr.",
+        "salary": 28,
+        "contract_type": "B",
+        "position": "OF"
+      },
+      {
+        "player": "Jung Hoo Lee",
+        "salary": 5,
+        "contract_type": "B",
+        "position": "OF"
+      }
+    ],
+    "Issac": [
+      {
+        "player": "Fernando Tatis Jr",
+        "salary": 26,
+        "contract_type": "N2",
+        "position": "RF"
+      },
+      {
+        "player": "Josh Naylor",
+        "salary": 2,
+        "contract_type": "O",
+        "position": "1B"
+      },
+      {
+        "player": "Adley Rutschman",
+        "salary": 17,
+        "contract_type": "N2",
+        "position": "C"
+      },
+      {
+        "player": "CJ Abrams",
+        "salary": 16,
+        "contract_type": "N2",
+        "position": "SS"
+      },
+      {
+        "player": "James Wood",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "LF"
+      },
+      {
+        "player": "Pete Crow Armstrong",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "CF"
+      },
+      {
+        "player": "Jose Ramirez",
+        "salary": 37,
+        "contract_type": "B",
+        "position": "3B"
+      },
+      {
+        "player": "Justin Steele",
+        "salary": 6,
+        "contract_type": "N1",
+        "position": "SP"
+      },
+      {
+        "player": "Jared Jones",
+        "salary": 3,
+        "contract_type": "B",
+        "position": "SP"
+      },
+      {
+        "player": "Hunter Brown",
+        "salary": 6,
+        "contract_type": "N1",
+        "position": "SP"
+      }
+    ],
+    "Tony林芳民": [
+      {
+        "player": "Hunter Greene",
+        "salary": 6,
+        "contract_type": "O",
+        "position": "SP"
+      },
+      {
+        "player": "Freddie Freeman",
+        "salary": 50,
+        "contract_type": "O",
+        "position": "1B"
+      },
+      {
+        "player": "Luis Robert Jr.",
+        "salary": 16,
+        "contract_type": "N1",
+        "position": "CF"
+      },
+      {
+        "player": "Triston Casas",
+        "salary": 11,
+        "contract_type": "N1",
+        "position": "1B"
+      },
+      {
+        "player": "Jose Altuve",
+        "salary": 34,
+        "contract_type": "N1",
+        "position": ""
+      },
+      {
+        "player": "Lawrence Butler",
+        "salary": 1,
+        "contract_type": "B",
+        "position": ""
+      },
+      {
+        "player": "Colt Keith",
+        "salary": 1,
+        "contract_type": "B",
+        "position": ""
+      },
+      {
+        "player": "Carlos Rodón",
+        "salary": 12,
+        "contract_type": "B",
+        "position": ""
+      },
+      {
+        "player": "Luke Weaver",
+        "salary": 1,
+        "contract_type": "B",
+        "position": ""
+      },
+      {
+        "player": "Jameson Taillon",
+        "salary": 1,
+        "contract_type": "B",
+        "position": ""
+      }
+    ],
+    "ywchiou": [
+      {
+        "player": "Yanier Diaz",
+        "salary": 11,
+        "contract_type": "N2",
+        "position": "C"
+      },
+      {
+        "player": "Raisel Iglesias",
+        "salary": 21,
+        "contract_type": "B",
+        "position": "RP"
+      },
+      {
+        "player": "Spencer Horwitz",
+        "salary": 2,
+        "contract_type": "B",
+        "position": "2B"
+      },
+      {
+        "player": "Joe Ryan",
+        "salary": 28,
+        "contract_type": "B",
+        "position": "SP"
+      },
+      {
+        "player": "Steven Kwan",
+        "salary": 8,
+        "contract_type": "B",
+        "position": "OF"
+      },
+      {
+        "player": "Luis Arraez",
+        "salary": 15,
+        "contract_type": "O",
+        "position": "1B"
+      },
+      {
+        "player": "Michael Toglia",
+        "salary": 2,
+        "contract_type": "B",
+        "position": "OF"
+      },
+      {
+        "player": "Jeremiah Estrada",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "RP"
+      },
+      {
+        "player": "Luis Rengifo",
+        "salary": 1,
+        "contract_type": "B",
+        "position": "2B"
+      }
+    ]
+  },
+  "_meta": {
+    "manager_succession": {
+      "hyc莊翔宇": "Hank",
+      "林小伯": "Billy WU"
+    },
+    "source": "5-Man Keep盟 新版球員名單.xlsx"
+  }
+}
