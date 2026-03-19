@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import os
 import secrets
-from urllib.parse import urlencode
+from urllib.parse import quote, urlencode
 
 import requests
 from fastapi import APIRouter, Depends, HTTPException, Query, Response
@@ -166,9 +166,12 @@ async def yahoo_callback(
 
     try:
         result = await _exchange_code_for_jwt(code)
-        # Set HttpOnly cookie and redirect (no token in URL)
+        # Set HttpOnly cookie AND pass token in URL as iOS Safari fallback.
+        # iOS Safari ITP blocks cookies set during cross-origin redirects,
+        # so the frontend can use the URL token to call /api/auth/set-cookie
+        # as a same-origin request (which Safari allows).
         redirect = RedirectResponse(
-            f"{frontend_url}/auth/callback?auth=ok",
+            f"{frontend_url}/auth/callback?auth=ok&token={result.token}",
             status_code=302,
         )
         set_auth_cookie(redirect, result.token)
@@ -586,4 +589,30 @@ async def logout():
         media_type="application/json",
     )
     clear_auth_cookie(response)
+    return response
+
+
+@router.post("/set-cookie")
+async def set_cookie_from_token(request_body: dict):
+    """iOS Safari fallback: set HttpOnly cookie from a token.
+
+    iOS Safari's ITP blocks cookies set during cross-origin redirects
+    (Yahoo -> Backend -> Frontend). This endpoint lets the frontend
+    send the token as a same-origin POST request, which Safari allows.
+    The token is validated before setting the cookie.
+    """
+    from api.dependencies import decode_jwt_token
+
+    token = request_body.get("token", "")
+    if not token:
+        raise HTTPException(status_code=400, detail="Token is required")
+
+    # Verify the token is valid before setting the cookie
+    decode_jwt_token(token)  # raises HTTPException 401 if invalid
+
+    response = Response(
+        content='{"message": "Cookie set successfully"}',
+        media_type="application/json",
+    )
+    set_auth_cookie(response, token)
     return response
