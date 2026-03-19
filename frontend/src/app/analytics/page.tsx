@@ -667,6 +667,116 @@ function DraftStatsTab({ data }: { data: DraftStatsResponse }) {
   );
 }
 
+// ========== FAAB Correlation Chart ==========
+
+function FaabCorrelationChart({ data }: { data: FaabStatsResponse["faab_vs_standings"] }) {
+  if (!data || data.length === 0) return null;
+
+  const maxSpent = Math.max(...data.map(d => d.faab_spent));
+  const maxPickups = Math.max(...data.map(d => d.num_pickups));
+
+  // Compute averages for playoff vs non-playoff
+  const playoffTeams = data.filter(d => d.is_playoff);
+  const nonPlayoff = data.filter(d => !d.is_playoff);
+  const avgPlayoffSpent = playoffTeams.length
+    ? Math.round(playoffTeams.reduce((s, d) => s + d.faab_spent, 0) / playoffTeams.length)
+    : 0;
+  const avgNonPlayoffSpent = nonPlayoff.length
+    ? Math.round(nonPlayoff.reduce((s, d) => s + d.faab_spent, 0) / nonPlayoff.length)
+    : 0;
+  const avgPlayoffPickups = playoffTeams.length
+    ? Math.round(playoffTeams.reduce((s, d) => s + d.num_pickups, 0) / playoffTeams.length)
+    : 0;
+  const avgNonPlayoffPickups = nonPlayoff.length
+    ? Math.round(nonPlayoff.reduce((s, d) => s + d.num_pickups, 0) / nonPlayoff.length)
+    : 0;
+
+  const chartW = 320;
+  const chartH = 200;
+  const pad = { top: 10, right: 10, bottom: 25, left: 30 };
+  const w = chartW - pad.left - pad.right;
+  const h = chartH - pad.top - pad.bottom;
+
+  return (
+    <div className="mb-4 rounded-lg border border-gray-200 bg-white p-3 sm:p-4">
+      <h4 className="mb-1 text-xs font-semibold text-gray-700">
+        2025 FAAB 花費 vs 最終排名（季後賽關聯分析）
+      </h4>
+      <p className="mb-3 text-[10px] text-gray-400">
+        有積極撿人的隊伍戰績是否更好？
+      </p>
+
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+        {/* Scatter plot */}
+        <svg viewBox={`0 0 ${chartW} ${chartH}`} className="w-full max-w-[340px] overflow-visible">
+          {/* Grid lines */}
+          {[4, 8, 12, 16].map(place => {
+            const y = pad.top + (place / 16) * h;
+            return (
+              <g key={place}>
+                <line x1={pad.left} y1={y} x2={chartW - pad.right} y2={y} stroke="#f3f4f6" strokeWidth={0.5} />
+                <text x={pad.left - 3} y={y + 3} textAnchor="end" className="fill-gray-300" fontSize={7}>{place}</text>
+              </g>
+            );
+          })}
+          {/* X axis labels */}
+          {[0, 25, 50, 75, 100].map(val => {
+            const x = pad.left + (val / (maxSpent * 1.1)) * w;
+            return (
+              <text key={val} x={x} y={chartH - 3} textAnchor="middle" className="fill-gray-300" fontSize={7}>${val}</text>
+            );
+          })}
+          {/* Axis labels */}
+          <text x={chartW / 2} y={chartH + 2} textAnchor="middle" className="fill-gray-400" fontSize={7}>FAAB 花費</text>
+          <text x={3} y={chartH / 2} textAnchor="middle" transform={`rotate(-90, 3, ${chartH / 2})`} className="fill-gray-400" fontSize={7}>排名</text>
+          {/* Playoff line at 8th */}
+          <line
+            x1={pad.left} y1={pad.top + (8 / 16) * h}
+            x2={chartW - pad.right} y2={pad.top + (8 / 16) * h}
+            stroke="#ef4444" strokeWidth={0.5} strokeDasharray="3,2" opacity={0.5}
+          />
+          <text x={chartW - pad.right + 2} y={pad.top + (8 / 16) * h + 3} className="fill-red-400" fontSize={6}>季後賽線</text>
+          {/* Data points */}
+          {data.map(d => {
+            const x = pad.left + (d.faab_spent / (maxSpent * 1.1)) * w;
+            const y = pad.top + ((d.place - 0.5) / 16) * h;
+            return (
+              <g key={d.manager}>
+                <circle cx={x} cy={y} r={4} fill={d.is_playoff ? "#6366f1" : "#d1d5db"} stroke="white" strokeWidth={1} />
+                <text x={x} y={y - 6} textAnchor="middle" className={d.is_playoff ? "fill-indigo-600" : "fill-gray-400"} fontSize={6} fontWeight={d.is_playoff ? 600 : 400}>
+                  {d.manager.substring(0, 6)}
+                </text>
+              </g>
+            );
+          })}
+        </svg>
+
+        {/* Summary stats */}
+        <div className="flex flex-col gap-2 text-[11px]">
+          <div className="rounded-md bg-indigo-50 px-3 py-2">
+            <div className="font-semibold text-indigo-700">季後賽隊伍 (Top 8)</div>
+            <div className="text-indigo-600">平均花費: ${avgPlayoffSpent} / 平均撿人: {avgPlayoffPickups} 次</div>
+          </div>
+          <div className="rounded-md bg-gray-50 px-3 py-2">
+            <div className="font-semibold text-gray-500">未進季後賽 (9-16)</div>
+            <div className="text-gray-400">平均花費: ${avgNonPlayoffSpent} / 平均撿人: {avgNonPlayoffPickups} 次</div>
+          </div>
+          <div className="mt-1 rounded-md border border-amber-200 bg-amber-50 px-3 py-2">
+            <div className="text-[10px] text-amber-700">
+              {avgPlayoffSpent > avgNonPlayoffSpent
+                ? `季後賽隊伍平均多花 $${avgPlayoffSpent - avgNonPlayoffSpent} FAAB`
+                : "花費差異不大"}
+              {avgPlayoffPickups > avgNonPlayoffPickups
+                ? `，多撿 ${avgPlayoffPickups - avgNonPlayoffPickups} 次人`
+                : ""}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ========== FAAB Stats ==========
 
 function FaabStatsTab({ data }: { data: FaabStatsResponse }) {
@@ -706,6 +816,11 @@ function FaabStatsTab({ data }: { data: FaabStatsResponse }) {
           <MiniCard label="平均花費" value={`$${summary.avg_team_faab_spent}`} />
           <MiniCard label="參與隊伍" value={`${summary.team_count}`} />
         </div>
+      )}
+
+      {/* FAAB vs Standings scatter chart */}
+      {data.faab_vs_standings && data.faab_vs_standings.length > 0 && (
+        <FaabCorrelationChart data={data.faab_vs_standings} />
       )}
 
       <div className="overflow-x-auto rounded-lg border border-gray-200">

@@ -50,7 +50,14 @@ def _available_years() -> list[int]:
 
 def _build_position_lookup() -> dict[str, str]:
     """Build a player_name -> position lookup from contracts data and DB."""
-    lookup: dict[str, str] = {}
+    # Manual fallback for players no longer on any roster
+    lookup: dict[str, str] = {
+        "Max Scherzer": "SP", "Joe Musgrove": "SP", "Eloy Jimenez": "OF",
+        "Jose Abreu": "1B", "Starling Marte": "OF", "Jarred Kelenic": "OF",
+        "Triston McKenzie": "SP", "Kris Bryant": "3B", "Tim Anderson": "SS",
+        "Justin Turner": "3B", "Kenta Maeda": "SP", "Aaron Civale": "SP",
+        "Chris Bassitt": "SP", "Eloy Jiménez": "OF", "José Abreu": "1B",
+    }
 
     # Source 1: contracts JSON (most reliable, has position field)
     contracts_path = DATA_DIR / "2026_contracts_v2.json"
@@ -337,10 +344,44 @@ def compute_faab_stats(years: list[int] | None = None) -> dict:
             "team_count": team_count,
         }
 
+    # FAAB vs standings correlation (2025 season data)
+    correlation: list[dict] = []
+    standings_path = DATA_DIR / "2025_playoff_standings.json"
+    if standings_path.exists():
+        try:
+            with open(standings_path, encoding="utf-8") as f:
+                standings_data = json.load(f)
+            standings_list = standings_data.get("standings", [])
+            # Build place map: manager -> place (1-16)
+            place_map: dict[str, int] = {}
+            for s in standings_list:
+                place_map[s["manager"]] = s["place"]
+
+            # Match FAAB data with standings for 2025
+            for mgr, tdata in all_teams.items():
+                faab_2025 = tdata.get("yearly", {}).get("2025", {})
+                if not faab_2025:
+                    continue
+                resolved = _resolve_manager_name(mgr)
+                place = place_map.get(resolved) or place_map.get(mgr)
+                if place is None:
+                    continue
+                correlation.append({
+                    "manager": resolved,
+                    "faab_spent": faab_2025["total_faab_spent"],
+                    "num_pickups": faab_2025["num_pickups"],
+                    "place": place,
+                    "is_playoff": place <= 8,
+                })
+            correlation.sort(key=lambda x: x["place"])
+        except Exception:
+            pass
+
     return {
         "years": years,
         "teams": dict(all_teams),
         "yearly_summary": yearly_summary,
+        "faab_vs_standings": correlation,
     }
 
 
