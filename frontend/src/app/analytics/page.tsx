@@ -305,13 +305,12 @@ function SalaryRankingsTab({ data }: { data: SalaryRankingsResponse }) {
     years.length > 0 ? String(years[years.length - 1]) : "",
   );
   const ranking = data.rankings[selectedYear] ?? [];
-  const maxSalary = ranking.length > 0 ? ranking[0].salary : 1;
 
   return (
     <div>
       <YearSelector years={years} selected={selectedYear} onChange={setSelectedYear} />
       <p className="mb-2 text-[11px] text-gray-400">
-        {selectedYear} 賽季薪資排名前 20（Keepers + 選秀）
+        {selectedYear} 賽季薪資排名前 20（Keepers + 選秀）- 分布 = 佔隊伍總薪資%
       </p>
 
       <div className="overflow-x-auto rounded-lg border border-gray-200">
@@ -345,11 +344,16 @@ function SalaryRankingsTab({ data }: { data: SalaryRankingsResponse }) {
                   ${p.salary}
                 </td>
                 <td className="hidden px-3 py-2 md:table-cell">
-                  <div className="h-3 w-32 rounded-full bg-gray-100">
-                    <div
-                      className="h-3 rounded-full bg-indigo-500"
-                      style={{ width: `${(p.salary / maxSalary) * 100}%` }}
-                    />
+                  <div className="flex items-center gap-2">
+                    <div className="h-3 w-24 rounded-full bg-gray-100">
+                      <div
+                        className="h-3 rounded-full bg-indigo-500"
+                        style={{ width: `${Math.min(p.salary_pct ?? 0, 100)}%` }}
+                      />
+                    </div>
+                    <span className="text-[10px] tabular-nums text-gray-400">
+                      {p.salary_pct ?? 0}%
+                    </span>
                   </div>
                 </td>
                 <td className="whitespace-nowrap px-2 py-1.5 text-gray-500 sm:px-3 sm:py-2">{p.manager}</td>
@@ -438,16 +442,11 @@ function ContractValuesTab({ data }: { data: ContractValuesResponse }) {
                     ${c.total_value}
                   </td>
                   <td className="hidden px-3 py-2 md:table-cell">
-                    <div className="relative h-4 w-28 rounded-full bg-gray-100 overflow-hidden" title={`${Math.round(pctComplete)}% 已執行`}>
-                      {/* Full contract bar (light) */}
+                    <div className="relative h-4 w-28 rounded-full bg-indigo-100 overflow-hidden" title={`${Math.round(pctComplete)}% 已執行`}>
+                      {/* Executed portion (dark fill from left) */}
                       <div
-                        className="absolute inset-y-0 left-0 rounded-full bg-indigo-200"
-                        style={{ width: `${(c.total_value / maxValue) * 100}%` }}
-                      />
-                      {/* Executed portion (dark, within the contract bar) */}
-                      <div
-                        className="absolute inset-y-0 left-0 rounded-full bg-indigo-600"
-                        style={{ width: `${(c.total_value / maxValue) * (pctComplete / 100)}%` }}
+                        className="absolute inset-y-0 left-0 rounded-full bg-indigo-500"
+                        style={{ width: `${pctComplete}%` }}
                       />
                     </div>
                     <div className="mt-0.5 text-[9px] text-gray-400">

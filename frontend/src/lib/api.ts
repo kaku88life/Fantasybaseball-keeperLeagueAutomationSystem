@@ -727,6 +727,7 @@ export interface SalaryRankingEntry {
   manager: string;
   source: string;
   position: string;
+  salary_pct: number;
 }
 
 export interface SalaryRankingsResponse {

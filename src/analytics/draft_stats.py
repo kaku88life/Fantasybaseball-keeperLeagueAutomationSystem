@@ -157,6 +157,9 @@ def compute_draft_stats(years: list[int] | None = None) -> dict:
     all_teams: dict[str, dict] = defaultdict(lambda: {"yearly": {}})
     yearly_summary: dict[str, dict] = {}
 
+    # Load keeper data to exclude keeper players from draft stats
+    hist = _load_historical_keepers()
+
     for year in years:
         draft = _load_draft(year)
         if not draft:
@@ -165,6 +168,15 @@ def compute_draft_stats(years: list[int] | None = None) -> dict:
         year_str = str(year)
         team_picks: dict[str, list[dict]] = defaultdict(list)
 
+        # Build keeper set: players with non-A contracts are keepers (B/N/O/R)
+        keeper_players: set[str] = set()
+        if year_str in hist:
+            for _mgr, players in hist[year_str].items():
+                for p in players:
+                    ct = p.get("contract_type", "A")
+                    if ct != "A":
+                        keeper_players.add(p["player"])
+
         league_max = {"cost": 0, "player": "", "manager": ""}
 
         for pick in draft:
@@ -172,6 +184,10 @@ def compute_draft_stats(years: list[int] | None = None) -> dict:
             cost = pick.get("cost", 0)
             player = pick.get("player_name", "")
             position = pick.get("player_position", "") or pos_lookup.get(player, "")
+
+            # Skip keeper players (non-A contract) - only count actual draft picks
+            if player in keeper_players:
+                continue
 
             team_picks[mgr].append({
                 "round": pick.get("round", 0),
@@ -652,12 +668,9 @@ def compute_salary_rankings(years: list[int] | None = None) -> dict:
         }
     """
     hist = _load_historical_keepers()
-    contracts_2026 = _load_2026_contracts()
 
+    # Only show completed seasons (2026 draft not yet done)
     available = sorted(set(int(y) for y in hist.keys()))
-    if contracts_2026:
-        available.append(2026)
-    available = sorted(set(available))
 
     if years:
         available = [y for y in available if y in years]
@@ -695,19 +708,6 @@ def compute_salary_rankings(years: list[int] | None = None) -> dict:
                         "position": pick.get("player_position", ""),
                     })
 
-        elif year == 2026:
-            # 2026 from contracts JSON
-            for mgr, players in contracts_2026.items():
-                for p in players:
-                    all_players.append({
-                        "player": p["player"],
-                        "salary": p["salary"],
-                        "contract_type": p["contract_type"],
-                        "manager": mgr,
-                        "source": p.get("source", "keeper"),
-                        "position": p.get("position", ""),
-                    })
-
         # Deduplicate: if same player appears as both keeper and draft,
         # keep the one with the more advanced contract (keeper > draft)
         # Contract priority: N > O > B > A > R > FA
@@ -724,11 +724,18 @@ def compute_salary_rankings(years: list[int] | None = None) -> dict:
                 seen[name] = p
         unique_players = list(seen.values())
 
+        # Compute per-manager total salary for % calculation
+        mgr_totals: dict[str, int] = defaultdict(int)
+        for p in unique_players:
+            mgr_totals[p["manager"]] += p["salary"]
+
         # Sort by salary descending, take top 20
         unique_players.sort(key=lambda x: (-x["salary"], x["player"]))
         top20 = unique_players[:20]
         for i, p in enumerate(top20, 1):
             p["rank"] = i
+            team_total = mgr_totals.get(p["manager"], 1)
+            p["salary_pct"] = round(p["salary"] / team_total * 100, 1)
 
         rankings[year_str] = top20
 
