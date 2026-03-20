@@ -108,10 +108,10 @@ def _build_team_text(team, db_team: dict) -> str:
         f"### Roster",
     ]
 
-    # Group by contract type
+    # Group by contract type (convert enum to string)
     players_by_type: dict[str, list] = {}
     for p in team.players:
-        ct = p.contract.contract_type
+        ct = str(p.contract.contract_type.value) if hasattr(p.contract.contract_type, 'value') else str(p.contract.contract_type)
         if ct not in players_by_type:
             players_by_type[ct] = []
         players_by_type[ct].append(p)
@@ -122,7 +122,7 @@ def _build_team_text(team, db_team: dict) -> str:
             # Check N1, N2, N3, etc.
             n_players = [
                 p for key, plist in players_by_type.items()
-                if key.startswith("N") for p in plist
+                if str(key).startswith("N") for p in plist
             ] if ct == "N" else []
             if ct == "N" and n_players:
                 group = n_players
@@ -134,9 +134,11 @@ def _build_team_text(team, db_team: dict) -> str:
         lines.append(f"| Player | Position | Salary | Contract | MLB Team |")
         lines.append(f"|--------|----------|--------|----------|----------|")
         for p in sorted(group, key=lambda x: -x.contract.salary):
-            ct_display = p.contract.contract_type
-            if ct_display.startswith("N"):
-                ct_display = f"N{p.contract.extension_years}"
+            ct_raw = str(p.contract.contract_type.value) if hasattr(p.contract.contract_type, 'value') else str(p.contract.contract_type)
+            ct_display = ct_raw
+            if str(ct_display).startswith("N"):
+                ext = getattr(p.contract, 'extension_years', 0) or 0
+                ct_display = f"N{ext}" if ext else ct_display
             lines.append(
                 f"| {p.name} | {p.position} | ${p.contract.salary} | {ct_display} | {p.mlb_team or '?'} |"
             )
