@@ -674,6 +674,7 @@ export interface FaabStatsResponse {
   }>;
   faab_vs_standings: Record<string, Array<{
     manager: string;
+    team_name: string;
     faab_spent: number;
     num_pickups: number;
     place: number;

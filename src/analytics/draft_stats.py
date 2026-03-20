@@ -62,13 +62,108 @@ def _available_years() -> list[int]:
 
 def _build_position_lookup() -> dict[str, str]:
     """Build a player_name -> position lookup from contracts data and DB."""
-    # Manual fallback for players no longer on any roster
+    # Manual fallback for players no longer on any roster or missing from data files
     lookup: dict[str, str] = {
-        "Max Scherzer": "SP", "Joe Musgrove": "SP", "Eloy Jimenez": "OF",
-        "Jose Abreu": "1B", "Starling Marte": "OF", "Jarred Kelenic": "OF",
-        "Triston McKenzie": "SP", "Kris Bryant": "3B", "Tim Anderson": "SS",
-        "Justin Turner": "3B", "Kenta Maeda": "SP", "Aaron Civale": "SP",
-        "Chris Bassitt": "SP", "Eloy Jiménez": "OF", "José Abreu": "1B",
+        # Pitchers - SP
+        "Max Scherzer": "SP", "Joe Musgrove": "SP", "Kenta Maeda": "SP",
+        "Aaron Civale": "SP", "Chris Bassitt": "SP", "Triston McKenzie": "SP",
+        "Nestor Cortes": "SP", "Miles Mikolas": "SP", "José Urquidy": "SP",
+        "Michael Soroka": "SP", "Jon Gray": "SP", "Patrick Sandoval": "SP",
+        "Marcus Stroman": "SP", "Cal Quantrill": "SP", "Noah Syndergaard": "SP",
+        "Carlos Carrasco": "SP", "Steven Matz": "SP", "Julio Urías": "SP",
+        "Dane Dunning": "SP", "Louis Varland": "SP", "Kutter Crawford": "SP",
+        "Graham Ashcraft": "SP", "Jordan Wicks": "SP", "Adbert Alzolay": "SP",
+        "Brock Stewart": "SP", "Andre Pallante": "SP", "Roansy Contreras": "SP",
+        "Frankie Montas": "SP", "James Paxton": "SP", "Wade Miley": "SP",
+        "Adam Wainwright": "SP", "Johnny Cueto": "SP", "Corey Kluber": "SP",
+        "Ross Stripling": "SP", "Alex Cobb": "SP", "Drew Rucinski": "SP",
+        "Collin McHugh": "SP", "Hayden Wesneski": "SP", "Gordon Graceffo": "SP",
+        "Shintaro Fujinami": "SP", "Drey Jameson": "SP", "Jared Shuster": "SP",
+        "JP Sears": "SP", "Erick Fedde": "SP", "Bowden Francis": "SP",
+        "DJ Herz": "SP", "Tobias Myers": "SP", "David Festa": "SP",
+        "Hayden Birdsong": "SP", "Cody Bradford": "SP", "Ben Brown": "SP",
+        "Griffin Canning": "SP", "Kyle Gibson": "SP", "Daniel Espino": "SP",
+        "Sixto Sánchez": "SP", "Cole Winn": "SP", "Chase Petty": "SP",
+        "Grant Holmes": "SP", "Chase Hampton": "SP", "Noah Schultz": "SP",
+        "Frank Mozzicato": "SP", "Robert Gasser": "SP", "Beau Brieske": "SP",
+        "José Suarez": "SP", "José Buttó": "SP",
+        # Pitchers - RP
+        "Paul Sewald": "RP", "Craig Kimbrel": "RP", "Giovanny Gallegos": "RP",
+        "Jorge López": "RP", "A.J. Minter": "RP", "Adam Ottavino": "RP",
+        "Liam Hendriks": "RP", "Cionel Pérez": "RP", "Kendall Graveman": "RP",
+        "Erik Swanson": "RP", "Andrew Chafin": "RP", "Brad Boxberger": "RP",
+        "Ryne Stanek": "RP", "James Karinchak": "RP", "Brock Burke": "RP",
+        "John Schreiber": "RP", "Génesis Cabrera": "RP", "Michael Fulmer": "RP",
+        "Joe Mantiply": "RP", "Daniel Hudson": "RP", "Anthony Bass": "RP",
+        "Dylan Floro": "RP", "Jimmy Herget": "RP", "Rafael Montero": "RP",
+        "Jonathan Loáisiga": "RP", "Trevor May": "RP", "Brandon Hughes": "RP",
+        "Brusdar Graterol": "RP", "Taylor Rogers": "RP", "Adam Cimber": "RP",
+        "Héctor Neris": "RP", "Brad Hand": "RP", "J.P. Feyereisen": "RP",
+        "José Alvarado": "RP", "Kevin Ginkel": "RP", "Yuki Matsui": "RP",
+        "Yimi García": "RP", "Tim Mayza": "RP", "Andrew Nardi": "RP",
+        "Colin Poche": "RP", "Jason Foley": "RP", "Alex Lange": "RP",
+        "Joel Payamps": "RP", "Danny Coulombe": "RP", "DL Hall": "RP",
+        "Julian Merryweather": "RP", "Caleb Ferguson": "RP", "Colin Holderman": "RP",
+        "James McArthur": "RP", "Robert Stephenson": "RP", "Brooks Raley": "RP",
+        "Yency Almonte": "RP", "Enyel De Los Santos": "RP", "Jose Cuas": "RP",
+        "Shelby Miller": "RP", "Justin Lawrence": "RP", "Hunter Harvey": "RP",
+        "Dylan Lee": "RP", "Fernando Cruz": "RP", "Porter Hodge": "RP",
+        "Ben Joyce": "RP", "Ryan Brasier": "RP", "Chad Green": "RP",
+        "Tommy Kahnle": "RP", "Nate Pearson": "RP", "Kevin Kelly": "RP",
+        "Bryan Hudson": "RP", "Justin Slaten": "RP", "Erik Miller": "RP",
+        "Elvis Luciano": "RP", "José Leclerc": "RP",
+        # Catchers
+        "Keibert Ruiz": "C", "Travis d'Arnaud": "C", "Danny Jansen": "C",
+        "Eric Haase": "C", "Tyler Stephenson": "C", "Luis Campusano": "C",
+        "Bo Naylor": "C", "Henry Davis": "C", "Francisco Alvarez": "C",
+        "Joey Bart": "C", "Ryan Jeffers": "C", "Connor Wong": "C",
+        "Ivan Herrera": "C", "Yasmani Grandal": "C",
+        # Infielders
+        "Ty France": "1B", "Jose Abreu": "1B", "José Abreu": "1B",
+        "Rowdy Tellez": "1B", "Anthony Rizzo": "1B", "Carlos Santana": "1B",
+        "C.J. Cron": "1B", "Nolan Schanuel": "1B", "Pavin Smith": "1B",
+        "Alex Kirilloff": "1B",
+        "Jonathan India": "2B", "Jake Cronenworth": "2B", "Kolten Wong": "2B",
+        "Jean Segura": "2B", "Vaughn Grissom": "2B", "Nick Gordon": "2B",
+        "Ezequiel Duran": "2B", "Michael Massey": "2B",
+        "Kris Bryant": "3B", "Justin Turner": "3B", "Gio Urshela": "3B",
+        "Brandon Drury": "3B", "Josh Rojas": "3B", "Jeimer Candelario": "3B",
+        "Jose Miranda": "3B", "Patrick Wisdom": "3B", "Joey Meneses": "3B",
+        "Christian Encarnacion-Strand": "3B",
+        "Tim Anderson": "SS", "Amed Rosario": "SS", "Oswald Peraza": "SS",
+        "Jon Berti": "SS", "Adalberto Mondesi": "SS", "Jorge Mateo": "SS",
+        "Masyn Winn": "SS", "Hyeseong Kim": "SS", "Brooks Lee": "SS",
+        "Willi Castro": "SS", "Joey Ortiz": "SS",
+        # Outfielders
+        "Jesse Winker": "OF", "Eloy Jimenez": "OF", "Eloy Jiménez": "OF",
+        "Jake Fraley": "OF", "Starling Marte": "OF", "Jarred Kelenic": "OF",
+        "Hunter Renfroe": "OF", "Oscar González": "OF", "Austin Hays": "OF",
+        "Dylan Carlson": "OF", "Mitch Haniger": "OF", "Garrett Mitchell": "OF",
+        "Seth Brown": "OF", "Joc Pederson": "OF", "Oscar Colás": "OF",
+        "Charlie Blackmon": "OF", "Bryan De La Cruz": "OF", "Mark Canha": "OF",
+        "Michael Conforto": "OF", "Esteury Ruiz": "OF", "J.D. Martinez": "OF",
+        "Yoán Moncada": "3B", "Chris Taylor": "SS,OF",
+        "Nelson Cruz": "DH", "Joey Gallo": "OF", "Jared Walsh": "1B",
+        "Randal Grichuk": "OF", "Wilmer Flores": "1B", "Eduardo Escobar": "3B",
+        "Anthony Rendon": "3B", "Austin Meadows": "OF",
+        "Alek Thomas": "OF", "Jack Suwinski": "OF", "Nelson Velázquez": "OF",
+        "Luke Raley": "OF", "Will Benson": "OF", "Davis Schneider": "OF",
+        "Matt Vierling": "OF", "Luis Matos": "OF", "Max Kepler": "OF",
+        "Heston Kjerstad": "OF", "Johan Rojas": "OF", "Leody Taveras": "OF",
+        "Jose Siri": "OF", "Nick Loftin": "SS", "Druw Jones": "OF",
+        "Curtis Mead": "3B", "Ricky Tiedemann": "SP",
+        "Victor Robles": "OF", "JJ Bleday": "OF", "Brandon Marsh": "OF",
+        "Tyler Fitzgerald": "SS", "Tommy Pham": "OF", "Jacob Young": "OF",
+        "Luisangel Acuña": "SS", "Emmanuel Rodriguez": "OF",
+        "Ethan Salas": "C",
+        # Multi-position
+        "Diego Castillo": "3B", "Yu Chang": "3B",
+        "J.D. Davis": "3B", "Dominic Fletcher": "OF",
+        "Yusniel Díaz": "OF", "Brandon Drury": "3B",
+        "Hunter Dozier": "3B", "Michael Brantley": "OF",
+        "Wil Myers": "OF", "Adam Duvall": "OF",
+        "Garrett Cooper": "1B", "Luis Urías": "SS",
+        "Elvis Andrus": "SS",
     }
 
     # Source 1: contracts JSON (most reliable, has position field)
@@ -93,8 +188,12 @@ def _build_position_lookup() -> dict[str, str]:
             with open(hist_path, encoding="utf-8") as f:
                 hist = json.load(f)
             for _year, managers in hist.items():
-                for _mgr, players in managers.items():
-                    for p in players:
+                for _mgr, players_list in managers.items():
+                    if not isinstance(players_list, list):
+                        continue
+                    for p in players_list:
+                        if not isinstance(p, dict):
+                            continue
                         name = p.get("player", "")
                         pos = p.get("position", "")
                         if name and pos and name not in lookup:
@@ -102,7 +201,23 @@ def _build_position_lookup() -> dict[str, str]:
         except Exception:
             pass
 
-    # Source 3: players DB table (has yahoo position data)
+    # Source 3: Yahoo roster files (has position for all rostered players)
+    for roster_file in sorted(DATA_DIR.glob("yahoo_*_rosters.json")):
+        try:
+            with open(roster_file, encoding="utf-8") as f:
+                rosters = json.load(f)
+            for _team_key, team_data in rosters.items():
+                if not isinstance(team_data, dict):
+                    continue
+                for p in team_data.get("players", []):
+                    name = p.get("name", "")
+                    pos = p.get("position", "")
+                    if name and pos and name not in lookup:
+                        lookup[name] = pos
+        except Exception:
+            pass
+
+    # Source 4: players DB table (has yahoo position data)
     try:
         from api.database import get_db
         conn = get_db()
@@ -374,8 +489,10 @@ def compute_faab_stats(years: list[int] | None = None) -> dict:
             continue
 
         place_map: dict[str, int] = {}
+        team_name_map: dict[str, str] = {}
         for s in standings_data.get("standings", []):
             place_map[s["manager"]] = s["place"]
+            team_name_map[s["manager"]] = s.get("name", "")
 
         year_corr: list[dict] = []
         for mgr, tdata in all_teams.items():
@@ -386,8 +503,10 @@ def compute_faab_stats(years: list[int] | None = None) -> dict:
             place = place_map.get(resolved) or place_map.get(mgr)
             if place is None:
                 continue
+            team_name = team_name_map.get(resolved) or team_name_map.get(mgr, "")
             year_corr.append({
                 "manager": resolved,
+                "team_name": team_name,
                 "faab_spent": faab_yr["total_faab_spent"],
                 "num_pickups": faab_yr["num_pickups"],
                 "place": place,
@@ -655,10 +774,11 @@ def compute_trade_stats(years: list[int] | None = None) -> dict:
 
 
 def _categorize_position(position: str) -> str:
-    """Categorize Yahoo position string into broad category.
+    """Categorize Yahoo position string into detailed position.
 
     Yahoo positions: C, 1B, 2B, 3B, SS, LF, CF, RF, OF, SP, RP, DH, Util
-    Categories: C, IF (1B/2B/3B/SS), OF (LF/CF/RF/OF), SP, RP, DH/Util, Unknown
+    Returns the primary (first) position as-is for detailed breakdown.
+    Normalizes OF -> OF, P -> RP, Util -> DH.
     """
     if not position:
         return "Unknown"
@@ -666,15 +786,11 @@ def _categorize_position(position: str) -> str:
     # Take the first listed position
     primary = position.split(",")[0].strip()
 
-    if primary in ("C",):
-        return "C"
-    if primary in ("1B", "2B", "3B", "SS"):
-        return "IF"
-    if primary in ("LF", "CF", "RF", "OF"):
+    if primary in ("C", "1B", "2B", "3B", "SS", "LF", "CF", "RF", "SP", "RP"):
+        return primary
+    if primary == "OF":
         return "OF"
-    if primary in ("SP",):
-        return "SP"
-    if primary in ("RP", "P"):
+    if primary == "P":
         return "RP"
     if primary in ("DH", "Util"):
         return "DH"

@@ -42,9 +42,16 @@ type TabId = (typeof TABS)[number]["id"];
 const POS_COLORS: Record<string, string> = {
   SP: "bg-blue-100 text-blue-800",
   RP: "bg-cyan-100 text-cyan-800",
+  C: "bg-purple-100 text-purple-800",
+  "1B": "bg-amber-100 text-amber-800",
+  "2B": "bg-orange-100 text-orange-800",
+  "3B": "bg-yellow-100 text-yellow-800",
+  SS: "bg-rose-100 text-rose-800",
+  LF: "bg-green-100 text-green-800",
+  CF: "bg-emerald-100 text-emerald-800",
+  RF: "bg-teal-100 text-teal-800",
   OF: "bg-green-100 text-green-800",
   IF: "bg-amber-100 text-amber-800",
-  C: "bg-purple-100 text-purple-800",
   DH: "bg-gray-100 text-gray-800",
   Unknown: "bg-gray-50 text-gray-500",
 };
@@ -493,13 +500,11 @@ function costBarColor(cost: number): string {
 function _categorize(position: string): string {
   if (!position) return "Unknown";
   const primary = position.split(",")[0].trim();
-  if (primary === "C") return "C";
-  if (["1B", "2B", "3B", "SS"].includes(primary)) return "IF";
-  if (["LF", "CF", "RF", "OF"].includes(primary)) return "OF";
-  if (primary === "SP") return "SP";
-  if (primary === "RP") return "RP";
+  if (["C", "1B", "2B", "3B", "SS", "LF", "CF", "RF", "SP", "RP"].includes(primary)) return primary;
+  if (primary === "OF") return "OF";
+  if (primary === "P") return "RP";
   if (["DH", "Util"].includes(primary)) return "DH";
-  return "Unknown";
+  return primary || "Unknown";
 }
 
 function DraftStatsTab({ data }: { data: DraftStatsResponse }) {
@@ -720,26 +725,28 @@ function FaabCorrelationChart({ allData }: { allData: FaabStatsResponse["faab_vs
   }
   const corrSpendPickups = denX2 > 0 && denY2 > 0 ? num2 / Math.sqrt(denX2 * denY2) : 0;
 
-  const chartW = 480;
-  const chartH = 320;
-  const pad = { top: 15, right: 15, bottom: 30, left: 35 };
+  const [hovered, setHovered] = useState<typeof data[0] | null>(null);
+
+  const chartW = 560;
+  const chartH = 400;
+  const pad = { top: 20, right: 20, bottom: 40, left: 45 };
   const w = chartW - pad.left - pad.right;
   const h = chartH - pad.top - pad.bottom;
 
   const xScale = (val: number) => pad.left + (val / (maxSpent * 1.1)) * w;
   const yScale = (val: number) => pad.top + h - (val / (maxPickups * 1.15)) * h;
 
-  const yTicks = [0, 20, 40, 60, 80].filter(v => v <= maxPickups * 1.1);
+  const yTicks = [0, 20, 40, 60, 80, 100].filter(v => v <= maxPickups * 1.15);
   const xTicks = [0, 25, 50, 75, 100].filter(v => v <= maxSpent * 1.1);
 
   return (
-    <div className="mb-4 rounded-lg border border-gray-200 bg-white p-3 sm:p-4">
-      <div className="mb-2 flex items-center justify-between">
+    <div className="mb-4 rounded-lg border border-gray-200 bg-white p-4 sm:p-5">
+      <div className="mb-3 flex items-center justify-between">
         <div>
-          <h4 className="text-xs font-semibold text-gray-700">
+          <h4 className="text-sm font-semibold text-gray-800">
             FAAB 花費 vs 撿人次數（季後賽關聯分析）
           </h4>
-          <p className="text-[10px] text-gray-400">
+          <p className="text-xs text-gray-500">
             積極使用 FAAB 的隊伍是否更容易進季後賽？紫色 = 季後賽隊伍
           </p>
         </div>
@@ -747,7 +754,7 @@ function FaabCorrelationChart({ allData }: { allData: FaabStatsResponse["faab_vs
           <div className="flex gap-1">
             {chartYears.map(yr => (
               <button key={yr} onClick={() => setSelectedChartYear(yr)}
-                className={`rounded px-2 py-0.5 text-[10px] font-medium ${selectedChartYear === yr ? "bg-indigo-600 text-white" : "bg-gray-100 text-gray-500 hover:bg-gray-200"}`}>
+                className={`rounded px-2.5 py-1 text-xs font-medium ${selectedChartYear === yr ? "bg-indigo-600 text-white" : "bg-gray-100 text-gray-500 hover:bg-gray-200"}`}>
                 {yr}
               </button>
             ))}
@@ -755,39 +762,63 @@ function FaabCorrelationChart({ allData }: { allData: FaabStatsResponse["faab_vs
         )}
       </div>
 
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
-        <svg viewBox={`0 0 ${chartW} ${chartH}`} className="w-full max-w-[520px] overflow-visible">
-          {yTicks.map(val => (
-            <g key={`y-${val}`}>
-              <line x1={pad.left} y1={yScale(val)} x2={chartW - pad.right} y2={yScale(val)} stroke="#e5e7eb" strokeWidth={0.5} />
-              <text x={pad.left - 5} y={yScale(val) + 4} textAnchor="end" className="fill-gray-500" fontSize={9}>{val}</text>
-            </g>
-          ))}
-          {xTicks.map(val => (
-            <g key={`x-${val}`}>
-              <line x1={xScale(val)} y1={pad.top} x2={xScale(val)} y2={chartH - pad.bottom} stroke="#e5e7eb" strokeWidth={0.5} />
-              <text x={xScale(val)} y={chartH - pad.bottom + 14} textAnchor="middle" className="fill-gray-500" fontSize={9}>${val}</text>
-            </g>
-          ))}
-          <text x={chartW / 2} y={chartH - 1} textAnchor="middle" className="fill-gray-600" fontSize={10} fontWeight={500}>FAAB 花費 ($)</text>
-          <text x={5} y={chartH / 2} textAnchor="middle" transform={`rotate(-90, 5, ${chartH / 2})`} className="fill-gray-600" fontSize={10} fontWeight={500}>撿人次數</text>
-          <line x1={xScale(avgPlayoffSpent)} y1={pad.top} x2={xScale(avgPlayoffSpent)} y2={chartH - pad.bottom} stroke="#6366f1" strokeWidth={0.5} strokeDasharray="3,2" opacity={0.3} />
-          <line x1={pad.left} y1={yScale(avgPlayoffPickups)} x2={chartW - pad.right} y2={yScale(avgPlayoffPickups)} stroke="#6366f1" strokeWidth={0.5} strokeDasharray="3,2" opacity={0.3} />
-          {data.map(d => {
-            const cx = xScale(d.faab_spent);
-            const cy = yScale(d.num_pickups);
-            return (
-              <g key={d.manager}>
-                <circle cx={cx} cy={cy} r={6} fill={d.is_playoff ? "#6366f1" : "#9ca3af"} stroke="white" strokeWidth={1.5} opacity={0.9} />
-                <text x={cx} y={cy - 10} textAnchor="middle" className={d.is_playoff ? "fill-indigo-700" : "fill-gray-600"} fontSize={9} fontWeight={d.is_playoff ? 700 : 500}>
-                  {d.manager.length > 6 ? d.manager.substring(0, 6) : d.manager}
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
+        <div className="relative min-w-0 flex-1">
+          <svg viewBox={`0 0 ${chartW} ${chartH}`} className="w-full overflow-visible" onMouseLeave={() => setHovered(null)}>
+            {yTicks.map(val => (
+              <g key={`y-${val}`}>
+                <line x1={pad.left} y1={yScale(val)} x2={chartW - pad.right} y2={yScale(val)} stroke="#e5e7eb" strokeWidth={0.5} />
+                <text x={pad.left - 6} y={yScale(val) + 4} textAnchor="end" className="fill-gray-500" fontSize={10}>{val}</text>
+              </g>
+            ))}
+            {xTicks.map(val => (
+              <g key={`x-${val}`}>
+                <line x1={xScale(val)} y1={pad.top} x2={xScale(val)} y2={chartH - pad.bottom} stroke="#e5e7eb" strokeWidth={0.5} />
+                <text x={xScale(val)} y={chartH - pad.bottom + 16} textAnchor="middle" className="fill-gray-500" fontSize={10}>${val}</text>
+              </g>
+            ))}
+            <text x={chartW / 2} y={chartH - 4} textAnchor="middle" className="fill-gray-600" fontSize={11} fontWeight={500}>FAAB 花費 ($)</text>
+            <text x={8} y={chartH / 2} textAnchor="middle" transform={`rotate(-90, 8, ${chartH / 2})`} className="fill-gray-600" fontSize={11} fontWeight={500}>撿人次數</text>
+            <line x1={xScale(avgPlayoffSpent)} y1={pad.top} x2={xScale(avgPlayoffSpent)} y2={chartH - pad.bottom} stroke="#6366f1" strokeWidth={0.5} strokeDasharray="4,3" opacity={0.25} />
+            <line x1={pad.left} y1={yScale(avgPlayoffPickups)} x2={chartW - pad.right} y2={yScale(avgPlayoffPickups)} stroke="#6366f1" strokeWidth={0.5} strokeDasharray="4,3" opacity={0.25} />
+            {data.map(d => {
+              const cx = xScale(d.faab_spent);
+              const cy = yScale(d.num_pickups);
+              const isHovered = hovered?.manager === d.manager;
+              return (
+                <g key={d.manager} onMouseEnter={() => setHovered(d)} style={{ cursor: "pointer" }}>
+                  <circle cx={cx} cy={cy} r={isHovered ? 9 : 7} fill={d.is_playoff ? "#6366f1" : "#9ca3af"} stroke={isHovered ? (d.is_playoff ? "#4338ca" : "#6b7280") : "white"} strokeWidth={isHovered ? 2.5 : 1.5} opacity={hovered && !isHovered ? 0.4 : 0.9} />
+                  {!hovered && (
+                    <text x={cx} y={cy - 11} textAnchor="middle" className={d.is_playoff ? "fill-indigo-700" : "fill-gray-600"} fontSize={10} fontWeight={d.is_playoff ? 700 : 500}>
+                      {d.manager}
+                    </text>
+                  )}
+                </g>
+              );
+            })}
+            {hovered && (
+              <g>
+                <rect x={Math.min(xScale(hovered.faab_spent) + 14, chartW - 165)} y={Math.max(yScale(hovered.num_pickups) - 50, 5)} width={150} height={62} rx={6} fill="white" stroke="#d1d5db" strokeWidth={1} filter="url(#shadow)" />
+                <text x={Math.min(xScale(hovered.faab_spent) + 22, chartW - 157)} y={Math.max(yScale(hovered.num_pickups) - 33, 22)} fontSize={12} fontWeight={700} className={hovered.is_playoff ? "fill-indigo-700" : "fill-gray-700"}>
+                  {hovered.manager} {hovered.is_playoff ? `(#${hovered.place})` : `#${hovered.place}`}
+                </text>
+                <text x={Math.min(xScale(hovered.faab_spent) + 22, chartW - 157)} y={Math.max(yScale(hovered.num_pickups) - 16, 39)} fontSize={10} className="fill-gray-600">
+                  {hovered.team_name}
+                </text>
+                <text x={Math.min(xScale(hovered.faab_spent) + 22, chartW - 157)} y={Math.max(yScale(hovered.num_pickups) + 1, 56)} fontSize={10} className="fill-gray-500">
+                  FAAB: ${hovered.faab_spent} / 撿人: {hovered.num_pickups} 次
                 </text>
               </g>
-            );
-          })}
-        </svg>
+            )}
+            <defs>
+              <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+                <feDropShadow dx="0" dy="1" stdDeviation="2" floodOpacity="0.1" />
+              </filter>
+            </defs>
+          </svg>
+        </div>
 
-        <div className="flex flex-col gap-2 text-xs">
+        <div className="flex w-full flex-col gap-2 text-xs lg:w-52 lg:flex-shrink-0">
           <div className="rounded-md bg-indigo-50 px-3 py-2">
             <div className="font-semibold text-indigo-800">季後賽隊伍 (Top 8)</div>
             <div className="text-indigo-700">平均花費: ${avgPlayoffSpent}</div>
@@ -924,7 +955,13 @@ function PositionPreferenceTab({ data }: { data: PositionPreferenceResponse }) {
   const [selectedYear, setSelectedYear] = useState(
     years.length > 0 ? String(years[years.length - 1]) : "",
   );
-  const posCategories = Object.keys(data.league_position_breakdown).sort();
+  const POS_ORDER = ["C", "1B", "2B", "3B", "SS", "LF", "CF", "RF", "OF", "SP", "RP", "DH", "Unknown"];
+  const posCategories = Object.keys(data.league_position_breakdown)
+    .sort((a, b) => {
+      const ai = POS_ORDER.indexOf(a);
+      const bi = POS_ORDER.indexOf(b);
+      return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
+    });
 
   return (
     <div>
