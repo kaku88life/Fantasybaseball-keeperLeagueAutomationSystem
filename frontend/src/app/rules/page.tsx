@@ -683,12 +683,15 @@ ${config.contractSystem}
 - Deployment: Docker-ready
 
 ## Features Needed
-1. Keeper selection interface with real-time validation
+1. Keeper selection interface with real-time validation and auto-save
 2. Contract tracking and automatic progression (A->B->O or A->B->N(x)->O)
-3. Salary cap management with buyout calculations
-4. Player database with rankings integration
-5. Commissioner dashboard for data import and management
-6. Season countdown and league overview
+3. Salary cap management with buyout calculations (salary + FAAB split)
+4. Player database with MLB/MiLB stats and Top 100 prospect rankings
+5. Commissioner dashboard for data import, team management, and approval workflow
+6. Season countdown (draft day, opening day, weekly schedule, playoffs)
+7. Analytics dashboard: salary rankings, contract values, draft top 10, FAAB correlation, position preference, trade activity
+8. LINE Bot integration for keeper submission reminders
+9. Historical data tracking across multiple seasons (2014-2025)
 
 Please provide the project structure, key files, and step-by-step implementation guide.
 Reference project: https://github.com/kaku88life/Fantasybaseball-keeperLeagueAutomationSystem`;
@@ -791,7 +794,7 @@ function DIYSection() {
               <p className="text-xs text-gray-500">
                 從 GitHub 上 Fork 專案到你的帳號，然後 clone 到本地開發環境。
               </p>
-              <code className="mt-1 block rounded bg-gray-100 px-3 py-1.5 text-xs text-gray-700">
+              <code className="mt-1 block overflow-x-auto whitespace-nowrap rounded bg-gray-100 px-3 py-1.5 text-xs text-gray-700">
                 git clone https://github.com/YOUR_USERNAME/Fantasybaseball-keeperLeagueAutomationSystem.git
               </code>
             </div>
@@ -804,7 +807,7 @@ function DIYSection() {
                 複製 <code className="rounded bg-gray-100 px-1">.env.example</code> 為 <code className="rounded bg-gray-100 px-1">.env</code>，
                 填入你的 Yahoo API 憑證和資料庫連線資訊。
               </p>
-              <code className="mt-1 block rounded bg-gray-100 px-3 py-1.5 text-xs text-gray-700">
+              <code className="mt-1 block overflow-x-auto whitespace-nowrap rounded bg-gray-100 px-3 py-1.5 text-xs text-gray-700">
                 cp .env.example .env
               </code>
             </div>
@@ -827,17 +830,37 @@ function DIYSection() {
             <div>
               <p className="font-medium text-gray-800">安裝依賴 & 啟動</p>
               <div className="mt-1 space-y-1">
-                <code className="block rounded bg-gray-100 px-3 py-1.5 text-xs text-gray-700">
+                <code className="block overflow-x-auto whitespace-nowrap rounded bg-gray-100 px-3 py-1.5 text-xs text-gray-700">
                   pip install -r requirements.txt
                 </code>
-                <code className="block rounded bg-gray-100 px-3 py-1.5 text-xs text-gray-700">
+                <code className="block overflow-x-auto whitespace-nowrap rounded bg-gray-100 px-3 py-1.5 text-xs text-gray-700">
                   cd frontend && npm install && npm run dev
+                </code>
+                <code className="block overflow-x-auto whitespace-nowrap rounded bg-gray-100 px-3 py-1.5 text-xs text-gray-700">
+                  python -m uvicorn api.main:app --port 8002
                 </code>
               </div>
             </div>
           </li>
           <li className="flex gap-3">
             <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-indigo-100 text-xs font-bold text-indigo-600">5</span>
+            <div>
+              <p className="font-medium text-gray-800">載入歷史資料</p>
+              <p className="text-xs text-gray-500">
+                使用腳本從 Yahoo API 抓取歷史名冊和交易資料，然後透過合約追溯引擎建立合約清單。
+              </p>
+              <div className="mt-1 space-y-1">
+                <code className="block overflow-x-auto whitespace-nowrap rounded bg-gray-100 px-3 py-1.5 text-xs text-gray-700">
+                  python scripts/fetch_historical_yahoo.py
+                </code>
+                <code className="block overflow-x-auto whitespace-nowrap rounded bg-gray-100 px-3 py-1.5 text-xs text-gray-700">
+                  python scripts/rebuild_with_correct_mapping.py
+                </code>
+              </div>
+            </div>
+          </li>
+          <li className="flex gap-3">
+            <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-indigo-100 text-xs font-bold text-indigo-600">6</span>
             <div>
               <p className="font-medium text-gray-800">修改聯盟規則</p>
               <p className="text-xs text-gray-500">
@@ -847,12 +870,12 @@ function DIYSection() {
             </div>
           </li>
           <li className="flex gap-3">
-            <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-indigo-100 text-xs font-bold text-indigo-600">6</span>
+            <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-indigo-100 text-xs font-bold text-indigo-600">7</span>
             <div>
               <p className="font-medium text-gray-800">部署</p>
               <p className="text-xs text-gray-500">
-                專案內含 Dockerfile，可部署至 Zeabur、Railway、Render 等平台。
-                前端可獨立部署至 Vercel。
+                專案內含 Dockerfile（python:3.11-slim），可部署至 Zeabur、Railway、Render 等平台。
+                前端可獨立部署至 Vercel。推送 master 分支即可自動重新部署。
               </p>
             </div>
           </li>
@@ -885,7 +908,8 @@ function DIYSection() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
             <span>
-              <strong>JWT_SECRET_KEY 務必自行產生</strong> — 使用 <code className="rounded bg-red-100 px-1 text-xs">python -c &quot;import secrets; print(secrets.token_hex(32))&quot;</code>
+              <strong>JWT_SECRET_KEY 務必自行產生</strong>
+              <code className="mt-1 block overflow-x-auto whitespace-nowrap rounded bg-red-100 px-2 py-1 text-xs">python -c &quot;import secrets; print(secrets.token_hex(32))&quot;</code>
             </span>
           </li>
           <li className="flex gap-2">
