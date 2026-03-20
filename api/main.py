@@ -23,7 +23,7 @@ from fastapi.responses import JSONResponse
 load_dotenv(project_root / ".env")
 
 from api.database import cleanup_old_notifications, init_db, seed_if_empty
-from api.routers import analytics, auth, commissioner, league, players, teams, validation
+from api.routers import analytics, auth, commissioner, league, players, public, teams, validation
 
 
 @asynccontextmanager
@@ -112,6 +112,7 @@ app.include_router(commissioner.router, prefix="/api/commissioner", tags=["commi
 app.include_router(validation.router, prefix="/api/validate", tags=["validation"])
 app.include_router(players.router, prefix="/api/players", tags=["players"])
 app.include_router(analytics.router, prefix="/api/analytics", tags=["analytics"])
+app.include_router(public.router, prefix="/api/public", tags=["public"])
 
 
 @app.middleware("http")
