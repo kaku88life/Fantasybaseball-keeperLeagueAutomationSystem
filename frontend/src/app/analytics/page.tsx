@@ -810,11 +810,8 @@ function FaabStatsTab({ data }: { data: FaabStatsResponse }) {
       <YearSelector years={years} selected={selectedYear} onChange={setSelectedYear} />
 
       {summary && (
-        <div className="mb-3 grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3">
+        <div className="mb-3 grid grid-cols-1 gap-2 sm:grid-cols-1 sm:gap-3">
           <MiniCard label="年度預算" value={`$${summary.faab_budget}`} />
-          <MiniCard label="聯盟總花費" value={`$${summary.total_league_faab_spent}`} />
-          <MiniCard label="平均花費" value={`$${summary.avg_team_faab_spent}`} />
-          <MiniCard label="參與隊伍" value={`${summary.team_count}`} />
         </div>
       )}
 

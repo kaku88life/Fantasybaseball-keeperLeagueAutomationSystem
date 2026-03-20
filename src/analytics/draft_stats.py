@@ -347,35 +347,45 @@ def compute_faab_stats(years: list[int] | None = None) -> dict:
     # FAAB vs standings correlation (2025 season data)
     correlation: list[dict] = []
     standings_path = DATA_DIR / "2025_playoff_standings.json"
+    place_map: dict[str, int] = {}
     if standings_path.exists():
         try:
             with open(standings_path, encoding="utf-8") as f:
                 standings_data = json.load(f)
-            standings_list = standings_data.get("standings", [])
-            # Build place map: manager -> place (1-16)
-            place_map: dict[str, int] = {}
-            for s in standings_list:
+            for s in standings_data.get("standings", []):
                 place_map[s["manager"]] = s["place"]
-
-            # Match FAAB data with standings for 2025
-            for mgr, tdata in all_teams.items():
-                faab_2025 = tdata.get("yearly", {}).get("2025", {})
-                if not faab_2025:
-                    continue
-                resolved = _resolve_manager_name(mgr)
-                place = place_map.get(resolved) or place_map.get(mgr)
-                if place is None:
-                    continue
-                correlation.append({
-                    "manager": resolved,
-                    "faab_spent": faab_2025["total_faab_spent"],
-                    "num_pickups": faab_2025["num_pickups"],
-                    "place": place,
-                    "is_playoff": place <= 8,
-                })
-            correlation.sort(key=lambda x: x["place"])
         except Exception:
             pass
+
+    # Include ALL 16 teams — assign non-playoff teams place 9-16 by FAAB spent
+    non_playoff_entries: list[dict] = []
+    for mgr, tdata in all_teams.items():
+        faab_2025 = tdata.get("yearly", {}).get("2025", {})
+        if not faab_2025:
+            continue
+        resolved = _resolve_manager_name(mgr)
+        place = place_map.get(resolved) or place_map.get(mgr)
+        entry = {
+            "manager": resolved,
+            "faab_spent": faab_2025["total_faab_spent"],
+            "num_pickups": faab_2025["num_pickups"],
+            "place": place if place is not None else 0,
+            "is_playoff": place is not None and place <= 8,
+        }
+        if place is not None:
+            correlation.append(entry)
+        else:
+            non_playoff_entries.append(entry)
+
+    # Assign places 9-16 to non-playoff teams (sorted by FAAB spent desc)
+    non_playoff_entries.sort(key=lambda x: x["faab_spent"], reverse=True)
+    next_place = max((c["place"] for c in correlation), default=8) + 1
+    for entry in non_playoff_entries:
+        entry["place"] = next_place
+        next_place += 1
+        correlation.append(entry)
+
+    correlation.sort(key=lambda x: x["place"])
 
     return {
         "years": years,
