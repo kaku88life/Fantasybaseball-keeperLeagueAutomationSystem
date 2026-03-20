@@ -18,6 +18,18 @@ from pathlib import Path
 DATA_DIR = Path(__file__).resolve().parents[2] / "data"
 
 
+def _normalize_player_name(name: str) -> str:
+    """Normalize player name for matching: strip accents, suffixes, punctuation."""
+    import unicodedata
+    # Remove parenthetical suffixes like "(Pitcher)"
+    name = re.sub(r"\s*\(.*?\)\s*", "", name)
+    # Strip trailing dots and whitespace
+    name = name.strip().rstrip(".")
+    # Normalize unicode accents (é -> e, í -> i, etc.)
+    nfkd = unicodedata.normalize("NFKD", name)
+    return "".join(c for c in nfkd if not unicodedata.combining(c)).lower()
+
+
 # ------------------------------------------------------------------
 # Manager name normalization (Excel aliases -> Yahoo aliases)
 # ------------------------------------------------------------------
@@ -191,14 +203,19 @@ def compute_draft_stats(years: list[int] | None = None) -> dict:
         year_str = str(year)
         team_picks: dict[str, list[dict]] = defaultdict(list)
 
-        # Build keeper set: players with non-A contracts are keepers (B/N/O/R)
-        keeper_players: set[str] = set()
+        # Build keeper set using normalized names (prev year roster + non-A current)
+        keeper_norm: set[str] = set()
+        prev_year_str = str(year - 1)
+        if prev_year_str in hist:
+            for _mgr, players in hist[prev_year_str].items():
+                for p in players:
+                    keeper_norm.add(_normalize_player_name(p["player"]))
         if year_str in hist:
             for _mgr, players in hist[year_str].items():
                 for p in players:
                     ct = p.get("contract_type", "A")
                     if ct != "A":
-                        keeper_players.add(p["player"])
+                        keeper_norm.add(_normalize_player_name(p["player"]))
 
         league_max = {"cost": 0, "player": "", "manager": ""}
 
@@ -208,8 +225,8 @@ def compute_draft_stats(years: list[int] | None = None) -> dict:
             player = pick.get("player_name", "")
             position = pick.get("player_position", "") or pos_lookup.get(player, "")
 
-            # Skip keeper players (non-A contract) - only count actual draft picks
-            if player in keeper_players:
+            # Skip keeper players - only count actual draft picks
+            if _normalize_player_name(player) in keeper_norm:
                 continue
 
             team_picks[mgr].append({
@@ -438,14 +455,21 @@ def compute_position_preference(years: list[int] | None = None, min_cost: int = 
 
         year_str = str(year)
 
-        # Build keeper set: players with non-A contracts are keepers
-        keeper_players: set[str] = set()
+        # Build keeper set using NORMALIZED names:
+        # 1) Players from previous year's roster are keepers (retained)
+        # 2) Non-A contracts in current year are also keepers (fallback)
+        keeper_normalized: set[str] = set()
+        prev_year_str = str(year - 1)
+        if prev_year_str in hist:
+            for _mgr, players in hist[prev_year_str].items():
+                for p in players:
+                    keeper_normalized.add(_normalize_player_name(p["player"]))
         if year_str in hist:
             for _mgr, players in hist[year_str].items():
                 for p in players:
                     ct = p.get("contract_type", "A")
                     if ct != "A":
-                        keeper_players.add(p["player"])
+                        keeper_normalized.add(_normalize_player_name(p["player"]))
 
         for pick in draft:
             cost = pick.get("cost", 0)
@@ -456,7 +480,7 @@ def compute_position_preference(years: list[int] | None = None, min_cost: int = 
             player = pick.get("player_name", "")
 
             # Skip keeper players - only analyze actual draft picks
-            if player in keeper_players:
+            if _normalize_player_name(player) in keeper_normalized:
                 continue
             # Use draft data position first, then fallback to lookup
             position = pick.get("player_position", "") or pos_lookup.get(player, "")
