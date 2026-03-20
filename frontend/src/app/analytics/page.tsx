@@ -691,60 +691,71 @@ function FaabCorrelationChart({ data }: { data: FaabStatsResponse["faab_vs_stand
     ? Math.round(nonPlayoff.reduce((s, d) => s + d.num_pickups, 0) / nonPlayoff.length)
     : 0;
 
-  const chartW = 320;
-  const chartH = 200;
-  const pad = { top: 10, right: 10, bottom: 25, left: 30 };
+  const chartW = 340;
+  const chartH = 240;
+  const pad = { top: 15, right: 15, bottom: 30, left: 35 };
   const w = chartW - pad.left - pad.right;
   const h = chartH - pad.top - pad.bottom;
+
+  // Scale helpers — X: FAAB spent, Y: num pickups (higher = top)
+  const xScale = (val: number) => pad.left + (val / (maxSpent * 1.1)) * w;
+  const yScale = (val: number) => pad.top + h - (val / (maxPickups * 1.15)) * h;
+
+  // Y grid values
+  const yTicks = [0, 20, 40, 60, 80].filter(v => v <= maxPickups * 1.1);
+  // X grid values
+  const xTicks = [0, 25, 50, 75, 100].filter(v => v <= maxSpent * 1.1);
 
   return (
     <div className="mb-4 rounded-lg border border-gray-200 bg-white p-3 sm:p-4">
       <h4 className="mb-1 text-xs font-semibold text-gray-700">
-        2025 FAAB 花費 vs 最終排名（季後賽關聯分析）
+        2025 FAAB 花費 vs 撿人次數（季後賽關聯分析）
       </h4>
       <p className="mb-3 text-[10px] text-gray-400">
-        有積極撿人的隊伍戰績是否更好？
+        積極使用 FAAB 的隊伍是否更容易進季後賽？紫色 = 季後賽隊伍
       </p>
 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
-        {/* Scatter plot */}
-        <svg viewBox={`0 0 ${chartW} ${chartH}`} className="w-full max-w-[340px] overflow-visible">
-          {/* Grid lines */}
-          {[4, 8, 12, 16].map(place => {
-            const y = pad.top + (place / 16) * h;
-            return (
-              <g key={place}>
-                <line x1={pad.left} y1={y} x2={chartW - pad.right} y2={y} stroke="#f3f4f6" strokeWidth={0.5} />
-                <text x={pad.left - 3} y={y + 3} textAnchor="end" className="fill-gray-300" fontSize={7}>{place}</text>
-              </g>
-            );
-          })}
-          {/* X axis labels */}
-          {[0, 25, 50, 75, 100].map(val => {
-            const x = pad.left + (val / (maxSpent * 1.1)) * w;
-            return (
-              <text key={val} x={x} y={chartH - 3} textAnchor="middle" className="fill-gray-300" fontSize={7}>${val}</text>
-            );
-          })}
+        {/* Scatter plot: X = FAAB spent, Y = num pickups */}
+        <svg viewBox={`0 0 ${chartW} ${chartH}`} className="w-full max-w-[360px] overflow-visible">
+          {/* Y grid lines + labels */}
+          {yTicks.map(val => (
+            <g key={`y-${val}`}>
+              <line x1={pad.left} y1={yScale(val)} x2={chartW - pad.right} y2={yScale(val)} stroke="#f3f4f6" strokeWidth={0.5} />
+              <text x={pad.left - 4} y={yScale(val) + 3} textAnchor="end" className="fill-gray-300" fontSize={7}>{val}</text>
+            </g>
+          ))}
+          {/* X grid lines + labels */}
+          {xTicks.map(val => (
+            <g key={`x-${val}`}>
+              <line x1={xScale(val)} y1={pad.top} x2={xScale(val)} y2={chartH - pad.bottom} stroke="#f3f4f6" strokeWidth={0.5} />
+              <text x={xScale(val)} y={chartH - pad.bottom + 12} textAnchor="middle" className="fill-gray-300" fontSize={7}>${val}</text>
+            </g>
+          ))}
           {/* Axis labels */}
-          <text x={chartW / 2} y={chartH + 2} textAnchor="middle" className="fill-gray-400" fontSize={7}>FAAB 花費</text>
-          <text x={3} y={chartH / 2} textAnchor="middle" transform={`rotate(-90, 3, ${chartH / 2})`} className="fill-gray-400" fontSize={7}>排名</text>
-          {/* Playoff line at 8th */}
+          <text x={chartW / 2} y={chartH - 2} textAnchor="middle" className="fill-gray-400" fontSize={7}>FAAB 花費 ($)</text>
+          <text x={6} y={chartH / 2} textAnchor="middle" transform={`rotate(-90, 6, ${chartH / 2})`} className="fill-gray-400" fontSize={7}>撿人次數</text>
+          {/* Playoff avg lines */}
           <line
-            x1={pad.left} y1={pad.top + (8 / 16) * h}
-            x2={chartW - pad.right} y2={pad.top + (8 / 16) * h}
-            stroke="#ef4444" strokeWidth={0.5} strokeDasharray="3,2" opacity={0.5}
+            x1={xScale(avgPlayoffSpent)} y1={pad.top}
+            x2={xScale(avgPlayoffSpent)} y2={chartH - pad.bottom}
+            stroke="#6366f1" strokeWidth={0.5} strokeDasharray="3,2" opacity={0.3}
           />
-          <text x={chartW - pad.right + 2} y={pad.top + (8 / 16) * h + 3} className="fill-red-400" fontSize={6}>季後賽線</text>
+          <line
+            x1={pad.left} y1={yScale(avgPlayoffPickups)}
+            x2={chartW - pad.right} y2={yScale(avgPlayoffPickups)}
+            stroke="#6366f1" strokeWidth={0.5} strokeDasharray="3,2" opacity={0.3}
+          />
           {/* Data points */}
           {data.map(d => {
-            const x = pad.left + (d.faab_spent / (maxSpent * 1.1)) * w;
-            const y = pad.top + ((d.place - 0.5) / 16) * h;
+            const cx = xScale(d.faab_spent);
+            const cy = yScale(d.num_pickups);
+            const isPlayoff = d.is_playoff;
             return (
               <g key={d.manager}>
-                <circle cx={x} cy={y} r={4} fill={d.is_playoff ? "#6366f1" : "#d1d5db"} stroke="white" strokeWidth={1} />
-                <text x={x} y={y - 6} textAnchor="middle" className={d.is_playoff ? "fill-indigo-600" : "fill-gray-400"} fontSize={6} fontWeight={d.is_playoff ? 600 : 400}>
-                  {d.manager.substring(0, 6)}
+                <circle cx={cx} cy={cy} r={5} fill={isPlayoff ? "#6366f1" : "#d1d5db"} stroke="white" strokeWidth={1.2} opacity={0.9} />
+                <text x={cx} y={cy - 8} textAnchor="middle" className={isPlayoff ? "fill-indigo-600" : "fill-gray-400"} fontSize={6} fontWeight={isPlayoff ? 600 : 400}>
+                  {d.manager.length > 5 ? d.manager.substring(0, 5) : d.manager}
                 </text>
               </g>
             );
@@ -755,11 +766,13 @@ function FaabCorrelationChart({ data }: { data: FaabStatsResponse["faab_vs_stand
         <div className="flex flex-col gap-2 text-[11px]">
           <div className="rounded-md bg-indigo-50 px-3 py-2">
             <div className="font-semibold text-indigo-700">季後賽隊伍 (Top 8)</div>
-            <div className="text-indigo-600">平均花費: ${avgPlayoffSpent} / 平均撿人: {avgPlayoffPickups} 次</div>
+            <div className="text-indigo-600">平均花費: ${avgPlayoffSpent}</div>
+            <div className="text-indigo-600">平均撿人: {avgPlayoffPickups} 次</div>
           </div>
           <div className="rounded-md bg-gray-50 px-3 py-2">
             <div className="font-semibold text-gray-500">未進季後賽 (9-16)</div>
-            <div className="text-gray-400">平均花費: ${avgNonPlayoffSpent} / 平均撿人: {avgNonPlayoffPickups} 次</div>
+            <div className="text-gray-400">平均花費: ${avgNonPlayoffSpent}</div>
+            <div className="text-gray-400">平均撿人: {avgNonPlayoffPickups} 次</div>
           </div>
           <div className="mt-1 rounded-md border border-amber-200 bg-amber-50 px-3 py-2">
             <div className="text-[10px] text-amber-700">
