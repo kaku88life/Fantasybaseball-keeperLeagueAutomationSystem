@@ -808,10 +808,11 @@ def compute_salary_rankings(years: list[int] | None = None) -> dict:
         # Sort by salary descending, take top 20
         unique_players.sort(key=lambda x: (-x["salary"], x["player"]))
         top20 = unique_players[:20]
+        # Salary cap: $300 + (year - 2024 + 1) * $5 for 2024+, else $300
+        salary_cap = 300 + (year - 2024 + 1) * 5 if year >= 2024 else 300
         for i, p in enumerate(top20, 1):
             p["rank"] = i
-            team_total = mgr_totals.get(p["manager"], 1)
-            p["salary_pct"] = round(p["salary"] / team_total * 100, 1)
+            p["salary_pct"] = round(p["salary"] / salary_cap * 100, 1)
 
         rankings[year_str] = top20
 

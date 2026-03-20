@@ -695,8 +695,8 @@ function FaabCorrelationChart({ allData }: { allData: FaabStatsResponse["faab_vs
     ? Math.round(nonPlayoff.reduce((s, d) => s + d.num_pickups, 0) / nonPlayoff.length)
     : 0;
 
-  const chartW = 340;
-  const chartH = 240;
+  const chartW = 480;
+  const chartH = 320;
   const pad = { top: 15, right: 15, bottom: 30, left: 35 };
   const w = chartW - pad.left - pad.right;
   const h = chartH - pad.top - pad.bottom;
@@ -731,7 +731,7 @@ function FaabCorrelationChart({ allData }: { allData: FaabStatsResponse["faab_vs
       </div>
 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
-        <svg viewBox={`0 0 ${chartW} ${chartH}`} className="w-full max-w-[360px] overflow-visible">
+        <svg viewBox={`0 0 ${chartW} ${chartH}`} className="w-full max-w-[520px] overflow-visible">
           {yTicks.map(val => (
             <g key={`y-${val}`}>
               <line x1={pad.left} y1={yScale(val)} x2={chartW - pad.right} y2={yScale(val)} stroke="#f3f4f6" strokeWidth={0.5} />
