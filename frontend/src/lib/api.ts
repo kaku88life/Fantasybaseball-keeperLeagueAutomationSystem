@@ -797,6 +797,7 @@ export interface LeagueSummaryResponse {
       total_spent: number;
       avg_pick_cost: number;
       max_pick: number;
+      top10_avg?: number;
       biggest_spender: { manager: string; total: number };
     }
   >;

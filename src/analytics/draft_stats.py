@@ -1162,11 +1162,14 @@ def compute_league_summary() -> dict:
             managers_cost[p.get("manager", "Unknown")] += p.get("cost", 0)
 
         top_mgr = max(managers_cost.items(), key=lambda x: x[1]) if managers_cost else ("", 0)
+        sorted_costs = sorted(costs, reverse=True)
+        top10_costs = sorted_costs[:10]
         summary["draft_highlights"][year_str] = {
             "total_picks": len(draft),
             "total_spent": sum(costs),
             "avg_pick_cost": round(sum(costs) / len(costs), 1) if costs else 0,
             "max_pick": max(costs) if costs else 0,
+            "top10_avg": round(sum(top10_costs) / len(top10_costs), 1) if top10_costs else 0,
             "biggest_spender": {"manager": top_mgr[0], "total": top_mgr[1]},
         }
 

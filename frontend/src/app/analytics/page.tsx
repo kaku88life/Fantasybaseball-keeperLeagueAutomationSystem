@@ -674,12 +674,8 @@ function DraftStatsTab({ data }: { data: DraftStatsResponse }) {
 
 // ========== FAAB Correlation Chart ==========
 
-function FaabCorrelationChart({ allData }: { allData: FaabStatsResponse["faab_vs_standings"] }) {
-  const chartYears = Object.keys(allData).sort();
-  const [selectedChartYear, setSelectedChartYear] = useState(
-    chartYears.length > 0 ? chartYears[chartYears.length - 1] : "",
-  );
-  const data = allData[selectedChartYear] || [];
+function FaabCorrelationChart({ allData, selectedYear }: { allData: FaabStatsResponse["faab_vs_standings"]; selectedYear: string }) {
+  const data = allData[selectedYear] || [];
   if (!data || data.length === 0) return null;
 
   const maxSpent = Math.max(...data.map(d => d.faab_spent));
@@ -728,38 +724,27 @@ function FaabCorrelationChart({ allData }: { allData: FaabStatsResponse["faab_vs
   const [hovered, setHovered] = useState<typeof data[0] | null>(null);
 
   const chartW = 560;
-  const chartH = 400;
+  const chartH = 320;
   const pad = { top: 20, right: 20, bottom: 40, left: 45 };
   const w = chartW - pad.left - pad.right;
   const h = chartH - pad.top - pad.bottom;
 
-  const xScale = (val: number) => pad.left + (val / (maxSpent * 1.1)) * w;
+  const xMax = maxSpent * 1.1;
+  const xScale = (val: number) => pad.left + (val / xMax) * w;
   const yScale = (val: number) => pad.top + h - (val / (maxPickups * 1.15)) * h;
 
   const yTicks = [0, 20, 40, 60, 80, 100].filter(v => v <= maxPickups * 1.15);
-  const xTicks = [0, 25, 50, 75, 100].filter(v => v <= maxSpent * 1.1);
+  const xTicks = [0, 25, 50, 75, 100, 150, 200].filter(v => v <= xMax);
 
   return (
     <div className="mb-4 rounded-lg border border-gray-200 bg-white p-4 sm:p-5">
-      <div className="mb-3 flex items-center justify-between">
-        <div>
-          <h4 className="text-sm font-semibold text-gray-800">
-            FAAB 花費 vs 撿人次數（季後賽關聯分析）
-          </h4>
-          <p className="text-xs text-gray-500">
-            積極使用 FAAB 的隊伍是否更容易進季後賽？紫色 = 季後賽隊伍
-          </p>
-        </div>
-        {chartYears.length > 1 && (
-          <div className="flex gap-1">
-            {chartYears.map(yr => (
-              <button key={yr} onClick={() => setSelectedChartYear(yr)}
-                className={`rounded px-2.5 py-1 text-xs font-medium ${selectedChartYear === yr ? "bg-indigo-600 text-white" : "bg-gray-100 text-gray-500 hover:bg-gray-200"}`}>
-                {yr}
-              </button>
-            ))}
-          </div>
-        )}
+      <div className="mb-3">
+        <h4 className="text-sm font-semibold text-gray-800">
+          FAAB 花費 vs 撿人次數（季後賽關聯分析）
+        </h4>
+        <p className="text-xs text-gray-500">
+          積極使用 FAAB 的隊伍是否更容易進季後賽？紫色 = 季後賽隊伍
+        </p>
       </div>
 
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
@@ -896,7 +881,7 @@ function FaabStatsTab({ data }: { data: FaabStatsResponse }) {
 
       {/* FAAB vs Standings scatter chart */}
       {data.faab_vs_standings && Object.keys(data.faab_vs_standings).length > 0 && (
-        <FaabCorrelationChart allData={data.faab_vs_standings} />
+        <FaabCorrelationChart allData={data.faab_vs_standings} selectedYear={selectedYear} />
       )}
 
       <div className="overflow-x-auto rounded-lg border border-gray-200">
@@ -1242,55 +1227,14 @@ function SummaryTab({ data }: { data: LeagueSummaryResponse }) {
         </div>
       </section>
 
-      {/* Keeper Cost per Year */}
-      <section>
-        <h3 className="mb-2 text-sm font-semibold text-gray-900 sm:text-base">
-          各年度留用花費
-        </h3>
-        <div className="overflow-x-auto rounded-lg border border-gray-200">
-          <table className="min-w-full divide-y divide-gray-200 text-xs sm:text-sm">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-2 py-1.5 text-left text-[10px] font-medium uppercase text-gray-400 sm:px-3 sm:py-2">年</th>
-                <th className="px-2 py-1.5 text-left text-[10px] font-medium uppercase text-gray-400 sm:px-3 sm:py-2">最高</th>
-                <th className="px-2 py-1.5 text-right text-[10px] font-medium uppercase text-gray-400 sm:px-3 sm:py-2">$</th>
-                <th className="hidden px-3 py-2 text-left text-[10px] font-medium uppercase text-gray-400 sm:table-cell">最低</th>
-                <th className="hidden px-3 py-2 text-right text-[10px] font-medium uppercase text-gray-400 sm:table-cell">$</th>
-                <th className="px-2 py-1.5 text-right text-[10px] font-medium uppercase text-gray-400 sm:px-3 sm:py-2">平均</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100 bg-white">
-              {keeperYears.map((year) => {
-                const ks = data.keeper_stats[year];
-                return (
-                  <tr key={year} className="hover:bg-gray-50">
-                    <td className="px-2 py-1.5 font-semibold text-gray-900 sm:px-3 sm:py-2">{year}</td>
-                    <td className="px-2 py-1.5 text-gray-600 sm:px-3 sm:py-2">{ks.highest_spender?.manager ?? "-"}</td>
-                    <td className="px-2 py-1.5 text-right tabular-nums font-medium text-indigo-700 sm:px-3 sm:py-2">
-                      ${ks.highest_spender?.total_cost ?? 0}
-                    </td>
-                    <td className="hidden px-3 py-2 text-gray-600 sm:table-cell">{ks.lowest_spender?.manager ?? "-"}</td>
-                    <td className="hidden px-3 py-2 text-right tabular-nums text-gray-400 sm:table-cell">
-                      ${ks.lowest_spender?.total_cost ?? 0}
-                    </td>
-                    <td className="px-2 py-1.5 text-right tabular-nums text-gray-400 sm:px-3 sm:py-2">
-                      ${ks.league_avg_cost}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      {/* Draft Highlights */}
+      {/* Draft Salary Trend Line Chart */}
       {draftYears.length > 0 && (
         <section>
           <h3 className="mb-2 text-sm font-semibold text-gray-900 sm:text-base">
-            選秀概況
+            選秀薪資趨勢
           </h3>
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3">
+          <DraftSalaryTrendChart draftHighlights={data.draft_highlights} years={draftYears} />
+          <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3">
             {draftYears.map((year) => {
               const dh = data.draft_highlights[year];
               return (
@@ -1298,10 +1242,9 @@ function SummaryTab({ data }: { data: LeagueSummaryResponse }) {
                   <div className="mb-1 text-xs font-semibold text-gray-900">{year}</div>
                   <div className="space-y-0.5 text-[10px] sm:text-xs">
                     <Row label="選秀筆數" value={`${dh.total_picks}`} />
-                    <Row label="總花費" value={`$${dh.total_spent}`} />
-                    <Row label="平均" value={`$${dh.avg_pick_cost}`} />
+                    <Row label="前十高薪平均" value={`$${dh.top10_avg ?? dh.avg_pick_cost}`} bold />
                     <Row label="最高" value={`$${dh.max_pick}`} bold />
-                    <Row label="大手筆" value={`${dh.biggest_spender.manager} ($${dh.biggest_spender.total})`} />
+                    <Row label="全體平均" value={`$${dh.avg_pick_cost}`} />
                   </div>
                 </div>
               );
@@ -1343,6 +1286,89 @@ function SummaryTab({ data }: { data: LeagueSummaryResponse }) {
           </div>
         </section>
       )}
+    </div>
+  );
+}
+
+// ========== Draft Salary Trend Chart ==========
+
+interface DraftHighlight {
+  total_picks: number;
+  total_spent: number;
+  avg_pick_cost: number;
+  max_pick: number;
+  top10_avg?: number;
+  biggest_spender: { manager: string; total: number };
+}
+
+function DraftSalaryTrendChart({ draftHighlights, years }: { draftHighlights: Record<string, DraftHighlight>; years: string[] }) {
+  if (years.length < 2) return null;
+
+  const dataPoints = years.map(y => ({
+    year: y,
+    maxPick: draftHighlights[y]?.max_pick ?? 0,
+    top10Avg: draftHighlights[y]?.top10_avg ?? draftHighlights[y]?.avg_pick_cost ?? 0,
+  }));
+
+  const allVals = dataPoints.flatMap(d => [d.maxPick, d.top10Avg]);
+  const yMax = Math.ceil(Math.max(...allVals) / 10) * 10 + 10;
+  const yMin = 0;
+
+  const chartW = 500;
+  const chartH = 220;
+  const pad = { top: 20, right: 30, bottom: 35, left: 45 };
+  const w = chartW - pad.left - pad.right;
+  const h = chartH - pad.top - pad.bottom;
+
+  const xScale = (i: number) => pad.left + (i / (dataPoints.length - 1)) * w;
+  const yScale = (val: number) => pad.top + h - ((val - yMin) / (yMax - yMin)) * h;
+
+  const yTicks = Array.from({ length: 5 }, (_, i) => Math.round(yMin + (i * (yMax - yMin)) / 4));
+
+  const makePath = (key: "maxPick" | "top10Avg") =>
+    dataPoints.map((d, i) => `${i === 0 ? "M" : "L"} ${xScale(i)} ${yScale(d[key])}`).join(" ");
+
+  return (
+    <div className="rounded-lg border border-gray-200 bg-white p-3 sm:p-4">
+      <div className="mb-2 flex items-center gap-4 text-[10px] sm:text-xs">
+        <span className="flex items-center gap-1">
+          <span className="inline-block h-0.5 w-4 bg-indigo-600" /> 最高薪球員
+        </span>
+        <span className="flex items-center gap-1">
+          <span className="inline-block h-0.5 w-4 bg-amber-500" style={{ borderTop: "2px dashed #f59e0b", height: 0 }} /> 前十高薪平均
+        </span>
+      </div>
+      <svg viewBox={`0 0 ${chartW} ${chartH}`} className="w-full max-w-[550px]">
+        {yTicks.map(val => (
+          <g key={val}>
+            <line x1={pad.left} y1={yScale(val)} x2={chartW - pad.right} y2={yScale(val)} stroke="#e5e7eb" strokeWidth={0.5} />
+            <text x={pad.left - 6} y={yScale(val) + 4} textAnchor="end" className="fill-gray-500" fontSize={10}>${val}</text>
+          </g>
+        ))}
+        {dataPoints.map((d, i) => (
+          <g key={d.year}>
+            <line x1={xScale(i)} y1={pad.top} x2={xScale(i)} y2={chartH - pad.bottom} stroke="#f3f4f6" strokeWidth={0.5} />
+            <text x={xScale(i)} y={chartH - pad.bottom + 16} textAnchor="middle" className="fill-gray-600" fontSize={11} fontWeight={600}>{d.year}</text>
+          </g>
+        ))}
+        {/* Max pick line */}
+        <path d={makePath("maxPick")} fill="none" stroke="#6366f1" strokeWidth={2.5} strokeLinejoin="round" />
+        {dataPoints.map((d, i) => (
+          <g key={`max-${i}`}>
+            <circle cx={xScale(i)} cy={yScale(d.maxPick)} r={5} fill="#6366f1" stroke="white" strokeWidth={2} />
+            <text x={xScale(i)} y={yScale(d.maxPick) - 10} textAnchor="middle" className="fill-indigo-700" fontSize={11} fontWeight={700}>${d.maxPick}</text>
+          </g>
+        ))}
+        {/* Top 10 avg line */}
+        <path d={makePath("top10Avg")} fill="none" stroke="#f59e0b" strokeWidth={2} strokeDasharray="6,3" strokeLinejoin="round" />
+        {dataPoints.map((d, i) => (
+          <g key={`avg-${i}`}>
+            <circle cx={xScale(i)} cy={yScale(d.top10Avg)} r={4} fill="#f59e0b" stroke="white" strokeWidth={2} />
+            <text x={xScale(i)} y={yScale(d.top10Avg) + 16} textAnchor="middle" className="fill-amber-700" fontSize={10} fontWeight={600}>${d.top10Avg}</text>
+          </g>
+        ))}
+        <text x={pad.left - 8} y={pad.top - 6} textAnchor="start" className="fill-gray-400" fontSize={9}>薪資 ($)</text>
+      </svg>
     </div>
   );
 }
