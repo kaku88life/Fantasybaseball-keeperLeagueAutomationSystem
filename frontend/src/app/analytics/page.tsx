@@ -28,13 +28,13 @@ import LoadingSpinner from "@/components/LoadingSpinner";
 import AuthGate from "@/components/AuthGate";
 
 const TABS = [
+  { id: "summary", label: "總覽" },
   { id: "salary", label: "薪資排行" },
   { id: "contract", label: "合約總值" },
   { id: "draft", label: "選秀 Top 10" },
   { id: "faab", label: "FAAB" },
   { id: "position", label: "位置偏好" },
   { id: "trade", label: "交易" },
-  { id: "summary", label: "總覽" },
 ] as const;
 type TabId = (typeof TABS)[number]["id"];
 
@@ -193,7 +193,7 @@ export default function AnalyticsPage() {
 }
 
 function AnalyticsContent() {
-  const [activeTab, setActiveTab] = useState<TabId>("salary");
+  const [activeTab, setActiveTab] = useState<TabId>("summary");
 
   const { data: salaryData, isLoading: salaryLoading } = useSWR<SalaryRankingsResponse>(
     activeTab === "salary" ? "analytics-salary" : null,
@@ -1300,11 +1300,13 @@ function DraftSalaryTrendChart({ draftHighlights, years }: { draftHighlights: Re
 
   const chartW = 800;
   const chartH = 260;
-  const pad = { top: 25, right: 40, bottom: 35, left: 50 };
+  const pad = { top: 25, right: 30, bottom: 35, left: 50 };
   const w = chartW - pad.left - pad.right;
   const h = chartH - pad.top - pad.bottom;
 
-  const xScale = (i: number) => pad.left + (i / (dataPoints.length - 1)) * w;
+  // Add half-step margin so first/last points don't sit on the edge
+  const step = w / (dataPoints.length + 1);
+  const xScale = (i: number) => pad.left + step * (i + 1);
   const yScale = (val: number) => pad.top + h - ((val - yMin) / (yMax - yMin)) * h;
 
   const yTicks = Array.from({ length: 5 }, (_, i) => Math.round(yMin + (i * (yMax - yMin)) / 4));
