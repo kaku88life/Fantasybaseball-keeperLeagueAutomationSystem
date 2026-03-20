@@ -941,7 +941,25 @@ function PositionPreferenceTab({ data }: { data: PositionPreferenceResponse }) {
     years.length > 0 ? String(years[years.length - 1]) : "",
   );
   const POS_ORDER = ["C", "1B", "2B", "3B", "SS", "LF", "CF", "RF", "OF", "SP", "RP", "DH", "Unknown"];
-  const posCategories = Object.keys(data.league_position_breakdown)
+
+  // Compute per-year league breakdown and per-team breakdown
+  const yearLeagueBreakdown: Record<string, number> = {};
+  const filteredTeams = Object.entries(data.teams)
+    .map(([mgr, teamData]) => {
+      const yd = teamData.yearly[selectedYear];
+      const posBreak = yd?.position_breakdown ?? {};
+      const spent = yd?.total_spent ?? 0;
+      const picks = yd?.picks ?? [];
+      // Accumulate league totals for this year
+      for (const [pos, cnt] of Object.entries(posBreak)) {
+        yearLeagueBreakdown[pos] = (yearLeagueBreakdown[pos] ?? 0) + cnt;
+      }
+      return { mgr, posBreak, spent, picks, totalPicks: Object.values(posBreak).reduce((s, v) => s + v, 0) };
+    })
+    .filter(t => t.totalPicks > 0)
+    .sort((a, b) => b.totalPicks - a.totalPicks);
+
+  const posCategories = Object.keys(yearLeagueBreakdown)
     .sort((a, b) => {
       const ai = POS_ORDER.indexOf(a);
       const bi = POS_ORDER.indexOf(b);
@@ -954,7 +972,7 @@ function PositionPreferenceTab({ data }: { data: PositionPreferenceResponse }) {
 
       <div className="mb-3">
         <h3 className="mb-1.5 text-xs font-semibold text-gray-600">
-          聯盟 $20+ 選秀位置分布
+          {selectedYear} 年 $20+ 選秀位置分布
         </h3>
         <div className="flex flex-wrap gap-1.5">
           {posCategories.map((pos) => (
@@ -962,11 +980,11 @@ function PositionPreferenceTab({ data }: { data: PositionPreferenceResponse }) {
               key={pos}
               className={`inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-[10px] font-medium sm:text-xs ${POS_COLORS[pos] ?? POS_COLORS.Unknown}`}
             >
-              {pos}: {data.league_position_breakdown[pos]}
+              {pos}: {yearLeagueBreakdown[pos]}
             </span>
           ))}
           <span className="inline-flex items-center gap-0.5 rounded-full bg-indigo-50 px-2 py-0.5 text-[10px] font-medium text-indigo-700 sm:text-xs">
-            Total: {Object.values(data.league_position_breakdown).reduce((a, b) => a + b, 0)}
+            Total: {Object.values(yearLeagueBreakdown).reduce((a, b) => a + b, 0)}
           </span>
         </div>
       </div>
@@ -983,14 +1001,7 @@ function PositionPreferenceTab({ data }: { data: PositionPreferenceResponse }) {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100 bg-white">
-            {Object.entries(data.teams)
-              .sort((a, b) => {
-                const aTotal = Object.values(a[1].career_position_breakdown).reduce((s, v) => s + v, 0);
-                const bTotal = Object.values(b[1].career_position_breakdown).reduce((s, v) => s + v, 0);
-                return bTotal - aTotal;
-              })
-              .map(([mgr, teamData]) => {
-                const totalSpent = Object.values(teamData.yearly).reduce((s, yd) => s + yd.total_spent, 0);
+            {filteredTeams.map(({ mgr, posBreak, spent, picks }) => {
                 const isExpanded = expandedTeam === mgr;
 
                 return (
@@ -1002,42 +1013,33 @@ function PositionPreferenceTab({ data }: { data: PositionPreferenceResponse }) {
                       </td>
                       {posCategories.map((pos) => (
                         <td key={pos} className="px-1.5 py-1.5 text-center tabular-nums sm:px-3 sm:py-2">
-                          {teamData.career_position_breakdown[pos] ? (
+                          {posBreak[pos] ? (
                             <span className={`inline-block min-w-[18px] rounded px-1 py-0.5 text-[9px] font-medium sm:text-xs ${POS_COLORS[pos] ?? POS_COLORS.Unknown}`}>
-                              {teamData.career_position_breakdown[pos]}
+                              {posBreak[pos]}
                             </span>
                           ) : (
                             <span className="text-gray-200">-</span>
                           )}
                         </td>
                       ))}
-                      <td className="px-2 py-1.5 text-center tabular-nums font-medium sm:px-3 sm:py-2">${totalSpent}</td>
+                      <td className="px-2 py-1.5 text-center tabular-nums font-medium sm:px-3 sm:py-2">${spent}</td>
                     </tr>
 
-                    {isExpanded && (
+                    {isExpanded && picks.length > 0 && (
                       <tr>
                         <td colSpan={posCategories.length + 2} className="bg-gray-50 px-3 py-2">
-                          {years.map((y) => {
-                            const yd = teamData.yearly[String(y)];
-                            if (!yd) return null;
-                            return (
-                              <div key={y} className="mb-1.5">
-                                <h4 className="mb-0.5 text-[10px] font-semibold text-gray-500">{y}</h4>
-                                <div className="flex flex-wrap gap-1">
-                                  {yd.picks
-                                    .sort((a: { cost: number }, b: { cost: number }) => b.cost - a.cost)
-                                    .map((p: { player: string; cost: number; position: string; pos_category: string }, i: number) => (
-                                      <span
-                                        key={i}
-                                        className={`inline-flex items-center rounded px-1.5 py-0.5 text-[10px] ${POS_COLORS[p.pos_category] ?? POS_COLORS.Unknown}`}
-                                      >
-                                        {p.player} ${p.cost}
-                                      </span>
-                                    ))}
-                                </div>
-                              </div>
-                            );
-                          })}
+                          <div className="flex flex-wrap gap-1">
+                            {picks
+                              .sort((a: { cost: number }, b: { cost: number }) => b.cost - a.cost)
+                              .map((p: { player: string; cost: number; position: string; pos_category: string }, i: number) => (
+                                <span
+                                  key={i}
+                                  className={`inline-flex items-center rounded px-1.5 py-0.5 text-[10px] ${POS_COLORS[p.pos_category] ?? POS_COLORS.Unknown}`}
+                                >
+                                  {p.player} ${p.cost}
+                                </span>
+                              ))}
+                          </div>
                         </td>
                       </tr>
                     )}
