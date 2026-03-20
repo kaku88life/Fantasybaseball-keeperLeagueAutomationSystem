@@ -672,13 +672,13 @@ export interface FaabStatsResponse {
     avg_team_faab_spent: number;
     team_count: number;
   }>;
-  faab_vs_standings: Array<{
+  faab_vs_standings: Record<string, Array<{
     manager: string;
     faab_spent: number;
     num_pickups: number;
     place: number;
     is_playoff: boolean;
-  }>;
+  }>>;
 }
 
 export interface PositionPreferenceResponse {

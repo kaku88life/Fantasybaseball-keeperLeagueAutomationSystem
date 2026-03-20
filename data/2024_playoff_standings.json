@@ -1,0 +1,31 @@
+{
+  "year": 2024,
+  "standings": [
+    {"place": 1, "manager": "wei", "name": "Baltimore Orioles", "team_key": "431.l.25517.t.4"},
+    {"place": 2, "manager": "魚魚", "name": "Seattle Mariners", "team_key": "431.l.25517.t.15"},
+    {"place": 3, "manager": "小喆", "name": "LA Dodgers", "team_key": "431.l.25517.t.10"},
+    {"place": 4, "manager": "Tony", "name": "Boston Red Sox 2024", "team_key": "431.l.25517.t.5"},
+    {"place": 5, "manager": "rozsun", "name": "Detroit TIGERS", "team_key": "431.l.25517.t.13"},
+    {"place": 6, "manager": "Hyper", "name": "Minnesota", "team_key": "431.l.25517.t.12"},
+    {"place": 7, "manager": "rawstuff", "name": "Cleveland Guardians", "team_key": "431.l.25517.t.7"},
+    {"place": 8, "manager": "YWC", "name": "Houston Astros", "team_key": "431.l.25517.t.8"},
+    {"place": 9, "manager": "哈寶好", "name": "Kansas City Royals", "team_key": "431.l.25517.t.9"},
+    {"place": 10, "manager": "TIMMY LIU", "name": "New York Mets", "team_key": "431.l.25517.t.14"},
+    {"place": 11, "manager": "Leo", "name": "Arizona D-backs", "team_key": "431.l.25517.t.2"},
+    {"place": 12, "manager": "謙謙", "name": "New York Yankees", "team_key": "431.l.25517.t.6"},
+    {"place": 13, "manager": "Ponpon", "name": "Tampa Bay Rays", "team_key": "431.l.25517.t.16"},
+    {"place": 14, "manager": "Ｋａｋｕ", "name": "Texas Rangers", "team_key": "431.l.25517.t.1"},
+    {"place": 15, "manager": "EDDIE", "name": "Attack on San Francisco", "team_key": "431.l.25517.t.11"},
+    {"place": 16, "manager": "hyc", "name": "Atlanta Braves", "team_key": "431.l.25517.t.3"}
+  ],
+  "ranking_bonus_map": {
+    "wei": 10,
+    "魚魚": 7,
+    "小喆": 5,
+    "Tony": 3,
+    "rozsun": 2,
+    "Hyper": 1,
+    "rawstuff": 0,
+    "YWC": 0
+  }
+}

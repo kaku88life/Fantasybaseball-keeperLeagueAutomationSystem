@@ -1,0 +1,31 @@
+{
+  "year": 2023,
+  "standings": [
+    {"place": 1, "manager": "Hyper", "name": "Mets", "team_key": "422.l.25091.t.2"},
+    {"place": 2, "manager": "rawstuff", "name": "Chicago Cubs", "team_key": "422.l.25091.t.5"},
+    {"place": 3, "manager": "rozsun", "name": "Milwaukee Brewers", "team_key": "422.l.25091.t.10"},
+    {"place": 4, "manager": "Tony", "name": "Cleveland Guardians", "team_key": "422.l.25091.t.12"},
+    {"place": 5, "manager": "wei", "name": "Boston Red Sox 2023", "team_key": "422.l.25091.t.4"},
+    {"place": 6, "manager": "Ponpon", "name": "St. Louis Cardinals", "team_key": "422.l.25091.t.15"},
+    {"place": 7, "manager": "Ｋａｋｕ", "name": "Texas Rangers", "team_key": "422.l.25091.t.1"},
+    {"place": 8, "manager": "魚魚", "name": "Seattle Mariners", "team_key": "422.l.25091.t.13"},
+    {"place": 9, "manager": "Leo", "name": "Baltimore Orioles", "team_key": "422.l.25091.t.3"},
+    {"place": 10, "manager": "YWC", "name": "Houston Astros", "team_key": "422.l.25091.t.7"},
+    {"place": 11, "manager": "TIMMY LIU", "name": "San Diego Padres", "team_key": "422.l.25091.t.6"},
+    {"place": 12, "manager": "EDDIE", "name": "Arizona D-backs", "team_key": "422.l.25091.t.11"},
+    {"place": 13, "manager": "哈寶好", "name": "Atlanta Braves", "team_key": "422.l.25091.t.16"},
+    {"place": 14, "manager": "謙謙", "name": "Los Angeles Angels", "team_key": "422.l.25091.t.9"},
+    {"place": 15, "manager": "小喆", "name": "LA Dodgers", "team_key": "422.l.25091.t.14"},
+    {"place": 16, "manager": "hyc", "name": "Kansas City Royals", "team_key": "422.l.25091.t.8"}
+  ],
+  "ranking_bonus_map": {
+    "Hyper": 10,
+    "rawstuff": 7,
+    "rozsun": 5,
+    "Tony": 3,
+    "wei": 2,
+    "Ponpon": 1,
+    "Ｋａｋｕ": 0,
+    "魚魚": 0
+  }
+}

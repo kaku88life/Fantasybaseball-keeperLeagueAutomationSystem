@@ -1,59 +1,23 @@
 {
   "year": 2025,
-  "playoff_weeks": [
-    23,
-    24,
-    25
-  ],
+  "playoff_weeks": [23, 24, 25],
   "standings": [
-    {
-      "place": 1,
-      "manager": "Leo",
-      "name": "PHI Phillies",
-      "team_key": "458.l.40288.t.2"
-    },
-    {
-      "place": 2,
-      "manager": "Tony",
-      "name": "Cincinnati Reds 2025",
-      "team_key": "458.l.40288.t.6"
-    },
-    {
-      "place": 3,
-      "manager": "rawstuff",
-      "name": "Chicago Cubs",
-      "team_key": "458.l.40288.t.7"
-    },
-    {
-      "place": 4,
-      "manager": "謙謙",
-      "name": "New York Yankees",
-      "team_key": "458.l.40288.t.14"
-    },
-    {
-      "place": 5,
-      "manager": "Billy",
-      "name": "Detroit Tigers",
-      "team_key": "458.l.40288.t.8"
-    },
-    {
-      "place": 6,
-      "manager": "TIMMY LIU",
-      "name": "Boston Red Sox",
-      "team_key": "458.l.40288.t.13"
-    },
-    {
-      "place": 7,
-      "manager": "Ponpon",
-      "name": "Tampa Bay Rays",
-      "team_key": "458.l.40288.t.16"
-    },
-    {
-      "place": 8,
-      "manager": "Hyper",
-      "name": "Arizona",
-      "team_key": "458.l.40288.t.12"
-    }
+    {"place": 1, "manager": "Leo", "name": "PHI Phillies", "team_key": "458.l.40288.t.2"},
+    {"place": 2, "manager": "Tony", "name": "Cincinnati Reds 2025", "team_key": "458.l.40288.t.6"},
+    {"place": 3, "manager": "rawstuff", "name": "Chicago Cubs", "team_key": "458.l.40288.t.7"},
+    {"place": 4, "manager": "謙謙", "name": "New York Yankees", "team_key": "458.l.40288.t.14"},
+    {"place": 5, "manager": "Billy", "name": "Detroit Tigers", "team_key": "458.l.40288.t.8"},
+    {"place": 6, "manager": "TIMMY LIU", "name": "Boston Red Sox", "team_key": "458.l.40288.t.13"},
+    {"place": 7, "manager": "Ponpon", "name": "Tampa Bay Rays", "team_key": "458.l.40288.t.16"},
+    {"place": 8, "manager": "Hyper", "name": "Arizona", "team_key": "458.l.40288.t.12"},
+    {"place": 9, "manager": "哈寶好", "name": "Kansas City Royals", "team_key": "458.l.40288.t.10"},
+    {"place": 10, "manager": "wei", "name": "Atlanta Braves2", "team_key": "458.l.40288.t.5"},
+    {"place": 11, "manager": "魚魚", "name": "Seattle Mariners", "team_key": "458.l.40288.t.15"},
+    {"place": 12, "manager": "小喆", "name": "Centennial Rockies", "team_key": "458.l.40288.t.11"},
+    {"place": 13, "manager": "叫我寬哥", "name": "blue jays", "team_key": "458.l.40288.t.3"},
+    {"place": 14, "manager": "YWC", "name": "Houston Astros", "team_key": "458.l.40288.t.9"},
+    {"place": 15, "manager": "EDDIE", "name": "Los Angeles Dodge ball", "team_key": "458.l.40288.t.4"},
+    {"place": 16, "manager": "Ｋａｋｕ", "name": "Texas Rangers", "team_key": "458.l.40288.t.1"}
   ],
   "ranking_bonus_map": {
     "Leo": 10,

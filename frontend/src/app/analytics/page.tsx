@@ -669,13 +669,17 @@ function DraftStatsTab({ data }: { data: DraftStatsResponse }) {
 
 // ========== FAAB Correlation Chart ==========
 
-function FaabCorrelationChart({ data }: { data: FaabStatsResponse["faab_vs_standings"] }) {
+function FaabCorrelationChart({ allData }: { allData: FaabStatsResponse["faab_vs_standings"] }) {
+  const chartYears = Object.keys(allData).sort();
+  const [selectedChartYear, setSelectedChartYear] = useState(
+    chartYears.length > 0 ? chartYears[chartYears.length - 1] : "",
+  );
+  const data = allData[selectedChartYear] || [];
   if (!data || data.length === 0) return null;
 
   const maxSpent = Math.max(...data.map(d => d.faab_spent));
   const maxPickups = Math.max(...data.map(d => d.num_pickups));
 
-  // Compute averages for playoff vs non-playoff
   const playoffTeams = data.filter(d => d.is_playoff);
   const nonPlayoff = data.filter(d => !d.is_playoff);
   const avgPlayoffSpent = playoffTeams.length
@@ -697,64 +701,60 @@ function FaabCorrelationChart({ data }: { data: FaabStatsResponse["faab_vs_stand
   const w = chartW - pad.left - pad.right;
   const h = chartH - pad.top - pad.bottom;
 
-  // Scale helpers — X: FAAB spent, Y: num pickups (higher = top)
   const xScale = (val: number) => pad.left + (val / (maxSpent * 1.1)) * w;
   const yScale = (val: number) => pad.top + h - (val / (maxPickups * 1.15)) * h;
 
-  // Y grid values
   const yTicks = [0, 20, 40, 60, 80].filter(v => v <= maxPickups * 1.1);
-  // X grid values
   const xTicks = [0, 25, 50, 75, 100].filter(v => v <= maxSpent * 1.1);
 
   return (
     <div className="mb-4 rounded-lg border border-gray-200 bg-white p-3 sm:p-4">
-      <h4 className="mb-1 text-xs font-semibold text-gray-700">
-        2025 FAAB 花費 vs 撿人次數（季後賽關聯分析）
-      </h4>
-      <p className="mb-3 text-[10px] text-gray-400">
-        積極使用 FAAB 的隊伍是否更容易進季後賽？紫色 = 季後賽隊伍
-      </p>
+      <div className="mb-2 flex items-center justify-between">
+        <div>
+          <h4 className="text-xs font-semibold text-gray-700">
+            FAAB 花費 vs 撿人次數（季後賽關聯分析）
+          </h4>
+          <p className="text-[10px] text-gray-400">
+            積極使用 FAAB 的隊伍是否更容易進季後賽？紫色 = 季後賽隊伍
+          </p>
+        </div>
+        {chartYears.length > 1 && (
+          <div className="flex gap-1">
+            {chartYears.map(yr => (
+              <button key={yr} onClick={() => setSelectedChartYear(yr)}
+                className={`rounded px-2 py-0.5 text-[10px] font-medium ${selectedChartYear === yr ? "bg-indigo-600 text-white" : "bg-gray-100 text-gray-500 hover:bg-gray-200"}`}>
+                {yr}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
-        {/* Scatter plot: X = FAAB spent, Y = num pickups */}
         <svg viewBox={`0 0 ${chartW} ${chartH}`} className="w-full max-w-[360px] overflow-visible">
-          {/* Y grid lines + labels */}
           {yTicks.map(val => (
             <g key={`y-${val}`}>
               <line x1={pad.left} y1={yScale(val)} x2={chartW - pad.right} y2={yScale(val)} stroke="#f3f4f6" strokeWidth={0.5} />
               <text x={pad.left - 4} y={yScale(val) + 3} textAnchor="end" className="fill-gray-300" fontSize={7}>{val}</text>
             </g>
           ))}
-          {/* X grid lines + labels */}
           {xTicks.map(val => (
             <g key={`x-${val}`}>
               <line x1={xScale(val)} y1={pad.top} x2={xScale(val)} y2={chartH - pad.bottom} stroke="#f3f4f6" strokeWidth={0.5} />
               <text x={xScale(val)} y={chartH - pad.bottom + 12} textAnchor="middle" className="fill-gray-300" fontSize={7}>${val}</text>
             </g>
           ))}
-          {/* Axis labels */}
           <text x={chartW / 2} y={chartH - 2} textAnchor="middle" className="fill-gray-400" fontSize={7}>FAAB 花費 ($)</text>
           <text x={6} y={chartH / 2} textAnchor="middle" transform={`rotate(-90, 6, ${chartH / 2})`} className="fill-gray-400" fontSize={7}>撿人次數</text>
-          {/* Playoff avg lines */}
-          <line
-            x1={xScale(avgPlayoffSpent)} y1={pad.top}
-            x2={xScale(avgPlayoffSpent)} y2={chartH - pad.bottom}
-            stroke="#6366f1" strokeWidth={0.5} strokeDasharray="3,2" opacity={0.3}
-          />
-          <line
-            x1={pad.left} y1={yScale(avgPlayoffPickups)}
-            x2={chartW - pad.right} y2={yScale(avgPlayoffPickups)}
-            stroke="#6366f1" strokeWidth={0.5} strokeDasharray="3,2" opacity={0.3}
-          />
-          {/* Data points */}
+          <line x1={xScale(avgPlayoffSpent)} y1={pad.top} x2={xScale(avgPlayoffSpent)} y2={chartH - pad.bottom} stroke="#6366f1" strokeWidth={0.5} strokeDasharray="3,2" opacity={0.3} />
+          <line x1={pad.left} y1={yScale(avgPlayoffPickups)} x2={chartW - pad.right} y2={yScale(avgPlayoffPickups)} stroke="#6366f1" strokeWidth={0.5} strokeDasharray="3,2" opacity={0.3} />
           {data.map(d => {
             const cx = xScale(d.faab_spent);
             const cy = yScale(d.num_pickups);
-            const isPlayoff = d.is_playoff;
             return (
               <g key={d.manager}>
-                <circle cx={cx} cy={cy} r={5} fill={isPlayoff ? "#6366f1" : "#d1d5db"} stroke="white" strokeWidth={1.2} opacity={0.9} />
-                <text x={cx} y={cy - 8} textAnchor="middle" className={isPlayoff ? "fill-indigo-600" : "fill-gray-400"} fontSize={6} fontWeight={isPlayoff ? 600 : 400}>
+                <circle cx={cx} cy={cy} r={5} fill={d.is_playoff ? "#6366f1" : "#d1d5db"} stroke="white" strokeWidth={1.2} opacity={0.9} />
+                <text x={cx} y={cy - 8} textAnchor="middle" className={d.is_playoff ? "fill-indigo-600" : "fill-gray-400"} fontSize={6} fontWeight={d.is_playoff ? 600 : 400}>
                   {d.manager.length > 5 ? d.manager.substring(0, 5) : d.manager}
                 </text>
               </g>
@@ -762,7 +762,6 @@ function FaabCorrelationChart({ data }: { data: FaabStatsResponse["faab_vs_stand
           })}
         </svg>
 
-        {/* Summary stats */}
         <div className="flex flex-col gap-2 text-[11px]">
           <div className="rounded-md bg-indigo-50 px-3 py-2">
             <div className="font-semibold text-indigo-700">季後賽隊伍 (Top 8)</div>
@@ -829,8 +828,8 @@ function FaabStatsTab({ data }: { data: FaabStatsResponse }) {
       )}
 
       {/* FAAB vs Standings scatter chart */}
-      {data.faab_vs_standings && data.faab_vs_standings.length > 0 && (
-        <FaabCorrelationChart data={data.faab_vs_standings} />
+      {data.faab_vs_standings && Object.keys(data.faab_vs_standings).length > 0 && (
+        <FaabCorrelationChart allData={data.faab_vs_standings} />
       )}
 
       <div className="overflow-x-auto rounded-lg border border-gray-200">
