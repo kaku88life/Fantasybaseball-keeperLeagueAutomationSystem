@@ -1234,22 +1234,6 @@ function SummaryTab({ data }: { data: LeagueSummaryResponse }) {
             選秀薪資趨勢
           </h3>
           <DraftSalaryTrendChart draftHighlights={data.draft_highlights} years={draftYears} />
-          <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3">
-            {draftYears.map((year) => {
-              const dh = data.draft_highlights[year];
-              return (
-                <div key={year} className="rounded-lg border border-gray-200 bg-white p-2.5 sm:p-3">
-                  <div className="mb-1 text-xs font-semibold text-gray-900">{year}</div>
-                  <div className="space-y-0.5 text-[10px] sm:text-xs">
-                    <Row label="選秀筆數" value={`${dh.total_picks}`} />
-                    <Row label="前十高薪平均" value={`$${dh.top10_avg ?? dh.avg_pick_cost}`} bold />
-                    <Row label="最高" value={`$${dh.max_pick}`} bold />
-                    <Row label="全體平均" value={`$${dh.avg_pick_cost}`} />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
         </section>
       )}
 
@@ -1314,9 +1298,9 @@ function DraftSalaryTrendChart({ draftHighlights, years }: { draftHighlights: Re
   const yMax = Math.ceil(Math.max(...allVals) / 10) * 10 + 10;
   const yMin = 0;
 
-  const chartW = 500;
-  const chartH = 220;
-  const pad = { top: 20, right: 30, bottom: 35, left: 45 };
+  const chartW = 800;
+  const chartH = 260;
+  const pad = { top: 25, right: 40, bottom: 35, left: 50 };
   const w = chartW - pad.left - pad.right;
   const h = chartH - pad.top - pad.bottom;
 
@@ -1338,7 +1322,7 @@ function DraftSalaryTrendChart({ draftHighlights, years }: { draftHighlights: Re
           <span className="inline-block h-0.5 w-4 bg-amber-500" style={{ borderTop: "2px dashed #f59e0b", height: 0 }} /> 前十高薪平均
         </span>
       </div>
-      <svg viewBox={`0 0 ${chartW} ${chartH}`} className="w-full max-w-[550px]">
+      <svg viewBox={`0 0 ${chartW} ${chartH}`} className="w-full">
         {yTicks.map(val => (
           <g key={val}>
             <line x1={pad.left} y1={yScale(val)} x2={chartW - pad.right} y2={yScale(val)} stroke="#e5e7eb" strokeWidth={0.5} />
