@@ -374,3 +374,122 @@ async def list_teams_public(year: int):
         }
         for t in db_teams
     ]
+
+
+def _get_all_rostered_names(year: int) -> set[str]:
+    """Get set of all rostered player names across all teams."""
+    snap = get_snapshot(year)
+    if not snap:
+        return set()
+    ls = dict_to_league_state(snap["data"])
+    names: set[str] = set()
+    for t in ls.teams:
+        for p in t.players:
+            names.add(p.name)
+    return names
+
+
+_HITTER_POSITIONS = {"C", "1B", "2B", "3B", "SS", "LF", "CF", "RF", "OF", "DH", "Util"}
+_PITCHER_POSITIONS = {"SP", "RP", "P"}
+
+
+def _is_hitter(position: str) -> bool:
+    if not position:
+        return False
+    primary = position.split(",")[0].strip()
+    return primary in _HITTER_POSITIONS
+
+
+def _is_pitcher(position: str) -> bool:
+    if not position:
+        return False
+    primary = position.split(",")[0].strip()
+    return primary in _PITCHER_POSITIONS
+
+
+@router.get("/fa/hitters/{year}", response_class=PlainTextResponse)
+async def get_fa_hitters(year: int):
+    """Free agent hitters ranked by overall rank.
+
+    Returns plain-text table of hitters not on any team's roster,
+    with previous season stats and current season projections.
+    """
+    rostered = _get_all_rostered_names(year)
+    try:
+        rankings = get_player_rankings(year)
+    except Exception:
+        rankings = []
+
+    fa_hitters = [
+        r for r in rankings
+        if r["player_name"] not in rostered
+        and r.get("o_rank")
+        and _is_hitter(r.get("position", ""))
+    ]
+    fa_hitters.sort(key=lambda x: x["o_rank"])
+
+    lines = [
+        f"# {year} Free Agent Hitters",
+        f"# Generated: {datetime.now().strftime('%Y-%m-%d %H:%M')}",
+        f"# Total: {len(fa_hitters)} hitters available",
+        f"",
+        f"| Rank | Player | Pos | MLB Team | Prev R | Prev H | Prev HR | Prev RBI | Prev SB | Prev AVG | Prev OPS | Proj R | Proj H | Proj HR | Proj RBI | Proj SB | Proj AVG | Proj OPS |",
+        f"|------|--------|-----|----------|--------|--------|---------|----------|---------|----------|----------|--------|--------|---------|----------|---------|----------|----------|",
+    ]
+
+    for r in fa_hitters:
+        lines.append(
+            f"| {r['o_rank']} | {r['player_name']} | {r.get('position', '?')} | {r.get('mlb_team', '?')} "
+            f"| {r.get('stat_r') or '-'} | {r.get('stat_h') or '-'} | {r.get('stat_hr') or '-'} "
+            f"| {r.get('stat_rbi') or '-'} | {r.get('stat_sb') or '-'} "
+            f"| {r.get('stat_avg') or '-'} | {r.get('stat_ops') or '-'} "
+            f"| {r.get('proj_r') or '-'} | {r.get('proj_h') or '-'} | {r.get('proj_hr') or '-'} "
+            f"| {r.get('proj_rbi') or '-'} | {r.get('proj_sb') or '-'} "
+            f"| {r.get('proj_avg') or '-'} | {r.get('proj_ops') or '-'} |"
+        )
+
+    return "\n".join(lines)
+
+
+@router.get("/fa/pitchers/{year}", response_class=PlainTextResponse)
+async def get_fa_pitchers(year: int):
+    """Free agent pitchers ranked by overall rank.
+
+    Returns plain-text table of pitchers not on any team's roster,
+    with previous season stats and current season projections.
+    """
+    rostered = _get_all_rostered_names(year)
+    try:
+        rankings = get_player_rankings(year)
+    except Exception:
+        rankings = []
+
+    fa_pitchers = [
+        r for r in rankings
+        if r["player_name"] not in rostered
+        and r.get("o_rank")
+        and _is_pitcher(r.get("position", ""))
+    ]
+    fa_pitchers.sort(key=lambda x: x["o_rank"])
+
+    lines = [
+        f"# {year} Free Agent Pitchers",
+        f"# Generated: {datetime.now().strftime('%Y-%m-%d %H:%M')}",
+        f"# Total: {len(fa_pitchers)} pitchers available",
+        f"",
+        f"| Rank | Player | Pos | MLB Team | Prev W | Prev SV | Prev HLD | Prev K | Prev ERA | Prev WHIP | Prev QS | Proj W | Proj SV | Proj HLD | Proj K | Proj ERA | Proj WHIP | Proj QS |",
+        f"|------|--------|-----|----------|--------|---------|----------|--------|----------|-----------|---------|--------|---------|----------|--------|----------|-----------|---------|",
+    ]
+
+    for r in fa_pitchers:
+        lines.append(
+            f"| {r['o_rank']} | {r['player_name']} | {r.get('position', '?')} | {r.get('mlb_team', '?')} "
+            f"| {r.get('stat_w') or '-'} | {r.get('stat_sv') or '-'} | {r.get('stat_hld') or '-'} "
+            f"| {r.get('stat_k') or '-'} | {r.get('stat_era') or '-'} "
+            f"| {r.get('stat_whip') or '-'} | {r.get('stat_qs') or '-'} "
+            f"| {r.get('proj_w') or '-'} | {r.get('proj_sv') or '-'} | {r.get('proj_hld') or '-'} "
+            f"| {r.get('proj_k') or '-'} | {r.get('proj_era') or '-'} "
+            f"| {r.get('proj_whip') or '-'} | {r.get('proj_qs') or '-'} |"
+        )
+
+    return "\n".join(lines)
