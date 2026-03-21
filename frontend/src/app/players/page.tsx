@@ -131,6 +131,14 @@ export default function PlayersPage() {
   // Sort
   const [sort, setSort] = useState<SortState>({ key: "o_rank", dir: "asc" });
 
+  // Stats column visibility (collapsible)
+  const [showHitting, setShowHitting] = useState(true);
+  const [showPitching, setShowPitching] = useState(true);
+
+  // Auto-toggle based on position filter
+  const effectiveShowHitting = positionFilter === "PITCHER" ? false : showHitting;
+  const effectiveShowPitching = positionFilter === "BATTER" ? false : showPitching;
+
   // Map owner filter: __FA__ -> contract=fa, else owner=name
   const serverOwner = ownerFilter === "__FA__" ? "" : ownerFilter;
   const serverContract = ownerFilter === "__FA__" ? "fa" : "";
@@ -666,7 +674,7 @@ export default function PlayersPage() {
               )}
 
               {/* Result count + pagination info */}
-              <div className="mb-2 flex items-center justify-between text-sm text-gray-500">
+              <div className="mb-2 flex flex-wrap items-center justify-between gap-2 text-sm text-gray-500">
                 <span>
                   篩選結果 {data?.total_count ?? 0} 位球員
                   {totalPages > 1 && (
@@ -675,6 +683,30 @@ export default function PlayersPage() {
                     </span>
                   )}
                 </span>
+                <div className="flex gap-1.5">
+                  <button
+                    onClick={() => setShowHitting(v => !v)}
+                    className={`rounded-full px-2.5 py-0.5 text-[10px] font-medium transition-colors ${
+                      effectiveShowHitting
+                        ? "bg-blue-100 text-blue-700"
+                        : "bg-gray-100 text-gray-400"
+                    } ${positionFilter === "PITCHER" ? "opacity-40 cursor-not-allowed" : ""}`}
+                    disabled={positionFilter === "PITCHER"}
+                  >
+                    {effectiveShowHitting ? "Hide" : "Show"} 打擊
+                  </button>
+                  <button
+                    onClick={() => setShowPitching(v => !v)}
+                    className={`rounded-full px-2.5 py-0.5 text-[10px] font-medium transition-colors ${
+                      effectiveShowPitching
+                        ? "bg-cyan-100 text-cyan-700"
+                        : "bg-gray-100 text-gray-400"
+                    } ${positionFilter === "BATTER" ? "opacity-40 cursor-not-allowed" : ""}`}
+                    disabled={positionFilter === "BATTER"}
+                  >
+                    {effectiveShowPitching ? "Hide" : "Show"} 投球
+                  </button>
+                </div>
               </div>
 
               {/* Stats mismatch hint */}
@@ -717,8 +749,8 @@ export default function PlayersPage() {
                         </th>
                       )}
 
-                      {/* Stats columns */}
-                      {HITTING_COLS.map((c) => (
+                      {/* Hitting stats columns */}
+                      {effectiveShowHitting && HITTING_COLS.map((c) => (
                         <SortTh
                           key={c.key}
                           col={c.key as SortKey}
@@ -726,7 +758,8 @@ export default function PlayersPage() {
                           className=""
                         />
                       ))}
-                      {PITCHING_COLS.map((c) => (
+                      {/* Pitching stats columns */}
+                      {effectiveShowPitching && PITCHING_COLS.map((c) => (
                         <SortTh
                           key={c.key}
                           col={c.key as SortKey}
@@ -826,7 +859,7 @@ export default function PlayersPage() {
                           )}
 
                           {/* Hitting stats */}
-                          {HITTING_COLS.map((c) => (
+                          {effectiveShowHitting && HITTING_COLS.map((c) => (
                             <td
                               key={c.key}
                               className={`whitespace-nowrap px-2 py-1.5 text-right text-xs ${
@@ -845,7 +878,7 @@ export default function PlayersPage() {
                           ))}
 
                           {/* Pitching stats */}
-                          {PITCHING_COLS.map((c) => (
+                          {effectiveShowPitching && PITCHING_COLS.map((c) => (
                             <td
                               key={c.key}
                               className={`whitespace-nowrap px-2 py-1.5 text-right text-xs ${
@@ -869,7 +902,7 @@ export default function PlayersPage() {
                     {paginatedPlayers.length === 0 && (
                       <tr>
                         <td
-                          colSpan={(isAuth ? 9 : 5) + HITTING_COLS.length + PITCHING_COLS.length}
+                          colSpan={(isAuth ? 9 : 5) + (effectiveShowHitting ? HITTING_COLS.length : 0) + (effectiveShowPitching ? PITCHING_COLS.length : 0)}
                           className="py-8 text-center text-gray-400"
                         >
                           沒有符合條件的球員
