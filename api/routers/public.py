@@ -13,7 +13,7 @@ from pathlib import Path
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import PlainTextResponse
 
-from api.database import get_all_teams, get_snapshot
+from api.database import get_all_teams, get_keeper_selections, get_player_rankings, get_snapshot
 from api.serializers import dict_to_league_state, serialize_player
 
 router = APIRouter()
@@ -222,9 +222,73 @@ async def get_league_context(year: int):
                 ))
 
         sections.append(_build_team_text(t, db_team))
+
+        # Keeper selections for this team
+        team_id = db_team.get("id")
+        if team_id:
+            selections = get_keeper_selections(year, team_id)
+            if selections:
+                sections.append(f"")
+                sections.append(f"### Keeper Decisions")
+                sections.append(f"| Player | Current Contract | Action | Extension | Next Contract |")
+                sections.append(f"|--------|-----------------|--------|-----------|---------------|")
+                for sel in selections:
+                    ext = f"{sel['extension_years']}yr" if sel.get('extension_years') else "-"
+                    sections.append(
+                        f"| {sel['player_name']} | {sel['current_contract']} | {sel['action']} | {ext} | {sel.get('next_contract', '-')} |"
+                    )
+
         sections.append(f"")
         sections.append(f"---")
         sections.append(f"")
+
+    # Collect all rostered player names for FA detection
+    all_rostered: set[str] = set()
+    for t in ls.teams:
+        for p in t.players:
+            all_rostered.add(p.name)
+
+    # Player rankings / projections
+    try:
+        rankings = get_player_rankings(year)
+    except Exception:
+        rankings = []
+
+    if rankings:
+        # Top ranked players
+        top_players = [r for r in rankings if r.get("o_rank") and r["o_rank"] <= 100]
+        if top_players:
+            sections.append(f"# {year} Player Rankings (Top 100)")
+            sections.append(f"")
+            sections.append(f"| Rank | Player | Position | Team | Status | Proj HR | Proj RBI | Proj SB | Proj AVG | Proj W | Proj K | Proj ERA |")
+            sections.append(f"|------|--------|----------|------|--------|---------|----------|---------|----------|--------|--------|----------|")
+            for r in sorted(top_players, key=lambda x: x["o_rank"]):
+                status = "Rostered" if r["player_name"] in all_rostered else "FA"
+                sections.append(
+                    f"| {r['o_rank']} | {r['player_name']} | {r.get('position', '?')} | {r.get('mlb_team', '?')} | {status} "
+                    f"| {r.get('proj_hr') or '-'} | {r.get('proj_rbi') or '-'} | {r.get('proj_sb') or '-'} "
+                    f"| {r.get('proj_avg') or '-'} | {r.get('proj_w') or '-'} | {r.get('proj_k') or '-'} "
+                    f"| {r.get('proj_era') or '-'} |"
+                )
+            sections.append(f"")
+
+        # Free agents: ranked players not on any roster
+        fa_players = [r for r in rankings if r["player_name"] not in all_rostered and r.get("o_rank")]
+        fa_players.sort(key=lambda x: x["o_rank"])
+        if fa_players:
+            sections.append(f"---")
+            sections.append(f"# {year} Free Agents (Not on any team, by ranking)")
+            sections.append(f"")
+            sections.append(f"| Rank | Player | Position | MLB Team |")
+            sections.append(f"|------|--------|----------|----------|")
+            for r in fa_players[:50]:
+                sections.append(
+                    f"| {r['o_rank']} | {r['player_name']} | {r.get('position', '?')} | {r.get('mlb_team', '?')} |"
+                )
+            if len(fa_players) > 50:
+                sections.append(f"")
+                sections.append(f"... and {len(fa_players) - 50} more free agents")
+            sections.append(f"")
 
     return "\n".join(sections)
 
