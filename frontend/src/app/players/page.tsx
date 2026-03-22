@@ -13,6 +13,7 @@ import {
 import { useAuth } from "@/lib/auth";
 import ContractBadge from "@/components/ContractBadge";
 import LoadingSpinner from "@/components/LoadingSpinner";
+import StatusBadge from "@/components/StatusBadge";
 import PlayerStatsModal from "@/components/PlayerStatsModal";
 import { POSITION_GROUPS } from "@/components/PositionFilter";
 import type {
@@ -794,14 +795,17 @@ export default function PlayersPage() {
 
                           {/* Player name */}
                           <td className="whitespace-nowrap px-2 py-1.5 font-medium">
-                            <button
-                              onClick={() =>
-                                setModalPlayer({ name: p.name, position: p.position })
-                              }
-                              className="text-left text-indigo-600 hover:text-indigo-800 hover:underline"
-                            >
-                              {p.name}
-                            </button>
+                            <span className="inline-flex items-center gap-1">
+                              <button
+                                onClick={() =>
+                                  setModalPlayer({ name: p.name, position: p.position })
+                                }
+                                className="text-left text-indigo-600 hover:text-indigo-800 hover:underline"
+                              >
+                                {p.name}
+                              </button>
+                              <StatusBadge status={p.status} />
+                            </span>
                           </td>
 
                           {/* Position */}

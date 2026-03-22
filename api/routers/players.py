@@ -392,6 +392,7 @@ async def get_player_database(
             # Merge ranking data into league player
             league_player["o_rank"] = r.get("o_rank")
             league_player["ar_rank"] = r.get("ar_rank")
+            league_player["status"] = r.get("status")
 
             # Always prefer ranking position/mlb_team (2026 Yahoo data is most current)
             if r.get("position"):
@@ -418,6 +419,7 @@ async def get_player_database(
                 "yahoo_player_id": player_key,
                 "o_rank": r.get("o_rank"),
                 "ar_rank": r.get("ar_rank"),
+                "status": r.get("status"),
                 "stats": _extract_stats(r, "stat"),
                 "next_contract_display": "",
                 "next_contract_type": "",

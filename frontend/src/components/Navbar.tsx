@@ -38,6 +38,12 @@ export default function Navbar() {
               >
                 球員 Players
               </Link>
+              <Link
+                href="/draft-strategy"
+                className="text-sm text-gray-300 hover:text-white"
+              >
+                選秀 Draft
+              </Link>
               {/* Auth-only links */}
               {user && (
                 <>
@@ -147,6 +153,13 @@ export default function Navbar() {
               onClick={() => setMenuOpen(false)}
             >
               球員 Players
+            </Link>
+            <Link
+              href="/draft-strategy"
+              className="block rounded px-3 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-white"
+              onClick={() => setMenuOpen(false)}
+            >
+              選秀 Draft
             </Link>
             {/* Auth-only links */}
             {user && (

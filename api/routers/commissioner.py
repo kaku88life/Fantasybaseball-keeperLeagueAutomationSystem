@@ -705,6 +705,7 @@ def _parse_yahoo_player(player_data: list) -> dict:
         "mlb_team": "",
         "o_rank": None,
         "ar_rank": None,
+        "status": None,
     }
 
     # player_data is a list of dicts with various info
@@ -723,6 +724,8 @@ def _parse_yahoo_player(player_data: list) -> dict:
                 result["position"] = item["display_position"]
             if "primary_position" in item and not result["position"]:
                 result["position"] = item["primary_position"]
+            if "status" in item:
+                result["status"] = item["status"]
             # Eligible positions list
             if "eligible_positions" in item:
                 pass  # use display_position instead

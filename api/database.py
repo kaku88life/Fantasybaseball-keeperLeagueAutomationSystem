@@ -404,6 +404,19 @@ MIGRATIONS: dict[str, list[str]] = {
         """,
         "CREATE INDEX IF NOT EXISTS idx_rookie_callup_player_year ON rookie_callup_log(player_name, year)",
     ],
+    "011_add_player_status": [
+        """
+        DO $$
+        BEGIN
+            IF NOT EXISTS (
+                SELECT 1 FROM information_schema.columns
+                WHERE table_name = 'player_rankings' AND column_name = 'status'
+            ) THEN
+                ALTER TABLE player_rankings ADD COLUMN status TEXT DEFAULT NULL;
+            END IF;
+        END $$;
+        """,
+    ],
 }
 
 
@@ -1114,7 +1127,7 @@ def bulk_upsert_player_rankings(year: int, players: list[dict]):
                 cur.execute(
                     """INSERT INTO player_rankings
                        (year, player_key, player_name, o_rank, ar_rank,
-                        position, mlb_team,
+                        position, mlb_team, status,
                         stat_ab, stat_r, stat_h, stat_hr, stat_rbi, stat_sb, stat_avg, stat_ops,
                         stat_ip, stat_w, stat_sv, stat_hld, stat_k, stat_era, stat_whip, stat_qs,
                         proj_ab, proj_r, proj_h, proj_hr, proj_rbi, proj_sb, proj_avg, proj_ops,
@@ -1122,7 +1135,7 @@ def bulk_upsert_player_rankings(year: int, players: list[dict]):
                         fetched_at)
                        VALUES (
                         %s, %s, %s, %s, %s,
-                        %s, %s,
+                        %s, %s, %s,
                         %s, %s, %s, %s, %s, %s, %s, %s,
                         %s, %s, %s, %s, %s, %s, %s, %s,
                         %s, %s, %s, %s, %s, %s, %s, %s,
@@ -1134,6 +1147,7 @@ def bulk_upsert_player_rankings(year: int, players: list[dict]):
                         ar_rank = EXCLUDED.ar_rank,
                         position = EXCLUDED.position,
                         mlb_team = EXCLUDED.mlb_team,
+                        status = EXCLUDED.status,
                         stat_ab = EXCLUDED.stat_ab,
                         stat_r = EXCLUDED.stat_r, stat_h = EXCLUDED.stat_h,
                         stat_hr = EXCLUDED.stat_hr, stat_rbi = EXCLUDED.stat_rbi,
@@ -1159,6 +1173,7 @@ def bulk_upsert_player_rankings(year: int, players: list[dict]):
                         year, p["player_key"], p["player_name"],
                         p.get("o_rank"), p.get("ar_rank"),
                         p.get("position", ""), p.get("mlb_team", ""),
+                        p.get("status"),
                         # Hitting stats
                         p.get("stat_ab"), p.get("stat_r"), p.get("stat_h"),
                         p.get("stat_hr"), p.get("stat_rbi"), p.get("stat_sb"),

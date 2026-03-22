@@ -73,6 +73,7 @@ export interface PlayerDatabaseEntry {
   yahoo_player_id: string;
   o_rank: number | null;
   ar_rank: number | null;
+  status?: string | null;
   stats: PlayerStatValues;
   next_contract_display: string;
   next_contract_type: string;
