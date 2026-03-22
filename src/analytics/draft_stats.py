@@ -318,8 +318,9 @@ def compute_draft_stats(years: list[int] | None = None) -> dict:
         year_str = str(year)
         team_picks: dict[str, list[dict]] = defaultdict(list)
 
-        # Build keeper set (historical_keepers + contracts JSON)
-        keeper_norm = _build_keeper_set(year, hist)
+        # Build keeper identification data
+        keeper_names = _build_keeper_set(year, hist)
+        keeper_map = _build_keeper_map(year)
 
         league_max = {"cost": 0, "player": "", "manager": ""}
 
@@ -330,7 +331,7 @@ def compute_draft_stats(years: list[int] | None = None) -> dict:
             position = pick.get("player_position", "") or pos_lookup.get(player, "")
 
             # Skip keeper players - only count actual draft picks
-            if _normalize_player_name(player) in keeper_norm:
+            if _is_keeper_pick(player, mgr, cost, keeper_names, keeper_map):
                 continue
 
             team_picks[mgr].append({
@@ -563,8 +564,9 @@ def compute_position_preference(years: list[int] | None = None, min_cost: int = 
 
         year_str = str(year)
 
-        # Build keeper set (historical_keepers + contracts JSON)
-        keeper_normalized = _build_keeper_set(year, hist)
+        # Build keeper identification data
+        keeper_names = _build_keeper_set(year, hist)
+        keeper_map = _build_keeper_map(year)
 
         for pick in draft:
             cost = pick.get("cost", 0)
@@ -575,7 +577,7 @@ def compute_position_preference(years: list[int] | None = None, min_cost: int = 
             player = pick.get("player_name", "")
 
             # Skip keeper players - only analyze actual draft picks
-            if _normalize_player_name(player) in keeper_normalized:
+            if _is_keeper_pick(player, mgr, cost, keeper_names, keeper_map):
                 continue
             # Use draft data position first, then fallback to lookup
             position = pick.get("player_position", "") or pos_lookup.get(player, "")
@@ -838,8 +840,9 @@ def _resolve_manager_name(name: str) -> str:
 def _build_keeper_set(year: int, hist: dict) -> set[str]:
     """Build normalized keeper name set for a given draft year.
 
-    Uses historical_keepers.json for 2023-2025 and 2026_contracts_v2.json
-    for 2026+. Players in this set should be excluded from draft stats.
+    For 2023-2025: uses historical_keepers.json (name-based matching).
+    For 2026+: uses contracts JSON with team+salary matching via
+    _build_keeper_map() instead. This function still works as fallback.
     """
     keeper_norm: set[str] = set()
     year_str = str(year)
@@ -859,16 +862,52 @@ def _build_keeper_set(year: int, hist: dict) -> set[str]:
                 if ct != "A":
                     keeper_norm.add(_normalize_player_name(p["player"]))
 
-    # Method 3: For 2026+, use contracts JSON (all players = keepers from prev year)
-    contracts_path = DATA_DIR / f"{year}_contracts_v2.json"
-    if contracts_path.exists():
-        with open(contracts_path, encoding="utf-8") as f:
-            contracts_data = json.load(f)
-        for _team_name, team_data in contracts_data.get("teams", {}).items():
-            for p in team_data.get("players", []):
-                keeper_norm.add(_normalize_player_name(p.get("name", "")))
-
     return keeper_norm
+
+
+def _build_keeper_map(year: int) -> dict[str, dict]:
+    """Build keeper map from contracts JSON for team+salary matching.
+
+    Returns: {normalized_name: {"team": manager_name, "salary": keeper_salary}}
+    A draft pick is a keeper only if same team AND same cost.
+    """
+    contracts_path = DATA_DIR / f"{year}_contracts_v2.json"
+    if not contracts_path.exists():
+        return {}
+    with open(contracts_path, encoding="utf-8") as f:
+        contracts_data = json.load(f)
+
+    keeper_map: dict[str, dict] = {}
+    for team_name, team_data in contracts_data.get("teams", {}).items():
+        for p in team_data.get("players", []):
+            name_norm = _normalize_player_name(p.get("name", ""))
+            keeper_map[name_norm] = {
+                "team": team_name.lower(),
+                "salary": p.get("contract_2026_salary", 0),
+            }
+    return keeper_map
+
+
+def _is_keeper_pick(
+    player: str, manager: str, cost: int,
+    keeper_names: set[str], keeper_map: dict[str, dict],
+) -> bool:
+    """Determine if a draft pick is a keeper (should be excluded from stats).
+
+    If keeper_map is available (2026+), uses team+salary matching.
+    Otherwise falls back to name-only matching from historical_keepers.
+    """
+    name_norm = _normalize_player_name(player)
+
+    # If contracts map exists, use precise team+salary matching
+    if keeper_map:
+        info = keeper_map.get(name_norm)
+        if info and info["team"] == manager.lower() and cost == info["salary"]:
+            return True
+        return False
+
+    # Fallback: name-only matching (for 2023-2025 historical data)
+    return name_norm in keeper_names
 
 
 # ------------------------------------------------------------------
