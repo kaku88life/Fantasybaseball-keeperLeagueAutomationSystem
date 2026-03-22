@@ -204,7 +204,7 @@ function AnalyticsContent() {
     () => getContractValues(),
   );
   // Only fetch 2023+ data for draft/FAAB/position/trade tabs
-  const recentYears = [2023, 2024, 2025];
+  const recentYears = [2023, 2024, 2025, 2026];
   const { data: draftData, isLoading: draftLoading } = useSWR<DraftStatsResponse>(
     activeTab === "draft" ? "analytics-draft" : null,
     () => getDraftStats(recentYears),
