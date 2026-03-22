@@ -6,9 +6,13 @@ set -e
 
 echo "=== Keeper League API - Startup ==="
 
-# Load/refresh 2026 contract data from JSON into DB
-echo "Loading 2026 contracts..."
-python -m scripts.load_2026_contracts || echo "WARNING: Contract loading failed, continuing..."
+# Load/refresh 2026 contract data (post-draft) into DB
+echo "Loading 2026 post-draft contracts..."
+python -m scripts.update_2026_post_draft || echo "WARNING: 2026 post-draft loading failed, continuing..."
+
+# Load/refresh 2027 contract projections into DB
+echo "Loading 2027 contract projections..."
+python -m scripts.build_2027_contracts || echo "WARNING: 2027 contract loading failed, continuing..."
 
 # Seed buyout records (idempotent - skips existing)
 echo "Seeding buyout records..."

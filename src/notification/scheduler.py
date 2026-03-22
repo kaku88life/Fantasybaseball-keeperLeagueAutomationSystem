@@ -123,12 +123,109 @@ def _daily_rookie_monitor_job():
         print(f"[RookieScheduler] Error: {e}")
 
 
+def _weekly_ranking_refresh_job():
+    """Weekly job: refresh Yahoo player rankings + status during MLB season."""
+    now = datetime.now()
+    month = now.month
+
+    # Only run during MLB season (March-October)
+    if month < 3 or month > 10:
+        print(f"[RankingRefresh] Off-season (month {month}), skipping.")
+        return
+
+    year = now.year
+    print(f"[RankingRefresh] Refreshing player rankings for {year}...")
+
+    try:
+        from api.yahoo_service import yahoo_api_get, YahooTokenError
+        from api.database import bulk_upsert_player_rankings, update_ar_ranks
+
+        # Resolve league key
+        game_keys = {
+            2024: "431", 2025: "458", 2026: "469",
+        }
+        league_nums = {
+            2024: "28498", 2025: "40288", 2026: "80910",
+        }
+        gk = game_keys.get(year)
+        ln = league_nums.get(year)
+        if not gk or not ln:
+            print(f"[RankingRefresh] No league key for year {year}")
+            return
+
+        league_key = f"{gk}.l.{ln}"
+
+        # Fetch OR rankings (25 players per batch)
+        import time
+        all_players: list[dict] = []
+        for start in range(0, 1500, 25):
+            try:
+                path = (
+                    f"/league/{league_key}/players"
+                    f";start={start};count=25;sort=OR"
+                    f";sort_type=season;out=stats"
+                )
+                data = yahoo_api_get(path)
+                league_data = data.get("fantasy_content", {}).get("league", [])
+                if len(league_data) < 2:
+                    break
+
+                players_section = league_data[1].get("players", {})
+                count = players_section.get("count", 0)
+                if count == 0:
+                    break
+
+                from api.routers.commissioner import _parse_yahoo_player, _parse_yahoo_stats
+                batch_players = []
+                for key, val in players_section.items():
+                    if key == "count":
+                        continue
+                    if isinstance(val, dict) and "player" in val:
+                        pdata = val["player"]
+                        if isinstance(pdata, list) and len(pdata) >= 2:
+                            player_info = _parse_yahoo_player(pdata[0])
+                            stats_info = _parse_yahoo_stats(
+                                pdata[1].get("player_stats", {}),
+                                prefix="proj",
+                            )
+                            player_info.update(stats_info)
+                            batch_players.append(player_info)
+
+                if not batch_players:
+                    break
+
+                for i, p in enumerate(batch_players):
+                    p["o_rank"] = start + i + 1
+
+                all_players.extend(batch_players)
+                time.sleep(1)
+
+            except Exception as e:
+                if "429" in str(e):
+                    time.sleep(10)
+                else:
+                    print(f"[RankingRefresh] Batch error at {start}: {e}")
+                    break
+
+        if all_players:
+            bulk_upsert_player_rankings(year, all_players)
+            print(f"[RankingRefresh] Updated {len(all_players)} player rankings for {year}")
+        else:
+            print("[RankingRefresh] No players fetched")
+
+    except YahooTokenError as e:
+        print(f"[RankingRefresh] Token error: {e}")
+    except Exception as e:
+        print(f"[RankingRefresh] Error: {e}")
+
+
 def start_scheduler():
     """Start the background scheduler.
 
     Jobs:
     1. Keeper reminder: daily cron during keeper period
     2. Rookie call-up monitor: daily cron during MLB season
+    3. Weekly ranking refresh: every Monday during MLB season
     """
     global _scheduler
 
@@ -166,6 +263,18 @@ def start_scheduler():
             replace_existing=True,
         )
 
+    # Job 3: Weekly ranking refresh (every Monday at noon)
+    _scheduler.add_job(
+        _weekly_ranking_refresh_job,
+        CronTrigger(
+            day_of_week="mon",
+            hour=REMINDER_CRON_HOUR,
+            timezone=REMINDER_CRON_TZ,
+        ),
+        id="ranking_refresh",
+        replace_existing=True,
+    )
+
     _scheduler.start()
     print(f"[Scheduler] Started ({mode} mode). "
           f"Check daily at {REMINDER_CRON_HOUR}:00 {REMINDER_CRON_TZ}")
@@ -174,6 +283,7 @@ def start_scheduler():
     if ROOKIE_MONITOR_ENABLED:
         print(f"[Scheduler] Rookie monitor active "
               f"(months {ROOKIE_MONITOR_START_MONTH}-{ROOKIE_MONITOR_END_MONTH})")
+    print("[Scheduler] Weekly ranking refresh: every Monday")
 
 
 def stop_scheduler():
