@@ -166,13 +166,12 @@ def main():
 
             if is_expired:
                 mgr_expired += 1
-                contract_2027_str = "EXPIRED"
-                can_keep = False
-            else:
-                mgr_kept += 1
-                ext_str = str(ext_2027) if ext_2027 > 0 else ""
-                contract_2027_str = f"${salary_2027}/{ct_2027}{ext_str}"
-                can_keep = ct_2027 != "O" or True  # O can still be on roster
+                # EXPIRED players are free agents — do NOT include in 2027 roster
+                continue
+
+            mgr_kept += 1
+            ext_str = str(ext_2027) if ext_2027 > 0 else ""
+            contract_2027_str = f"${salary_2027}/{ct_2027}{ext_str}"
 
             # JSON record
             players_2027.append({
@@ -204,7 +203,7 @@ def main():
                 position=position,
                 contract=contract,
                 yahoo_player_id=d.get("player_key", ""),
-                is_active_keeper=not is_expired,
+                is_active_keeper=True,
                 source=source,
                 mlb_team=mlb_team,
             ))

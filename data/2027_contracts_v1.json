@@ -186,51 +186,6 @@
           "can_keep": true
         },
         {
-          "name": "Shota Imanaga",
-          "player_key": "469.p.63640",
-          "position": "SP",
-          "mlb_team": "CHC",
-          "source": "keeper",
-          "contract_2026": "$22/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 22,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
-          "can_keep": false
-        },
-        {
-          "name": "Shohei Ohtani (Batter)",
-          "player_key": "469.p.1000001",
-          "position": "Util",
-          "mlb_team": "LAD",
-          "source": "keeper",
-          "contract_2026": "$20/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 20,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
-          "can_keep": false
-        },
-        {
-          "name": "Riley Greene",
-          "player_key": "469.p.11760",
-          "position": "LF,CF,RF",
-          "mlb_team": "DET",
-          "source": "keeper",
-          "contract_2026": "$20/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 20,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
-          "can_keep": false
-        },
-        {
           "name": "Nick Lodolo",
           "player_key": "469.p.11750",
           "position": "SP",
@@ -276,21 +231,6 @@
           "can_keep": false
         },
         {
-          "name": "Jhoan Duran",
-          "player_key": "469.p.11495",
-          "position": "RP",
-          "mlb_team": "PHI",
-          "source": "trade_keeper",
-          "contract_2026": "$12/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 12,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
-          "can_keep": false
-        },
-        {
           "name": "Jesús Luzardo",
           "player_key": "469.p.10627",
           "position": "SP",
@@ -303,51 +243,6 @@
           "contract_2027_salary": 5,
           "contract_2027_ext": 0,
           "contract_2027": "$5/O",
-          "can_keep": false
-        },
-        {
-          "name": "Jackson Merrill",
-          "player_key": "469.p.12522",
-          "position": "CF",
-          "mlb_team": "SD",
-          "source": "keeper",
-          "contract_2026": "$8/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 8,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
-          "can_keep": false
-        },
-        {
-          "name": "Jack Flaherty",
-          "player_key": "469.p.10592",
-          "position": "SP",
-          "mlb_team": "DET",
-          "source": "keeper",
-          "contract_2026": "$1/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 1,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
-          "can_keep": false
-        },
-        {
-          "name": "George Kirby",
-          "player_key": "469.p.11826",
-          "position": "SP",
-          "mlb_team": "SEA",
-          "source": "keeper",
-          "contract_2026": "$11/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 11,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
           "can_keep": false
         },
         {
@@ -641,21 +536,6 @@
           "can_keep": false
         },
         {
-          "name": "Seiya Suzuki",
-          "player_key": "469.p.12588",
-          "position": "LF,RF",
-          "mlb_team": "CHC",
-          "source": "keeper",
-          "contract_2026": "$20/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 20,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
-          "can_keep": false
-        },
-        {
           "name": "Quinn Priester",
           "player_key": "469.p.11820",
           "position": "SP,RP",
@@ -668,21 +548,6 @@
           "contract_2027_salary": 1,
           "contract_2027_ext": 0,
           "contract_2027": "$1/O",
-          "can_keep": false
-        },
-        {
-          "name": "Pablo López",
-          "player_key": "469.p.11057",
-          "position": "SP",
-          "mlb_team": "MIN",
-          "source": "keeper",
-          "contract_2026": "$14/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 14,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
           "can_keep": false
         },
         {
@@ -699,36 +564,6 @@
           "contract_2027_ext": 0,
           "contract_2027": "$1/R",
           "can_keep": true
-        },
-        {
-          "name": "Matt Chapman",
-          "player_key": "469.p.10205",
-          "position": "3B",
-          "mlb_team": "SF",
-          "source": "keeper",
-          "contract_2026": "$5/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 5,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
-          "can_keep": false
-        },
-        {
-          "name": "Luis Severino",
-          "player_key": "469.p.9879",
-          "position": "SP",
-          "mlb_team": "ATH",
-          "source": "keeper",
-          "contract_2026": "$2/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 2,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
-          "can_keep": false
         },
         {
           "name": "Josh Bell",
@@ -1141,21 +976,6 @@
           "can_keep": false
         },
         {
-          "name": "Junior Caminero",
-          "player_key": "469.p.60419",
-          "position": "3B",
-          "mlb_team": "TB",
-          "source": "keeper",
-          "contract_2026": "$1/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 1,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
-          "can_keep": false
-        },
-        {
           "name": "Colt Emerson",
           "player_key": "469.p.62954",
           "position": "SS",
@@ -1171,21 +991,6 @@
           "can_keep": true
         },
         {
-          "name": "Bryan Reynolds",
-          "player_key": "469.p.10577",
-          "position": "LF,CF,RF",
-          "mlb_team": "PIT",
-          "source": "trade_keeper",
-          "contract_2026": "$16/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 16,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
-          "can_keep": false
-        },
-        {
           "name": "Brandon Woodruff",
           "player_key": "469.p.10730",
           "position": "SP",
@@ -1198,21 +1003,6 @@
           "contract_2027_salary": 7,
           "contract_2027_ext": 0,
           "contract_2027": "$7/O",
-          "can_keep": false
-        },
-        {
-          "name": "Brandon Nimmo",
-          "player_key": "469.p.9876",
-          "position": "LF,CF",
-          "mlb_team": "TEX",
-          "source": "keeper",
-          "contract_2026": "$11/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 11,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
           "can_keep": false
         },
         {
@@ -1476,21 +1266,6 @@
           "can_keep": true
         },
         {
-          "name": "Kyle Schwarber",
-          "player_key": "469.p.9861",
-          "position": "LF",
-          "mlb_team": "PHI",
-          "source": "keeper",
-          "contract_2026": "$19/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 19,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
-          "can_keep": false
-        },
-        {
           "name": "Jakob Marsee",
           "player_key": "469.p.62119",
           "position": "LF,CF",
@@ -1521,21 +1296,6 @@
           "can_keep": false
         },
         {
-          "name": "Eugenio Suárez",
-          "player_key": "469.p.9724",
-          "position": "3B",
-          "mlb_team": "CIN",
-          "source": "keeper",
-          "contract_2026": "$1/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 1,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
-          "can_keep": false
-        },
-        {
           "name": "Emilio Pagán",
           "player_key": "469.p.10691",
           "position": "RP",
@@ -1563,21 +1323,6 @@
           "contract_2027_salary": 1,
           "contract_2027_ext": 0,
           "contract_2027": "$1/O",
-          "can_keep": false
-        },
-        {
-          "name": "Cristopher Sánchez",
-          "player_key": "469.p.11706",
-          "position": "SP",
-          "mlb_team": "PHI",
-          "source": "keeper",
-          "contract_2026": "$10/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 10,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
           "can_keep": false
         },
         {
@@ -1796,21 +1541,6 @@
           "can_keep": false
         },
         {
-          "name": "Willy Adames",
-          "player_key": "469.p.9893",
-          "position": "SS",
-          "mlb_team": "SF",
-          "source": "keeper",
-          "contract_2026": "$10/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 10,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
-          "can_keep": false
-        },
-        {
           "name": "Taylor Ward",
           "player_key": "469.p.10496",
           "position": "LF",
@@ -1823,21 +1553,6 @@
           "contract_2027_salary": 11,
           "contract_2027_ext": 0,
           "contract_2027": "$11/O",
-          "can_keep": false
-        },
-        {
-          "name": "Shane Bieber",
-          "player_key": "469.p.10867",
-          "position": "SP",
-          "mlb_team": "TOR",
-          "source": "keeper",
-          "contract_2026": "$1/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 1,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
           "can_keep": false
         },
         {
@@ -1871,21 +1586,6 @@
           "can_keep": false
         },
         {
-          "name": "Robert Suarez",
-          "player_key": "469.p.12354",
-          "position": "RP",
-          "mlb_team": "ATL",
-          "source": "keeper",
-          "contract_2026": "$10/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 10,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
-          "can_keep": false
-        },
-        {
           "name": "Michael Harris II",
           "player_key": "469.p.12056",
           "position": "CF",
@@ -1901,21 +1601,6 @@
           "can_keep": false
         },
         {
-          "name": "Luis Gil",
-          "player_key": "469.p.11689",
-          "position": "SP",
-          "mlb_team": "NYY",
-          "source": "keeper",
-          "contract_2026": "$3/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 3,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
-          "can_keep": false
-        },
-        {
           "name": "Jackson Jobe",
           "player_key": "469.p.12422",
           "position": "SP,RP",
@@ -1928,36 +1613,6 @@
           "contract_2027_salary": 1,
           "contract_2027_ext": 0,
           "contract_2027": "$1/O",
-          "can_keep": false
-        },
-        {
-          "name": "Garrett Crochet",
-          "player_key": "469.p.12046",
-          "position": "SP",
-          "mlb_team": "BOS",
-          "source": "keeper",
-          "contract_2026": "$9/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 9,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
-          "can_keep": false
-        },
-        {
-          "name": "Drew Rasmussen",
-          "player_key": "469.p.11789",
-          "position": "SP",
-          "mlb_team": "TB",
-          "source": "keeper",
-          "contract_2026": "$1/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 1,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
           "can_keep": false
         },
         {
@@ -2206,21 +1861,6 @@
           "can_keep": true
         },
         {
-          "name": "Zac Gallen",
-          "player_key": "469.p.11116",
-          "position": "SP",
-          "mlb_team": "AZ",
-          "source": "keeper",
-          "contract_2026": "$21/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 21,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
-          "can_keep": false
-        },
-        {
           "name": "Wilyer Abreu",
           "player_key": "469.p.12731",
           "position": "LF,CF,RF",
@@ -2294,51 +1934,6 @@
           "contract_2027_ext": 1,
           "contract_2027": "$21/N1",
           "can_keep": true
-        },
-        {
-          "name": "Ranger Suárez",
-          "player_key": "469.p.11117",
-          "position": "SP",
-          "mlb_team": "BOS",
-          "source": "keeper",
-          "contract_2026": "$1/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 1,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
-          "can_keep": false
-        },
-        {
-          "name": "Michael Busch",
-          "player_key": "469.p.11778",
-          "position": "1B",
-          "mlb_team": "CHC",
-          "source": "keeper",
-          "contract_2026": "$1/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 1,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
-          "can_keep": false
-        },
-        {
-          "name": "Marcus Semien",
-          "player_key": "469.p.9517",
-          "position": "2B",
-          "mlb_team": "NYM",
-          "source": "keeper",
-          "contract_2026": "$21/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 21,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
-          "can_keep": false
         },
         {
           "name": "José Caballero",
@@ -2429,21 +2024,6 @@
           "contract_2027_ext": 0,
           "contract_2027": "$1/R",
           "can_keep": true
-        },
-        {
-          "name": "Brice Turang",
-          "player_key": "469.p.11343",
-          "position": "2B",
-          "mlb_team": "MIL",
-          "source": "keeper",
-          "contract_2026": "$1/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 1,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
-          "can_keep": false
         },
         {
           "name": "Andrew Vaughn",
@@ -2631,21 +2211,6 @@
           "can_keep": false
         },
         {
-          "name": "Triston Casas",
-          "player_key": "469.p.11279",
-          "position": "1B",
-          "mlb_team": "BOS",
-          "source": "keeper",
-          "contract_2026": "$11/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 11,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
-          "can_keep": false
-        },
-        {
           "name": "Noelvi Marte",
           "player_key": "469.p.11529",
           "position": "3B,RF",
@@ -2676,36 +2241,6 @@
           "can_keep": false
         },
         {
-          "name": "Luke Weaver",
-          "player_key": "469.p.10217",
-          "position": "RP",
-          "mlb_team": "NYM",
-          "source": "keeper",
-          "contract_2026": "$1/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 1,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
-          "can_keep": false
-        },
-        {
-          "name": "Luis Robert Jr.",
-          "player_key": "469.p.10765",
-          "position": "CF",
-          "mlb_team": "NYM",
-          "source": "keeper",
-          "contract_2026": "$16/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 16,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
-          "can_keep": false
-        },
-        {
           "name": "Kevin McGonigle",
           "player_key": "469.p.62955",
           "position": "SS",
@@ -2719,21 +2254,6 @@
           "contract_2027_ext": 0,
           "contract_2027": "$1/R",
           "can_keep": true
-        },
-        {
-          "name": "Jose Altuve",
-          "player_key": "469.p.8996",
-          "position": "2B,LF",
-          "mlb_team": "HOU",
-          "source": "keeper",
-          "contract_2026": "$34/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 34,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
-          "can_keep": false
         },
         {
           "name": "Jasson Domínguez",
@@ -2781,21 +2301,6 @@
           "can_keep": false
         },
         {
-          "name": "Colt Keith",
-          "player_key": "469.p.12430",
-          "position": "1B,2B,3B",
-          "mlb_team": "DET",
-          "source": "keeper",
-          "contract_2026": "$1/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 1,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
-          "can_keep": false
-        },
-        {
           "name": "Colson Montgomery",
           "player_key": "469.p.12413",
           "position": "3B,SS",
@@ -2808,21 +2313,6 @@
           "contract_2027_salary": 1,
           "contract_2027_ext": 0,
           "contract_2027": "$1/O",
-          "can_keep": false
-        },
-        {
-          "name": "Carlos Rodón",
-          "player_key": "469.p.9823",
-          "position": "SP",
-          "mlb_team": "NYY",
-          "source": "keeper",
-          "contract_2026": "$12/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 12,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
           "can_keep": false
         },
         {
@@ -3131,36 +2621,6 @@
           "can_keep": false
         },
         {
-          "name": "Steven Kwan",
-          "player_key": "469.p.12314",
-          "position": "LF",
-          "mlb_team": "CLE",
-          "source": "keeper",
-          "contract_2026": "$8/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 8,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
-          "can_keep": false
-        },
-        {
-          "name": "Raisel Iglesias",
-          "player_key": "469.p.9902",
-          "position": "RP",
-          "mlb_team": "ATL",
-          "source": "keeper",
-          "contract_2026": "$21/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 21,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
-          "can_keep": false
-        },
-        {
           "name": "Matt Olson",
           "player_key": "469.p.9605",
           "position": "1B",
@@ -3188,36 +2648,6 @@
           "contract_2027_salary": 53,
           "contract_2027_ext": 0,
           "contract_2027": "$53/O",
-          "can_keep": false
-        },
-        {
-          "name": "Joe Ryan",
-          "player_key": "469.p.11847",
-          "position": "SP",
-          "mlb_team": "MIN",
-          "source": "keeper",
-          "contract_2026": "$28/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 28,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
-          "can_keep": false
-        },
-        {
-          "name": "Jeremiah Estrada",
-          "player_key": "469.p.12687",
-          "position": "RP",
-          "mlb_team": "SD",
-          "source": "keeper",
-          "contract_2026": "$1/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 1,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
           "can_keep": false
         },
         {
@@ -3466,21 +2896,6 @@
           "can_keep": false
         },
         {
-          "name": "Pete Crow-Armstrong",
-          "player_key": "469.p.12157",
-          "position": "CF",
-          "mlb_team": "CHC",
-          "source": "keeper",
-          "contract_2026": "$1/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 1,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
-          "can_keep": false
-        },
-        {
           "name": "Manny Machado",
           "player_key": "469.p.9111",
           "position": "3B",
@@ -3511,21 +2926,6 @@
           "can_keep": true
         },
         {
-          "name": "José Ramírez",
-          "player_key": "469.p.9507",
-          "position": "3B",
-          "mlb_team": "CLE",
-          "source": "keeper",
-          "contract_2026": "$37/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 37,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
-          "can_keep": false
-        },
-        {
           "name": "JJ Wetherholt",
           "player_key": "469.p.64317",
           "position": "2B,3B,SS",
@@ -3541,21 +2941,6 @@
           "can_keep": true
         },
         {
-          "name": "James Wood",
-          "player_key": "469.p.12521",
-          "position": "LF",
-          "mlb_team": "WSH",
-          "source": "keeper",
-          "contract_2026": "$1/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 1,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
-          "can_keep": false
-        },
-        {
           "name": "Jacob Wilson",
           "player_key": "469.p.62976",
           "position": "SS",
@@ -3568,21 +2953,6 @@
           "contract_2027_salary": 1,
           "contract_2027_ext": 0,
           "contract_2027": "$1/O",
-          "can_keep": false
-        },
-        {
-          "name": "Hunter Brown",
-          "player_key": "469.p.12141",
-          "position": "SP",
-          "mlb_team": "HOU",
-          "source": "keeper",
-          "contract_2026": "$6/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 6,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
           "can_keep": false
         },
         {
@@ -3981,36 +3351,6 @@
           "can_keep": true
         },
         {
-          "name": "Jackson Holliday",
-          "player_key": "469.p.60090",
-          "position": "2B,SS",
-          "mlb_team": "BAL",
-          "source": "keeper",
-          "contract_2026": "$1/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 1,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
-          "can_keep": false
-        },
-        {
-          "name": "Jackson Chourio",
-          "player_key": "469.p.12480",
-          "position": "LF,CF,RF",
-          "mlb_team": "MIL",
-          "source": "keeper",
-          "contract_2026": "$2/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 2,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
-          "can_keep": false
-        },
-        {
           "name": "Hurston Waldrep",
           "player_key": "469.p.62958",
           "position": "SP",
@@ -4346,21 +3686,6 @@
           "can_keep": false
         },
         {
-          "name": "Ryan Helsley",
-          "player_key": "469.p.10946",
-          "position": "RP",
-          "mlb_team": "BAL",
-          "source": "trade_keeper",
-          "contract_2026": "$11/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 11,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
-          "can_keep": false
-        },
-        {
           "name": "José Soriano",
           "player_key": "469.p.11327",
           "position": "SP",
@@ -4666,21 +3991,6 @@
           "can_keep": false
         },
         {
-          "name": "Vinnie Pasquantino",
-          "player_key": "469.p.12449",
-          "position": "1B",
-          "mlb_team": "KC",
-          "source": "keeper",
-          "contract_2026": "$11/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 11,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
-          "can_keep": false
-        },
-        {
           "name": "Trent Grisham",
           "player_key": "469.p.10522",
           "position": "CF",
@@ -4693,21 +4003,6 @@
           "contract_2027_salary": 2,
           "contract_2027_ext": 0,
           "contract_2027": "$2/O",
-          "can_keep": false
-        },
-        {
-          "name": "Seth Lugo",
-          "player_key": "469.p.10326",
-          "position": "SP",
-          "mlb_team": "KC",
-          "source": "keeper",
-          "contract_2026": "$1/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 1,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
           "can_keep": false
         },
         {
@@ -4726,21 +4021,6 @@
           "can_keep": true
         },
         {
-          "name": "Salvador Perez",
-          "player_key": "469.p.9015",
-          "position": "C,1B",
-          "mlb_team": "KC",
-          "source": "keeper",
-          "contract_2026": "$9/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 9,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
-          "can_keep": false
-        },
-        {
           "name": "Noah Cameron",
           "player_key": "469.p.60211",
           "position": "SP",
@@ -4753,21 +4033,6 @@
           "contract_2027_salary": 1,
           "contract_2027_ext": 0,
           "contract_2027": "$1/O",
-          "can_keep": false
-        },
-        {
-          "name": "Michael Wacha",
-          "player_key": "469.p.9329",
-          "position": "SP",
-          "mlb_team": "KC",
-          "source": "keeper",
-          "contract_2026": "$1/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 1,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
           "can_keep": false
         },
         {
@@ -4816,21 +4081,6 @@
           "can_keep": false
         },
         {
-          "name": "Logan Webb",
-          "player_key": "469.p.11235",
-          "position": "SP",
-          "mlb_team": "SF",
-          "source": "keeper",
-          "contract_2026": "$16/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 16,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
-          "can_keep": false
-        },
-        {
           "name": "Kerry Carpenter",
           "player_key": "469.p.12667",
           "position": "LF,RF",
@@ -4874,21 +4124,6 @@
           "contract_2027_ext": 0,
           "contract_2027": "$3/R",
           "can_keep": true
-        },
-        {
-          "name": "Brent Rooker",
-          "player_key": "469.p.10917",
-          "position": "LF,RF",
-          "mlb_team": "ATH",
-          "source": "keeper",
-          "contract_2026": "$7/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 7,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
-          "can_keep": false
         },
         {
           "name": "Brendan Donovan",
@@ -5091,51 +4326,6 @@
           "can_keep": true
         },
         {
-          "name": "Yoshinobu Yamamoto",
-          "player_key": "469.p.63423",
-          "position": "SP",
-          "mlb_team": "LAD",
-          "source": "keeper",
-          "contract_2026": "$38/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 38,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
-          "can_keep": false
-        },
-        {
-          "name": "Teoscar Hernández",
-          "player_key": "469.p.10366",
-          "position": "LF,RF",
-          "mlb_team": "LAD",
-          "source": "keeper",
-          "contract_2026": "$20/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 20,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
-          "can_keep": false
-        },
-        {
-          "name": "Tanner Bibee",
-          "player_key": "469.p.60137",
-          "position": "SP",
-          "mlb_team": "CLE",
-          "source": "keeper",
-          "contract_2026": "$6/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 6,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
-          "can_keep": false
-        },
-        {
           "name": "Kyle Teel",
           "player_key": "469.p.62979",
           "position": "C",
@@ -5181,21 +4371,6 @@
           "can_keep": true
         },
         {
-          "name": "Jacob deGrom",
-          "player_key": "469.p.9701",
-          "position": "SP",
-          "mlb_team": "TEX",
-          "source": "keeper",
-          "contract_2026": "$20/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 20,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
-          "can_keep": false
-        },
-        {
           "name": "Isaac Paredes",
           "player_key": "469.p.10881",
           "position": "3B",
@@ -5208,21 +4383,6 @@
           "contract_2027_salary": 14,
           "contract_2027_ext": 0,
           "contract_2027": "$14/O",
-          "can_keep": false
-        },
-        {
-          "name": "Heliot Ramos",
-          "player_key": "469.p.10944",
-          "position": "LF,CF,RF",
-          "mlb_team": "SF",
-          "source": "keeper",
-          "contract_2026": "$1/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 1,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
           "can_keep": false
         },
         {
@@ -5241,21 +4401,6 @@
           "can_keep": false
         },
         {
-          "name": "Gabriel Moreno",
-          "player_key": "469.p.11855",
-          "position": "C",
-          "mlb_team": "AZ",
-          "source": "keeper",
-          "contract_2026": "$11/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 11,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
-          "can_keep": false
-        },
-        {
           "name": "Emmet Sheehan",
           "player_key": "469.p.60238",
           "position": "SP",
@@ -5268,36 +4413,6 @@
           "contract_2027_salary": 1,
           "contract_2027_ext": 0,
           "contract_2027": "$1/O",
-          "can_keep": false
-        },
-        {
-          "name": "Brenton Doyle",
-          "player_key": "469.p.12136",
-          "position": "CF",
-          "mlb_team": "COL",
-          "source": "keeper",
-          "contract_2026": "$1/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 1,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
-          "can_keep": false
-        },
-        {
-          "name": "Bailey Ober",
-          "player_key": "469.p.12096",
-          "position": "SP",
-          "mlb_team": "MIN",
-          "source": "keeper",
-          "contract_2026": "$6/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 6,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
           "can_keep": false
         },
         {
@@ -5531,21 +4646,6 @@
           "can_keep": true
         },
         {
-          "name": "Nico Hoerner",
-          "player_key": "469.p.11284",
-          "position": "2B",
-          "mlb_team": "CHC",
-          "source": "keeper",
-          "contract_2026": "$11/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 11,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
-          "can_keep": false
-        },
-        {
           "name": "Max Clark",
           "player_key": "469.p.62974",
           "position": "CF",
@@ -5588,21 +4688,6 @@
           "contract_2027_salary": 10,
           "contract_2027_ext": 0,
           "contract_2027": "$10/O",
-          "can_keep": false
-        },
-        {
-          "name": "Jazz Chisholm Jr.",
-          "player_key": "469.p.10839",
-          "position": "2B,3B",
-          "mlb_team": "NYY",
-          "source": "keeper",
-          "contract_2026": "$28/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 28,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
           "can_keep": false
         },
         {
@@ -5663,36 +4748,6 @@
           "contract_2027_salary": 1,
           "contract_2027_ext": 0,
           "contract_2027": "$1/O",
-          "can_keep": false
-        },
-        {
-          "name": "Cody Bellinger",
-          "player_key": "469.p.10504",
-          "position": "LF,CF,RF",
-          "mlb_team": "NYY",
-          "source": "keeper",
-          "contract_2026": "$14/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 14,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
-          "can_keep": false
-        },
-        {
-          "name": "Cal Raleigh",
-          "player_key": "469.p.11531",
-          "position": "C",
-          "mlb_team": "SEA",
-          "source": "keeper",
-          "contract_2026": "$11/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 11,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
           "can_keep": false
         },
         {
@@ -5926,21 +4981,6 @@
           "can_keep": false
         },
         {
-          "name": "Shane McClanahan",
-          "player_key": "469.p.11398",
-          "position": "SP",
-          "mlb_team": "TB",
-          "source": "keeper",
-          "contract_2026": "$18/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 18,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
-          "can_keep": false
-        },
-        {
           "name": "Randy Arozarena",
           "player_key": "469.p.11104",
           "position": "LF,CF",
@@ -5956,36 +4996,6 @@
           "can_keep": false
         },
         {
-          "name": "Paul Skenes",
-          "player_key": "469.p.62972",
-          "position": "SP",
-          "mlb_team": "PIT",
-          "source": "keeper",
-          "contract_2026": "$15/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 15,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
-          "can_keep": false
-        },
-        {
-          "name": "Oneil Cruz",
-          "player_key": "469.p.11370",
-          "position": "CF",
-          "mlb_team": "PIT",
-          "source": "keeper",
-          "contract_2026": "$15/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 15,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
-          "can_keep": false
-        },
-        {
           "name": "Nick Kurtz",
           "player_key": "469.p.64313",
           "position": "1B",
@@ -5998,21 +5008,6 @@
           "contract_2027_salary": 2,
           "contract_2027_ext": 0,
           "contract_2027": "$2/O",
-          "can_keep": false
-        },
-        {
-          "name": "Ketel Marte",
-          "player_key": "469.p.10036",
-          "position": "2B",
-          "mlb_team": "AZ",
-          "source": "keeper",
-          "contract_2026": "$18/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 18,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
           "can_keep": false
         },
         {
@@ -6076,21 +5071,6 @@
           "can_keep": false
         },
         {
-          "name": "Dylan Cease",
-          "player_key": "469.p.10438",
-          "position": "SP",
-          "mlb_team": "TOR",
-          "source": "keeper",
-          "contract_2026": "$17/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 17,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
-          "can_keep": false
-        },
-        {
           "name": "Cole Young",
           "player_key": "469.p.60580",
           "position": "2B",
@@ -6119,21 +5099,6 @@
           "contract_2027_ext": 0,
           "contract_2027": "$2/R",
           "can_keep": true
-        },
-        {
-          "name": "Bryan Woo",
-          "player_key": "469.p.60584",
-          "position": "SP",
-          "mlb_team": "SEA",
-          "source": "keeper",
-          "contract_2026": "$15/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 15,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
-          "can_keep": false
         },
         {
           "name": "Andrew Painter",
@@ -6306,21 +5271,6 @@
           "can_keep": true
         },
         {
-          "name": "Zach Neto",
-          "player_key": "469.p.60214",
-          "position": "SS",
-          "mlb_team": "LAA",
-          "source": "trade_keeper",
-          "contract_2026": "$3/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 3,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
-          "can_keep": false
-        },
-        {
           "name": "Wyatt Langford",
           "player_key": "469.p.62973",
           "position": "LF,CF",
@@ -6333,36 +5283,6 @@
           "contract_2027_salary": 35,
           "contract_2027_ext": 0,
           "contract_2027": "$35/O",
-          "can_keep": false
-        },
-        {
-          "name": "Tanner Scott",
-          "player_key": "469.p.10432",
-          "position": "RP",
-          "mlb_team": "LAD",
-          "source": "keeper",
-          "contract_2026": "$6/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 6,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
-          "can_keep": false
-        },
-        {
-          "name": "Shohei Ohtani (Pitcher)",
-          "player_key": "469.p.1000002",
-          "position": "SP",
-          "mlb_team": "LAD",
-          "source": "keeper",
-          "contract_2026": "$22/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 22,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
           "can_keep": false
         },
         {
@@ -6471,21 +5391,6 @@
           "can_keep": false
         },
         {
-          "name": "Jared Jones",
-          "player_key": "469.p.60907",
-          "position": "SP",
-          "mlb_team": "PIT",
-          "source": "trade_keeper",
-          "contract_2026": "$3/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 3,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
-          "can_keep": false
-        },
-        {
           "name": "Jacob Misiorowski",
           "player_key": "469.p.60254",
           "position": "SP",
@@ -6513,21 +5418,6 @@
           "contract_2027_salary": 1,
           "contract_2027_ext": 0,
           "contract_2027": "$1/O",
-          "can_keep": false
-        },
-        {
-          "name": "Evan Carter",
-          "player_key": "469.p.12563",
-          "position": "LF,CF,RF",
-          "mlb_team": "TEX",
-          "source": "keeper",
-          "contract_2026": "$1/O",
-          "contract_2026_type": "O",
-          "contract_2026_salary": 1,
-          "contract_2027_type": "O",
-          "contract_2027_salary": 0,
-          "contract_2027_ext": 0,
-          "contract_2027": "EXPIRED",
           "can_keep": false
         },
         {
