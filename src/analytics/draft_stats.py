@@ -318,19 +318,8 @@ def compute_draft_stats(years: list[int] | None = None) -> dict:
         year_str = str(year)
         team_picks: dict[str, list[dict]] = defaultdict(list)
 
-        # Build keeper set using normalized names (prev year roster + non-A current)
-        keeper_norm: set[str] = set()
-        prev_year_str = str(year - 1)
-        if prev_year_str in hist:
-            for _mgr, players in hist[prev_year_str].items():
-                for p in players:
-                    keeper_norm.add(_normalize_player_name(p["player"]))
-        if year_str in hist:
-            for _mgr, players in hist[year_str].items():
-                for p in players:
-                    ct = p.get("contract_type", "A")
-                    if ct != "A":
-                        keeper_norm.add(_normalize_player_name(p["player"]))
+        # Build keeper set (historical_keepers + contracts JSON)
+        keeper_norm = _build_keeper_set(year, hist)
 
         league_max = {"cost": 0, "player": "", "manager": ""}
 
@@ -574,21 +563,8 @@ def compute_position_preference(years: list[int] | None = None, min_cost: int = 
 
         year_str = str(year)
 
-        # Build keeper set using NORMALIZED names:
-        # 1) Players from previous year's roster are keepers (retained)
-        # 2) Non-A contracts in current year are also keepers (fallback)
-        keeper_normalized: set[str] = set()
-        prev_year_str = str(year - 1)
-        if prev_year_str in hist:
-            for _mgr, players in hist[prev_year_str].items():
-                for p in players:
-                    keeper_normalized.add(_normalize_player_name(p["player"]))
-        if year_str in hist:
-            for _mgr, players in hist[year_str].items():
-                for p in players:
-                    ct = p.get("contract_type", "A")
-                    if ct != "A":
-                        keeper_normalized.add(_normalize_player_name(p["player"]))
+        # Build keeper set (historical_keepers + contracts JSON)
+        keeper_normalized = _build_keeper_set(year, hist)
 
         for pick in draft:
             cost = pick.get("cost", 0)
@@ -857,6 +833,42 @@ def _load_2026_contracts() -> dict[str, list[dict]]:
 def _resolve_manager_name(name: str) -> str:
     """Resolve manager succession (e.g. hyc莊翔宇 -> Hank)."""
     return _MGR_SUCCESSION.get(name, name)
+
+
+def _build_keeper_set(year: int, hist: dict) -> set[str]:
+    """Build normalized keeper name set for a given draft year.
+
+    Uses historical_keepers.json for 2023-2025 and 2026_contracts_v2.json
+    for 2026+. Players in this set should be excluded from draft stats.
+    """
+    keeper_norm: set[str] = set()
+    year_str = str(year)
+    prev_year_str = str(year - 1)
+
+    # Method 1: Previous year roster from historical_keepers.json
+    if prev_year_str in hist:
+        for _mgr, players in hist[prev_year_str].items():
+            for p in players:
+                keeper_norm.add(_normalize_player_name(p["player"]))
+
+    # Method 2: Current year non-A contracts from historical_keepers.json
+    if year_str in hist:
+        for _mgr, players in hist[year_str].items():
+            for p in players:
+                ct = p.get("contract_type", "A")
+                if ct != "A":
+                    keeper_norm.add(_normalize_player_name(p["player"]))
+
+    # Method 3: For 2026+, use contracts JSON (all players = keepers from prev year)
+    contracts_path = DATA_DIR / f"{year}_contracts_v2.json"
+    if contracts_path.exists():
+        with open(contracts_path, encoding="utf-8") as f:
+            contracts_data = json.load(f)
+        for _team_name, team_data in contracts_data.get("teams", {}).items():
+            for p in team_data.get("players", []):
+                keeper_norm.add(_normalize_player_name(p.get("name", "")))
+
+    return keeper_norm
 
 
 # ------------------------------------------------------------------
