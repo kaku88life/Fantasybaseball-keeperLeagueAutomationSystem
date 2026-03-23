@@ -881,9 +881,15 @@ def _build_keeper_map(year: int) -> dict[str, dict]:
     for team_name, team_data in contracts_data.get("teams", {}).items():
         for p in team_data.get("players", []):
             name_norm = _normalize_player_name(p.get("name", ""))
+            # Parse contract type from "N2/$21" or "O/$20" format
+            c2026 = p.get("contract_2026", "")
+            ct = "B"
+            if "/" in c2026:
+                ct = c2026.split("/")[0]
             keeper_map[name_norm] = {
                 "team": team_name.lower(),
                 "salary": p.get("contract_2026_salary", 0),
+                "contract_type": ct,
             }
     return keeper_map
 
@@ -936,8 +942,17 @@ def compute_salary_rankings(years: list[int] | None = None) -> dict:
     """
     hist = _load_historical_keepers()
 
-    # Only show completed seasons (2026 draft not yet done)
+    # Determine available years: historical + contracts JSON
     available = sorted(set(int(y) for y in hist.keys()))
+    # Add years that have contracts JSON (e.g. 2026)
+    for f in DATA_DIR.glob("*_contracts_v2.json"):
+        try:
+            y = int(f.stem.split("_")[0])
+            if y not in available:
+                available.append(y)
+        except (IndexError, ValueError):
+            pass
+    available = sorted(available)
 
     if years:
         available = [y for y in available if y in years]
@@ -948,8 +963,8 @@ def compute_salary_rankings(years: list[int] | None = None) -> dict:
         all_players: list[dict] = []
         year_str = str(year)
 
-        if year <= 2025 and year_str in hist:
-            # Keeper data from Excel
+        if year_str in hist:
+            # Keeper data from Excel (2023-2025)
             for mgr, players in hist[year_str].items():
                 resolved_mgr = _resolve_manager_name(mgr)
                 for p in players:
@@ -962,18 +977,38 @@ def compute_salary_rankings(years: list[int] | None = None) -> dict:
                         "position": p.get("position", ""),
                     })
 
-            # Add draft picks for years that have Yahoo draft data
-            draft = _load_draft(year)
-            if draft:
-                for pick in draft:
-                    all_players.append({
-                        "player": pick.get("player_name", ""),
-                        "salary": pick.get("cost", 0),
-                        "contract_type": "A",
-                        "manager": pick.get("manager", "Unknown"),
-                        "source": "draft",
-                        "position": pick.get("player_position", ""),
-                    })
+        # Build keeper contract map for enriching draft picks
+        keeper_map = _build_keeper_map(year)
+
+        # Add draft picks from Yahoo draft data
+        # For 2026+: Yahoo draft is the primary source (correct team + salary)
+        # Contract type enriched from keeper_map (same team+salary = keeper)
+        draft = _load_draft(year)
+        if draft:
+            for pick in draft:
+                player_name = pick.get("player_name", "")
+                mgr = pick.get("manager", "Unknown")
+                cost = pick.get("cost", 0) or 0
+                name_norm = _normalize_player_name(player_name)
+
+                # Determine contract type from keeper map
+                ct = "A"  # default: new draft pick
+                source = "draft"
+                if keeper_map:
+                    info = keeper_map.get(name_norm)
+                    if info and info["team"] == mgr.lower() and cost == info["salary"]:
+                        # This is a keeper pick - get contract type from contracts
+                        ct = info.get("contract_type", "B")
+                        source = "keeper"
+
+                all_players.append({
+                    "player": player_name,
+                    "salary": cost,
+                    "contract_type": ct,
+                    "manager": mgr,
+                    "source": source,
+                    "position": pick.get("player_position", ""),
+                })
 
         # Deduplicate: if same player appears as both keeper and draft,
         # keep the one with the more advanced contract (keeper > draft)
@@ -994,7 +1029,7 @@ def compute_salary_rankings(years: list[int] | None = None) -> dict:
         # Compute per-manager total salary for % calculation
         mgr_totals: dict[str, int] = defaultdict(int)
         for p in unique_players:
-            mgr_totals[p["manager"]] += p["salary"]
+            mgr_totals[p["manager"]] += p["salary"] or 0
 
         # Sort by salary descending, take top 20
         unique_players.sort(key=lambda x: (-x["salary"], x["player"]))
