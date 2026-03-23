@@ -161,7 +161,7 @@ function YearOverviewContent() {
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
-            className={`whitespace-nowrap px-3 py-2 text-xs font-medium transition sm:px-4 sm:text-sm ${
+            className={`min-h-[44px] whitespace-nowrap px-3 py-2 text-xs font-medium transition sm:min-h-0 sm:px-4 sm:text-sm ${
               activeTab === tab.key
                 ? "border-b-2 border-indigo-600 text-indigo-600"
                 : "text-gray-500 hover:text-gray-700"
@@ -345,7 +345,7 @@ function KeepersTab({
   return (
     <div className="space-y-6">
       {/* Summary bar */}
-      <div className="flex items-center justify-between rounded-lg border bg-gray-50 px-4 py-3 text-sm text-gray-600">
+      <div className="flex flex-col gap-2 rounded-lg border bg-gray-50 px-3 py-3 text-sm text-gray-600 sm:flex-row sm:items-center sm:justify-between sm:px-4">
         <div>
           已繳交{" "}
           <span className="font-bold text-indigo-600">
@@ -362,13 +362,13 @@ function KeepersTab({
           <div className="flex gap-2">
             <button
               onClick={expandAll}
-              className="rounded px-2 py-0.5 text-xs text-indigo-600 hover:bg-indigo-50"
+              className="min-h-[44px] rounded px-2 py-0.5 text-xs text-indigo-600 hover:bg-indigo-50 sm:min-h-0"
             >
               全部展開
             </button>
             <button
               onClick={collapseAll}
-              className="rounded px-2 py-0.5 text-xs text-gray-500 hover:bg-gray-100"
+              className="min-h-[44px] rounded px-2 py-0.5 text-xs text-gray-500 hover:bg-gray-100 sm:min-h-0"
             >
               全部收合
             </button>
@@ -596,8 +596,8 @@ function KeepersTab({
                   <div className="space-y-0.5 overflow-x-auto">
                     <div className="flex items-center gap-1 border-b pb-1 text-xs font-medium text-gray-500 sm:gap-2">
                       <span className="min-w-0 flex-1">球員</span>
-                      <span className="w-10 shrink-0 text-center sm:w-12">球隊</span>
-                      <span className="w-10 shrink-0 text-center sm:w-14">位置</span>
+                      <span className="hidden w-12 shrink-0 text-center sm:block">球隊</span>
+                      <span className="hidden w-14 shrink-0 text-center sm:block">位置</span>
                       <span className="w-14 shrink-0 text-center sm:w-16">原合約</span>
                       <span className="w-14 shrink-0 text-center sm:w-16">新合約</span>
                     </div>
@@ -609,10 +609,10 @@ function KeepersTab({
                         <span className="min-w-0 flex-1 truncate font-medium">
                           {p.player_name}
                         </span>
-                        <span className="w-10 shrink-0 text-center text-gray-400 sm:w-12">
+                        <span className="hidden w-12 shrink-0 text-center text-gray-400 sm:block">
                           {p.mlb_team || "-"}
                         </span>
-                        <span className="w-10 shrink-0 text-center text-gray-400 sm:w-14">
+                        <span className="hidden w-14 shrink-0 text-center text-gray-400 sm:block">
                           {p.position || "-"}
                         </span>
                         <span className="w-14 shrink-0 text-center text-gray-500 sm:w-16">

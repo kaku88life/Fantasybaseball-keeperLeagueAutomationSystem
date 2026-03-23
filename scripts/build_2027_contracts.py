@@ -203,7 +203,7 @@ def main():
                 position=position,
                 contract=contract,
                 yahoo_player_id=d.get("player_key", ""),
-                is_active_keeper=True,
+                is_active_keeper=(ct_enum != ContractType.R),
                 source=source,
                 mlb_team=mlb_team,
             ))

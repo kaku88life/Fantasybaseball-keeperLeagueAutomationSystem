@@ -725,12 +725,12 @@ export default function PlayersPage() {
                   <thead className="bg-gray-50">
                     <tr>
                       <SortTh col="o_rank" label="OR" className="w-10" />
-                      <SortTh col="ar_rank" label="AR" className="w-10" />
+                      <SortTh col="ar_rank" label="AR" className="hidden sm:table-cell w-10" />
                       <SortTh col="name" label="球員" />
                       <th className="whitespace-nowrap px-2 py-2 text-left text-xs font-medium uppercase text-gray-500">
                         Pos
                       </th>
-                      <th className="whitespace-nowrap px-2 py-2 text-left text-xs font-medium uppercase text-gray-500">
+                      <th className="hidden md:table-cell whitespace-nowrap px-2 py-2 text-left text-xs font-medium uppercase text-gray-500">
                         MLB
                       </th>
                       {isAuth && (
@@ -789,7 +789,7 @@ export default function PlayersPage() {
                           </td>
 
                           {/* AR (Actual Rank) */}
-                          <td className="whitespace-nowrap px-2 py-1.5 text-xs text-gray-500">
+                          <td className="hidden sm:table-cell whitespace-nowrap px-2 py-1.5 text-xs text-gray-500">
                             {p.ar_rank ?? "-"}
                           </td>
 
@@ -814,7 +814,7 @@ export default function PlayersPage() {
                           </td>
 
                           {/* MLB Team */}
-                          <td className="whitespace-nowrap px-2 py-1.5 text-xs text-gray-500">
+                          <td className="hidden md:table-cell whitespace-nowrap px-2 py-1.5 text-xs text-gray-500">
                             {p.mlb_team || "-"}
                           </td>
 

@@ -4,6 +4,9 @@ APScheduler-based background scheduler.
 Jobs:
 1. Keeper reminder: LINE group reminders every N days during keeper period.
 2. Rookie call-up monitor: daily check for R-contract player MLB debuts.
+3. Weekly ranking refresh: every Monday during MLB season.
+4. Daily player status update: IL/DTD/NA/O status during MLB season.
+5. Monthly transaction fetch: Yahoo transactions on 1st of each month.
 
 Yearly auto-mode: set REMINDER_MONTH / REMINDER_START_DAY / REMINDER_END_DAY
 to define a fixed annual window (e.g. March 1-15 every year).
@@ -219,6 +222,160 @@ def _weekly_ranking_refresh_job():
         print(f"[RankingRefresh] Error: {e}")
 
 
+def _daily_player_status_job():
+    """Daily job: update player IL/DTD/NA/O status from Yahoo API."""
+    now = datetime.now()
+    month = now.month
+
+    # Only run during MLB season (March-October)
+    if month < 3 or month > 10:
+        print(f"[StatusUpdate] Off-season (month {month}), skipping.")
+        return
+
+    year = now.year
+    print(f"[StatusUpdate] Updating player statuses for {year}...")
+
+    try:
+        from api.yahoo_service import yahoo_api_get, YahooTokenError
+        from api.database import get_db
+        import time
+
+        # Resolve league key
+        game_keys = {2024: "431", 2025: "458", 2026: "469"}
+        league_nums = {2024: "28498", 2025: "40288", 2026: "80910"}
+        gk = game_keys.get(year)
+        ln = league_nums.get(year)
+        if not gk or not ln:
+            print(f"[StatusUpdate] No league key for year {year}")
+            return
+
+        league_key = f"{gk}.l.{ln}"
+
+        # Fetch top 500 players for status updates (lighter than full ranking)
+        from api.routers.commissioner import _parse_yahoo_player
+        updated = 0
+        for start in range(0, 500, 25):
+            try:
+                path = (
+                    f"/league/{league_key}/players"
+                    f";start={start};count=25;sort=OR"
+                    f";sort_type=season;out=stats"
+                )
+                data = yahoo_api_get(path)
+                league_data = data.get("fantasy_content", {}).get("league", [])
+                if len(league_data) < 2:
+                    break
+
+                players_section = league_data[1].get("players", {})
+                count = players_section.get("count", 0)
+                if count == 0:
+                    break
+
+                # Update status in DB
+                conn = get_db()
+                cur = conn.cursor()
+                for key, val in players_section.items():
+                    if key == "count":
+                        continue
+                    if isinstance(val, dict) and "player" in val:
+                        pdata = val["player"]
+                        if isinstance(pdata, list) and len(pdata) >= 1:
+                            player_info = _parse_yahoo_player(pdata[0])
+                            pk = player_info.get("player_key")
+                            status = player_info.get("status")
+                            if pk:
+                                cur.execute(
+                                    "UPDATE player_rankings SET status = %s "
+                                    "WHERE year = %s AND player_key = %s",
+                                    (status, year, pk),
+                                )
+                                updated += 1
+                conn.commit()
+                cur.close()
+                time.sleep(1)
+
+            except Exception as e:
+                if "429" in str(e):
+                    time.sleep(10)
+                else:
+                    print(f"[StatusUpdate] Batch error at {start}: {e}")
+                    break
+
+        print(f"[StatusUpdate] Updated {updated} player statuses for {year}")
+
+    except Exception as e:
+        print(f"[StatusUpdate] Error: {e}")
+
+
+def _monthly_transaction_fetch_job():
+    """Monthly job: fetch latest transactions from Yahoo API."""
+    now = datetime.now()
+    month = now.month
+
+    # Only run during MLB season (March-October)
+    if month < 3 or month > 10:
+        print(f"[TransactionFetch] Off-season (month {month}), skipping.")
+        return
+
+    year = now.year
+    print(f"[TransactionFetch] Fetching transactions for {year}...")
+
+    try:
+        from api.yahoo_service import fetch_transactions_full, YahooTokenError
+        import json
+        from pathlib import Path
+
+        # Resolve league key
+        game_keys = {2024: "431", 2025: "458", 2026: "469"}
+        league_nums = {2024: "28498", 2025: "40288", 2026: "80910"}
+        gk = game_keys.get(year)
+        ln = league_nums.get(year)
+        if not gk or not ln:
+            print(f"[TransactionFetch] No league key for year {year}")
+            return
+
+        league_key = f"{gk}.l.{ln}"
+        result = fetch_transactions_full(league_key)
+        new_transactions = result.get("transactions", [])
+
+        if not new_transactions:
+            print("[TransactionFetch] No transactions found.")
+            return
+
+        # Load existing file and merge (dedup by transaction_id)
+        data_dir = Path(__file__).resolve().parent.parent.parent / "data"
+        tx_file = data_dir / f"yahoo_{year}_transactions.json"
+
+        existing_tx = []
+        if tx_file.exists():
+            with open(tx_file, "r", encoding="utf-8") as f:
+                existing_data = json.load(f)
+            if isinstance(existing_data, dict):
+                existing_tx = existing_data.get("transactions", [])
+            elif isinstance(existing_data, list):
+                existing_tx = existing_data
+
+        # Dedup by transaction_id
+        existing_ids = {tx.get("transaction_id") for tx in existing_tx}
+        added = 0
+        for tx in new_transactions:
+            if tx.get("transaction_id") not in existing_ids:
+                existing_tx.append(tx)
+                added += 1
+
+        # Save merged data
+        save_data = {"transactions": existing_tx}
+        with open(tx_file, "w", encoding="utf-8") as f:
+            json.dump(save_data, f, indent=2, ensure_ascii=False)
+
+        print(f"[TransactionFetch] {len(new_transactions)} total, "
+              f"{added} new transactions added. "
+              f"File: {tx_file.name} ({len(existing_tx)} total)")
+
+    except Exception as e:
+        print(f"[TransactionFetch] Error: {e}")
+
+
 def start_scheduler():
     """Start the background scheduler.
 
@@ -226,6 +383,8 @@ def start_scheduler():
     1. Keeper reminder: daily cron during keeper period
     2. Rookie call-up monitor: daily cron during MLB season
     3. Weekly ranking refresh: every Monday during MLB season
+    4. Daily player status update: during MLB season
+    5. Monthly transaction fetch: 1st of each month during season
     """
     global _scheduler
 
@@ -275,6 +434,30 @@ def start_scheduler():
         replace_existing=True,
     )
 
+    # Job 4: Daily player status update (IL/DTD/NA/O)
+    _scheduler.add_job(
+        _daily_player_status_job,
+        CronTrigger(
+            hour=REMINDER_CRON_HOUR,
+            minute=30,
+            timezone=REMINDER_CRON_TZ,
+        ),
+        id="player_status_update",
+        replace_existing=True,
+    )
+
+    # Job 5: Monthly transaction fetch (1st of each month)
+    _scheduler.add_job(
+        _monthly_transaction_fetch_job,
+        CronTrigger(
+            day=1,
+            hour=REMINDER_CRON_HOUR,
+            timezone=REMINDER_CRON_TZ,
+        ),
+        id="transaction_fetch",
+        replace_existing=True,
+    )
+
     _scheduler.start()
     print(f"[Scheduler] Started ({mode} mode). "
           f"Check daily at {REMINDER_CRON_HOUR}:00 {REMINDER_CRON_TZ}")
@@ -284,6 +467,8 @@ def start_scheduler():
         print(f"[Scheduler] Rookie monitor active "
               f"(months {ROOKIE_MONITOR_START_MONTH}-{ROOKIE_MONITOR_END_MONTH})")
     print("[Scheduler] Weekly ranking refresh: every Monday")
+    print("[Scheduler] Daily player status update: 12:30 PM")
+    print("[Scheduler] Monthly transaction fetch: 1st of each month")
 
 
 def stop_scheduler():

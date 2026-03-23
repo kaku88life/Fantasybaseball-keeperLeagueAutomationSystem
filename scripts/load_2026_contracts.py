@@ -84,7 +84,7 @@ def build_player(player_data: dict) -> Player:
         position=player_data.get("position", ""),
         contract=contract,
         yahoo_player_id=player_data.get("player_key"),
-        is_active_keeper=True,
+        is_active_keeper=(resolved_type != ContractType.R),
         source=player_data.get("source", ""),
         mlb_team=player_data.get("mlb_team", ""),
     )

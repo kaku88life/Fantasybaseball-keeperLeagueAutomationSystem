@@ -113,11 +113,11 @@ export default function UserManagementPage() {
 
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-xl font-bold sm:text-2xl">用戶管理 User Management</h1>
         <Link
           href="/commissioner"
-          className="rounded border px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50"
+          className="inline-flex min-h-[44px] items-center justify-center rounded border px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50 sm:min-h-0"
         >
           返回管理面板 Back to Dashboard
         </Link>
@@ -128,176 +128,336 @@ export default function UserManagementPage() {
       ) : users.length === 0 ? (
         <p className="text-gray-500">目前沒有已登入的用戶。</p>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b bg-gray-50 text-left text-xs text-gray-500">
-                <th className="px-4 py-3">ID</th>
-                <th className="px-4 py-3">Yahoo 暱稱 Nickname</th>
-                <th className="px-4 py-3">LINE 名稱</th>
-                <th className="px-4 py-3">Email</th>
-                <th className="px-4 py-3">Yahoo GUID</th>
-                <th className="px-4 py-3">對應隊伍 Team</th>
-                <th className="px-4 py-3">最後登入 Last Login</th>
-                <th className="px-4 py-3">Commissioner</th>
-                <th className="px-4 py-3">操作 Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {users.map((u) => (
-                <tr key={u.id} className="border-b last:border-0 hover:bg-gray-50">
-                  <td className="px-4 py-3 text-xs text-gray-400">#{u.id}</td>
-                  <td className="px-4 py-3 font-medium">{u.yahoo_nickname || "-"}</td>
-                  <td className="px-4 py-3">
-                    {editingLineName === u.id ? (
-                      <div className="flex items-center gap-1">
-                        <input
-                          type="text"
-                          value={lineNameInput}
-                          onChange={(e) => setLineNameInput(e.target.value)}
-                          className="w-24 rounded border px-2 py-0.5 text-xs focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                          placeholder="LINE 名稱"
-                          autoFocus
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") handleSaveLineName(u.id);
-                            if (e.key === "Escape") {
+        <>
+          {/* Desktop table view */}
+          <div className="hidden overflow-x-auto md:block">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b bg-gray-50 text-left text-xs text-gray-500">
+                  <th className="px-4 py-3">ID</th>
+                  <th className="px-4 py-3">Yahoo 暱稱 Nickname</th>
+                  <th className="px-4 py-3">LINE 名稱</th>
+                  <th className="px-4 py-3">Email</th>
+                  <th className="px-4 py-3">Yahoo GUID</th>
+                  <th className="px-4 py-3">對應隊伍 Team</th>
+                  <th className="px-4 py-3">最後登入 Last Login</th>
+                  <th className="px-4 py-3">Commissioner</th>
+                  <th className="px-4 py-3">操作 Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {users.map((u) => (
+                  <tr key={u.id} className="border-b last:border-0 hover:bg-gray-50">
+                    <td className="px-4 py-3 text-xs text-gray-400">#{u.id}</td>
+                    <td className="px-4 py-3 font-medium">{u.yahoo_nickname || "-"}</td>
+                    <td className="px-4 py-3">
+                      {editingLineName === u.id ? (
+                        <div className="flex items-center gap-1">
+                          <input
+                            type="text"
+                            value={lineNameInput}
+                            onChange={(e) => setLineNameInput(e.target.value)}
+                            className="w-24 rounded border px-2 py-0.5 text-xs focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                            placeholder="LINE 名稱"
+                            autoFocus
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") handleSaveLineName(u.id);
+                              if (e.key === "Escape") {
+                                setEditingLineName(null);
+                                setLineNameInput("");
+                              }
+                            }}
+                          />
+                          <button
+                            onClick={() => handleSaveLineName(u.id)}
+                            disabled={saving === u.id}
+                            className="rounded bg-green-600 px-1.5 py-0.5 text-xs text-white hover:bg-green-700"
+                          >
+                            OK
+                          </button>
+                          <button
+                            onClick={() => {
                               setEditingLineName(null);
                               setLineNameInput("");
-                            }
-                          }}
-                        />
-                        <button
-                          onClick={() => handleSaveLineName(u.id)}
-                          disabled={saving === u.id}
-                          className="rounded bg-green-600 px-1.5 py-0.5 text-xs text-white hover:bg-green-700"
-                        >
-                          OK
-                        </button>
-                        <button
-                          onClick={() => {
-                            setEditingLineName(null);
-                            setLineNameInput("");
-                          }}
-                          className="rounded px-1.5 py-0.5 text-xs text-gray-500 hover:bg-gray-200"
-                        >
-                          取消
-                        </button>
-                      </div>
-                    ) : u.line_name ? (
-                      <div className="flex items-center gap-1">
-                        <span className="rounded bg-green-50 px-2 py-0.5 text-xs font-medium text-green-700">
-                          {u.line_name}
-                        </span>
+                            }}
+                            className="rounded px-1.5 py-0.5 text-xs text-gray-500 hover:bg-gray-200"
+                          >
+                            取消
+                          </button>
+                        </div>
+                      ) : u.line_name ? (
+                        <div className="flex items-center gap-1">
+                          <span className="rounded bg-green-50 px-2 py-0.5 text-xs font-medium text-green-700">
+                            {u.line_name}
+                          </span>
+                          <button
+                            onClick={() => {
+                              setEditingLineName(u.id);
+                              setLineNameInput(u.line_name || "");
+                            }}
+                            className="rounded p-0.5 text-gray-400 hover:bg-gray-200 hover:text-gray-600"
+                            title="編輯 LINE 名稱"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+                              <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                            </svg>
+                          </button>
+                          <button
+                            onClick={() => handleClearLineName(u.id, u.line_name || "")}
+                            disabled={saving === u.id}
+                            className="rounded p-0.5 text-gray-400 hover:bg-red-100 hover:text-red-600"
+                            title="清除 LINE 名稱"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+                              <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                            </svg>
+                          </button>
+                        </div>
+                      ) : (
                         <button
                           onClick={() => {
                             setEditingLineName(u.id);
-                            setLineNameInput(u.line_name || "");
+                            setLineNameInput("");
                           }}
-                          className="rounded p-0.5 text-gray-400 hover:bg-gray-200 hover:text-gray-600"
-                          title="編輯 LINE 名稱"
+                          className="text-xs text-gray-400 hover:text-indigo-600"
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                          </svg>
-                        </button>
-                        <button
-                          onClick={() => handleClearLineName(u.id, u.line_name || "")}
-                          disabled={saving === u.id}
-                          className="rounded p-0.5 text-gray-400 hover:bg-red-100 hover:text-red-600"
-                          title="清除 LINE 名稱"
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
-                            <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                          </svg>
-                        </button>
-                      </div>
-                    ) : (
-                      <button
-                        onClick={() => {
-                          setEditingLineName(u.id);
-                          setLineNameInput("");
-                        }}
-                        className="text-xs text-gray-400 hover:text-indigo-600"
-                      >
-                        + 設定
-                      </button>
-                    )}
-                  </td>
-                  <td className="px-4 py-3 text-gray-500">{u.yahoo_email || "-"}</td>
-                  <td className="px-4 py-3">
-                    {u.yahoo_guid ? (
-                      <span
-                        className="cursor-help font-mono text-xs text-gray-400"
-                        title={u.yahoo_guid}
-                      >
-                        {u.yahoo_guid.slice(0, 8)}...
-                      </span>
-                    ) : (
-                      "-"
-                    )}
-                  </td>
-                  <td className="px-4 py-3">
-                    <select
-                      value={u.team_id ?? ""}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        if (val) handleAssignTeam(u.id, Number(val));
-                      }}
-                      disabled={saving === u.id}
-                      className="rounded border px-2 py-1 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                    >
-                      <option value="">-- 未指派 --</option>
-                      {teams.map((t) => (
-                        <option key={t.id} value={t.id}>
-                          {t.manager_name}
-                        </option>
-                      ))}
-                    </select>
-                    {saving === u.id && (
-                      <span className="ml-2 text-xs text-gray-400">儲存中...</span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3 text-xs text-gray-400">
-                    {u.last_login
-                      ? new Date(u.last_login).toLocaleString("zh-TW")
-                      : "-"}
-                  </td>
-                  <td className="px-4 py-3">
-                    {u.is_commissioner ? (
-                      <span className="rounded bg-indigo-100 px-2 py-0.5 text-xs text-indigo-700">
-                        Commissioner
-                      </span>
-                    ) : (
-                      <span className="text-xs text-gray-400">-</span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-2">
-                      {!u.is_commissioner && (
-                        <button
-                          onClick={() =>
-                            handleSetCommissioner(u.id, u.yahoo_nickname || `#${u.id}`)
-                          }
-                          className="rounded border px-2 py-1 text-xs text-indigo-600 hover:bg-indigo-50"
-                        >
-                          授予權限 Grant
+                          + 設定
                         </button>
                       )}
-                      <button
-                        onClick={() => handleDeleteUser(u)}
-                        disabled={saving === u.id || u.id === user?.user_id}
-                        className="rounded border border-red-200 px-2 py-1 text-xs text-red-500 hover:bg-red-50 disabled:opacity-30"
-                        title={u.id === user?.user_id ? "無法刪除自己的帳號" : "刪除用戶"}
+                    </td>
+                    <td className="px-4 py-3 text-gray-500">{u.yahoo_email || "-"}</td>
+                    <td className="px-4 py-3">
+                      {u.yahoo_guid ? (
+                        <span
+                          className="cursor-help font-mono text-xs text-gray-400"
+                          title={u.yahoo_guid}
+                        >
+                          {u.yahoo_guid.slice(0, 8)}...
+                        </span>
+                      ) : (
+                        "-"
+                      )}
+                    </td>
+                    <td className="px-4 py-3">
+                      <select
+                        value={u.team_id ?? ""}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          if (val) handleAssignTeam(u.id, Number(val));
+                        }}
+                        disabled={saving === u.id}
+                        className="rounded border px-2 py-1 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                       >
-                        刪除
-                      </button>
+                        <option value="">-- 未指派 --</option>
+                        {teams.map((t) => (
+                          <option key={t.id} value={t.id}>
+                            {t.manager_name}
+                          </option>
+                        ))}
+                      </select>
+                      {saving === u.id && (
+                        <span className="ml-2 text-xs text-gray-400">儲存中...</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-xs text-gray-400">
+                      {u.last_login
+                        ? new Date(u.last_login).toLocaleString("zh-TW")
+                        : "-"}
+                    </td>
+                    <td className="px-4 py-3">
+                      {u.is_commissioner ? (
+                        <span className="rounded bg-indigo-100 px-2 py-0.5 text-xs text-indigo-700">
+                          Commissioner
+                        </span>
+                      ) : (
+                        <span className="text-xs text-gray-400">-</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        {!u.is_commissioner && (
+                          <button
+                            onClick={() =>
+                              handleSetCommissioner(u.id, u.yahoo_nickname || `#${u.id}`)
+                            }
+                            className="rounded border px-2 py-1 text-xs text-indigo-600 hover:bg-indigo-50"
+                          >
+                            授予權限 Grant
+                          </button>
+                        )}
+                        <button
+                          onClick={() => handleDeleteUser(u)}
+                          disabled={saving === u.id || u.id === user?.user_id}
+                          className="rounded border border-red-200 px-2 py-1 text-xs text-red-500 hover:bg-red-50 disabled:opacity-30"
+                          title={u.id === user?.user_id ? "無法刪除自己的帳號" : "刪除用戶"}
+                        >
+                          刪除
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Mobile card view */}
+          <div className="space-y-3 md:hidden">
+            {users.map((u) => (
+              <div key={u.id} className="rounded-lg border bg-white p-4">
+                {/* Header: name + badge */}
+                <div className="mb-2 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-gray-400">#{u.id}</span>
+                    <h3 className="font-semibold text-sm">{u.yahoo_nickname || "-"}</h3>
+                    {u.is_commissioner && (
+                      <span className="rounded bg-indigo-100 px-1.5 py-0.5 text-[10px] text-indigo-700">
+                        Commissioner
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Info rows */}
+                <div className="space-y-1.5 text-xs">
+                  {/* LINE name */}
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-500">LINE 名稱</span>
+                    <div>
+                      {editingLineName === u.id ? (
+                        <div className="flex items-center gap-1">
+                          <input
+                            type="text"
+                            value={lineNameInput}
+                            onChange={(e) => setLineNameInput(e.target.value)}
+                            className="w-20 rounded border px-1.5 py-0.5 text-xs focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                            placeholder="LINE 名稱"
+                            autoFocus
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") handleSaveLineName(u.id);
+                              if (e.key === "Escape") {
+                                setEditingLineName(null);
+                                setLineNameInput("");
+                              }
+                            }}
+                          />
+                          <button
+                            onClick={() => handleSaveLineName(u.id)}
+                            disabled={saving === u.id}
+                            className="min-h-[44px] rounded bg-green-600 px-1.5 py-0.5 text-xs text-white hover:bg-green-700"
+                          >
+                            OK
+                          </button>
+                          <button
+                            onClick={() => {
+                              setEditingLineName(null);
+                              setLineNameInput("");
+                            }}
+                            className="min-h-[44px] rounded px-1.5 py-0.5 text-xs text-gray-500 hover:bg-gray-200"
+                          >
+                            取消
+                          </button>
+                        </div>
+                      ) : u.line_name ? (
+                        <div className="flex items-center gap-1">
+                          <span className="rounded bg-green-50 px-2 py-0.5 text-xs font-medium text-green-700">
+                            {u.line_name}
+                          </span>
+                          <button
+                            onClick={() => {
+                              setEditingLineName(u.id);
+                              setLineNameInput(u.line_name || "");
+                            }}
+                            className="min-h-[44px] min-w-[44px] rounded p-1 text-gray-400 hover:bg-gray-200 hover:text-gray-600"
+                            title="編輯 LINE 名稱"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+                              <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                            </svg>
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => {
+                            setEditingLineName(u.id);
+                            setLineNameInput("");
+                          }}
+                          className="min-h-[44px] text-xs text-gray-400 hover:text-indigo-600"
+                        >
+                          + 設定
+                        </button>
+                      )}
                     </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                  </div>
+
+                  {/* Email */}
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-500">Email</span>
+                    <span className="truncate ml-2 max-w-[180px] text-gray-600">{u.yahoo_email || "-"}</span>
+                  </div>
+
+                  {/* Team assignment */}
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-500">對應隊伍</span>
+                    <div>
+                      <select
+                        value={u.team_id ?? ""}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          if (val) handleAssignTeam(u.id, Number(val));
+                        }}
+                        disabled={saving === u.id}
+                        className="min-h-[44px] rounded border px-2 py-1 text-xs focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                      >
+                        <option value="">-- 未指派 --</option>
+                        {teams.map((t) => (
+                          <option key={t.id} value={t.id}>
+                            {t.manager_name}
+                          </option>
+                        ))}
+                      </select>
+                      {saving === u.id && (
+                        <span className="ml-1 text-[10px] text-gray-400">儲存中...</span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Last login */}
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-500">最後登入</span>
+                    <span className="text-gray-400">
+                      {u.last_login
+                        ? new Date(u.last_login).toLocaleString("zh-TW")
+                        : "-"}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Action buttons */}
+                <div className="mt-3 flex flex-wrap items-center gap-2 border-t pt-3">
+                  {!u.is_commissioner && (
+                    <button
+                      onClick={() =>
+                        handleSetCommissioner(u.id, u.yahoo_nickname || `#${u.id}`)
+                      }
+                      className="min-h-[44px] rounded border px-3 py-1.5 text-xs text-indigo-600 hover:bg-indigo-50"
+                    >
+                      授予權限 Grant
+                    </button>
+                  )}
+                  <button
+                    onClick={() => handleDeleteUser(u)}
+                    disabled={saving === u.id || u.id === user?.user_id}
+                    className="min-h-[44px] rounded border border-red-200 px-3 py-1.5 text-xs text-red-500 hover:bg-red-50 disabled:opacity-30"
+                    title={u.id === user?.user_id ? "無法刪除自己的帳號" : "刪除用戶"}
+                  >
+                    刪除
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
       )}
     </div>
   );

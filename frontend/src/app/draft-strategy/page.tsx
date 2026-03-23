@@ -376,14 +376,14 @@ export default function DraftStrategyPage() {
       {/* Position filter + search */}
       <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
         {/* Position pills */}
-        <div className="flex flex-wrap gap-1">
+        <div className="flex flex-wrap gap-1.5 sm:gap-1">
           {POSITION_GROUPS.map((pos) => (
             <button
               key={pos}
               onClick={() => {
                 setPositionFilter(pos);
               }}
-              className={`rounded-full px-2.5 py-1 text-xs font-medium transition ${
+              className={`min-h-[36px] min-w-[36px] rounded-full px-3 py-1.5 text-xs font-medium transition sm:min-h-0 sm:min-w-0 sm:px-2.5 sm:py-1 ${
                 positionFilter === pos
                   ? "bg-indigo-600 text-white"
                   : "bg-gray-100 text-gray-600 hover:bg-gray-200"
@@ -419,8 +419,8 @@ export default function DraftStrategyPage() {
           )}
         </div>
 
-        {/* Stat column toggles */}
-        <div className="flex items-center gap-2 text-xs">
+        {/* Stat column toggles - only visible on md+ where stats are shown */}
+        <div className="hidden items-center gap-2 text-xs md:flex">
           <button
             onClick={() => setShowHitting(!showHitting)}
             className={`rounded px-2 py-1 ${
@@ -473,20 +473,20 @@ export default function DraftStrategyPage() {
             <thead className="bg-gray-50">
               <tr className="border-b text-left text-gray-500">
                 <th className="w-10 px-2 py-2 text-center">#</th>
-                <th className="w-14 px-2 py-2 text-center">Yahoo</th>
-                <th className="min-w-[140px] px-2 py-2">球員</th>
-                <th className="w-16 px-2 py-2">位置</th>
-                <th className="w-14 px-2 py-2">MLB</th>
-                <th className="w-12 px-2 py-2">狀態</th>
+                <th className="hidden w-14 px-2 py-2 text-center sm:table-cell">Yahoo</th>
+                <th className="min-w-[120px] px-2 py-2 sm:min-w-[140px]">球員</th>
+                <th className="w-14 px-2 py-2 sm:w-16">位置</th>
+                <th className="hidden px-2 py-2 sm:table-cell sm:w-14">MLB</th>
+                <th className="hidden px-2 py-2 sm:table-cell sm:w-12">狀態</th>
                 {showHitting &&
                   HITTING_COLS.map((c) => (
-                    <th key={c.key} className="w-10 px-1 py-2 text-right">
+                    <th key={c.key} className="hidden w-10 px-1 py-2 text-right md:table-cell">
                       {c.label}
                     </th>
                   ))}
                 {showPitching &&
                   PITCHING_COLS.map((c) => (
-                    <th key={c.key} className="w-10 px-1 py-2 text-right">
+                    <th key={c.key} className="hidden w-10 px-1 py-2 text-right md:table-cell">
                       {c.label}
                     </th>
                   ))}
@@ -559,8 +559,8 @@ export default function DraftStrategyPage() {
                       )}
                     </td>
 
-                    {/* Yahoo rank */}
-                    <td className="px-2 py-1.5 text-center text-gray-400">
+                    {/* Yahoo rank - hidden on mobile */}
+                    <td className="hidden px-2 py-1.5 text-center text-gray-400 sm:table-cell">
                       {yahooRank ?? "-"}
                     </td>
 
@@ -585,20 +585,20 @@ export default function DraftStrategyPage() {
                     {/* Position */}
                     <td className="px-2 py-1.5 text-gray-600">{p.position}</td>
 
-                    {/* MLB team */}
-                    <td className="px-2 py-1.5 text-gray-600">{p.mlb_team}</td>
+                    {/* MLB team - hidden on mobile */}
+                    <td className="hidden px-2 py-1.5 text-gray-600 sm:table-cell">{p.mlb_team}</td>
 
-                    {/* Status */}
-                    <td className="px-2 py-1.5">
+                    {/* Status - hidden on mobile (shown inline with name) */}
+                    <td className="hidden px-2 py-1.5 sm:table-cell">
                       <StatusBadge status={p.status} />
                     </td>
 
-                    {/* Hitting stats */}
+                    {/* Hitting stats - hidden on mobile */}
                     {showHitting &&
                       HITTING_COLS.map((c) => (
                         <td
                           key={c.key}
-                          className="px-1 py-1.5 text-right tabular-nums text-gray-600"
+                          className="hidden px-1 py-1.5 text-right tabular-nums text-gray-600 md:table-cell"
                         >
                           {formatStat(
                             stats[c.key as keyof typeof stats] as
@@ -609,12 +609,12 @@ export default function DraftStrategyPage() {
                         </td>
                       ))}
 
-                    {/* Pitching stats */}
+                    {/* Pitching stats - hidden on mobile */}
                     {showPitching &&
                       PITCHING_COLS.map((c) => (
                         <td
                           key={c.key}
-                          className="px-1 py-1.5 text-right tabular-nums text-gray-600"
+                          className="hidden px-1 py-1.5 text-right tabular-nums text-gray-600 md:table-cell"
                         >
                           {formatStat(
                             stats[c.key as keyof typeof stats] as
@@ -625,19 +625,19 @@ export default function DraftStrategyPage() {
                         </td>
                       ))}
 
-                    {/* Actions: up/down arrows */}
-                    <td className="px-2 py-1.5 text-center">
+                    {/* Actions: up/down arrows (touch-friendly) */}
+                    <td className="px-1 py-1 text-center sm:px-2 sm:py-1.5">
                       <div className="inline-flex gap-0.5">
                         <button
                           onClick={() => {
                             if (idx > 0) movePlayer(idx, idx - 1);
                           }}
                           disabled={idx === 0}
-                          className="rounded p-0.5 text-gray-400 hover:bg-gray-100 hover:text-gray-700 disabled:opacity-30"
+                          className="min-h-[44px] min-w-[44px] rounded p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-700 disabled:opacity-30 sm:min-h-0 sm:min-w-0 sm:p-0.5"
                           title="上移"
                         >
                           <svg
-                            className="h-4 w-4"
+                            className="mx-auto h-5 w-5 sm:h-4 sm:w-4"
                             fill="none"
                             viewBox="0 0 24 24"
                             stroke="currentColor"
@@ -656,11 +656,11 @@ export default function DraftStrategyPage() {
                               movePlayer(idx, idx + 1);
                           }}
                           disabled={idx === filteredPlayers.length - 1}
-                          className="rounded p-0.5 text-gray-400 hover:bg-gray-100 hover:text-gray-700 disabled:opacity-30"
+                          className="min-h-[44px] min-w-[44px] rounded p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-700 disabled:opacity-30 sm:min-h-0 sm:min-w-0 sm:p-0.5"
                           title="下移"
                         >
                           <svg
-                            className="h-4 w-4"
+                            className="mx-auto h-5 w-5 sm:h-4 sm:w-4"
                             fill="none"
                             viewBox="0 0 24 24"
                             stroke="currentColor"
@@ -700,7 +700,7 @@ export default function DraftStrategyPage() {
       {/* Hint */}
       <div className="mt-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-xs text-gray-500">
         <ul className="list-inside list-disc space-y-0.5">
-          <li>拖曳表格列可移動球員排名順位（桌面版）</li>
+          <li className="hidden sm:list-item">拖曳表格列可移動球員排名順位（桌面版）</li>
           <li>
             點擊排名數字可直接輸入目標排名，按 Enter 確認
           </li>

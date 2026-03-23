@@ -416,19 +416,19 @@ export default function CommissionerDashboard() {
           </select>
           <Link
             href="/commissioner/users"
-            className="rounded bg-gray-600 px-2.5 py-1.5 text-xs text-white hover:bg-gray-500 sm:px-3 sm:text-sm"
+            className="inline-flex min-h-[44px] items-center rounded bg-gray-600 px-2.5 py-1.5 text-xs text-white hover:bg-gray-500 sm:min-h-0 sm:px-3 sm:text-sm"
           >
             用戶管理
           </Link>
           <Link
             href="/commissioner/buyouts"
-            className="rounded bg-amber-600 px-2.5 py-1.5 text-xs text-white hover:bg-amber-500 sm:px-3 sm:text-sm"
+            className="inline-flex min-h-[44px] items-center rounded bg-amber-600 px-2.5 py-1.5 text-xs text-white hover:bg-amber-500 sm:min-h-0 sm:px-3 sm:text-sm"
           >
             Buyout Management
           </Link>
           <Link
             href="/commissioner/import"
-            className="rounded bg-indigo-600 px-2.5 py-1.5 text-xs text-white hover:bg-indigo-500 sm:px-3 sm:text-sm"
+            className="inline-flex min-h-[44px] items-center rounded bg-indigo-600 px-2.5 py-1.5 text-xs text-white hover:bg-indigo-500 sm:min-h-0 sm:px-3 sm:text-sm"
           >
             匯入 Excel
           </Link>
@@ -436,7 +436,7 @@ export default function CommissionerDashboard() {
       </div>
 
       {/* Stats */}
-      <div className="mb-6 grid grid-cols-3 gap-2 sm:flex sm:flex-wrap sm:gap-4">
+      <div className="mb-6 grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-5 sm:gap-4">
         <div className="rounded-lg border bg-white px-3 py-2 sm:px-4 sm:py-3">
           <p className="text-[10px] text-gray-500 sm:text-xs">總隊伍</p>
           <p className="text-xl font-bold sm:text-2xl">{submissions.length}</p>
@@ -961,7 +961,7 @@ export default function CommissionerDashboard() {
                       {s.is_submitted && (
                         <button
                           onClick={() => handleExpand(s.team_id)}
-                          className="rounded border bg-white px-3 py-1 text-xs text-gray-700 hover:bg-gray-50"
+                          className="min-h-[44px] rounded border bg-white px-3 py-1 text-xs text-gray-700 hover:bg-gray-50 sm:min-h-0"
                         >
                           {isExpanded ? "收合" : "詳情"}
                         </button>
@@ -971,13 +971,13 @@ export default function CommissionerDashboard() {
                         <>
                           <button
                             onClick={() => handleApprove(s.team_id)}
-                            className="rounded bg-green-600 px-3 py-1 text-xs text-white hover:bg-green-500"
+                            className="min-h-[44px] rounded bg-green-600 px-3 py-1 text-xs text-white hover:bg-green-500 sm:min-h-0"
                           >
                             通過
                           </button>
                           <button
                             onClick={() => handleRejectStart(s.team_id)}
-                            className="rounded bg-red-600 px-3 py-1 text-xs text-white hover:bg-red-500"
+                            className="min-h-[44px] rounded bg-red-600 px-3 py-1 text-xs text-white hover:bg-red-500 sm:min-h-0"
                           >
                             退回
                           </button>
@@ -987,7 +987,7 @@ export default function CommissionerDashboard() {
                       {status === "approved" && (
                         <button
                           onClick={() => handleUnlock(s.team_id, s.manager_name)}
-                          className="rounded border border-yellow-400 bg-yellow-50 px-3 py-1 text-xs text-yellow-700 hover:bg-yellow-100"
+                          className="min-h-[44px] rounded border border-yellow-400 bg-yellow-50 px-3 py-1 text-xs text-yellow-700 hover:bg-yellow-100 sm:min-h-0"
                         >
                           解鎖
                         </button>
@@ -996,7 +996,7 @@ export default function CommissionerDashboard() {
                       {status === "pending" && (
                         <Link
                           href={`/${selectedYear}/${s.team_id}`}
-                          className="rounded border bg-white px-3 py-1 text-xs text-indigo-600 hover:bg-indigo-50"
+                          className="inline-flex min-h-[44px] items-center rounded border bg-white px-3 py-1 text-xs text-indigo-600 hover:bg-indigo-50 sm:min-h-0"
                         >
                           查看名單
                         </Link>
@@ -1004,7 +1004,7 @@ export default function CommissionerDashboard() {
 
                       <button
                         onClick={() => handleClearSelections(s.team_id, s.manager_name)}
-                        className="rounded border border-red-200 px-3 py-1 text-xs text-red-500 hover:bg-red-50"
+                        className="min-h-[44px] rounded border border-red-200 px-3 py-1 text-xs text-red-500 hover:bg-red-50 sm:min-h-0"
                         title="清除該隊所有留用選擇及繳交記錄"
                       >
                         清除選擇
@@ -1088,7 +1088,7 @@ export default function CommissionerDashboard() {
                         {detail.validation_result?.financial_summary && (
                           <div>
                             <h4 className="mb-2 text-sm font-semibold">財務摘要 Financial Summary</h4>
-                            <div className="grid grid-cols-2 gap-2 text-sm md:grid-cols-3 lg:grid-cols-5">
+                            <div className="grid grid-cols-1 gap-2 text-sm sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
                               {(() => {
                                 const f = detail.validation_result.financial_summary;
                                 const hasBuyout = f.buyout_salary_cost > 0 || f.buyout_faab_cost > 0;

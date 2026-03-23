@@ -227,13 +227,13 @@ export default function BuyoutsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-6xl mx-auto px-4 py-8">
+      <div className="mx-auto max-w-6xl px-2 py-4 sm:px-4 sm:py-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-xl font-bold text-gray-900 sm:text-2xl">Buyout Management</h1>
-            <p className="text-sm text-gray-500 mt-1">
-              Manage contract buyout records (mid-season drops and keeper-phase releases)
+            <h1 className="text-xl font-bold text-gray-900 sm:text-2xl">買斷管理 Buyout</h1>
+            <p className="mt-1 text-xs text-gray-500 sm:text-sm">
+              管理合約買斷紀錄（季中釋出 / 留用階段買斷）
             </p>
           </div>
           <div className="flex items-center gap-3">
@@ -241,12 +241,12 @@ export default function BuyoutsPage() {
               href="/commissioner"
               className="text-sm text-blue-600 hover:underline"
             >
-              Back to Dashboard
+              返回管理面板
             </Link>
             <select
               value={selectedYear}
               onChange={(e) => setSelectedYear(Number(e.target.value))}
-              className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
             >
               {years.map((y) => (
                 <option key={y} value={y}>
@@ -284,15 +284,15 @@ export default function BuyoutsPage() {
             }}
             className="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-indigo-500 transition-colors"
           >
-            + New Buyout Record
+            + 新增買斷紀錄
           </button>
         </div>
 
         {/* Create/Edit Form */}
         {showForm && (
-          <div className="mb-6 bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">
-              {editingId ? "Edit Buyout" : "New Buyout Record"}
+          <div className="mb-6 rounded-lg border border-gray-200 bg-white p-4 shadow-sm sm:p-6">
+            <h2 className="mb-4 text-base font-semibold text-gray-900 sm:text-lg">
+              {editingId ? "編輯買斷" : "新增買斷紀錄"}
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {/* Team */}
@@ -495,15 +495,15 @@ export default function BuyoutsPage() {
 
         {/* Buyout Records Table */}
         <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900">
-              Active Buyout Records ({selectedYear})
+          <div className="border-b border-gray-200 px-4 py-4 sm:px-6">
+            <h2 className="text-base font-semibold text-gray-900 sm:text-lg">
+              {selectedYear} 年買斷紀錄
             </h2>
-            <p className="text-sm text-gray-500 mt-1">
-              Total: {buyouts.length} record(s) |{" "}
-              Salary Cap Impact: $
+            <p className="mt-1 text-xs text-gray-500 sm:text-sm">
+              共 {buyouts.length} 筆 |{" "}
+              薪資帽影響: $
               {buyouts.reduce((sum, b) => sum + (b.buyout_salary || b.buyout_salary_cost || 0), 0)} |{" "}
-              FAAB Impact: $
+              FAAB 影響: $
               {buyouts.reduce((sum, b) => sum + (b.buyout_faab || b.buyout_faab_cost || 0), 0)}
             </p>
           </div>
@@ -519,71 +519,71 @@ export default function BuyoutsPage() {
               <table className="w-full text-sm">
                 <thead className="bg-gray-50 text-gray-600">
                   <tr>
-                    <th className="text-left px-4 py-3 font-medium">Team</th>
-                    <th className="text-left px-4 py-3 font-medium">Player</th>
-                    <th className="text-left px-4 py-3 font-medium">Contract</th>
-                    <th className="text-left px-4 py-3 font-medium">Type</th>
-                    <th className="text-right px-4 py-3 font-medium">Cap/yr</th>
-                    <th className="text-right px-4 py-3 font-medium">FAAB/yr</th>
-                    <th className="text-center px-4 py-3 font-medium">Remaining</th>
-                    <th className="text-left px-4 py-3 font-medium">Notes</th>
-                    <th className="text-center px-4 py-3 font-medium">Actions</th>
+                    <th className="px-3 py-3 text-left font-medium sm:px-4">隊伍</th>
+                    <th className="px-3 py-3 text-left font-medium sm:px-4">球員</th>
+                    <th className="hidden px-4 py-3 text-left font-medium sm:table-cell">合約</th>
+                    <th className="hidden px-4 py-3 text-left font-medium md:table-cell">類型</th>
+                    <th className="px-3 py-3 text-right font-medium sm:px-4">薪資/年</th>
+                    <th className="hidden px-4 py-3 text-right font-medium sm:table-cell">FAAB/年</th>
+                    <th className="px-3 py-3 text-center font-medium sm:px-4">剩餘</th>
+                    <th className="hidden px-4 py-3 text-left font-medium lg:table-cell">備註</th>
+                    <th className="px-3 py-3 text-center font-medium sm:px-4">操作</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
                   {buyouts.map((bo) => (
                     <tr key={bo.id} className="hover:bg-gray-50">
-                      <td className="px-4 py-3 font-medium text-gray-900">
+                      <td className="px-3 py-3 font-medium text-gray-900 sm:px-4">
                         {bo.manager_name}
                       </td>
-                      <td className="px-4 py-3 text-gray-700">{bo.player_name}</td>
-                      <td className="px-4 py-3 text-gray-500 font-mono text-xs">
+                      <td className="px-3 py-3 text-gray-700 sm:px-4">{bo.player_name}</td>
+                      <td className="hidden px-4 py-3 font-mono text-xs text-gray-500 sm:table-cell">
                         {bo.original_contract}
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="hidden px-4 py-3 md:table-cell">
                         <span
-                          className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                          className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
                             bo.buyout_type === "mid_season_drop"
                               ? "bg-orange-100 text-orange-700"
                               : "bg-purple-100 text-purple-700"
                           }`}
                         >
                           {bo.buyout_type === "mid_season_drop"
-                            ? "Mid-season"
-                            : "Keeper Release"}
+                            ? "季中釋出"
+                            : "留用買斷"}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-right font-mono text-gray-900">
+                      <td className="px-3 py-3 text-right font-mono text-gray-900 sm:px-4">
                         ${bo.buyout_salary || bo.buyout_salary_cost || 0}
                       </td>
-                      <td className="px-4 py-3 text-right font-mono text-gray-500">
+                      <td className="hidden px-4 py-3 text-right font-mono text-gray-500 sm:table-cell">
                         {(bo.buyout_faab || bo.buyout_faab_cost || 0) > 0
                           ? `$${bo.buyout_faab || bo.buyout_faab_cost}`
                           : "-"}
                       </td>
-                      <td className="px-4 py-3 text-center">
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
-                          {bo.remaining_years} yr
+                      <td className="px-3 py-3 text-center sm:px-4">
+                        <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-700">
+                          {bo.remaining_years} 年
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-gray-500 text-xs max-w-[200px] truncate">
+                      <td className="hidden px-4 py-3 text-xs text-gray-500 max-w-[200px] truncate lg:table-cell">
                         {bo.notes || bo.note || "-"}
                       </td>
-                      <td className="px-4 py-3 text-center">
+                      <td className="px-3 py-3 text-center sm:px-4">
                         <div className="flex items-center justify-center gap-1">
                           <button
                             onClick={() => handleEdit(bo)}
-                            className="text-blue-600 hover:text-blue-800 text-xs px-2 py-1 rounded hover:bg-blue-50 transition-colors"
+                            className="min-h-[44px] min-w-[44px] rounded px-2 py-1 text-xs text-blue-600 hover:bg-blue-50 hover:text-blue-800 transition-colors sm:min-h-0 sm:min-w-0"
                           >
-                            Edit
+                            編輯
                           </button>
                           <button
                             onClick={() =>
                               bo.id && handleDelete(bo.id, bo.player_name)
                             }
-                            className="text-red-600 hover:text-red-800 text-xs px-2 py-1 rounded hover:bg-red-50 transition-colors"
+                            className="min-h-[44px] min-w-[44px] rounded px-2 py-1 text-xs text-red-600 hover:bg-red-50 hover:text-red-800 transition-colors sm:min-h-0 sm:min-w-0"
                           >
-                            Delete
+                            刪除
                           </button>
                         </div>
                       </td>
@@ -597,11 +597,11 @@ export default function BuyoutsPage() {
 
         {/* Per-team Summary */}
         {buyouts.length > 0 && (
-          <div className="mt-6 bg-white border border-gray-200 rounded-lg shadow-sm p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">
-              Per-team Buyout Summary
+          <div className="mt-6 rounded-lg border border-gray-200 bg-white p-4 shadow-sm sm:p-6">
+            <h2 className="mb-4 text-base font-semibold text-gray-900 sm:text-lg">
+              各隊買斷摘要
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {Object.entries(
                 buyouts.reduce(
                   (acc, bo) => {

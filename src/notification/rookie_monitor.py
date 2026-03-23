@@ -15,7 +15,7 @@ from pathlib import Path
 import httpx
 
 MLB_BASE = "https://statsapi.mlb.com/api/v1"
-CONTRACTS_PATH = Path(__file__).resolve().parents[2] / "data" / "2026_contracts_v2.json"
+DATA_DIR = Path(__file__).resolve().parents[2] / "data"
 
 # Cache searched MLB IDs within a single run to avoid repeated lookups
 _mlb_id_cache: dict[str, int | None] = {}
@@ -50,27 +50,29 @@ def _load_r_contract_players(year: int) -> list[dict]:
     except Exception:
         pass
 
-    # Primary: load from contracts JSON
-    if not CONTRACTS_PATH.exists():
-        print(f"[RookieMonitor] Contracts file not found: {CONTRACTS_PATH}")
+    # Primary: load from contracts JSON (nested structure: teams -> manager -> players)
+    contracts_path = DATA_DIR / f"{year}_contracts_v2.json"
+    if not contracts_path.exists():
+        print(f"[RookieMonitor] Contracts file not found: {contracts_path}")
         return []
 
-    with open(CONTRACTS_PATH, encoding="utf-8") as f:
+    with open(contracts_path, encoding="utf-8") as f:
         contracts = json.load(f)
 
     r_players = []
-    for player in contracts:
-        ct = player.get("contract_type", "")
-        # Include R contracts and also A contracts that might be rookies
-        if ct == "R":
-            r_players.append({
-                "name": player["name"],
-                "player_key": player.get("player_key", ""),
-                "position": player.get("position", ""),
-                "mlb_team": player.get("mlb_team", ""),
-                "owner_manager": player.get("manager", ""),
-                "owner_team_id": player.get("team_id", 0),
-            })
+    teams_data = contracts.get("teams", {})
+    for manager_name, team_data in teams_data.items():
+        for player in team_data.get("players", []):
+            ct = player.get("contract_2026_type", player.get("contract_type", ""))
+            if ct == "R":
+                r_players.append({
+                    "name": player["name"],
+                    "player_key": player.get("player_key", ""),
+                    "position": player.get("position", ""),
+                    "mlb_team": player.get("mlb_team", ""),
+                    "owner_manager": manager_name,
+                    "owner_team_id": 0,
+                })
 
     return r_players
 
