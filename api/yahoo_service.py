@@ -11,6 +11,8 @@ from __future__ import annotations
 import datetime
 import json
 import os
+import threading
+import time as _time
 from pathlib import Path
 from typing import Optional
 
@@ -22,6 +24,11 @@ BASE_URL = "https://fantasysports.yahooapis.com/fantasy/v2"
 
 # Buffer before expiry to trigger proactive refresh (5 minutes)
 _REFRESH_BUFFER_SECONDS = 300
+
+# Rate limiting: minimum interval between Yahoo API requests (seconds)
+_RATE_LIMIT_INTERVAL = 1.0
+_last_request_time = 0.0
+_rate_lock = threading.Lock()
 
 
 class YahooTokenError(Exception):
@@ -156,10 +163,21 @@ def refresh_db_token(token_row: dict) -> str:
     return new_access_token
 
 
-def yahoo_api_get(path: str) -> dict:
+def _wait_for_rate_limit():
+    """Enforce minimum interval between Yahoo API requests."""
+    global _last_request_time
+    with _rate_lock:
+        now = _time.monotonic()
+        elapsed = now - _last_request_time
+        if elapsed < _RATE_LIMIT_INTERVAL:
+            _time.sleep(_RATE_LIMIT_INTERVAL - elapsed)
+        _last_request_time = _time.monotonic()
+
+
+def yahoo_api_get(path: str, _retry_count: int = 0) -> dict:
     """
-    Perform a GET request to Yahoo Fantasy API with auto-refresh.
-    Retries once on 401.
+    Perform a GET request to Yahoo Fantasy API with auto-refresh,
+    rate limiting, and 429 retry with exponential backoff.
 
     Args:
         path: API path (e.g., "/league/469.l.80910/standings")
@@ -171,6 +189,8 @@ def yahoo_api_get(path: str) -> dict:
         YahooTokenError: if no valid token
         RuntimeError: if API call fails after retry
     """
+    _wait_for_rate_limit()
+
     url = f"{BASE_URL}{path}"
     separator = "&" if "?" in url else "?"
     url += f"{separator}format=json"
@@ -188,7 +208,19 @@ def yahoo_api_get(path: str) -> dict:
         if token_row:
             access_token = refresh_db_token(token_row)
             headers = {"Authorization": f"Bearer {access_token}"}
+            _wait_for_rate_limit()
             resp = requests.get(url, headers=headers, timeout=15)
+
+    # Retry on 429 (rate limited) with exponential backoff, up to 3 times
+    if resp.status_code == 429 and _retry_count < 3:
+        wait = 5 * (2 ** _retry_count)  # 5s, 10s, 20s
+        print(
+            f"[YahooService] Rate limited (429), retrying in {wait}s "
+            f"(attempt {_retry_count + 1}/3)",
+            flush=True,
+        )
+        _time.sleep(wait)
+        return yahoo_api_get(path, _retry_count=_retry_count + 1)
 
     if resp.status_code != 200:
         raise RuntimeError(

@@ -114,6 +114,24 @@ PLAYOFF_TEAMS = 8
 YAHOO_LEAGUE_ID = None  # set via environment variable
 YAHOO_GAME_KEY = "mlb"
 
+# Yahoo game keys and league numbers per year
+# Used by scheduler jobs and yahoo_service to resolve league keys
+YAHOO_GAME_KEYS: dict[int, str] = {
+    2024: "431", 2025: "458", 2026: "469",
+}
+YAHOO_LEAGUE_NUMS: dict[int, str] = {
+    2024: "28498", 2025: "40288", 2026: "80910",
+}
+
+
+def get_league_key(year: int) -> str | None:
+    """Get Yahoo league key string for a given year (e.g. '469.l.80910')."""
+    gk = YAHOO_GAME_KEYS.get(year)
+    ln = YAHOO_LEAGUE_NUMS.get(year)
+    if not gk or not ln:
+        return None
+    return f"{gk}.l.{ln}"
+
 # ========== Manager Name Mapping ==========
 # Maps Excel manager names to Yahoo nicknames (for teams that don't auto-match)
 # Format: {excel_name: yahoo_nickname}

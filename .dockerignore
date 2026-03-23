@@ -1,0 +1,50 @@
+# Git
+.git/
+.gitignore
+
+# Frontend (built separately or not needed in backend container)
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+
+# Python virtual env
+venv/
+.venv/
+
+# Environment & secrets
+.env
+.env.local
+.env.production
+oauth2.json
+
+# Database files
+*.db
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+nul
+
+# Claude
+.claude/
+
+# Reports & Excel
+reports/
+*.xlsx
+*.xls
+
+# SSL certificates (local dev)
+certs/
+
+# Documentation
+*.md
+!requirements.txt
+
+# Cache
+__pycache__/
+*.py[cod]
+*.egg-info/

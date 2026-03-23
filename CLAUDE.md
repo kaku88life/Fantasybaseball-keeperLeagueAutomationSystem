@@ -208,8 +208,7 @@ available_faab = faab_budget - buyout_faab_cost
 
 ### FAAB 未撿人罰款 (Penalty for Missed Pickups)
 - 第 1 次: $5
-- 第 2 次: $10
-- 第 3 次: $15 (遞增)
+- 第 2 次及之後: 每次 $10（固定）
 
 ---
 

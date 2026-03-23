@@ -144,19 +144,11 @@ def _weekly_ranking_refresh_job():
         from api.database import bulk_upsert_player_rankings, update_ar_ranks
 
         # Resolve league key
-        game_keys = {
-            2024: "431", 2025: "458", 2026: "469",
-        }
-        league_nums = {
-            2024: "28498", 2025: "40288", 2026: "80910",
-        }
-        gk = game_keys.get(year)
-        ln = league_nums.get(year)
-        if not gk or not ln:
+        from config.settings import get_league_key
+        league_key = get_league_key(year)
+        if not league_key:
             print(f"[RankingRefresh] No league key for year {year}")
             return
-
-        league_key = f"{gk}.l.{ln}"
 
         # Fetch OR rankings (25 players per batch)
         import time
@@ -241,15 +233,11 @@ def _daily_player_status_job():
         import time
 
         # Resolve league key
-        game_keys = {2024: "431", 2025: "458", 2026: "469"}
-        league_nums = {2024: "28498", 2025: "40288", 2026: "80910"}
-        gk = game_keys.get(year)
-        ln = league_nums.get(year)
-        if not gk or not ln:
+        from config.settings import get_league_key
+        league_key = get_league_key(year)
+        if not league_key:
             print(f"[StatusUpdate] No league key for year {year}")
             return
-
-        league_key = f"{gk}.l.{ln}"
 
         # Fetch top 500 players for status updates (lighter than full ranking)
         from api.routers.commissioner import _parse_yahoo_player
@@ -273,25 +261,28 @@ def _daily_player_status_job():
 
                 # Update status in DB
                 conn = get_db()
-                cur = conn.cursor()
-                for key, val in players_section.items():
-                    if key == "count":
-                        continue
-                    if isinstance(val, dict) and "player" in val:
-                        pdata = val["player"]
-                        if isinstance(pdata, list) and len(pdata) >= 1:
-                            player_info = _parse_yahoo_player(pdata[0])
-                            pk = player_info.get("player_key")
-                            status = player_info.get("status")
-                            if pk:
-                                cur.execute(
-                                    "UPDATE player_rankings SET status = %s "
-                                    "WHERE year = %s AND player_key = %s",
-                                    (status, year, pk),
-                                )
-                                updated += 1
-                conn.commit()
-                cur.close()
+                try:
+                    cur = conn.cursor()
+                    for key, val in players_section.items():
+                        if key == "count":
+                            continue
+                        if isinstance(val, dict) and "player" in val:
+                            pdata = val["player"]
+                            if isinstance(pdata, list) and len(pdata) >= 1:
+                                player_info = _parse_yahoo_player(pdata[0])
+                                pk = player_info.get("player_key")
+                                status = player_info.get("status")
+                                if pk:
+                                    cur.execute(
+                                        "UPDATE player_rankings SET status = %s "
+                                        "WHERE year = %s AND player_key = %s",
+                                        (status, year, pk),
+                                    )
+                                    updated += 1
+                    conn.commit()
+                    cur.close()
+                finally:
+                    conn.close()
                 time.sleep(1)
 
             except Exception as e:
@@ -326,15 +317,12 @@ def _monthly_transaction_fetch_job():
         from pathlib import Path
 
         # Resolve league key
-        game_keys = {2024: "431", 2025: "458", 2026: "469"}
-        league_nums = {2024: "28498", 2025: "40288", 2026: "80910"}
-        gk = game_keys.get(year)
-        ln = league_nums.get(year)
-        if not gk or not ln:
+        from config.settings import get_league_key
+        league_key = get_league_key(year)
+        if not league_key:
             print(f"[TransactionFetch] No league key for year {year}")
             return
 
-        league_key = f"{gk}.l.{ln}"
         result = fetch_transactions_full(league_key)
         new_transactions = result.get("transactions", [])
 

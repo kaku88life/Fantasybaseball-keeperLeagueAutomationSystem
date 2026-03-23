@@ -339,9 +339,19 @@ export async function importExcel(file: File, year: number): Promise<{
   const formData = new FormData();
   formData.append("file", file);
 
+  // iOS Safari / LINE browser fallback: add Authorization header from localStorage
+  const headers: Record<string, string> = {};
+  if (typeof window !== "undefined") {
+    const fallbackToken = localStorage.getItem("auth_token_fallback");
+    if (fallbackToken) {
+      headers["Authorization"] = `Bearer ${fallbackToken}`;
+    }
+  }
+
   const res = await fetch(`${API_BASE}/api/commissioner/import-excel?year=${year}`, {
     method: "POST",
     credentials: "include",   // Send HttpOnly auth cookie
+    headers,
     body: formData,
   });
 

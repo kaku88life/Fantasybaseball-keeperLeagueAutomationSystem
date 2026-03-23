@@ -147,9 +147,15 @@ async def catch_all_errors_middleware(request: Request, call_next):
     except Exception as exc:
         print(f"[ERROR] {request.method} {request.url.path}: {exc}", flush=True)
         traceback.print_exc()
+        # Hide internal details in production
+        detail = (
+            "Internal server error"
+            if _is_production
+            else f"Internal server error: {type(exc).__name__}: {exc}"
+        )
         response = JSONResponse(
             status_code=500,
-            content={"detail": f"Internal server error: {type(exc).__name__}: {exc}"},
+            content={"detail": detail},
         )
         _add_cors_headers(response, origin)
         return response
@@ -163,9 +169,15 @@ async def global_exception_handler(request: Request, exc: Exception):
     print(f"[ERROR-HANDLER] {request.method} {request.url.path}: {exc}", flush=True)
     traceback.print_exc()
     origin = request.headers.get("origin", "")
+    # Hide internal details in production
+    detail = (
+        "Internal server error"
+        if _is_production
+        else f"Internal server error: {type(exc).__name__}: {exc}"
+    )
     response = JSONResponse(
         status_code=500,
-        content={"detail": f"Internal server error: {type(exc).__name__}: {exc}"},
+        content={"detail": detail},
     )
     _add_cors_headers(response, origin)
     return response

@@ -22,6 +22,7 @@ oauth2.json
 # OS
 .DS_Store
 Thumbs.db
+nul
 
 # Data files (keep Excel templates out of repo)
 *.xlsx
@@ -36,6 +37,7 @@ frontend/.next/
 frontend/out/
 
 # Database
+*.db
 data/*.db
 
 # SSL certificates (local dev)
