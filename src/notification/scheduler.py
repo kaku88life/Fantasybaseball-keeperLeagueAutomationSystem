@@ -224,7 +224,8 @@ def _weekly_ranking_refresh_job():
 
 
 def _daily_player_status_job():
-    """Daily job: update player IL/DTD/NA/O status from Yahoo API."""
+    """Daily job: update player IL/DTD/NA/O status from Yahoo API.
+    Also detects status changes and sends LINE notifications for owned players."""
     now = datetime.now()
     month = now.month
 
@@ -238,7 +239,7 @@ def _daily_player_status_job():
 
     try:
         from api.yahoo_service import yahoo_api_get, YahooTokenError
-        from api.database import get_db
+        from api.database import get_db, get_player_statuses
         import time
 
         # Resolve league key
@@ -248,7 +249,11 @@ def _daily_player_status_job():
             print(f"[StatusUpdate] No league key for year {year}")
             return
 
-        # Fetch top 500 players for status updates (lighter than full ranking)
+        # Step 1: Snapshot old statuses BEFORE update
+        old_statuses = get_player_statuses(year)
+        has_old_data = bool(old_statuses)
+
+        # Step 2: Fetch and update statuses from Yahoo
         from api.routers.commissioner import _parse_yahoo_player
         updated = 0
         for start in range(0, 500, 25):
@@ -303,8 +308,84 @@ def _daily_player_status_job():
 
         print(f"[StatusUpdate] Updated {updated} player statuses for {year}")
 
+        # Step 3: Detect changes and send LINE notification
+        if has_old_data:
+            _send_injury_change_notification(year, old_statuses)
+        else:
+            print("[StatusUpdate] First run (no previous data), skipping injury notification.")
+
     except Exception as e:
         print(f"[StatusUpdate] Error: {e}")
+
+
+def _send_injury_change_notification(year: int, old_statuses: dict[str, dict]):
+    """Compare old vs new player statuses and send LINE notification for changes."""
+    from api.database import get_player_statuses
+    from src.notification.line_service import send_line_group_message
+
+    new_statuses = get_player_statuses(year)
+
+    # Categorize changes (only for owned players)
+    new_injuries: list[str] = []      # NULL/empty -> IL/DTD/IL-LT
+    recovered: list[str] = []          # IL/DTD -> NULL/empty
+    status_changes: list[str] = []     # IL -> DTD, DTD -> IL, etc.
+
+    injury_statuses = {"IL", "IL-LT", "DTD", "NA", "O", "SUSP"}
+
+    for pk, new_info in new_statuses.items():
+        owner = new_info.get("owner_manager", "")
+        if not owner:
+            continue  # Skip FA players
+
+        old_info = old_statuses.get(pk, {})
+        old_status = old_info.get("status", "")
+        new_status = new_info.get("status", "")
+
+        if old_status == new_status:
+            continue  # No change
+
+        name = new_info["player_name"]
+        pos = new_info.get("position", "")
+        team = new_info.get("mlb_team", "")
+        label = f"  {name} ({pos}/{team}) - {owner}" if pos else f"  {name} - {owner}"
+
+        if (not old_status or old_status not in injury_statuses) and new_status in injury_statuses:
+            new_injuries.append(f"{label} -> {new_status}")
+        elif old_status in injury_statuses and (not new_status or new_status not in injury_statuses):
+            recovered.append(f"{label} -> Active")
+        elif old_status in injury_statuses and new_status in injury_statuses and old_status != new_status:
+            status_changes.append(f"{label} -> {new_status} (was {old_status})")
+
+    # Build message only if there are changes
+    if not new_injuries and not recovered and not status_changes:
+        print("[StatusUpdate] No injury status changes detected.")
+        return
+
+    lines = ["[5-Man Keeper League] 傷兵異動通知", ""]
+
+    if new_injuries:
+        lines.append("進入傷兵/異常名單:")
+        lines.extend(new_injuries)
+        lines.append("")
+
+    if recovered:
+        lines.append("解除傷兵名單:")
+        lines.extend(recovered)
+        lines.append("")
+
+    if status_changes:
+        lines.append("狀態變更:")
+        lines.extend(status_changes)
+        lines.append("")
+
+    total = len(new_injuries) + len(recovered) + len(status_changes)
+    message = "\n".join(lines)
+
+    success, error = send_line_group_message(message)
+    if success:
+        print(f"[StatusUpdate] LINE injury notification sent ({total} changes).")
+    else:
+        print(f"[StatusUpdate] LINE notification failed: {error}")
 
 
 def _daily_transaction_fetch_job():
@@ -518,17 +599,291 @@ def _daily_roster_ownership_sync_job():
         print(f"[RosterSync] Error: {e}")
 
 
+def _weekly_war_report_job():
+    """Weekly job (Monday 18:45): generate and send weekly war report to LINE."""
+    now = datetime.now()
+    month = now.month
+
+    # Only run during MLB season (March-October)
+    if month < 3 or month > 10:
+        print(f"[WarReport] Off-season (month {month}), skipping.")
+        return
+
+    year = now.year
+    print(f"[WarReport] Generating weekly war report for {year}...")
+
+    try:
+        from api.yahoo_service import yahoo_api_get, YahooTokenError
+        from api.database import save_weekly_standings, get_weekly_standings
+        from src.notification.line_service import send_line_group_message
+        from config.settings import get_league_key
+        import time
+
+        league_key = get_league_key(year)
+        if not league_key:
+            print(f"[WarReport] No league key for year {year}")
+            return
+
+        # --- 1. Get current week from league metadata ---
+        meta_path = f"/league/{league_key}/metadata"
+        meta_data = yahoo_api_get(meta_path)
+        league_meta = meta_data.get("fantasy_content", {}).get("league", [])
+        current_week = 1
+        if isinstance(league_meta, list):
+            for item in league_meta:
+                if isinstance(item, dict) and "current_week" in item:
+                    current_week = int(item["current_week"])
+                    break
+        # The report covers the just-completed week (current_week - 1 if games are done)
+        # On Monday, Yahoo's "current_week" should be the upcoming week
+        report_week = max(current_week - 1, 1)
+        print(f"[WarReport] Yahoo current_week={current_week}, reporting week {report_week}")
+
+        # --- 2. Fetch standings ---
+        time.sleep(1)
+        standings_path = f"/league/{league_key}/standings"
+        standings_data = yahoo_api_get(standings_path)
+        league_standings = standings_data.get("fantasy_content", {}).get("league", [])
+        if len(league_standings) < 2:
+            print("[WarReport] No standings data.")
+            return
+
+        teams_section = league_standings[1].get("standings", [{}])[0].get("teams", {})
+        team_count = teams_section.get("count", 0)
+
+        from api.routers.commissioner import _parse_yahoo_player
+
+        current_standings: list[dict] = []
+        for i in range(team_count):
+            team_raw = teams_section.get(str(i), {}).get("team", [])
+            if not team_raw:
+                continue
+            # Parse team info
+            info_list = team_raw[0] if isinstance(team_raw, list) else []
+            team_name = ""
+            manager_name = ""
+            for item in info_list:
+                if isinstance(item, dict):
+                    if "name" in item:
+                        team_name = item["name"]
+                    if "managers" in item:
+                        mgrs = item["managers"]
+                        if isinstance(mgrs, list) and mgrs:
+                            manager_name = mgrs[0].get("manager", {}).get("nickname", "")
+            # Parse standings
+            standing = {}
+            if len(team_raw) > 1:
+                standing = team_raw[1].get("team_standings", {})
+            rank = int(standing.get("rank", 0))
+            record = standing.get("outcome_totals", {})
+            wins = int(record.get("wins", 0))
+            losses = int(record.get("losses", 0))
+            ties = int(record.get("ties", 0))
+
+            current_standings.append({
+                "team_name": team_name,
+                "manager_name": manager_name,
+                "rank": rank,
+                "wins": wins,
+                "losses": losses,
+                "ties": ties,
+            })
+
+        current_standings.sort(key=lambda x: x["rank"])
+
+        # Save current standings for next week's comparison
+        save_weekly_standings(year, report_week, current_standings)
+
+        # Load previous week standings for rank change comparison
+        prev_standings = get_weekly_standings(year, report_week - 1) if report_week > 1 else []
+        prev_rank_map = {s["manager_name"]: s["rank"] for s in prev_standings}
+
+        # --- 3. Fetch scoreboard (matchup results) ---
+        time.sleep(1)
+        scoreboard_path = f"/league/{league_key}/scoreboard;week={report_week}"
+        scoreboard_data = yahoo_api_get(scoreboard_path)
+        league_sb = scoreboard_data.get("fantasy_content", {}).get("league", [])
+        matchups: list[dict] = []
+        if len(league_sb) >= 2:
+            sb = league_sb[1].get("scoreboard", {})
+            # Handle nested structure
+            matchups_section = None
+            if "0" in sb and "matchups" in sb["0"]:
+                matchups_section = sb["0"]["matchups"]
+            elif "matchups" in sb:
+                matchups_section = sb["matchups"]
+
+            if matchups_section:
+                m_count = matchups_section.get("count", 0)
+                for mi in range(m_count):
+                    m_raw = matchups_section.get(str(mi), {}).get("matchup", {})
+                    teams_data = m_raw.get("0", {}).get("teams", {})
+                    t_count = teams_data.get("count", 0)
+                    winner_key = m_raw.get("winner_team_key", "")
+                    match_teams = []
+                    for ti in range(t_count):
+                        t_raw = teams_data.get(str(ti), {}).get("team", [])
+                        if not t_raw:
+                            continue
+                        t_info = t_raw[0] if isinstance(t_raw, list) else []
+                        t_name = ""
+                        t_key = ""
+                        t_mgr = ""
+                        for item in t_info:
+                            if isinstance(item, dict):
+                                if "name" in item:
+                                    t_name = item["name"]
+                                if "team_key" in item:
+                                    t_key = item["team_key"]
+                                if "managers" in item:
+                                    mgrs = item["managers"]
+                                    if isinstance(mgrs, list) and mgrs:
+                                        t_mgr = mgrs[0].get("manager", {}).get("nickname", "")
+                        points = 0.0
+                        if len(t_raw) > 1:
+                            tp = t_raw[1].get("team_points", {})
+                            try:
+                                points = float(tp.get("total", 0))
+                            except (ValueError, TypeError):
+                                points = 0.0
+                        match_teams.append({
+                            "name": t_name,
+                            "manager": t_mgr,
+                            "points": points,
+                            "is_winner": t_key == winner_key,
+                        })
+                    if len(match_teams) == 2:
+                        matchups.append(match_teams)
+
+        # --- 4. Fetch top 5 hitters and pitchers by Yahoo Points ---
+        time.sleep(1)
+        top_batters: list[dict] = []
+        top_pitchers: list[dict] = []
+
+        for pos_type, result_list in [("B", top_batters), ("P", top_pitchers)]:
+            try:
+                players_path = (
+                    f"/league/{league_key}/players"
+                    f";sort=PTS;sort_type=week;sort_week={report_week}"
+                    f";position={pos_type};count=5;out=stats,ownership"
+                )
+                pdata = yahoo_api_get(players_path)
+                p_league = pdata.get("fantasy_content", {}).get("league", [])
+                if len(p_league) >= 2:
+                    p_section = p_league[1].get("players", {})
+                    for pk_idx in range(p_section.get("count", 0)):
+                        p_entry = p_section.get(str(pk_idx), {}).get("player", [])
+                        if not p_entry or not isinstance(p_entry, list):
+                            continue
+                        # Parse player info
+                        p_info = {}
+                        for item in (p_entry[0] if isinstance(p_entry[0], list) else [p_entry[0]]):
+                            if isinstance(item, dict):
+                                if "name" in item:
+                                    p_info["name"] = item["name"].get("full", "")
+                                if "display_position" in item:
+                                    p_info["position"] = item["display_position"]
+                                if "editorial_team_abbr" in item:
+                                    p_info["mlb_team"] = item["editorial_team_abbr"]
+                                if "ownership" in item:
+                                    owner = item["ownership"]
+                                    p_info["owner_team"] = owner.get("owner_team_name", "FA")
+                        # Parse points
+                        pts = 0.0
+                        if len(p_entry) > 1:
+                            player_pts = p_entry[1].get("player_points", {})
+                            try:
+                                pts = float(player_pts.get("total", 0))
+                            except (ValueError, TypeError):
+                                pts = 0.0
+                        p_info["points"] = pts
+                        result_list.append(p_info)
+                time.sleep(1)
+            except Exception as e:
+                print(f"[WarReport] Error fetching top {pos_type} players: {e}")
+
+        # --- 5. Build LINE message ---
+        lines = [f"[5-Man Keeper League] 第 {report_week} 週戰報", ""]
+
+        # Standings
+        lines.append("-- 排名 --")
+        for s in current_standings:
+            w, l, t = s["wins"], s["losses"], s["ties"]
+            mgr = s["manager_name"]
+            rank = s["rank"]
+            # Rank change indicator
+            prev_rank = prev_rank_map.get(mgr)
+            if prev_rank is not None and prev_rank != rank:
+                diff = prev_rank - rank  # positive = improved
+                change = f" ^{diff}" if diff > 0 else f" v{-diff}"
+            else:
+                change = " --"
+            lines.append(f"{rank}. {mgr} ({w}-{l}-{t}){change}")
+        lines.append("")
+
+        # Matchup results
+        if matchups:
+            lines.append("-- 本週對戰 --")
+            for m in matchups:
+                t1, t2 = m[0], m[1]
+                p1, p2 = t1["points"], t2["points"]
+                m1, m2 = t1["manager"] or t1["name"], t2["manager"] or t2["name"]
+                w1 = " W" if t1["is_winner"] else ""
+                w2 = " W" if t2["is_winner"] else ""
+                lines.append(f"{m1} {p1:.0f}{w1} - {p2:.0f}{w2} {m2}")
+            lines.append("")
+
+        # Top batters
+        if top_batters:
+            lines.append("-- 本週最佳打者 (Yahoo Pts) --")
+            for idx, b in enumerate(top_batters[:5], 1):
+                name = b.get("name", "?")
+                pos = b.get("position", "")
+                pts = b.get("points", 0)
+                owner = b.get("owner_team", "FA")
+                lines.append(f"{idx}. {name} ({pos}) - {pts:.1f} pts [{owner}]")
+            lines.append("")
+
+        # Top pitchers
+        if top_pitchers:
+            lines.append("-- 本週最佳投手 (Yahoo Pts) --")
+            for idx, p in enumerate(top_pitchers[:5], 1):
+                name = p.get("name", "?")
+                pos = p.get("position", "")
+                pts = p.get("points", 0)
+                owner = p.get("owner_team", "FA")
+                lines.append(f"{idx}. {name} ({pos}) - {pts:.1f} pts [{owner}]")
+            lines.append("")
+
+        lines.append("* Yahoo Fantasy Points (僅供參考)")
+
+        message = "\n".join(lines)
+
+        # Send LINE message
+        success, error = send_line_group_message(message)
+        if success:
+            print(f"[WarReport] Week {report_week} war report sent to LINE.")
+        else:
+            print(f"[WarReport] LINE send failed: {error}")
+
+    except YahooTokenError as e:
+        print(f"[WarReport] Token error: {e}")
+    except Exception as e:
+        print(f"[WarReport] Error: {e}")
+
+
 def start_scheduler():
     """Start the background scheduler.
 
     Jobs:
     1. Keeper reminder: daily cron during keeper period
     2. Rookie call-up monitor: daily cron during MLB season
-    3. Weekly ranking refresh: every Monday during MLB season
-    4. Daily player status update: during MLB season
+    3. Weekly ranking refresh: every Monday 18:00 during MLB season
+    4. Daily player status update + injury notification: during MLB season
     5. Daily transaction fetch: daily during MLB season
     6. Season start notification: LINE message on Opening Day
     7. Daily roster ownership sync: fetch rosters, update owner_manager
+    8. Weekly war report: every Monday 18:45 during MLB season
     """
     global _scheduler
 
@@ -566,12 +921,12 @@ def start_scheduler():
             replace_existing=True,
         )
 
-    # Job 3: Weekly ranking refresh (every Monday at noon)
+    # Job 3: Weekly ranking refresh (every Monday at 18:00 - after Yahoo settles stats)
     _scheduler.add_job(
         _weekly_ranking_refresh_job,
         CronTrigger(
             day_of_week="mon",
-            hour=REMINDER_CRON_HOUR,
+            hour=18,
             timezone=REMINDER_CRON_TZ,
         ),
         id="ranking_refresh",
@@ -626,6 +981,19 @@ def start_scheduler():
         replace_existing=True,
     )
 
+    # Job 8: Weekly war report (every Monday at 18:45 - after ranking refresh)
+    _scheduler.add_job(
+        _weekly_war_report_job,
+        CronTrigger(
+            day_of_week="mon",
+            hour=18,
+            minute=45,
+            timezone=REMINDER_CRON_TZ,
+        ),
+        id="war_report",
+        replace_existing=True,
+    )
+
     _scheduler.start()
     print(f"[Scheduler] Started ({mode} mode). "
           f"Check daily at {REMINDER_CRON_HOUR}:00 {REMINDER_CRON_TZ}")
@@ -634,12 +1002,13 @@ def start_scheduler():
     if ROOKIE_MONITOR_ENABLED:
         print(f"[Scheduler] Rookie monitor active "
               f"(months {ROOKIE_MONITOR_START_MONTH}-{ROOKIE_MONITOR_END_MONTH})")
-    print("[Scheduler] Weekly ranking refresh: every Monday")
-    print("[Scheduler] Daily player status update: 12:30 PM")
+    print("[Scheduler] Weekly ranking refresh: every Monday 18:00")
+    print("[Scheduler] Daily player status update + injury notification: 12:30 PM")
     print(f"[Scheduler] Daily transaction fetch: {DAILY_SYNC_HOUR}:15 {REMINDER_CRON_TZ}")
     print(f"[Scheduler] Season start notification: {DAILY_SYNC_HOUR}:00 {REMINDER_CRON_TZ} "
           f"(Opening Day: {SEASON_START_DATE})")
     print(f"[Scheduler] Daily roster ownership sync: {DAILY_SYNC_HOUR}:30 {REMINDER_CRON_TZ}")
+    print("[Scheduler] Weekly war report: every Monday 18:45")
 
 
 def stop_scheduler():

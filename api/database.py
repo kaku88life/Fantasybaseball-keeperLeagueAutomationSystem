@@ -451,6 +451,24 @@ MIGRATIONS: dict[str, list[str]] = {
         END $$;
         """,
     ],
+    "013_weekly_standings": [
+        """
+        CREATE TABLE IF NOT EXISTS weekly_standings (
+            id SERIAL PRIMARY KEY,
+            year INTEGER NOT NULL,
+            week INTEGER NOT NULL,
+            team_name TEXT NOT NULL,
+            manager_name TEXT NOT NULL,
+            rank INTEGER,
+            wins INTEGER DEFAULT 0,
+            losses INTEGER DEFAULT 0,
+            ties INTEGER DEFAULT 0,
+            created_at TIMESTAMPTZ DEFAULT NOW(),
+            UNIQUE(year, week, manager_name)
+        )
+        """,
+        "CREATE INDEX IF NOT EXISTS idx_weekly_standings_year_week ON weekly_standings(year, week)",
+    ],
 }
 
 
@@ -1196,6 +1214,32 @@ def update_ar_ranks(year: int, ar_data: dict[str, int]):
         print(f"[PlayerRankings] Updated {len(ar_data)} AR ranks for year {year}", flush=True)
 
 
+def get_player_statuses(year: int) -> dict[str, dict]:
+    """Get current player statuses for a year (for injury change detection).
+
+    Returns:
+        dict mapping player_key -> {player_name, status, owner_manager, position, mlb_team}
+    """
+    with get_conn() as conn:
+        rows = _fetchall(
+            conn,
+            """SELECT player_key, player_name, status, owner_manager, position, mlb_team
+               FROM player_rankings WHERE year = %s""",
+            (year,),
+        )
+        return {
+            row["player_key"]: {
+                "player_name": row["player_name"],
+                "status": row["status"] or "",
+                "owner_manager": row["owner_manager"] or "",
+                "position": row["position"] or "",
+                "mlb_team": row["mlb_team"] or "",
+            }
+            for row in rows
+            if row["player_key"]
+        }
+
+
 def sync_roster_ownership(year: int, ownership_map: dict[str, str]):
     """Update owner_manager for players in player_rankings based on Yahoo roster data.
 
@@ -1303,6 +1347,52 @@ def record_callup(
             row_id = cur.fetchone()[0]
         conn.commit()
         return row_id
+
+
+# ========== Weekly Standings ==========
+
+def save_weekly_standings(year: int, week: int, standings: list[dict]):
+    """Save weekly standings snapshot for ranking change comparison.
+
+    Args:
+        year: Season year
+        week: Yahoo week number
+        standings: list of {team_name, manager_name, rank, wins, losses, ties}
+    """
+    if not standings:
+        return
+
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            for s in standings:
+                cur.execute(
+                    """INSERT INTO weekly_standings
+                       (year, week, team_name, manager_name, rank, wins, losses, ties)
+                       VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                       ON CONFLICT(year, week, manager_name) DO UPDATE SET
+                           team_name = EXCLUDED.team_name,
+                           rank = EXCLUDED.rank,
+                           wins = EXCLUDED.wins,
+                           losses = EXCLUDED.losses,
+                           ties = EXCLUDED.ties""",
+                    (year, week, s["team_name"], s["manager_name"],
+                     s.get("rank"), s.get("wins", 0), s.get("losses", 0), s.get("ties", 0)),
+                )
+        conn.commit()
+        print(f"[WeeklyStandings] Saved standings for year {year} week {week} "
+              f"({len(standings)} teams)", flush=True)
+
+
+def get_weekly_standings(year: int, week: int) -> list[dict]:
+    """Get saved weekly standings for a specific week."""
+    with get_conn() as conn:
+        return _fetchall(
+            conn,
+            """SELECT * FROM weekly_standings
+               WHERE year = %s AND week = %s
+               ORDER BY rank""",
+            (year, week),
+        )
 
 
 def cleanup_old_notifications(retention_days: int = 365):
