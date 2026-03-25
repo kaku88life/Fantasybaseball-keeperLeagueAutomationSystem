@@ -42,7 +42,7 @@ ROOKIE_MONITOR_END_MONTH = int(os.getenv("ROOKIE_MONITOR_END_MONTH", "9"))
 # During DST (EDT, UTC-4): 0:00 EDT = 04:00 UTC = 12:00 TWN
 # We use 13:00 TWN as a safe default (between the two offsets)
 SEASON_START_DATE = os.getenv("SEASON_START_DATE", "2026-03-26")  # Opening Day date
-DAILY_SYNC_HOUR = int(os.getenv("DAILY_SYNC_HOUR", "13"))         # 1 PM Taiwan = ~midnight US EST
+DAILY_SYNC_HOUR = int(os.getenv("DAILY_SYNC_HOUR", "0"))           # midnight Taiwan time
 
 _scheduler = None
 
