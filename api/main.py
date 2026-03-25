@@ -53,9 +53,41 @@ async def lifespan(app: FastAPI):
         today_str = _dt.now(tz).strftime("%Y-%m-%d")
         print(f"[Startup] Opening Day check: today={today_str}, target={SEASON_START_DATE}", flush=True)
         if today_str == SEASON_START_DATE:
-            from src.notification.scheduler import _season_start_notification_job
-            print("[Startup] Today is Opening Day! Triggering season start notification...", flush=True)
-            _season_start_notification_job()
+            # Check if already sent today (using notification_log)
+            from api.database import get_db
+            conn = get_db()
+            try:
+                cur = conn.cursor()
+                cur.execute(
+                    """SELECT COUNT(*) FROM notification_log
+                       WHERE notification_type = 'season_start'
+                       AND sent_at::date = CURRENT_DATE""",
+                )
+                already_sent = cur.fetchone()[0] > 0
+                cur.close()
+            finally:
+                conn.close()
+
+            if already_sent:
+                print("[Startup] Opening Day notification already sent today, skipping.", flush=True)
+            else:
+                from src.notification.scheduler import _season_start_notification_job
+                print("[Startup] Today is Opening Day! Triggering season start notification...", flush=True)
+                _season_start_notification_job()
+                # Record that we sent it
+                conn = get_db()
+                try:
+                    cur = conn.cursor()
+                    cur.execute(
+                        """INSERT INTO notification_log
+                           (team_id, year, notification_type, sent_by)
+                           VALUES (0, %s, 'season_start', 'startup')""",
+                        (_dt.now(tz).year,),
+                    )
+                    conn.commit()
+                    cur.close()
+                finally:
+                    conn.close()
     except Exception as e:
         print(f"[Startup] Opening Day check error (non-fatal): {e}", flush=True)
 
