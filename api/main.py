@@ -44,6 +44,18 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         print(f"[Startup] Scheduler error (non-fatal): {e}", flush=True)
 
+    # Check if today is Opening Day and send notification if not yet sent
+    try:
+        from src.notification.scheduler import SEASON_START_DATE
+        from datetime import datetime as _dt
+        today_str = _dt.now().strftime("%Y-%m-%d")
+        if today_str == SEASON_START_DATE:
+            from src.notification.scheduler import _season_start_notification_job
+            print("[Startup] Today is Opening Day! Triggering season start notification...", flush=True)
+            _season_start_notification_job()
+    except Exception as e:
+        print(f"[Startup] Opening Day check error (non-fatal): {e}", flush=True)
+
     yield
 
     try:
