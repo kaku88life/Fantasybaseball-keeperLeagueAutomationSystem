@@ -180,6 +180,11 @@ async def yahoo_callback(
         return RedirectResponse(
             f"{frontend_url}/auth/callback?error={quote(str(e.detail))}"
         )
+    except Exception as e:
+        print(f"[AUTH] Unexpected error in yahoo_callback: {type(e).__name__}: {e}", flush=True)
+        return RedirectResponse(
+            f"{frontend_url}/auth/callback?error={quote('Authentication failed. Please try again.')}"
+        )
 
 
 async def _exchange_code_for_jwt(code: str) -> CallbackResponse:

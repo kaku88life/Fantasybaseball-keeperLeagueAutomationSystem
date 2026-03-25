@@ -112,8 +112,15 @@ def get_conn():
         with get_conn() as conn:
             row = _fetchone(conn, "SELECT ...", (...))
     """
-    with get_conn() as conn:
+    conn = get_db()
+    try:
         yield conn
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        conn.close()
 
 
 def _fetchone(conn, query: str, params: tuple = ()) -> Optional[dict]:
