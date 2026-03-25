@@ -438,6 +438,19 @@ MIGRATIONS: dict[str, list[str]] = {
         END $$;
         """,
     ],
+    "012_add_owner_manager": [
+        """
+        DO $$
+        BEGIN
+            IF NOT EXISTS (
+                SELECT 1 FROM information_schema.columns
+                WHERE table_name = 'player_rankings' AND column_name = 'owner_manager'
+            ) THEN
+                ALTER TABLE player_rankings ADD COLUMN owner_manager TEXT DEFAULT NULL;
+            END IF;
+        END $$;
+        """,
+    ],
 }
 
 
@@ -1181,6 +1194,44 @@ def update_ar_ranks(year: int, ar_data: dict[str, int]):
                 )
         conn.commit()
         print(f"[PlayerRankings] Updated {len(ar_data)} AR ranks for year {year}", flush=True)
+
+
+def sync_roster_ownership(year: int, ownership_map: dict[str, str]):
+    """Update owner_manager for players in player_rankings based on Yahoo roster data.
+
+    Args:
+        year: The season year
+        ownership_map: dict mapping player_key -> manager_name (empty string = free agent)
+    """
+    if not ownership_map:
+        return
+
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            # Clear all ownership for this year first (marks dropped players as FA)
+            cur.execute(
+                "UPDATE player_rankings SET owner_manager = NULL WHERE year = %s",
+                (year,),
+            )
+            # Set ownership for players currently on rosters
+            updated = 0
+            for player_key, manager_name in ownership_map.items():
+                if not manager_name:
+                    continue
+                cur.execute(
+                    """UPDATE player_rankings
+                       SET owner_manager = %s
+                       WHERE year = %s AND player_key = %s""",
+                    (manager_name, year, player_key),
+                )
+                if cur.rowcount > 0:
+                    updated += 1
+        conn.commit()
+        print(
+            f"[RosterOwnership] Synced ownership for {updated}/{len(ownership_map)} "
+            f"players (year {year})",
+            flush=True,
+        )
 
 
 def get_ranking_fetch_status(year: int) -> dict:

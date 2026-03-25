@@ -6,7 +6,9 @@ Jobs:
 2. Rookie call-up monitor: daily check for R-contract player MLB debuts.
 3. Weekly ranking refresh: every Monday during MLB season.
 4. Daily player status update: IL/DTD/NA/O status during MLB season.
-5. Monthly transaction fetch: Yahoo transactions on 1st of each month.
+5. Daily transaction fetch: Yahoo transactions during MLB season.
+6. Season start notification: LINE message on Opening Day (US midnight).
+7. Daily roster ownership sync: fetch team rosters, update owner_manager (US midnight).
 
 Yearly auto-mode: set REMINDER_MONTH / REMINDER_START_DAY / REMINDER_END_DAY
 to define a fixed annual window (e.g. March 1-15 every year).
@@ -34,6 +36,13 @@ REMINDER_INTERVAL_DAYS = int(os.getenv("REMINDER_INTERVAL_DAYS", "3"))
 ROOKIE_MONITOR_ENABLED = os.getenv("ROOKIE_MONITOR_ENABLED", "true").lower() == "true"
 ROOKIE_MONITOR_START_MONTH = int(os.getenv("ROOKIE_MONITOR_START_MONTH", "3"))
 ROOKIE_MONITOR_END_MONTH = int(os.getenv("ROOKIE_MONITOR_END_MONTH", "9"))
+
+# --- Season start notification + daily roster sync ---
+# US midnight = 13:00 Taiwan time (UTC+8, EST is UTC-5; 0:00 EST = 05:00 UTC = 13:00 TWN)
+# During DST (EDT, UTC-4): 0:00 EDT = 04:00 UTC = 12:00 TWN
+# We use 13:00 TWN as a safe default (between the two offsets)
+SEASON_START_DATE = os.getenv("SEASON_START_DATE", "2026-03-26")  # Opening Day date
+DAILY_SYNC_HOUR = int(os.getenv("DAILY_SYNC_HOUR", "13"))         # 1 PM Taiwan = ~midnight US EST
 
 _scheduler = None
 
@@ -298,8 +307,8 @@ def _daily_player_status_job():
         print(f"[StatusUpdate] Error: {e}")
 
 
-def _monthly_transaction_fetch_job():
-    """Monthly job: fetch latest transactions from Yahoo API."""
+def _daily_transaction_fetch_job():
+    """Daily job: fetch latest transactions from Yahoo API during MLB season."""
     now = datetime.now()
     month = now.month
 
@@ -364,6 +373,151 @@ def _monthly_transaction_fetch_job():
         print(f"[TransactionFetch] Error: {e}")
 
 
+def _season_start_notification_job():
+    """Daily job (at DAILY_SYNC_HOUR): send LINE notification on Opening Day."""
+    today_str = datetime.now().strftime("%Y-%m-%d")
+    if today_str != SEASON_START_DATE:
+        return
+
+    year = datetime.now().year
+    print(f"[SeasonStart] Today is Opening Day ({today_str})! Sending LINE notification...")
+
+    try:
+        from src.notification.line_service import send_line_group_message
+        message = (
+            f"[5-Man Keeper League]\n"
+            f"\u26be {year} 賽季正式開始！Play Ball! \u26be\n"
+            f"祝各位 GM 本季順利，好球連發！"
+        )
+        success, error = send_line_group_message(message)
+        if success:
+            print(f"[SeasonStart] LINE notification sent for {year} Opening Day.")
+        else:
+            print(f"[SeasonStart] LINE notification failed: {error}")
+    except Exception as e:
+        print(f"[SeasonStart] Error sending notification: {e}")
+
+
+def _daily_roster_ownership_sync_job():
+    """Daily job (at DAILY_SYNC_HOUR): fetch Yahoo team rosters and sync owner_manager."""
+    now = datetime.now()
+    month = now.month
+
+    # Only run during MLB season (March-October)
+    if month < 3 or month > 10:
+        print(f"[RosterSync] Off-season (month {month}), skipping.")
+        return
+
+    year = now.year
+    print(f"[RosterSync] Syncing roster ownership for {year}...")
+
+    try:
+        from api.yahoo_service import yahoo_api_get, YahooTokenError
+        from api.database import sync_roster_ownership, get_all_teams
+        from config.settings import get_league_key
+        import time
+
+        league_key = get_league_key(year)
+        if not league_key:
+            print(f"[RosterSync] No league key for year {year}")
+            return
+
+        # Get all teams from Yahoo to map team_key -> manager_name
+        db_teams = get_all_teams()
+
+        # Fetch all teams from Yahoo API
+        teams_path = f"/league/{league_key}/teams"
+        teams_data = yahoo_api_get(teams_path)
+        league_section = teams_data.get("fantasy_content", {}).get("league", [])
+        if len(league_section) < 2:
+            print("[RosterSync] No teams data from Yahoo API")
+            return
+
+        teams_section = league_section[1].get("teams", {})
+        team_count = teams_section.get("count", 0)
+
+        # Map yahoo_team_id -> manager_name using DB
+        yahoo_id_to_manager: dict[str, str] = {}
+        for db_team in db_teams:
+            if db_team.get("yahoo_team_id"):
+                yahoo_id_to_manager[str(db_team["yahoo_team_id"])] = db_team["manager_name"]
+
+        # Build ownership_map: player_key -> manager_name
+        ownership_map: dict[str, str] = {}
+
+        for i in range(team_count):
+            team_entry = teams_section.get(str(i), {}).get("team", [])
+            if not team_entry:
+                continue
+
+            # Extract yahoo team key and ID
+            team_info_list = team_entry[0] if isinstance(team_entry, list) else []
+            team_key = ""
+            team_id_str = ""
+            for item in team_info_list:
+                if isinstance(item, dict):
+                    if "team_key" in item:
+                        team_key = item["team_key"]
+                    if "team_id" in item:
+                        team_id_str = str(item["team_id"])
+
+            manager_name = yahoo_id_to_manager.get(team_id_str, "")
+            if not manager_name:
+                # Fallback: try manager name from Yahoo data
+                managers_list = next(
+                    (item["managers"] for item in team_info_list
+                     if isinstance(item, dict) and "managers" in item),
+                    []
+                )
+                if managers_list and isinstance(managers_list, list):
+                    mgr = managers_list[0].get("manager", {})
+                    manager_name = mgr.get("nickname", "")
+
+            if not team_key:
+                continue
+
+            # Fetch this team's roster
+            try:
+                roster_path = f"/team/{team_key}/roster"
+                roster_data = yahoo_api_get(roster_path)
+                roster_section = (
+                    roster_data.get("fantasy_content", {})
+                    .get("team", [])
+                )
+                if len(roster_section) >= 2:
+                    players_section = roster_section[1].get("roster", {}).get("players", {})
+                    p_count = players_section.get("count", 0)
+                    for j in range(p_count):
+                        player_entry = players_section.get(str(j), {}).get("player", [])
+                        if not player_entry:
+                            continue
+                        player_info_list = player_entry[0] if isinstance(player_entry, list) else []
+                        player_key = ""
+                        for item in player_info_list:
+                            if isinstance(item, dict) and "player_key" in item:
+                                player_key = item["player_key"]
+                                break
+                        if player_key and manager_name:
+                            ownership_map[player_key] = manager_name
+                time.sleep(0.6)
+            except Exception as e:
+                if "429" in str(e):
+                    time.sleep(10)
+                else:
+                    print(f"[RosterSync] Error fetching roster for team {team_key}: {e}")
+
+        if ownership_map:
+            sync_roster_ownership(year, ownership_map)
+            print(f"[RosterSync] Ownership sync complete: {len(ownership_map)} players mapped.")
+        else:
+            print("[RosterSync] No ownership data fetched.")
+
+    except YahooTokenError as e:
+        print(f"[RosterSync] Token error: {e}")
+    except Exception as e:
+        print(f"[RosterSync] Error: {e}")
+
+
 def start_scheduler():
     """Start the background scheduler.
 
@@ -372,7 +526,9 @@ def start_scheduler():
     2. Rookie call-up monitor: daily cron during MLB season
     3. Weekly ranking refresh: every Monday during MLB season
     4. Daily player status update: during MLB season
-    5. Monthly transaction fetch: 1st of each month during season
+    5. Daily transaction fetch: daily during MLB season
+    6. Season start notification: LINE message on Opening Day
+    7. Daily roster ownership sync: fetch rosters, update owner_manager
     """
     global _scheduler
 
@@ -434,15 +590,39 @@ def start_scheduler():
         replace_existing=True,
     )
 
-    # Job 5: Monthly transaction fetch (1st of each month)
+    # Job 5: Daily transaction fetch (during MLB season)
     _scheduler.add_job(
-        _monthly_transaction_fetch_job,
+        _daily_transaction_fetch_job,
         CronTrigger(
-            day=1,
-            hour=REMINDER_CRON_HOUR,
+            hour=DAILY_SYNC_HOUR,
+            minute=15,
             timezone=REMINDER_CRON_TZ,
         ),
         id="transaction_fetch",
+        replace_existing=True,
+    )
+
+    # Job 6: Season start notification (Opening Day LINE message)
+    _scheduler.add_job(
+        _season_start_notification_job,
+        CronTrigger(
+            hour=DAILY_SYNC_HOUR,
+            minute=0,
+            timezone=REMINDER_CRON_TZ,
+        ),
+        id="season_start_notification",
+        replace_existing=True,
+    )
+
+    # Job 7: Daily roster ownership sync (US midnight = DAILY_SYNC_HOUR Taiwan)
+    _scheduler.add_job(
+        _daily_roster_ownership_sync_job,
+        CronTrigger(
+            hour=DAILY_SYNC_HOUR,
+            minute=30,
+            timezone=REMINDER_CRON_TZ,
+        ),
+        id="roster_ownership_sync",
         replace_existing=True,
     )
 
@@ -456,7 +636,10 @@ def start_scheduler():
               f"(months {ROOKIE_MONITOR_START_MONTH}-{ROOKIE_MONITOR_END_MONTH})")
     print("[Scheduler] Weekly ranking refresh: every Monday")
     print("[Scheduler] Daily player status update: 12:30 PM")
-    print("[Scheduler] Monthly transaction fetch: 1st of each month")
+    print(f"[Scheduler] Daily transaction fetch: {DAILY_SYNC_HOUR}:15 {REMINDER_CRON_TZ}")
+    print(f"[Scheduler] Season start notification: {DAILY_SYNC_HOUR}:00 {REMINDER_CRON_TZ} "
+          f"(Opening Day: {SEASON_START_DATE})")
+    print(f"[Scheduler] Daily roster ownership sync: {DAILY_SYNC_HOUR}:30 {REMINDER_CRON_TZ}")
 
 
 def stop_scheduler():
