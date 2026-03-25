@@ -102,6 +102,20 @@ def get_db() -> psycopg2.extensions.connection:
     return conn
 
 
+from contextlib import contextmanager
+
+@contextmanager
+def get_conn():
+    """Context manager for database connections. Auto-closes on exit.
+
+    Usage:
+        with get_conn() as conn:
+            row = _fetchone(conn, "SELECT ...", (...))
+    """
+    with get_conn() as conn:
+        yield conn
+
+
 def _fetchone(conn, query: str, params: tuple = ()) -> Optional[dict]:
     """Execute query and return one row as dict, or None."""
     with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
@@ -467,8 +481,7 @@ def _run_migrations(conn):
 
 async def init_db():
     """Initialize the database schema and run versioned migrations."""
-    conn = get_db()
-    try:
+    with get_conn() as conn:
         # 1) Create tables
         with conn.cursor() as cur:
             for stmt in SCHEMA_STATEMENTS:
@@ -477,22 +490,17 @@ async def init_db():
 
         # 2) Run versioned migrations
         _run_migrations(conn)
-    finally:
-        conn.close()
 
 
 def seed_if_empty():
     """Auto-seed 2026 contract data if DB has no league snapshots."""
-    conn = get_db()
-    try:
+    with get_conn() as conn:
         with conn.cursor() as cur:
             cur.execute("SELECT COUNT(*) FROM league_snapshots")
             count = cur.fetchone()[0]
         if count > 0:
             print(f"[Seed] League data already present ({count} snapshots). Skipping.")
             return
-    finally:
-        conn.close()
 
     print("[Seed] No league data found. Loading 2026 contracts...")
     from scripts.load_2026_contracts import load_contracts
@@ -503,19 +511,13 @@ def seed_if_empty():
 # ========== Users ==========
 
 def get_user_by_guid(yahoo_guid: str) -> Optional[dict]:
-    conn = get_db()
-    try:
+    with get_conn() as conn:
         return _fetchone(conn, "SELECT * FROM users WHERE yahoo_guid = %s", (yahoo_guid,))
-    finally:
-        conn.close()
 
 
 def get_user_by_id(user_id: int) -> Optional[dict]:
-    conn = get_db()
-    try:
+    with get_conn() as conn:
         return _fetchone(conn, "SELECT * FROM users WHERE id = %s", (user_id,))
-    finally:
-        conn.close()
 
 
 def upsert_user(
@@ -525,8 +527,7 @@ def upsert_user(
     team_id: Optional[int] = None,
     is_commissioner: bool = False,
 ) -> dict:
-    conn = get_db()
-    try:
+    with get_conn() as conn:
         with conn.cursor() as cur:
             cur.execute(
                 """INSERT INTO users (yahoo_guid, yahoo_nickname, yahoo_email, team_id, is_commissioner, last_login)
@@ -540,38 +541,29 @@ def upsert_user(
             )
         conn.commit()
         return get_user_by_guid(yahoo_guid)
-    finally:
-        conn.close()
 
 
 def update_user_line_name(user_id: int, line_name: str):
     """Update user's LINE display name."""
-    conn = get_db()
-    try:
+    with get_conn() as conn:
         with conn.cursor() as cur:
             cur.execute(
                 "UPDATE users SET line_name = %s WHERE id = %s",
                 (line_name.strip(), user_id),
             )
         conn.commit()
-    finally:
-        conn.close()
 
 
 # ========== Teams ==========
 
 def get_all_teams() -> list[dict]:
-    conn = get_db()
-    try:
+    with get_conn() as conn:
         return _fetchall(conn, "SELECT * FROM teams ORDER BY id")
-    finally:
-        conn.close()
 
 
 def get_team_line_names() -> dict[int, str]:
     """Return mapping of team_id -> line_name from users table."""
-    conn = get_db()
-    try:
+    with get_conn() as conn:
         rows = _fetchall(
             conn,
             """SELECT u.team_id, u.line_name
@@ -579,31 +571,22 @@ def get_team_line_names() -> dict[int, str]:
                WHERE u.team_id IS NOT NULL AND u.line_name IS NOT NULL AND u.line_name != ''""",
         )
         return {r["team_id"]: r["line_name"] for r in rows}
-    finally:
-        conn.close()
 
 
 def get_team_by_id(team_id: int) -> Optional[dict]:
-    conn = get_db()
-    try:
+    with get_conn() as conn:
         return _fetchone(conn, "SELECT * FROM teams WHERE id = %s", (team_id,))
-    finally:
-        conn.close()
 
 
 def get_team_by_manager(manager_name: str) -> Optional[dict]:
-    conn = get_db()
-    try:
+    with get_conn() as conn:
         return _fetchone(
             conn, "SELECT * FROM teams WHERE manager_name = %s", (manager_name,)
         )
-    finally:
-        conn.close()
 
 
 def upsert_team(manager_name: str, team_name: str = "", yahoo_team_id: str = "") -> dict:
-    conn = get_db()
-    try:
+    with get_conn() as conn:
         with conn.cursor() as cur:
             cur.execute(
                 """INSERT INTO teams (manager_name, team_name, yahoo_team_id)
@@ -615,13 +598,10 @@ def upsert_team(manager_name: str, team_name: str = "", yahoo_team_id: str = "")
             )
         conn.commit()
         return get_team_by_manager(manager_name)
-    finally:
-        conn.close()
 
 
 def update_team_adjustments(team_id: int, trade_compensation: int, faab_adjustment: int):
-    conn = get_db()
-    try:
+    with get_conn() as conn:
         with conn.cursor() as cur:
             cur.execute(
                 """UPDATE teams SET trade_compensation = %s, faab_adjustment = %s
@@ -629,24 +609,18 @@ def update_team_adjustments(team_id: int, trade_compensation: int, faab_adjustme
                 (trade_compensation, faab_adjustment, team_id),
             )
         conn.commit()
-    finally:
-        conn.close()
 
 
 # ========== League Snapshots ==========
 
 def get_snapshot_years() -> list[int]:
-    conn = get_db()
-    try:
+    with get_conn() as conn:
         rows = _fetchall(conn, "SELECT year FROM league_snapshots ORDER BY year")
         return [r["year"] for r in rows]
-    finally:
-        conn.close()
 
 
 def get_snapshot(year: int) -> Optional[dict]:
-    conn = get_db()
-    try:
+    with get_conn() as conn:
         result = _fetchone(
             conn, "SELECT * FROM league_snapshots WHERE year = %s", (year,)
         )
@@ -654,13 +628,10 @@ def get_snapshot(year: int) -> Optional[dict]:
             return None
         result["data"] = json.loads(result["data"])
         return result
-    finally:
-        conn.close()
 
 
 def save_snapshot(year: int, data: dict, source_file: str = "", imported_by: Optional[int] = None):
-    conn = get_db()
-    try:
+    with get_conn() as conn:
         with conn.cursor() as cur:
             cur.execute(
                 """INSERT INTO league_snapshots (year, data, source_file, imported_by)
@@ -673,15 +644,12 @@ def save_snapshot(year: int, data: dict, source_file: str = "", imported_by: Opt
                 (year, json.dumps(data, ensure_ascii=False), source_file, imported_by),
             )
         conn.commit()
-    finally:
-        conn.close()
 
 
 # ========== Keeper Selections ==========
 
 def get_keeper_selections(year: int, team_id: int) -> list[dict]:
-    conn = get_db()
-    try:
+    with get_conn() as conn:
         return _fetchall(
             conn,
             """SELECT * FROM keeper_selections
@@ -689,8 +657,6 @@ def get_keeper_selections(year: int, team_id: int) -> list[dict]:
                ORDER BY player_name""",
             (year, team_id),
         )
-    finally:
-        conn.close()
 
 
 def upsert_keeper_selection(
@@ -702,8 +668,7 @@ def upsert_keeper_selection(
     extension_years: int = 0,
     next_contract: str = "",
 ):
-    conn = get_db()
-    try:
+    with get_conn() as conn:
         with conn.cursor() as cur:
             cur.execute(
                 """INSERT INTO keeper_selections
@@ -718,28 +683,22 @@ def upsert_keeper_selection(
                 (year, team_id, player_name, current_contract, action, extension_years, next_contract),
             )
         conn.commit()
-    finally:
-        conn.close()
 
 
 def delete_keeper_selections(year: int, team_id: int):
-    conn = get_db()
-    try:
+    with get_conn() as conn:
         with conn.cursor() as cur:
             cur.execute(
                 "DELETE FROM keeper_selections WHERE year = %s AND team_id = %s",
                 (year, team_id),
             )
         conn.commit()
-    finally:
-        conn.close()
 
 
 # ========== Keeper Submissions ==========
 
 def get_submission(year: int, team_id: int) -> Optional[dict]:
-    conn = get_db()
-    try:
+    with get_conn() as conn:
         result = _fetchone(
             conn,
             "SELECT * FROM keeper_submissions WHERE year = %s AND team_id = %s",
@@ -751,13 +710,10 @@ def get_submission(year: int, team_id: int) -> Optional[dict]:
         if result["validation_result"]:
             result["validation_result"] = json.loads(result["validation_result"])
         return result
-    finally:
-        conn.close()
 
 
 def get_all_submissions(year: int) -> list[dict]:
-    conn = get_db()
-    try:
+    with get_conn() as conn:
         rows = _fetchall(
             conn,
             """SELECT ks.*, t.manager_name, t.team_name
@@ -772,8 +728,6 @@ def get_all_submissions(year: int) -> list[dict]:
             if r["validation_result"]:
                 r["validation_result"] = json.loads(r["validation_result"])
         return rows
-    finally:
-        conn.close()
 
 
 def upsert_submission(
@@ -784,8 +738,7 @@ def upsert_submission(
     validation_result: dict,
     is_valid: bool,
 ):
-    conn = get_db()
-    try:
+    with get_conn() as conn:
         with conn.cursor() as cur:
             cur.execute(
                 """INSERT INTO keeper_submissions
@@ -806,13 +759,10 @@ def upsert_submission(
                 ),
             )
         conn.commit()
-    finally:
-        conn.close()
 
 
 def approve_submission(year: int, team_id: int, approved: bool, notes: str = ""):
-    conn = get_db()
-    try:
+    with get_conn() as conn:
         with conn.cursor() as cur:
             cur.execute(
                 """UPDATE keeper_submissions
@@ -821,22 +771,17 @@ def approve_submission(year: int, team_id: int, approved: bool, notes: str = "")
                 (int(approved), notes, year, team_id),
             )
         conn.commit()
-    finally:
-        conn.close()
 
 
 def delete_submission(year: int, team_id: int):
     """Delete a submission record (unlock). Keeper selections are preserved."""
-    conn = get_db()
-    try:
+    with get_conn() as conn:
         with conn.cursor() as cur:
             cur.execute(
                 "DELETE FROM keeper_submissions WHERE year = %s AND team_id = %s",
                 (year, team_id),
             )
         conn.commit()
-    finally:
-        conn.close()
 
 
 # ========== Notification Log ==========
@@ -845,8 +790,7 @@ def get_recent_notifications(
     year: int, team_id: int, notification_type: str, hours: int = 24
 ) -> list[dict]:
     """Check if a notification was sent recently (cooldown window)."""
-    conn = get_db()
-    try:
+    with get_conn() as conn:
         return _fetchall(
             conn,
             """SELECT * FROM notification_log
@@ -857,8 +801,6 @@ def get_recent_notifications(
                ORDER BY sent_at DESC""",
             (year, team_id, notification_type, hours),
         )
-    finally:
-        conn.close()
 
 
 def insert_notification_log(
@@ -872,8 +814,7 @@ def insert_notification_log(
     error_message: str = "",
 ):
     """Record a notification send attempt."""
-    conn = get_db()
-    try:
+    with get_conn() as conn:
         with conn.cursor() as cur:
             cur.execute(
                 """INSERT INTO notification_log
@@ -884,14 +825,11 @@ def insert_notification_log(
                  sent_by, status, error_message),
             )
         conn.commit()
-    finally:
-        conn.close()
 
 
 def get_reminder_history(year: int) -> list[dict]:
     """Get all notification records for a year (for commissioner dashboard)."""
-    conn = get_db()
-    try:
+    with get_conn() as conn:
         return _fetchall(
             conn,
             """SELECT n.*, t.manager_name
@@ -902,16 +840,13 @@ def get_reminder_history(year: int) -> list[dict]:
                LIMIT 100""",
             (year,),
         )
-    finally:
-        conn.close()
 
 
 # ========== Buyouts ==========
 
 def get_team_buyouts(team_id: int, year: int) -> list[dict]:
     """Get all active buyout records for a team in a specific year."""
-    conn = get_db()
-    try:
+    with get_conn() as conn:
         return _fetchall(
             conn,
             """SELECT * FROM buyouts
@@ -919,14 +854,11 @@ def get_team_buyouts(team_id: int, year: int) -> list[dict]:
                ORDER BY player_name""",
             (team_id, year),
         )
-    finally:
-        conn.close()
 
 
 def get_all_buyouts(year: int) -> list[dict]:
     """Get all buyout records for a year (commissioner view)."""
-    conn = get_db()
-    try:
+    with get_conn() as conn:
         return _fetchall(
             conn,
             """SELECT b.*, t.manager_name
@@ -936,8 +868,6 @@ def get_all_buyouts(year: int) -> list[dict]:
                ORDER BY t.manager_name, b.player_name""",
             (year,),
         )
-    finally:
-        conn.close()
 
 
 def create_buyout(
@@ -954,8 +884,7 @@ def create_buyout(
     notes: str = "",
 ) -> dict:
     """Create a new buyout record."""
-    conn = get_db()
-    try:
+    with get_conn() as conn:
         with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
             cur.execute(
                 """INSERT INTO buyouts
@@ -971,8 +900,6 @@ def create_buyout(
             result = dict(cur.fetchone())
         conn.commit()
         return result
-    finally:
-        conn.close()
 
 
 def update_buyout(buyout_id: int, **kwargs) -> dict:
@@ -983,17 +910,13 @@ def update_buyout(buyout_id: int, **kwargs) -> dict:
     }
     updates = {k: v for k, v in kwargs.items() if k in allowed}
     if not updates:
-        conn = get_db()
-        try:
+        with get_conn() as conn:
             return _fetchone(conn, "SELECT * FROM buyouts WHERE id = %s", (buyout_id,))
-        finally:
-            conn.close()
 
     set_clauses = ", ".join(f"{k} = %s" for k in updates)
     values = list(updates.values()) + [buyout_id]
 
-    conn = get_db()
-    try:
+    with get_conn() as conn:
         with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
             cur.execute(
                 f"UPDATE buyouts SET {set_clauses} WHERE id = %s RETURNING *",
@@ -1002,40 +925,31 @@ def update_buyout(buyout_id: int, **kwargs) -> dict:
             result = cur.fetchone()
         conn.commit()
         return dict(result) if result else None
-    finally:
-        conn.close()
 
 
 def delete_buyout(buyout_id: int):
     """Delete a buyout record."""
-    conn = get_db()
-    try:
+    with get_conn() as conn:
         with conn.cursor() as cur:
             cur.execute("DELETE FROM buyouts WHERE id = %s", (buyout_id,))
         conn.commit()
-    finally:
-        conn.close()
 
 
 # ========== Yahoo Tokens ==========
 
 def get_yahoo_token(user_id: int) -> Optional[dict]:
     """Get Yahoo OAuth token for a specific user."""
-    conn = get_db()
-    try:
+    with get_conn() as conn:
         return _fetchone(
             conn,
             "SELECT * FROM yahoo_tokens WHERE user_id = %s",
             (user_id,),
         )
-    finally:
-        conn.close()
 
 
 def get_commissioner_yahoo_token() -> Optional[dict]:
     """Get the Yahoo token for a commissioner user (most recently updated)."""
-    conn = get_db()
-    try:
+    with get_conn() as conn:
         return _fetchone(
             conn,
             """SELECT yt.* FROM yahoo_tokens yt
@@ -1044,8 +958,6 @@ def get_commissioner_yahoo_token() -> Optional[dict]:
                ORDER BY yt.updated_at DESC
                LIMIT 1""",
         )
-    finally:
-        conn.close()
 
 
 def upsert_yahoo_token(
@@ -1057,8 +969,7 @@ def upsert_yahoo_token(
     token_type: str = "bearer",
 ) -> Optional[dict]:
     """Insert or update Yahoo OAuth token for a user."""
-    conn = get_db()
-    try:
+    with get_conn() as conn:
         with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
             cur.execute(
                 """INSERT INTO yahoo_tokens
@@ -1077,27 +988,21 @@ def upsert_yahoo_token(
             result = cur.fetchone()
         conn.commit()
         return dict(result) if result else None
-    finally:
-        conn.close()
 
 
 def delete_yahoo_token(user_id: int):
     """Remove a user's Yahoo OAuth token (disconnect)."""
-    conn = get_db()
-    try:
+    with get_conn() as conn:
         with conn.cursor() as cur:
             cur.execute("DELETE FROM yahoo_tokens WHERE user_id = %s", (user_id,))
         conn.commit()
-    finally:
-        conn.close()
 
 
 # ========== Player Rankings ==========
 
 def get_player_rankings(year: int) -> list[dict]:
     """Get all player rankings for a year."""
-    conn = get_db()
-    try:
+    with get_conn() as conn:
         return _fetchall(
             conn,
             """SELECT * FROM player_rankings
@@ -1105,8 +1010,6 @@ def get_player_rankings(year: int) -> list[dict]:
                ORDER BY COALESCE(o_rank, 9999)""",
             (year,),
         )
-    finally:
-        conn.close()
 
 
 def bulk_upsert_player_rankings(year: int, players: list[dict]):
@@ -1120,8 +1023,7 @@ def bulk_upsert_player_rankings(year: int, players: list[dict]):
     if not players:
         return
 
-    conn = get_db()
-    try:
+    with get_conn() as conn:
         with conn.cursor() as cur:
             for p in players:
                 cur.execute(
@@ -1194,8 +1096,6 @@ def bulk_upsert_player_rankings(year: int, players: list[dict]):
                 )
         conn.commit()
         print(f"[PlayerRankings] Upserted {len(players)} rankings for year {year}", flush=True)
-    finally:
-        conn.close()
 
 
 def update_last_season_stats(year: int, players: list[dict], sort_type: str = "prev_season"):
@@ -1214,8 +1114,7 @@ def update_last_season_stats(year: int, players: list[dict], sort_type: str = "p
     if not players:
         return
 
-    conn = get_db()
-    try:
+    with get_conn() as conn:
         updated = 0
         with conn.cursor() as cur:
             for p in players:
@@ -1252,8 +1151,6 @@ def update_last_season_stats(year: int, players: list[dict], sort_type: str = "p
             f"players (year {year})",
             flush=True,
         )
-    finally:
-        conn.close()
 
 
 def update_ar_ranks(year: int, ar_data: dict[str, int]):
@@ -1266,8 +1163,7 @@ def update_ar_ranks(year: int, ar_data: dict[str, int]):
     if not ar_data:
         return
 
-    conn = get_db()
-    try:
+    with get_conn() as conn:
         with conn.cursor() as cur:
             for player_key, ar_rank in ar_data.items():
                 cur.execute(
@@ -1278,14 +1174,11 @@ def update_ar_ranks(year: int, ar_data: dict[str, int]):
                 )
         conn.commit()
         print(f"[PlayerRankings] Updated {len(ar_data)} AR ranks for year {year}", flush=True)
-    finally:
-        conn.close()
 
 
 def get_ranking_fetch_status(year: int) -> dict:
     """Get the last fetch time and count for player rankings of a year."""
-    conn = get_db()
-    try:
+    with get_conn() as conn:
         row = _fetchone(
             conn,
             """SELECT COUNT(*) as total_count,
@@ -1309,8 +1202,6 @@ def get_ranking_fetch_status(year: int) -> dict:
                 "stats_sort_type": sort_row["stats_sort_type"] if sort_row else "prev_season",
             }
         return {"has_data": False, "total_count": 0, "last_fetched_at": None, "stats_sort_type": None}
-    finally:
-        conn.close()
 
 
 # ── Rookie Call-up Log ──────────────────────────────────────────
@@ -1318,16 +1209,13 @@ def get_ranking_fetch_status(year: int) -> dict:
 
 def get_notified_callups(year: int) -> set[str]:
     """Return set of player_names already notified for this year."""
-    conn = get_db()
-    try:
+    with get_conn() as conn:
         with conn.cursor() as cur:
             cur.execute(
                 "SELECT player_name FROM rookie_callup_log WHERE year = %s AND notified = TRUE",
                 (year,),
             )
             return {row[0] for row in cur.fetchall()}
-    finally:
-        conn.close()
 
 
 def record_callup(
@@ -1342,8 +1230,7 @@ def record_callup(
     detection_source: str = "mlb_api",
 ) -> int:
     """Insert a rookie call-up record and return its id."""
-    conn = get_db()
-    try:
+    with get_conn() as conn:
         with conn.cursor() as cur:
             cur.execute(
                 """INSERT INTO rookie_callup_log
@@ -1358,27 +1245,23 @@ def record_callup(
             row_id = cur.fetchone()[0]
         conn.commit()
         return row_id
-    finally:
-        conn.close()
 
 
 def cleanup_old_notifications(retention_days: int = 365):
     """Delete notification_log records older than retention_days.
     Called on startup to prevent unbounded table growth."""
-    conn = get_db()
-    try:
-        with conn.cursor() as cur:
-            cur.execute(
-                """DELETE FROM notification_log
-                   WHERE sent_at < NOW() - make_interval(days => %s)""",
-                (retention_days,),
-            )
-            deleted = cur.rowcount
-        conn.commit()
-        if deleted > 0:
-            print(f"[Cleanup] Deleted {deleted} notification records older than {retention_days} days.")
-    except Exception as e:
-        conn.rollback()
-        print(f"[Cleanup] notification_log cleanup failed (non-fatal): {e}")
-    finally:
-        conn.close()
+    with get_conn() as conn:
+        try:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """DELETE FROM notification_log
+                       WHERE sent_at < NOW() - make_interval(days => %s)""",
+                    (retention_days,),
+                )
+                deleted = cur.rowcount
+            conn.commit()
+            if deleted > 0:
+                print(f"[Cleanup] Deleted {deleted} notification records older than {retention_days} days.")
+        except Exception as e:
+            conn.rollback()
+            print(f"[Cleanup] notification_log cleanup failed (non-fatal): {e}")

@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
+import useSWR from "swr";
 import {
   getAllBuyouts,
   createBuyout,
@@ -62,8 +63,19 @@ const EMPTY_FORM: BuyoutFormData = {
 
 export default function BuyoutsPage() {
   const { user, loading: authLoading } = useAuth();
-  const [years, setYears] = useState<number[]>([]);
+
+  // SWR cached years and teams (consistent with other pages)
+  const { data: yearsData = [] } = useSWR("years", getYears);
   const [selectedYear, setSelectedYear] = useState<number>(2026);
+
+  useEffect(() => {
+    if (yearsData.length > 0 && !yearsData.includes(selectedYear)) {
+      setSelectedYear(Math.max(...yearsData));
+    }
+  }, [yearsData, selectedYear]);
+
+  const years = yearsData;
+
   const [buyouts, setBuyouts] = useState<(BuyoutRecord & { manager_name: string })[]>([]);
   const [loading, setLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
@@ -73,16 +85,6 @@ export default function BuyoutsPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [teams, setTeams] = useState<{ id: number; name: string }[]>(TEAMS);
-
-  // Load available years
-  useEffect(() => {
-    getYears().then((yrs) => {
-      if (yrs.length > 0) {
-        setYears(yrs);
-        setSelectedYear(Math.max(...yrs));
-      }
-    }).catch(() => {});
-  }, []);
 
   // Load teams from API
   useEffect(() => {

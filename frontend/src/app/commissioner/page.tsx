@@ -2,6 +2,7 @@
 
 import { Fragment, useEffect, useState, useCallback } from "react";
 import Link from "next/link";
+import useSWR from "swr";
 import {
   getSubmissions,
   getYears,
@@ -121,10 +122,20 @@ function getSelectionDisplay(sel: { current_contract?: string; action: string; e
 
 export default function CommissionerDashboard() {
   const { user } = useAuth();
-  const [years, setYears] = useState<number[]>([]);
-  const [selectedYear, setSelectedYear] = useState<number>(
-    new Date().getFullYear(),
-  );
+
+  // SWR cached years (consistent with other pages)
+  const { data: yearsData = [] } = useSWR("years", getYears);
+  const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
+
+  // Auto-select latest year if current year not available
+  useEffect(() => {
+    if (yearsData.length > 0 && !yearsData.includes(selectedYear)) {
+      setSelectedYear(yearsData[yearsData.length - 1]);
+    }
+  }, [yearsData, selectedYear]);
+
+  const years = yearsData;
+
   const [submissions, setSubmissions] = useState<SubmissionStatus[]>([]);
   const [loading, setLoading] = useState(false);
   const [loadError, setLoadError] = useState("");
@@ -169,15 +180,6 @@ export default function CommissionerDashboard() {
   const [yahooToken, setYahooToken] = useState<YahooTokenStatus | null>(null);
   const [yahooTokenLoading, setYahooTokenLoading] = useState(false);
   const [yahooTokenMsg, setYahooTokenMsg] = useState("");
-
-  useEffect(() => {
-    getYears().then((y) => {
-      setYears(y);
-      if (y.length > 0 && !y.includes(selectedYear)) {
-        setSelectedYear(y[y.length - 1]);
-      }
-    });
-  }, []);
 
   const refreshSubmissions = useCallback(async () => {
     if (!selectedYear || !user?.is_commissioner) return;

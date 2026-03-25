@@ -2,7 +2,25 @@
  * API client for communicating with the FastAPI backend.
  */
 
-import type { BuyoutRecord } from "@/types";
+import type {
+  BuyoutRecord,
+  DBTeam,
+  KeeperSelectionsWithValidation,
+  LeagueSettings,
+  LeagueSnapshot,
+  PlayerDatabaseResponse,
+  PlayerKeeperOptions,
+  PlayerStats,
+  ProspectsResponse,
+  RankingFetchStatus,
+  SubmissionDetail,
+  SubmissionStatus,
+  Team,
+  TeamAdjustments,
+  UserInfo,
+  UserWithTeam,
+  ValidationResult,
+} from "@/types";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8002";
 
@@ -88,7 +106,7 @@ export class ApiError extends Error {
 
 // ========== Auth ==========
 
-export async function getCurrentUser(): Promise<import("@/types").UserInfo> {
+export async function getCurrentUser(): Promise<UserInfo> {
   return request("/api/auth/me");
 }
 
@@ -105,7 +123,7 @@ export async function getYears(): Promise<number[]> {
   return request("/api/league/years");
 }
 
-export async function getLeagueYear(year: number): Promise<import("@/types").LeagueSnapshot> {
+export async function getLeagueYear(year: number): Promise<LeagueSnapshot> {
   return request(`/api/league/${year}`);
 }
 
@@ -127,7 +145,7 @@ export async function getLeagueSummary(year: number): Promise<{
   return request(`/api/league/${year}/summary`);
 }
 
-export async function getLeagueSettings(): Promise<import("@/types").LeagueSettings> {
+export async function getLeagueSettings(): Promise<LeagueSettings> {
   return request("/api/league/settings");
 }
 
@@ -168,21 +186,21 @@ export async function getKeeperResults(year: number): Promise<{
 
 // ========== Teams ==========
 
-export async function getTeams(): Promise<import("@/types").DBTeam[]> {
+export async function getTeams(): Promise<DBTeam[]> {
   return request("/api/teams/");
 }
 
 export async function getTeamRoster(
   teamId: number,
   year: number,
-): Promise<import("@/types").Team> {
+): Promise<Team> {
   return request(`/api/teams/${teamId}/roster/${year}`);
 }
 
 export async function getKeeperOptions(
   teamId: number,
   year: number,
-): Promise<import("@/types").PlayerKeeperOptions[]> {
+): Promise<PlayerKeeperOptions[]> {
   return request(`/api/teams/${teamId}/keeper-options/${year}`);
 }
 
@@ -190,9 +208,9 @@ export async function getKeeperPageData(
   teamId: number,
   year: number,
 ): Promise<{
-  roster: import("@/types").Team;
-  options: import("@/types").PlayerKeeperOptions[];
-  selections: import("@/types").KeeperSelectionsWithValidation;
+  roster: Team;
+  options: PlayerKeeperOptions[];
+  selections: KeeperSelectionsWithValidation;
 }> {
   return request(`/api/teams/${teamId}/keeper-page/${year}`);
 }
@@ -200,7 +218,7 @@ export async function getKeeperPageData(
 export async function getKeeperSelections(
   teamId: number,
   year: number,
-): Promise<import("@/types").KeeperSelectionsWithValidation> {
+): Promise<KeeperSelectionsWithValidation> {
   return request(`/api/teams/${teamId}/keeper-selections/${year}`);
 }
 
@@ -208,7 +226,7 @@ export async function updateKeeperSelections(
   teamId: number,
   year: number,
   selections: Array<{ player_name: string; action: string; extension_years?: number }>,
-): Promise<import("@/types").KeeperSelectionsWithValidation> {
+): Promise<KeeperSelectionsWithValidation> {
   return request(`/api/teams/${teamId}/keeper-selections/${year}`, {
     method: "PUT",
     body: JSON.stringify({ selections }),
@@ -226,7 +244,7 @@ export async function submitKeeperList(
 
 // ========== Commissioner ==========
 
-export async function getSubmissions(year: number): Promise<import("@/types").SubmissionStatus[]> {
+export async function getSubmissions(year: number): Promise<SubmissionStatus[]> {
   return request(`/api/commissioner/submissions/${year}`);
 }
 
@@ -245,7 +263,7 @@ export async function approveSubmission(
 export async function getSubmissionDetail(
   year: number,
   teamId: number,
-): Promise<import("@/types").SubmissionDetail> {
+): Promise<SubmissionDetail> {
   return request(`/api/commissioner/submissions/${year}/${teamId}`);
 }
 
@@ -258,7 +276,7 @@ export async function unlockSubmission(
   });
 }
 
-export async function getUsers(): Promise<import("@/types").UserWithTeam[]> {
+export async function getUsers(): Promise<UserWithTeam[]> {
   return request("/api/commissioner/users");
 }
 
@@ -312,7 +330,7 @@ export async function clearKeeperSelections(
   });
 }
 
-export async function getAllTeamAdjustments(): Promise<import("@/types").TeamAdjustments[]> {
+export async function getAllTeamAdjustments(): Promise<TeamAdjustments[]> {
   return request("/api/commissioner/all-team-adjustments");
 }
 
@@ -498,7 +516,7 @@ export interface PlayerDatabaseParams {
 export async function getPlayerDatabase(
   year: number,
   params: PlayerDatabaseParams = {},
-): Promise<import("@/types").PlayerDatabaseResponse> {
+): Promise<PlayerDatabaseResponse> {
   const qs = new URLSearchParams();
   for (const [k, v] of Object.entries(params)) {
     if (v !== undefined && v !== "" && v !== null) qs.set(k, String(v));
@@ -530,7 +548,7 @@ export async function fetchYahooRankings(
 
 export async function getRankingFetchStatus(
   year: number,
-): Promise<import("@/types").RankingFetchStatus> {
+): Promise<RankingFetchStatus> {
   return request(`/api/commissioner/ranking-status/${year}`);
 }
 
@@ -538,7 +556,7 @@ export async function getRankingFetchStatus(
 
 export async function getProspects(
   year: number,
-): Promise<import("@/types").ProspectsResponse> {
+): Promise<ProspectsResponse> {
   return request(`/api/players/prospects/${year}`);
 }
 
@@ -556,7 +574,7 @@ export async function reloadProspects(): Promise<{
 export async function getPlayerStats(
   name: string,
   position: string = "",
-): Promise<import("@/types").PlayerStats> {
+): Promise<PlayerStats> {
   const params = new URLSearchParams({ name });
   if (position) params.set("position", position);
   return request(`/api/players/stats?${params.toString()}`);
@@ -568,7 +586,7 @@ export async function validateKeeperList(
   teamId: number,
   year: number,
   selections: Array<{ player_name: string; action: string; extension_years?: number }>,
-): Promise<import("@/types").ValidationResult> {
+): Promise<ValidationResult> {
   return request("/api/validate/keeper-list", {
     method: "POST",
     body: JSON.stringify({ team_id: teamId, year, selections }),

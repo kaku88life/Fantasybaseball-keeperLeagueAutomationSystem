@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
+import { useTableSort } from "@/lib/hooks";
 import useSWR from "swr";
 import {
   getDraftStats,
@@ -479,8 +480,7 @@ function DraftStatsTab({ data }: { data: DraftStatsResponse }) {
   const [selectedYear, setSelectedYear] = useState(
     years.length > 0 ? String(years[years.length - 1]) : "",
   );
-  const [sortKey, setSortKey] = useState<"top10_total" | "manager">("top10_total");
-  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+  const { sortKey, sortDir, handleSort, arrow } = useTableSort<"top10_total" | "manager">("top10_total");
   const [expandedTeam, setExpandedTeam] = useState<string | null>(null);
 
   let globalMax = 1;
@@ -503,14 +503,6 @@ function DraftStatsTab({ data }: { data: DraftStatsResponse }) {
       const bVal = b[1].yearly[selectedYear]?.top10_total ?? 0;
       return sortDir === "asc" ? aVal - bVal : bVal - aVal;
     });
-
-  const handleSort = (key: typeof sortKey) => {
-    if (key === sortKey) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
-    else { setSortKey(key); setSortDir("desc"); }
-  };
-
-  const arrow = (key: typeof sortKey) =>
-    sortKey === key ? (sortDir === "asc" ? " \u25B2" : " \u25BC") : " \u25BD";
 
   const summary = data.yearly_summary[selectedYear];
 
@@ -815,8 +807,7 @@ function FaabStatsTab({ data }: { data: FaabStatsResponse }) {
   const [selectedYear, setSelectedYear] = useState(
     years.length > 0 ? String(years[years.length - 1]) : "",
   );
-  const [sortKey, setSortKey] = useState<"total_faab_spent" | "remaining_pct" | "num_pickups" | "max_bid">("total_faab_spent");
-  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+  const { sortKey, sortDir, handleSort, arrow } = useTableSort<"total_faab_spent" | "remaining_pct" | "num_pickups" | "max_bid">("total_faab_spent");
 
   const sortedTeams = Object.entries(data.teams)
     .filter(([, td]) => td.yearly[selectedYear])
@@ -825,14 +816,6 @@ function FaabStatsTab({ data }: { data: FaabStatsResponse }) {
       const bVal = b[1].yearly[selectedYear]?.[sortKey] ?? 0;
       return sortDir === "asc" ? aVal - bVal : bVal - aVal;
     });
-
-  const handleSort = (key: typeof sortKey) => {
-    if (key === sortKey) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
-    else { setSortKey(key); setSortDir("desc"); }
-  };
-
-  const arrow = (key: typeof sortKey) =>
-    sortKey === key ? (sortDir === "asc" ? " \u25B2" : " \u25BC") : " \u25BD";
 
   const summary = data.yearly_summary[selectedYear];
 
