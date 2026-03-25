@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import useSWR from "swr";
 import {
@@ -52,6 +52,7 @@ function YearOverviewContent() {
   const params = useParams();
   const year = Number(params.year);
   const { user } = useAuth();
+  const router = useRouter();
 
   const [activeTab, setActiveTab] = useState<TabKey>("season-end");
 
@@ -81,7 +82,7 @@ function YearOverviewContent() {
         <p className="text-red-600">{error}</p>
         {years.length > 0 && (
           <div className="mt-4">
-            <p className="text-sm text-gray-500">Available years:</p>
+            <p className="text-sm text-gray-500">切換賽季：</p>
             <div className="mt-2 flex justify-center gap-2">
               {years.map((y) => (
                 <Link
@@ -89,7 +90,7 @@ function YearOverviewContent() {
                   href={`/${y}`}
                   className="rounded bg-gray-200 px-3 py-1 text-sm hover:bg-gray-300"
                 >
-                  {y}
+                  {y} 賽季
                 </Link>
               ))}
             </div>
@@ -106,7 +107,7 @@ function YearOverviewContent() {
   const tabs: { key: TabKey; label: string; sublabel: string }[] = [
     {
       key: "season-end",
-      label: `${year - 1} 賽季最終名單`,
+      label: `${year - 1} 賽季名單`,
       sublabel: "Season-End Roster",
     },
     {
@@ -135,19 +136,17 @@ function YearOverviewContent() {
                 Commissioner
               </Link>
             )}
-            {years.map((y) => (
-              <Link
-                key={y}
-                href={`/${y}`}
-                className={`rounded px-2.5 py-1 text-xs sm:px-3 sm:text-sm ${
-                  y === year
-                    ? "bg-indigo-600 text-white"
-                    : "bg-gray-200 hover:bg-gray-300"
-                }`}
+            {years.length > 0 && (
+              <select
+                value={year}
+                onChange={(e) => router.push(`/${e.target.value}`)}
+                className="rounded border border-gray-300 bg-white px-2.5 py-1 text-xs font-medium focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:px-3 sm:text-sm"
               >
-                {y}
-              </Link>
-            ))}
+                {years.map((y) => (
+                  <option key={y} value={y}>{y} 賽季</option>
+                ))}
+              </select>
+            )}
           </div>
         </div>
         <p className="mt-1 text-sm text-gray-500">

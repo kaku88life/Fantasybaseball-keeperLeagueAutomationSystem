@@ -53,7 +53,7 @@ export default function HomePage() {
   }
 
   // --- Unauthenticated: Promotional landing page ---
-  const apiBase = process.env.NEXT_PUBLIC_API_URL || "https://localhost:8002";
+  const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8002";
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8 sm:py-12">
