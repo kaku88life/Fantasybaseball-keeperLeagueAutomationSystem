@@ -1220,6 +1220,203 @@ def _monthly_war_report_job():
         print(f"[MonthlyReport] Error: {e}")
 
 
+def _prospect_ranking_update_job():
+    """Annual job (Aug 15): fetch MLB Pipeline prospect data and compare with league R-contract players."""
+    now = datetime.now()
+    # Only run on August 15
+    if now.month != 8 or now.day != 15:
+        return
+
+    year = now.year
+    print(f"[ProspectUpdate] Fetching MLB prospect rankings for {year}...")
+
+    try:
+        import httpx
+        import time
+        from src.notification.line_service import send_line_group_message
+        from src.notification.rookie_monitor import _load_r_contract_players
+
+        MLB_BASE = "https://statsapi.mlb.com/api/v1"
+
+        # --- 1. Fetch MLB Pipeline prospect data ---
+        # Try the draft/prospects endpoint for the current year
+        prospects: list[dict] = []
+        try:
+            resp = httpx.get(
+                f"{MLB_BASE}/draft/prospects/{year}",
+                timeout=30.0,
+            )
+            resp.raise_for_status()
+            data = resp.json()
+
+            # Parse prospects from response
+            prospect_list = data.get("prospects", [])
+            for p in prospect_list:
+                person = p.get("person", {})
+                if not person:
+                    continue
+                prospects.append({
+                    "name": person.get("fullName", ""),
+                    "mlb_id": person.get("id"),
+                    "position": person.get("primaryPosition", {}).get("abbreviation", ""),
+                    "team": p.get("team", {}).get("abbreviation",
+                            person.get("currentTeam", {}).get("abbreviation", "")),
+                    "rank": p.get("rank", p.get("pickNumber", 0)),
+                })
+        except Exception as e:
+            print(f"[ProspectUpdate] draft/prospects endpoint error: {e}")
+
+        # Also try the people/search approach for a broader list
+        if not prospects:
+            print("[ProspectUpdate] Trying alternative: top prospect search...")
+            try:
+                # MLB Stats API: search for prospect-tagged players
+                resp = httpx.get(
+                    f"{MLB_BASE}/people/search",
+                    params={
+                        "names": "",
+                        "sportId": 11,  # Minor leagues
+                        "season": year,
+                        "hydrate": "currentTeam",
+                    },
+                    timeout=30.0,
+                )
+                if resp.status_code == 200:
+                    people = resp.json().get("people", [])
+                    for person in people[:200]:
+                        prospects.append({
+                            "name": person.get("fullName", ""),
+                            "mlb_id": person.get("id"),
+                            "position": person.get("primaryPosition", {}).get("abbreviation", ""),
+                            "team": person.get("currentTeam", {}).get("abbreviation", ""),
+                            "rank": 0,
+                        })
+            except Exception as e:
+                print(f"[ProspectUpdate] Alternative search error: {e}")
+
+        print(f"[ProspectUpdate] Fetched {len(prospects)} prospects from MLB API")
+
+        # --- 2. Load league R-contract players ---
+        r_players = _load_r_contract_players(year)
+        if not r_players:
+            print("[ProspectUpdate] No R-contract players found in league")
+            # Still send a summary even if no R players
+            r_players = []
+
+        print(f"[ProspectUpdate] League has {len(r_players)} R-contract players")
+
+        # --- 3. Cross-reference: check which R players appear in prospect list ---
+        # Normalize names for matching (lowercase, strip accents, etc.)
+        prospect_name_map: dict[str, dict] = {}
+        for p in prospects:
+            name_key = p["name"].lower().strip()
+            prospect_name_map[name_key] = p
+            # Also try last name only for fuzzy matching
+            parts = name_key.split()
+            if len(parts) >= 2:
+                prospect_name_map[parts[-1]] = p
+
+        matched: list[dict] = []
+        unmatched: list[dict] = []
+
+        for rp in r_players:
+            rp_name = rp["name"].lower().strip()
+            # Clean parenthetical nicknames: "Roki Sasaki (佐々木朗希)" -> "roki sasaki"
+            clean_name = rp_name.split("(")[0].strip()
+
+            match = prospect_name_map.get(clean_name)
+            if not match:
+                # Try last name
+                parts = clean_name.split()
+                if len(parts) >= 2:
+                    match = prospect_name_map.get(parts[-1])
+
+            if not match:
+                # Try MLB Stats API person search for individual player
+                try:
+                    search_name = rp["name"].split("(")[0].strip()
+                    resp = httpx.get(
+                        f"{MLB_BASE}/people/search",
+                        params={"names": search_name, "hydrate": "currentTeam"},
+                        timeout=10.0,
+                    )
+                    if resp.status_code == 200:
+                        people = resp.json().get("people", [])
+                        if people:
+                            person = people[0]
+                            match = {
+                                "name": person.get("fullName", ""),
+                                "mlb_id": person.get("id"),
+                                "position": person.get("primaryPosition", {}).get("abbreviation", ""),
+                                "team": person.get("currentTeam", {}).get("abbreviation", ""),
+                                "rank": 0,
+                                "age": person.get("currentAge"),
+                                "debut": person.get("mlbDebutDate", ""),
+                            }
+                    time.sleep(0.5)
+                except Exception:
+                    pass
+
+            if match:
+                matched.append({
+                    **rp,
+                    "prospect_info": match,
+                })
+            else:
+                unmatched.append(rp)
+
+        # --- 4. Build and send LINE notification ---
+        lines = [
+            f"[5-Man Keeper League] {year} 新秀排名更新",
+            f"MLB Prospect Rankings Update",
+            f"",
+            f"資料來源: MLB Stats API ({now.strftime('%Y-%m-%d')})",
+            f"聯盟 R 約球員: {len(r_players)} 名",
+            f"",
+        ]
+
+        if matched:
+            lines.append("-- 聯盟 R 約球員 MLB 資訊 --")
+            for m in matched:
+                pi = m["prospect_info"]
+                rank_str = f"#{pi['rank']}" if pi.get("rank") else ""
+                age_str = f", {pi['age']}歲" if pi.get("age") else ""
+                debut_str = f" (已升大聯盟 {pi['debut']})" if pi.get("debut") else ""
+                lines.append(
+                    f"  {m['name']} ({pi.get('position', m['position'])}/{pi.get('team', m['mlb_team'])})"
+                    f" - {m['owner_manager']} 隊"
+                )
+                if rank_str or age_str or debut_str:
+                    lines.append(f"    {rank_str}{age_str}{debut_str}")
+            lines.append("")
+
+        if unmatched:
+            lines.append("-- 未在 MLB API 中找到 --")
+            for u in unmatched:
+                lines.append(
+                    f"  {u['name']} ({u['position']}/{u['mlb_team']}) - {u['owner_manager']} 隊"
+                )
+            lines.append("")
+
+        if not r_players:
+            lines.append("目前聯盟沒有 R 約球員。")
+            lines.append("")
+
+        lines.append(f"API 取得 {len(prospects)} 名 prospect 資料")
+
+        message = "\n".join(lines)
+
+        success, error = send_line_group_message(message)
+        if success:
+            print(f"[ProspectUpdate] LINE notification sent. "
+                  f"Matched: {len(matched)}, Unmatched: {len(unmatched)}")
+        else:
+            print(f"[ProspectUpdate] LINE send failed: {error}")
+
+    except Exception as e:
+        print(f"[ProspectUpdate] Error: {e}")
+
+
 def start_scheduler():
     """Start the background scheduler.
 
@@ -1233,6 +1430,7 @@ def start_scheduler():
     7. Daily roster ownership sync: fetch rosters, update owner_manager
     8. Weekly war report: every Monday 18:45 during MLB season
     9. Monthly war report: 1st of each month 19:00 during MLB season
+    10. Prospect ranking update: Aug 15 annually, fetch MLB API + compare R players
     """
     global _scheduler
 
@@ -1370,7 +1568,21 @@ def start_scheduler():
           f"(Opening Day: {SEASON_START_DATE})")
     print(f"[Scheduler] Daily roster ownership sync: {DAILY_SYNC_HOUR}:30 {REMINDER_CRON_TZ}")
     print("[Scheduler] Weekly war report: every Monday 18:45")
+    # Job 10: Annual prospect ranking update (Aug 15)
+    _scheduler.add_job(
+        _prospect_ranking_update_job,
+        CronTrigger(
+            month=8,
+            day=15,
+            hour=19,
+            timezone=REMINDER_CRON_TZ,
+        ),
+        id="prospect_update",
+        replace_existing=True,
+    )
+
     print("[Scheduler] Monthly war report: 1st of each month 19:00")
+    print("[Scheduler] Prospect ranking update: Aug 15 19:00")
 
 
 def stop_scheduler():
