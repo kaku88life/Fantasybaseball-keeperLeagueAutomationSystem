@@ -46,9 +46,12 @@ async def lifespan(app: FastAPI):
 
     # Check if today is Opening Day and send notification if not yet sent
     try:
-        from src.notification.scheduler import SEASON_START_DATE
+        from src.notification.scheduler import SEASON_START_DATE, REMINDER_CRON_TZ
         from datetime import datetime as _dt
-        today_str = _dt.now().strftime("%Y-%m-%d")
+        import zoneinfo
+        tz = zoneinfo.ZoneInfo(REMINDER_CRON_TZ)
+        today_str = _dt.now(tz).strftime("%Y-%m-%d")
+        print(f"[Startup] Opening Day check: today={today_str}, target={SEASON_START_DATE}", flush=True)
         if today_str == SEASON_START_DATE:
             from src.notification.scheduler import _season_start_notification_job
             print("[Startup] Today is Opening Day! Triggering season start notification...", flush=True)

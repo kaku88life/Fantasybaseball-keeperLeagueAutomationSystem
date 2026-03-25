@@ -456,7 +456,9 @@ def _daily_transaction_fetch_job():
 
 def _season_start_notification_job():
     """Daily job (at DAILY_SYNC_HOUR): send LINE notification on Opening Day."""
-    today_str = datetime.now().strftime("%Y-%m-%d")
+    import zoneinfo
+    tz = zoneinfo.ZoneInfo(REMINDER_CRON_TZ)
+    today_str = datetime.now(tz).strftime("%Y-%m-%d")
     if today_str != SEASON_START_DATE:
         return
 
