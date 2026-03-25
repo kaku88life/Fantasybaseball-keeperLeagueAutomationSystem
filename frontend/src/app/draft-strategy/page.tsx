@@ -87,6 +87,10 @@ export default function DraftStrategyPage() {
     value: string;
   } | null>(null);
 
+  // Column sort state (null = use custom drag order)
+  const [sortKey, setSortKey] = useState<string | null>(null);
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+
   // Set default year
   useEffect(() => {
     if (years.length > 0 && selectedYear === 0) {
@@ -290,6 +294,53 @@ export default function DraftStrategyPage() {
 
   const isFiltered = positionFilter !== "ALL" || committedSearch.trim() !== "";
 
+  // Lower-is-better stats default to ascending sort
+  const LOWER_IS_BETTER = new Set(["era", "whip"]);
+
+  function handleSort(key: string) {
+    if (sortKey === key) {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortKey(key);
+      setSortDir(LOWER_IS_BETTER.has(key) ? "asc" : "desc");
+    }
+  }
+
+  // Sorted view of filteredPlayers; when sortKey is null use drag custom order
+  const displayPlayers = useMemo(() => {
+    if (!sortKey) return filteredPlayers;
+    const dir = sortDir === "asc" ? 1 : -1;
+    return [...filteredPlayers].sort((a, b) => {
+      let aVal: string | number | null | undefined;
+      let bVal: string | number | null | undefined;
+      switch (sortKey) {
+        case "name":     aVal = a.name;       bVal = b.name;       break;
+        case "position": aVal = a.position;   bVal = b.position;   break;
+        case "mlb_team": aVal = a.mlb_team;   bVal = b.mlb_team;   break;
+        case "status":   aVal = a.status ?? ""; bVal = b.status ?? ""; break;
+        case "o_rank":   aVal = a.o_rank;     bVal = b.o_rank;     break;
+        default: {
+          const sa = a.stats as Record<string, number> | null | undefined;
+          const sb = b.stats as Record<string, number> | null | undefined;
+          aVal = sa?.[sortKey];
+          bVal = sb?.[sortKey];
+        }
+      }
+      if (typeof aVal === "string" && typeof bVal === "string") {
+        return dir * aVal.localeCompare(bVal);
+      }
+      if (aVal == null && bVal == null) return 0;
+      if (aVal == null) return 1;
+      if (bVal == null) return -1;
+      return dir * ((aVal as number) - (bVal as number));
+    });
+  }, [filteredPlayers, sortKey, sortDir]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  function SortIcon({ col }: { col: string }) {
+    if (sortKey !== col) return <span className="ml-0.5 text-[10px] text-gray-300">↕</span>;
+    return <span className="ml-0.5 text-[10px] text-indigo-500">{sortDir === "asc" ? "↑" : "↓"}</span>;
+  }
+
   return (
     <div className="mx-auto max-w-[1400px] px-2 py-4 sm:px-4 sm:py-6">
       <div className="mb-4 flex flex-col gap-3 sm:mb-6 sm:flex-row sm:items-center sm:justify-between">
@@ -411,10 +462,18 @@ export default function DraftStrategyPage() {
             篩選模式 - 排序操作只在篩選結果內移動
           </span>
         )}
-        {customOrder && loadCustomOrder(selectedYear) && (
+        {customOrder && loadCustomOrder(selectedYear) && !sortKey && (
           <span className="text-emerald-600">
             已載入自訂排名
           </span>
+        )}
+        {sortKey && (
+          <button
+            onClick={() => setSortKey(null)}
+            className="rounded bg-indigo-100 px-2 py-0.5 text-indigo-600 hover:bg-indigo-200"
+          >
+            排序中：{sortKey} {sortDir === "asc" ? "↑" : "↓"} ✕ 清除排序
+          </button>
         )}
       </div>
 
@@ -429,32 +488,65 @@ export default function DraftStrategyPage() {
             <thead className="bg-gray-50">
               <tr className="border-b text-left text-gray-500">
                 <th className="w-10 px-2 py-2 text-center">#</th>
-                <th className="hidden w-14 px-2 py-2 text-center sm:table-cell">Yahoo</th>
-                <th className="min-w-[120px] px-2 py-2 sm:min-w-[140px]">球員</th>
-                <th className="w-14 px-2 py-2 sm:w-16">位置</th>
-                <th className="hidden px-2 py-2 sm:table-cell sm:w-14">MLB</th>
-                <th className="hidden px-2 py-2 sm:table-cell sm:w-12">狀態</th>
+                <th
+                  className="hidden w-14 cursor-pointer select-none px-2 py-2 text-center hover:bg-gray-100 sm:table-cell"
+                  onClick={() => handleSort("o_rank")}
+                >
+                  Yahoo<SortIcon col="o_rank" />
+                </th>
+                <th
+                  className="min-w-[120px] cursor-pointer select-none px-2 py-2 hover:bg-gray-100 sm:min-w-[140px]"
+                  onClick={() => handleSort("name")}
+                >
+                  球員<SortIcon col="name" />
+                </th>
+                <th
+                  className="w-14 cursor-pointer select-none px-2 py-2 hover:bg-gray-100 sm:w-16"
+                  onClick={() => handleSort("position")}
+                >
+                  位置<SortIcon col="position" />
+                </th>
+                <th
+                  className="hidden cursor-pointer select-none px-2 py-2 hover:bg-gray-100 sm:table-cell sm:w-14"
+                  onClick={() => handleSort("mlb_team")}
+                >
+                  MLB<SortIcon col="mlb_team" />
+                </th>
+                <th
+                  className="hidden cursor-pointer select-none px-2 py-2 hover:bg-gray-100 sm:table-cell sm:w-12"
+                  onClick={() => handleSort("status")}
+                >
+                  狀態<SortIcon col="status" />
+                </th>
                 {showHitting &&
                   HITTING_COLS.map((c) => (
-                    <th key={c.key} className="hidden w-10 px-1 py-2 text-right md:table-cell">
-                      {c.label}
+                    <th
+                      key={c.key}
+                      className="hidden w-10 cursor-pointer select-none px-1 py-2 text-right hover:bg-gray-100 md:table-cell"
+                      onClick={() => handleSort(c.key)}
+                    >
+                      {c.label}<SortIcon col={c.key} />
                     </th>
                   ))}
                 {showPitching &&
                   PITCHING_COLS.map((c) => (
-                    <th key={c.key} className="hidden w-10 px-1 py-2 text-right md:table-cell">
-                      {c.label}
+                    <th
+                      key={c.key}
+                      className="hidden w-10 cursor-pointer select-none px-1 py-2 text-right hover:bg-gray-100 md:table-cell"
+                      onClick={() => handleSort(c.key)}
+                    >
+                      {c.label}<SortIcon col={c.key} />
                     </th>
                   ))}
                 <th className="w-20 px-2 py-2 text-center">操作</th>
               </tr>
             </thead>
             <tbody>
-              {filteredPlayers.map((p, idx) => {
+              {displayPlayers.map((p, idx) => {
                 const customRank = getCustomRank(p.yahoo_player_id);
                 const yahooRank = p.o_rank;
-                const isDragging = dragIdx === idx;
-                const isDragOver = dragOverIdx === idx;
+                const isDragging = !sortKey && dragIdx === idx;
+                const isDragOver = !sortKey && dragOverIdx === idx;
                 const stats = p.stats || {};
                 const isJumping =
                   jumpTarget?.playerKey === p.yahoo_player_id;
@@ -462,18 +554,18 @@ export default function DraftStrategyPage() {
                 return (
                   <tr
                     key={p.yahoo_player_id || `${p.name}-${idx}`}
-                    draggable
-                    onDragStart={() => handleDragStart(idx)}
-                    onDragOver={(e) => handleDragOver(e, idx)}
-                    onDrop={() => handleDrop(idx)}
-                    onDragEnd={handleDragEnd}
+                    draggable={!sortKey}
+                    onDragStart={() => !sortKey && handleDragStart(idx)}
+                    onDragOver={(e) => !sortKey && handleDragOver(e, idx)}
+                    onDrop={() => !sortKey && handleDrop(idx)}
+                    onDragEnd={() => !sortKey && handleDragEnd()}
                     className={`border-b transition-colors ${
                       isDragging
                         ? "opacity-40"
                         : isDragOver
-                          ? "bg-indigo-50 border-indigo-300"
+                          ? "border-indigo-300 bg-indigo-50"
                           : "hover:bg-gray-50"
-                    } cursor-grab active:cursor-grabbing`}
+                    } ${sortKey ? "cursor-default" : "cursor-grab active:cursor-grabbing"}`}
                   >
                     {/* Custom rank */}
                     <td className="px-2 py-1.5 text-center font-mono font-bold text-gray-700">
@@ -581,16 +673,16 @@ export default function DraftStrategyPage() {
                         </td>
                       ))}
 
-                    {/* Actions: up/down arrows (touch-friendly) */}
+                    {/* Actions: up/down arrows (touch-friendly) — disabled when sort is active */}
                     <td className="px-1 py-1 text-center sm:px-2 sm:py-1.5">
                       <div className="inline-flex gap-0.5">
                         <button
                           onClick={() => {
-                            if (idx > 0) movePlayer(idx, idx - 1);
+                            if (!sortKey && idx > 0) movePlayer(idx, idx - 1);
                           }}
-                          disabled={idx === 0}
+                          disabled={sortKey !== null || idx === 0}
                           className="min-h-[44px] min-w-[44px] rounded p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-700 disabled:opacity-30 sm:min-h-0 sm:min-w-0 sm:p-0.5"
-                          title="上移"
+                          title={sortKey ? "排序中，請清除排序後再調整順位" : "上移"}
                         >
                           <svg
                             className="mx-auto h-5 w-5 sm:h-4 sm:w-4"
@@ -608,12 +700,12 @@ export default function DraftStrategyPage() {
                         </button>
                         <button
                           onClick={() => {
-                            if (idx < filteredPlayers.length - 1)
+                            if (!sortKey && idx < displayPlayers.length - 1)
                               movePlayer(idx, idx + 1);
                           }}
-                          disabled={idx === filteredPlayers.length - 1}
+                          disabled={sortKey !== null || idx === displayPlayers.length - 1}
                           className="min-h-[44px] min-w-[44px] rounded p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-700 disabled:opacity-30 sm:min-h-0 sm:min-w-0 sm:p-0.5"
-                          title="下移"
+                          title={sortKey ? "排序中，請清除排序後再調整順位" : "下移"}
                         >
                           <svg
                             className="mx-auto h-5 w-5 sm:h-4 sm:w-4"

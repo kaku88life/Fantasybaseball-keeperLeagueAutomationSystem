@@ -60,8 +60,10 @@ async def get_league_settings():
 
 @router.get("/years")
 async def list_years() -> list[int]:
-    """Return all available snapshot years."""
-    return get_snapshot_years()
+    """Return snapshot years that have a configured Yahoo game key (excludes future/unconfigured years)."""
+    from config.settings import YAHOO_GAME_KEYS
+    configured = set(YAHOO_GAME_KEYS.keys())
+    return sorted([y for y in get_snapshot_years() if y in configured])
 
 
 @router.get("/{year}", response_model=LeagueSnapshotSchema)
