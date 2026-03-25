@@ -65,28 +65,8 @@ interface SortState {
   dir: "asc" | "desc";
 }
 
-// Stat columns config
-const HITTING_COLS: Array<{ key: string; label: string }> = [
-  { key: "ab", label: "AB" },
-  { key: "r", label: "R" },
-  { key: "h", label: "H" },
-  { key: "hr", label: "HR" },
-  { key: "rbi", label: "RBI" },
-  { key: "sb", label: "SB" },
-  { key: "avg", label: "AVG" },
-  { key: "ops", label: "OPS" },
-];
-
-const PITCHING_COLS: Array<{ key: string; label: string }> = [
-  { key: "ip", label: "IP" },
-  { key: "w", label: "W" },
-  { key: "sv", label: "SV" },
-  { key: "hld", label: "HLD" },
-  { key: "k", label: "K" },
-  { key: "era", label: "ERA" },
-  { key: "whip", label: "WHIP" },
-  { key: "qs", label: "QS" },
-];
+// Stat columns config (shared)
+import { HITTING_COLS, PITCHING_COLS, formatStat } from "@/lib/stats";
 
 // Prospect ownership filter options
 const PROSPECT_OWNER_OPTIONS = [
@@ -95,13 +75,7 @@ const PROSPECT_OWNER_OPTIONS = [
   { value: "fa", label: "FA" },
 ] as const;
 
-// Pipeline uses LHP/RHP for prospects; Yahoo uses SP/RP/P
-const ALL_PITCHER_POSITIONS = ["SP", "RP", "P", "LHP", "RHP"];
-
-function isPitcher(position: string): boolean {
-  const pos = position.split(",").map((s) => s.trim().toUpperCase());
-  return pos.some((p) => ALL_PITCHER_POSITIONS.includes(p));
-}
+import { isPitcher } from "@/lib/position";
 
 export default function PlayersPage() {
   const { user } = useAuth();
@@ -279,14 +253,6 @@ export default function PlayersPage() {
     </th>
   );
 
-  // Format stat value for display
-  const formatStat = (val: number | undefined, key: string): string => {
-    if (val === undefined || val === null) return "-";
-    if (key === "avg" || key === "ops") return val.toFixed(3);
-    if (key === "era") return val.toFixed(2);
-    if (key === "whip") return val.toFixed(2);
-    return String(val);
-  };
 
   // ============================================================
   // Prospects tab state

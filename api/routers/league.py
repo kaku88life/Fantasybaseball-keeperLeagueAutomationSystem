@@ -7,93 +7,14 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from api.dependencies import get_current_user
 
-from api.database import get_all_submissions, get_all_teams, get_player_rankings, get_snapshot, get_snapshot_years, get_team_buyouts
+from api.database import get_all_submissions, get_all_teams, get_snapshot, get_snapshot_years
+from api.helpers import enrich_league_positions, enrich_teams_from_db
 from api.schemas import LeagueSettingsSchema, LeagueSnapshotSchema
 from api.serializers import dict_to_league_state, serialize_league_state, serialize_team
 from src.contract.engine import calculate_buyout
-from src.contract.models import BuyoutRecord, ContractType
+from src.contract.models import ContractType
 
 router = APIRouter()
-
-
-def _build_position_lookup(year: int) -> dict[str, dict]:
-    """Build a position/mlb_team lookup from player_rankings (2026 Yahoo data)."""
-    rankings = get_player_rankings(year)
-    lookup: dict[str, dict] = {}
-    for r in rankings:
-        pk = r.get("player_key", "")
-        entry = {"position": r.get("position", ""), "mlb_team": r.get("mlb_team", "")}
-        if pk:
-            lookup[pk] = entry
-            if ".p." in pk:
-                pid = pk.split(".p.")[-1]
-                lookup[f"pid:{pid}"] = entry
-        name = r.get("player_name", "")
-        if name:
-            lookup[f"name:{name.lower()}"] = entry
-    return lookup
-
-
-def _enrich_league_positions(ls, year: int):
-    """Override all player positions in a LeagueState with 2026 Yahoo data."""
-    lookup = _build_position_lookup(year)
-    for team in ls.teams:
-        for p in team.players:
-            entry = None
-            if p.yahoo_player_id:
-                entry = lookup.get(p.yahoo_player_id)
-                if not entry and ".p." in p.yahoo_player_id:
-                    pid = p.yahoo_player_id.split(".p.")[-1]
-                    entry = lookup.get(f"pid:{pid}")
-            if not entry:
-                entry = lookup.get(f"name:{p.name.lower()}")
-            if entry:
-                if entry["position"]:
-                    p.position = entry["position"]
-                if entry["mlb_team"]:
-                    p.mlb_team = entry["mlb_team"]
-
-
-def _enrich_teams_from_db(ls, db_teams: list[dict], year: int):
-    """Load DB-stored buyouts, trade_compensation, and faab_adjustment into team models.
-
-    The league snapshot does NOT contain buyout records (they live in the
-    ``buyouts`` DB table) or commissioner adjustments (trade_compensation,
-    faab_adjustment stored on the ``teams`` table).  This helper mirrors the
-    logic in ``teams.py::_get_team_from_snapshot()`` so that league-level
-    endpoints also reflect the correct financial numbers.
-    """
-    # Map manager_name -> db_team row for quick lookup
-    db_map: dict[str, dict] = {t["manager_name"]: t for t in db_teams}
-    # Map manager_name -> db team_id
-    id_map: dict[str, int] = {t["manager_name"]: t["id"] for t in db_teams}
-
-    for t in ls.teams:
-        db_team = db_map.get(t.manager_name)
-        if not db_team:
-            continue
-
-        # Apply commissioner adjustments (same as _get_team_from_snapshot)
-        db_trade_comp = db_team.get("trade_compensation", 0) or 0
-        db_faab_adj = db_team.get("faab_adjustment", 0) or 0
-        if db_trade_comp != 0:
-            t.trade_compensation = db_trade_comp
-        if db_faab_adj != 0:
-            t.faab_budget = t.faab_budget + db_faab_adj
-
-        # Load buyout records from DB
-        team_id = id_map[t.manager_name]
-        db_buyouts = get_team_buyouts(team_id, year)
-        for bo in db_buyouts:
-            t.buyout_records.append(BuyoutRecord(
-                player_name=bo["player_name"],
-                original_contract=bo["original_contract"],
-                buyout_salary_cost=bo["buyout_salary"],
-                buyout_faab_cost=bo["buyout_faab"],
-                remaining_years=bo["remaining_years"],
-                use_faab=bo["use_faab"],
-                note=bo.get("notes", ""),
-            ))
 
 
 @router.get("/settings", response_model=LeagueSettingsSchema)
@@ -151,7 +72,7 @@ async def get_league_year(year: int, _user: dict = Depends(get_current_user)):
         raise HTTPException(status_code=404, detail=f"No data for year {year}")
 
     ls = dict_to_league_state(snap["data"])
-    _enrich_league_positions(ls, year)
+    enrich_league_positions(ls, year)
     return serialize_league_state(ls)
 
 
@@ -165,7 +86,7 @@ async def get_league_summary(year: int, _user: dict = Depends(get_current_user))
         raise HTTPException(status_code=404, detail=f"No data for year {year}")
 
     ls = dict_to_league_state(snap["data"])
-    _enrich_league_positions(ls, year)
+    enrich_league_positions(ls, year)
 
     # Get line names and team IDs
     line_names = get_team_line_names()
@@ -173,7 +94,7 @@ async def get_league_summary(year: int, _user: dict = Depends(get_current_user))
     manager_to_team_id = {t["manager_name"]: t["id"] for t in db_teams}
 
     # Load DB-stored buyouts and commissioner adjustments into team models
-    _enrich_teams_from_db(ls, db_teams, year)
+    enrich_teams_from_db(ls, db_teams, year)
 
     summary = []
     for t in ls.teams:
@@ -206,13 +127,13 @@ async def get_keeper_results(year: int, _user: dict = Depends(get_current_user))
         raise HTTPException(status_code=404, detail=f"No data for year {year}")
 
     ls = dict_to_league_state(snap["data"])
-    _enrich_league_positions(ls, year)
+    enrich_league_positions(ls, year)
 
     # Get all DB teams for ID mapping
     db_teams = get_all_teams()
 
     # Load DB-stored buyouts and commissioner adjustments into team models
-    _enrich_teams_from_db(ls, db_teams, year)
+    enrich_teams_from_db(ls, db_teams, year)
 
     # Build a map: manager_name -> team model (AFTER enrichment so buyouts are loaded)
     team_map = {t.manager_name: t for t in ls.teams}
@@ -295,7 +216,7 @@ async def get_keeper_results(year: int, _user: dict = Depends(get_current_user))
                 keeper_cost += salary
 
         # Get team financial info
-        # trade_compensation already applied by _enrich_teams_from_db
+        # trade_compensation already applied by enrich_teams_from_db
         salary_cap = 0
         ranking_bonus = 0
         trade_comp = db_team.get("trade_compensation", 0) or 0
@@ -305,7 +226,7 @@ async def get_keeper_results(year: int, _user: dict = Depends(get_current_user))
         if team_model:
             salary_cap = team_model.salary_cap
             ranking_bonus = team_model.ranking_bonus
-            # Now correctly reflects DB buyout records (loaded by _enrich_teams_from_db)
+            # Now correctly reflects DB buyout records (loaded by enrich_teams_from_db)
             carryover_buyout_salary = team_model.total_buyout_cost
             carryover_buyout_faab = team_model.total_buyout_faab_cost
 

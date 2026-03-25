@@ -630,20 +630,8 @@ async def disconnect_yahoo_token(
 
 # ========== Player Rankings (Yahoo API Fetch) ==========
 
-# Yahoo game_key per year (MLB Fantasy)
-_YAHOO_GAME_KEYS: dict[int, str] = {
-    2024: "431",
-    2025: "458",
-    2026: "469",
-    2027: "480",  # placeholder, update when known
-}
-
-# Yahoo league_num per year (changes each season for the same keeper league)
-# The full league key is: {game_key}.l.{league_num}
-_YAHOO_LEAGUE_NUMS: dict[int, str] = {
-    2025: "40288",
-    2026: "80910",
-}
+# Import centralized Yahoo keys from config (single source of truth)
+from config.settings import YAHOO_GAME_KEYS as _YAHOO_GAME_KEYS, YAHOO_LEAGUE_NUMS as _YAHOO_LEAGUE_NUMS
 
 # Yahoo stat_id -> our column name mapping
 # Verified from league settings API: /league/{key}/settings -> stat_categories

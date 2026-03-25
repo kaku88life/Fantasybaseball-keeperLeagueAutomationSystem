@@ -26,6 +26,8 @@ import type {
 } from "@/lib/api";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import AuthGate from "@/components/AuthGate";
+import { POS_COLORS, categorizePosition } from "@/lib/position";
+import { CONTRACT_BADGE_COLORS, contractBadgeColor } from "@/lib/contract-colors";
 
 const TABS = [
   { id: "summary", label: "總覽" },
@@ -38,36 +40,8 @@ const TABS = [
 ] as const;
 type TabId = (typeof TABS)[number]["id"];
 
-// Position category colors
-const POS_COLORS: Record<string, string> = {
-  SP: "bg-blue-100 text-blue-800",
-  RP: "bg-cyan-100 text-cyan-800",
-  C: "bg-purple-100 text-purple-800",
-  "1B": "bg-amber-100 text-amber-800",
-  "2B": "bg-orange-100 text-orange-800",
-  "3B": "bg-yellow-100 text-yellow-800",
-  SS: "bg-rose-100 text-rose-800",
-  LF: "bg-green-100 text-green-800",
-  CF: "bg-emerald-100 text-emerald-800",
-  RF: "bg-teal-100 text-teal-800",
-  OF: "bg-green-100 text-green-800",
-  IF: "bg-amber-100 text-amber-800",
-  DH: "bg-gray-100 text-gray-800",
-  Unknown: "bg-gray-50 text-gray-500",
-};
-
-// Contract type badge colors
-const CT_COLORS: Record<string, string> = {
-  A: "bg-emerald-100 text-emerald-700",
-  B: "bg-blue-100 text-blue-700",
-  O: "bg-gray-100 text-gray-600",
-  R: "bg-purple-100 text-purple-700",
-  FA: "bg-gray-50 text-gray-500",
-};
-function contractBadgeColor(ct: string): string {
-  if (ct.startsWith("N")) return "bg-amber-100 text-amber-700";
-  return CT_COLORS[ct] ?? "bg-gray-100 text-gray-600";
-}
+// POS_COLORS imported from @/lib/position
+// contractBadgeColor imported from @/lib/contract-colors
 
 // ========== Scrollable Tab Bar with hover arrows ==========
 
@@ -497,15 +471,8 @@ function costBarColor(cost: number): string {
   return "bg-indigo-200";
 }
 
-function _categorize(position: string): string {
-  if (!position) return "Unknown";
-  const primary = position.split(",")[0].trim();
-  if (["C", "1B", "2B", "3B", "SS", "LF", "CF", "RF", "SP", "RP"].includes(primary)) return primary;
-  if (primary === "OF") return "OF";
-  if (primary === "P") return "RP";
-  if (["DH", "Util"].includes(primary)) return "DH";
-  return primary || "Unknown";
-}
+// _categorize replaced by shared categorizePosition from @/lib/position
+const _categorize = categorizePosition;
 
 function DraftStatsTab({ data }: { data: DraftStatsResponse }) {
   const years = data.years;
@@ -1372,11 +1339,3 @@ function MiniCard({ label, value }: { label: string; value: string }) {
   );
 }
 
-function Row({ label, value, bold }: { label: string; value: string; bold?: boolean }) {
-  return (
-    <div className="flex justify-between">
-      <span className="text-gray-400">{label}</span>
-      <span className={bold ? "font-bold text-indigo-700" : "font-medium"}>{value}</span>
-    </div>
-  );
-}

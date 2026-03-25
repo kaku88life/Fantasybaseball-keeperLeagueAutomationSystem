@@ -14,6 +14,7 @@ from fastapi import APIRouter, HTTPException
 from fastapi.responses import PlainTextResponse
 
 from api.database import get_all_teams, get_keeper_selections, get_player_rankings, get_snapshot
+from api.helpers import apply_db_adjustments
 from api.serializers import dict_to_league_state, serialize_player
 
 router = APIRouter()
@@ -195,31 +196,7 @@ async def get_league_context(year: int):
 
     for t in sorted(ls.teams, key=lambda x: x.manager_name):
         db_team = db_team_map.get(t.manager_name, {})
-
-        # Apply DB adjustments
-        db_trade_comp = db_team.get("trade_compensation", 0) or 0
-        db_faab_adj = db_team.get("faab_adjustment", 0) or 0
-        if db_trade_comp != 0:
-            t.trade_compensation = db_trade_comp
-        if db_faab_adj != 0:
-            t.faab_budget = t.faab_budget + db_faab_adj
-
-        # Load buyouts
-        from api.database import get_team_buyouts
-        team_id = db_team.get("id")
-        if team_id:
-            from src.contract.models import BuyoutRecord
-            db_buyouts = get_team_buyouts(team_id, year)
-            for bo in db_buyouts:
-                t.buyout_records.append(BuyoutRecord(
-                    player_name=bo["player_name"],
-                    original_contract=bo["original_contract"],
-                    buyout_salary_cost=bo["buyout_salary"],
-                    buyout_faab_cost=bo["buyout_faab"],
-                    remaining_years=bo["remaining_years"],
-                    use_faab=bo["use_faab"],
-                    note=bo.get("notes", ""),
-                ))
+        apply_db_adjustments(t, db_team, year)
 
         sections.append(_build_team_text(t, db_team))
 
@@ -326,26 +303,7 @@ async def get_team_context(year: int, team_id: int):
         raise HTTPException(status_code=404, detail="Team not in snapshot")
 
     # Apply adjustments
-    db_trade_comp = db_team.get("trade_compensation", 0) or 0
-    db_faab_adj = db_team.get("faab_adjustment", 0) or 0
-    if db_trade_comp != 0:
-        target_team.trade_compensation = db_trade_comp
-    if db_faab_adj != 0:
-        target_team.faab_budget = target_team.faab_budget + db_faab_adj
-
-    from api.database import get_team_buyouts
-    from src.contract.models import BuyoutRecord
-    db_buyouts = get_team_buyouts(team_id, year)
-    for bo in db_buyouts:
-        target_team.buyout_records.append(BuyoutRecord(
-            player_name=bo["player_name"],
-            original_contract=bo["original_contract"],
-            buyout_salary_cost=bo["buyout_salary"],
-            buyout_faab_cost=bo["buyout_faab"],
-            remaining_years=bo["remaining_years"],
-            use_faab=bo["use_faab"],
-            note=bo.get("notes", ""),
-        ))
+    apply_db_adjustments(target_team, db_team, year)
 
     sections = [
         f"# Fantasy Baseball Keeper League - {year} Season",

@@ -6,6 +6,7 @@ import { getPlayerDatabase, getYears } from "@/lib/api";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import StatusBadge from "@/components/StatusBadge";
 import PlayerStatsModal from "@/components/PlayerStatsModal";
+import { isBatter, isPitcher } from "@/lib/position";
 import type { PlayerDatabaseEntry } from "@/types";
 
 // ── Position filter groups ──
@@ -22,22 +23,6 @@ const POSITION_GROUPS = [
   "SP",
   "RP",
 ] as const;
-
-const PITCHER_POS = new Set(["SP", "RP", "P"]);
-
-function isBatter(pos: string) {
-  if (!pos) return false;
-  return !pos
-    .split(",")
-    .every((s) => PITCHER_POS.has(s.trim().toUpperCase()));
-}
-
-function isPitcher(pos: string) {
-  if (!pos) return false;
-  return pos
-    .split(",")
-    .some((s) => PITCHER_POS.has(s.trim().toUpperCase()));
-}
 
 // ── localStorage helpers ──
 const STORAGE_KEY = (year: number) => `draft-board-${year}`;
@@ -71,37 +56,8 @@ function saveCustomOrder(year: number, order: string[]) {
   localStorage.setItem(STORAGE_KEY(year), JSON.stringify(data));
 }
 
-// ── Stat column definitions ──
-const HITTING_COLS = [
-  { key: "ab", label: "AB" },
-  { key: "r", label: "R" },
-  { key: "h", label: "H" },
-  { key: "hr", label: "HR" },
-  { key: "rbi", label: "RBI" },
-  { key: "sb", label: "SB" },
-  { key: "avg", label: "AVG" },
-  { key: "ops", label: "OPS" },
-];
-
-const PITCHING_COLS = [
-  { key: "ip", label: "IP" },
-  { key: "w", label: "W" },
-  { key: "sv", label: "SV" },
-  { key: "hld", label: "HLD" },
-  { key: "k", label: "K" },
-  { key: "era", label: "ERA" },
-  { key: "whip", label: "WHIP" },
-  { key: "qs", label: "QS" },
-];
-
-function formatStat(val: number | undefined | null, key: string) {
-  if (val == null) return "-";
-  if (key === "avg" || key === "ops" || key === "era" || key === "whip") {
-    return val.toFixed(3).replace(/^0/, "");
-  }
-  if (key === "ip") return val.toFixed(1);
-  return String(val);
-}
+// ── Stat column definitions (shared) ──
+import { HITTING_COLS, PITCHING_COLS, formatStat } from "@/lib/stats";
 
 // ── Main page component ──
 export default function DraftStrategyPage() {

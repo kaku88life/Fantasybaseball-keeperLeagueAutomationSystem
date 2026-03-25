@@ -8,18 +8,21 @@ from fastapi import APIRouter, Depends, HTTPException
 from api.database import (
     get_all_teams,
     get_keeper_selections,
-    get_player_rankings,
     get_snapshot,
     get_submission,
     upsert_keeper_selection,
     upsert_submission,
 )
 from api.dependencies import get_current_user
+from api.helpers import (
+    apply_db_adjustments,
+    build_keeper_options,
+    enrich_team_positions,
+    to_selection_responses,
+)
 from api.schemas import (
-    KeeperSelectionResponse,
     KeeperSelectionsUpdate,
     KeeperSelectionsWithValidation,
-    PlayerKeeperOptionsSchema,
     TeamSchema,
     ValidationResult,
 )
@@ -32,48 +35,9 @@ from api.serializers import (
 router = APIRouter()
 
 
-def _build_position_lookup(year: int) -> dict[str, dict]:
-    """Build a position/mlb_team lookup from player_rankings (2026 Yahoo data)."""
-    rankings = get_player_rankings(year)
-    lookup: dict[str, dict] = {}
-    for r in rankings:
-        pk = r.get("player_key", "")
-        entry = {"position": r.get("position", ""), "mlb_team": r.get("mlb_team", "")}
-        if pk:
-            lookup[pk] = entry
-            # Also index by player number for cross-season matching
-            if ".p." in pk:
-                pid = pk.split(".p.")[-1]
-                lookup[f"pid:{pid}"] = entry
-        # Also index by name (lowercase) as fallback
-        name = r.get("player_name", "")
-        if name:
-            lookup[f"name:{name.lower()}"] = entry
-    return lookup
-
-
-def _enrich_team_positions(team, year: int):
-    """Override player positions with 2026 Yahoo ranking data."""
-    lookup = _build_position_lookup(year)
-    for p in team.players:
-        entry = None
-        if p.yahoo_player_id:
-            entry = lookup.get(p.yahoo_player_id)
-            if not entry and ".p." in p.yahoo_player_id:
-                pid = p.yahoo_player_id.split(".p.")[-1]
-                entry = lookup.get(f"pid:{pid}")
-        if not entry:
-            entry = lookup.get(f"name:{p.name.lower()}")
-        if entry:
-            if entry["position"]:
-                p.position = entry["position"]
-            if entry["mlb_team"]:
-                p.mlb_team = entry["mlb_team"]
-
-
 def _get_team_from_snapshot(year: int, team_id: int):
     """Get a Team model object from a league snapshot by DB team_id."""
-    from api.database import get_team_by_id, get_team_buyouts
+    from api.database import get_team_by_id
 
     db_team = get_team_by_id(team_id)
     if not db_team:
@@ -89,31 +53,8 @@ def _get_team_from_snapshot(year: int, team_id: int):
     manager_name = db_team["manager_name"]
     for t in ls.teams:
         if t.manager_name == manager_name:
-            # Apply DB-stored commissioner adjustments
-            db_trade_comp = db_team.get("trade_compensation", 0) or 0
-            db_faab_adj = db_team.get("faab_adjustment", 0) or 0
-            if db_trade_comp != 0:
-                t.trade_compensation = db_trade_comp
-            if db_faab_adj != 0:
-                t.faab_budget = t.faab_budget + db_faab_adj
-
-            # Load buyout records from DB and merge into team model
-            from src.contract.models import BuyoutRecord
-            db_buyouts = get_team_buyouts(team_id, year)
-            for bo in db_buyouts:
-                t.buyout_records.append(BuyoutRecord(
-                    player_name=bo["player_name"],
-                    original_contract=bo["original_contract"],
-                    buyout_salary_cost=bo["buyout_salary"],
-                    buyout_faab_cost=bo["buyout_faab"],
-                    remaining_years=bo["remaining_years"],
-                    use_faab=bo["use_faab"],
-                    note=bo.get("notes", ""),
-                ))
-
-            # Enrich positions with 2026 Yahoo ranking data
-            _enrich_team_positions(t, year)
-
+            apply_db_adjustments(t, db_team, year)
+            enrich_team_positions(t, year)
             return t, db_team
 
     raise HTTPException(
@@ -153,39 +94,18 @@ async def get_keeper_page_data(
     user: dict = Depends(get_current_user),
 ):
     """Combined endpoint: roster + keeper options + selections in one call."""
-    from src.contract.engine import generate_keeper_options
-
     team, db_team = _get_team_from_snapshot(year, team_id)
 
     # 1. Roster
     roster = serialize_team(team, db_team_id=db_team["id"])
 
     # 2. Keeper options
-    options_result = []
-    for player in team.players:
-        options = generate_keeper_options(player)
-        option_schemas = []
-        for opt in options:
-            keep_action = _infer_keep_action(opt, player)
-            ext_years = 0
-            if "extend" in keep_action:
-                ext_years = _extract_extension_years(opt)
-                keep_action = "extend"
-            option_schemas.append({
-                "player_name": opt.player_name,
-                "current_contract": opt.current_contract.display,
-                "next_contract": opt.next_contract.display if opt.next_contract else None,
-                "action": opt.action,
-                "salary_change": opt.salary_change,
-                "is_mandatory": opt.is_mandatory,
-                "keep_action": keep_action,
-                "extension_years": ext_years,
-            })
-        options_result.append({
-            "player": serialize_player(player).model_dump(),
-            "options": option_schemas,
-            "is_mandatory_keeper": player.is_mandatory_keeper,
-        })
+    options_result = build_keeper_options(
+        team,
+        infer_keep_action=_infer_keep_action,
+        extract_extension_years=_extract_extension_years,
+        serialize_player=serialize_player,
+    )
 
     # 3. Selections + validation
     submission = get_submission(year, team_id)
@@ -194,16 +114,7 @@ async def get_keeper_page_data(
         _check_team_access(user, team_id)
 
     selections_db = get_keeper_selections(year, team_id)
-    selections = [
-        KeeperSelectionResponse(
-            player_name=s["player_name"],
-            current_contract=s["current_contract"],
-            action=s["action"],
-            extension_years=s["extension_years"],
-            next_contract=s["next_contract"],
-        )
-        for s in selections_db
-    ]
+    selections = to_selection_responses(selections_db)
     validation = _validate_selections(year, team_id, selections_db)
 
     return {
@@ -220,41 +131,14 @@ async def get_keeper_page_data(
 @router.get("/{team_id}/keeper-options/{year}")
 async def get_keeper_options(team_id: int, year: int, _user: dict = Depends(get_current_user)):
     """Get all keeper options for each player on a team."""
-    from src.contract.engine import ContractTransition, generate_keeper_options
-
     team, db_team = _get_team_from_snapshot(year, team_id)
 
-    result = []
-    for player in team.players:
-        options = generate_keeper_options(player)
-        option_schemas = []
-        for opt in options:
-            # Determine keep_action and extension_years from the transition
-            keep_action = _infer_keep_action(opt, player)
-            ext_years = 0
-            if "extend" in keep_action:
-                # Extract extension years from action string
-                ext_years = _extract_extension_years(opt)
-                keep_action = "extend"
-
-            option_schemas.append({
-                "player_name": opt.player_name,
-                "current_contract": opt.current_contract.display,
-                "next_contract": opt.next_contract.display if opt.next_contract else None,
-                "action": opt.action,
-                "salary_change": opt.salary_change,
-                "is_mandatory": opt.is_mandatory,
-                "keep_action": keep_action,
-                "extension_years": ext_years,
-            })
-
-        result.append({
-            "player": serialize_player(player).model_dump(),
-            "options": option_schemas,
-            "is_mandatory_keeper": player.is_mandatory_keeper,
-        })
-
-    return result
+    return build_keeper_options(
+        team,
+        infer_keep_action=_infer_keep_action,
+        extract_extension_years=_extract_extension_years,
+        serialize_player=serialize_player,
+    )
 
 
 def _infer_keep_action(transition, player) -> str:
@@ -310,18 +194,7 @@ async def get_team_keeper_selections(
         _check_team_access(user, team_id)
 
     selections_db = get_keeper_selections(year, team_id)
-    selections = [
-        KeeperSelectionResponse(
-            player_name=s["player_name"],
-            current_contract=s["current_contract"],
-            action=s["action"],
-            extension_years=s["extension_years"],
-            next_contract=s["next_contract"],
-        )
-        for s in selections_db
-    ]
-
-    # Run validation
+    selections = to_selection_responses(selections_db)
     validation = _validate_selections(year, team_id, selections_db)
 
     return KeeperSelectionsWithValidation(
@@ -376,17 +249,7 @@ async def update_keeper_selections(
 
     # Return updated state
     selections_db = get_keeper_selections(year, team_id)
-    selections = [
-        KeeperSelectionResponse(
-            player_name=s["player_name"],
-            current_contract=s["current_contract"],
-            action=s["action"],
-            extension_years=s["extension_years"],
-            next_contract=s["next_contract"],
-        )
-        for s in selections_db
-    ]
-
+    selections = to_selection_responses(selections_db)
     validation = _validate_selections(year, team_id, selections_db)
 
     return KeeperSelectionsWithValidation(

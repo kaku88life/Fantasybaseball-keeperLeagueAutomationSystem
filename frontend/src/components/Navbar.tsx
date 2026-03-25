@@ -5,6 +5,18 @@ import { useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/components/Toast";
 
+// Centralized nav links -- add/remove here to update both desktop & mobile
+const PUBLIC_LINKS = [
+  { href: "/rules", label: "規則 Rules" },
+  { href: "/players", label: "球員 Players" },
+  { href: "/draft-strategy", label: "選秀 Draft" },
+];
+
+const AUTH_LINKS = [
+  { href: `/${new Date().getFullYear()}`, label: "聯盟 League" },
+  { href: "/analytics", label: "統計 Stats" },
+];
+
 export default function Navbar() {
   const { user, logout } = useAuth();
   const { showToast } = useToast();
@@ -25,40 +37,18 @@ export default function Navbar() {
               5-Man Keepers
             </Link>
             <div className="hidden sm:flex items-center gap-4">
-              {/* Public links - always visible */}
-              <Link
-                href="/rules"
-                className="text-sm text-gray-300 hover:text-white"
-              >
-                規則 Rules
-              </Link>
-              <Link
-                href="/players"
-                className="text-sm text-gray-300 hover:text-white"
-              >
-                球員 Players
-              </Link>
-              <Link
-                href="/draft-strategy"
-                className="text-sm text-gray-300 hover:text-white"
-              >
-                選秀 Draft
-              </Link>
-              {/* Auth-only links */}
+              {PUBLIC_LINKS.map((link) => (
+                <Link key={link.href} href={link.href} className="text-sm text-gray-300 hover:text-white">
+                  {link.label}
+                </Link>
+              ))}
               {user && (
                 <>
-                  <Link
-                    href={`/${new Date().getFullYear()}`}
-                    className="text-sm text-gray-300 hover:text-white"
-                  >
-                    聯盟 League
-                  </Link>
-                  <Link
-                    href="/analytics"
-                    className="text-sm text-gray-300 hover:text-white"
-                  >
-                    統計 Stats
-                  </Link>
+                  {AUTH_LINKS.map((link) => (
+                    <Link key={link.href} href={link.href} className="text-sm text-gray-300 hover:text-white">
+                      {link.label}
+                    </Link>
+                  ))}
                   {user.is_commissioner && (
                     <Link
                       href="/commissioner"
@@ -139,45 +129,28 @@ export default function Navbar() {
       {menuOpen && (
         <div className="border-t border-gray-700 sm:hidden">
           <div className="px-4 py-3 space-y-1">
-            {/* Public links */}
-            <Link
-              href="/rules"
-              className="block rounded px-3 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-white"
-              onClick={() => setMenuOpen(false)}
-            >
-              規則 Rules
-            </Link>
-            <Link
-              href="/players"
-              className="block rounded px-3 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-white"
-              onClick={() => setMenuOpen(false)}
-            >
-              球員 Players
-            </Link>
-            <Link
-              href="/draft-strategy"
-              className="block rounded px-3 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-white"
-              onClick={() => setMenuOpen(false)}
-            >
-              選秀 Draft
-            </Link>
-            {/* Auth-only links */}
+            {PUBLIC_LINKS.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="block rounded px-3 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-white"
+                onClick={() => setMenuOpen(false)}
+              >
+                {link.label}
+              </Link>
+            ))}
             {user && (
               <>
-                <Link
-                  href={`/${new Date().getFullYear()}`}
-                  className="block rounded px-3 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-white"
-                  onClick={() => setMenuOpen(false)}
-                >
-                  聯盟 League
-                </Link>
-                <Link
-                  href="/analytics"
-                  className="block rounded px-3 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-white"
-                  onClick={() => setMenuOpen(false)}
-                >
-                  統計 Stats
-                </Link>
+                {AUTH_LINKS.map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className="block rounded px-3 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-white"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    {link.label}
+                  </Link>
+                ))}
                 {user.is_commissioner && (
                   <Link
                     href="/commissioner"
