@@ -872,6 +872,354 @@ def _weekly_war_report_job():
         print(f"[WarReport] Error: {e}")
 
 
+def _monthly_war_report_job():
+    """Monthly job (1st of each month, 19:00): generate monthly summary report."""
+    now = datetime.now()
+    month = now.month
+
+    # Only run during MLB season (April-October; skips March since no full month data yet)
+    if month < 4 or month > 10:
+        print(f"[MonthlyReport] Off-season or too early (month {month}), skipping.")
+        return
+
+    year = now.year
+    report_month = month - 1  # Report covers the previous month
+    month_names = {3: "3月", 4: "4月", 5: "5月", 6: "6月",
+                   7: "7月", 8: "8月", 9: "9月", 10: "10月"}
+    month_label = month_names.get(report_month, f"{report_month}月")
+
+    print(f"[MonthlyReport] Generating {month_label} report for {year}...")
+
+    try:
+        from api.yahoo_service import yahoo_api_get, YahooTokenError
+        from api.database import get_weekly_standings
+        from src.notification.line_service import send_line_group_message
+        from config.settings import get_league_key
+        import time
+        import json
+        from pathlib import Path
+
+        league_key = get_league_key(year)
+        if not league_key:
+            print(f"[MonthlyReport] No league key for year {year}")
+            return
+
+        # --- 1. Get current week to determine which weeks belong to the report month ---
+        meta_path = f"/league/{league_key}/metadata"
+        meta_data = yahoo_api_get(meta_path)
+        league_meta = meta_data.get("fantasy_content", {}).get("league", [])
+        current_week = 1
+        start_date_str = ""
+        if isinstance(league_meta, list):
+            for item in league_meta:
+                if isinstance(item, dict):
+                    if "current_week" in item:
+                        current_week = int(item["current_week"])
+                    if "start_date" in item:
+                        start_date_str = item["start_date"]
+
+        # Estimate which weeks fall in the report month
+        # Yahoo seasons typically start late March; each week is 7 days
+        # We use the weekly_standings table to find weeks with data in the report month
+        report_week_end = current_week - 1  # Last completed week
+
+        # --- 2. Fetch current standings for month-end snapshot ---
+        time.sleep(1)
+        standings_path = f"/league/{league_key}/standings"
+        standings_data = yahoo_api_get(standings_path)
+        league_standings = standings_data.get("fantasy_content", {}).get("league", [])
+        if len(league_standings) < 2:
+            print("[MonthlyReport] No standings data.")
+            return
+
+        teams_section = league_standings[1].get("standings", [{}])[0].get("teams", {})
+        team_count = teams_section.get("count", 0)
+
+        current_standings: list[dict] = []
+        for i in range(team_count):
+            team_raw = teams_section.get(str(i), {}).get("team", [])
+            if not team_raw:
+                continue
+            info_list = team_raw[0] if isinstance(team_raw, list) else []
+            team_name = ""
+            manager_name = ""
+            for item in info_list:
+                if isinstance(item, dict):
+                    if "name" in item:
+                        team_name = item["name"]
+                    if "managers" in item:
+                        mgrs = item["managers"]
+                        if isinstance(mgrs, list) and mgrs:
+                            manager_name = mgrs[0].get("manager", {}).get("nickname", "")
+            standing = {}
+            if len(team_raw) > 1:
+                standing = team_raw[1].get("team_standings", {})
+            rank = int(standing.get("rank", 0))
+            record = standing.get("outcome_totals", {})
+            wins = int(record.get("wins", 0))
+            losses = int(record.get("losses", 0))
+            ties = int(record.get("ties", 0))
+            current_standings.append({
+                "team_name": team_name,
+                "manager_name": manager_name,
+                "rank": rank,
+                "wins": wins,
+                "losses": losses,
+                "ties": ties,
+            })
+        current_standings.sort(key=lambda x: x["rank"])
+
+        # Find the earliest week of the report month from weekly_standings
+        # We look for the week saved ~4 weeks ago as start-of-month reference
+        month_start_week = max(report_week_end - 4, 1)
+        prev_month_standings = get_weekly_standings(year, month_start_week)
+        prev_rank_map = {s["manager_name"]: s["rank"] for s in prev_month_standings}
+        # Also compute W-L changes (monthly record)
+        prev_record_map = {
+            s["manager_name"]: (s.get("wins", 0), s.get("losses", 0), s.get("ties", 0))
+            for s in prev_month_standings
+        }
+
+        # --- 3. Monthly matchup summary (aggregate all weeks in the month) ---
+        time.sleep(1)
+        team_monthly_record: dict[str, dict] = {}  # manager -> {w, l, t}
+        for wk in range(month_start_week + 1, report_week_end + 1):
+            try:
+                sb_path = f"/league/{league_key}/scoreboard;week={wk}"
+                sb_data = yahoo_api_get(sb_path)
+                sb_league = sb_data.get("fantasy_content", {}).get("league", [])
+                if len(sb_league) < 2:
+                    continue
+                sb = sb_league[1].get("scoreboard", {})
+                matchups_section = None
+                if "0" in sb and "matchups" in sb["0"]:
+                    matchups_section = sb["0"]["matchups"]
+                elif "matchups" in sb:
+                    matchups_section = sb["matchups"]
+                if not matchups_section:
+                    continue
+
+                m_count = matchups_section.get("count", 0)
+                for mi in range(m_count):
+                    m_raw = matchups_section.get(str(mi), {}).get("matchup", {})
+                    teams_data = m_raw.get("0", {}).get("teams", {})
+                    winner_key = m_raw.get("winner_team_key", "")
+                    t_count = teams_data.get("count", 0)
+
+                    match_info = []
+                    for ti in range(t_count):
+                        t_raw = teams_data.get(str(ti), {}).get("team", [])
+                        if not t_raw:
+                            continue
+                        t_info = t_raw[0] if isinstance(t_raw, list) else []
+                        t_key = ""
+                        t_mgr = ""
+                        for item in t_info:
+                            if isinstance(item, dict):
+                                if "team_key" in item:
+                                    t_key = item["team_key"]
+                                if "managers" in item:
+                                    mgrs = item["managers"]
+                                    if isinstance(mgrs, list) and mgrs:
+                                        t_mgr = mgrs[0].get("manager", {}).get("nickname", "")
+                        pts = 0.0
+                        if len(t_raw) > 1:
+                            tp = t_raw[1].get("team_points", {})
+                            try:
+                                pts = float(tp.get("total", 0))
+                            except (ValueError, TypeError):
+                                pass
+                        match_info.append({"key": t_key, "mgr": t_mgr, "pts": pts})
+
+                    if len(match_info) == 2:
+                        for mi_t in match_info:
+                            mgr = mi_t["mgr"]
+                            if mgr not in team_monthly_record:
+                                team_monthly_record[mgr] = {"w": 0, "l": 0, "t": 0}
+                            if mi_t["key"] == winner_key:
+                                team_monthly_record[mgr]["w"] += 1
+                            elif winner_key:
+                                team_monthly_record[mgr]["l"] += 1
+                            else:
+                                team_monthly_record[mgr]["t"] += 1
+
+                time.sleep(0.6)
+            except Exception as e:
+                if "429" in str(e):
+                    time.sleep(10)
+                else:
+                    print(f"[MonthlyReport] Scoreboard error week {wk}: {e}")
+
+        # --- 4. Top 5 hitters and pitchers (month stats) ---
+        time.sleep(1)
+        top_batters: list[dict] = []
+        top_pitchers: list[dict] = []
+
+        for pos_type, result_list in [("B", top_batters), ("P", top_pitchers)]:
+            try:
+                # Use season sort_type=lastmonth if available, otherwise season
+                players_path = (
+                    f"/league/{league_key}/players"
+                    f";sort=PTS;sort_type=lastmonth"
+                    f";position={pos_type};count=5;out=stats,ownership"
+                )
+                pdata = yahoo_api_get(players_path)
+                p_league = pdata.get("fantasy_content", {}).get("league", [])
+                if len(p_league) >= 2:
+                    p_section = p_league[1].get("players", {})
+                    for pk_idx in range(p_section.get("count", 0)):
+                        p_entry = p_section.get(str(pk_idx), {}).get("player", [])
+                        if not p_entry or not isinstance(p_entry, list):
+                            continue
+                        p_info = {}
+                        for item in (p_entry[0] if isinstance(p_entry[0], list) else [p_entry[0]]):
+                            if isinstance(item, dict):
+                                if "name" in item:
+                                    p_info["name"] = item["name"].get("full", "")
+                                if "display_position" in item:
+                                    p_info["position"] = item["display_position"]
+                                if "editorial_team_abbr" in item:
+                                    p_info["mlb_team"] = item["editorial_team_abbr"]
+                                if "ownership" in item:
+                                    owner = item["ownership"]
+                                    p_info["owner_team"] = owner.get("owner_team_name", "FA")
+                        pts = 0.0
+                        if len(p_entry) > 1:
+                            player_pts = p_entry[1].get("player_points", {})
+                            try:
+                                pts = float(player_pts.get("total", 0))
+                            except (ValueError, TypeError):
+                                pts = 0.0
+                        p_info["points"] = pts
+                        result_list.append(p_info)
+                time.sleep(1)
+            except Exception as e:
+                print(f"[MonthlyReport] Error fetching top {pos_type}: {e}")
+
+        # --- 5. Transaction summary from JSON file ---
+        tx_summary: list[str] = []
+        try:
+            data_dir = Path(__file__).resolve().parent.parent.parent / "data"
+            tx_file = data_dir / f"yahoo_{year}_transactions.json"
+            if tx_file.exists():
+                with open(tx_file, "r", encoding="utf-8") as f:
+                    tx_data = json.load(f)
+                all_tx = tx_data.get("transactions", [])
+
+                # Filter transactions from the report month
+                month_trades = 0
+                month_adds = 0
+                month_drops = 0
+                notable_trades: list[str] = []
+
+                for tx in all_tx:
+                    ts = tx.get("timestamp", "")
+                    if not ts:
+                        continue
+                    try:
+                        from datetime import datetime as dt_cls
+                        tx_date = dt_cls.fromtimestamp(int(ts))
+                        if tx_date.year != year or tx_date.month != report_month:
+                            continue
+                    except (ValueError, TypeError):
+                        continue
+
+                    tx_type = tx.get("type", "")
+                    if tx_type == "trade":
+                        month_trades += 1
+                        # Collect notable trade details (first 3)
+                        if len(notable_trades) < 3:
+                            players = tx.get("players", [])
+                            names = [p.get("name", "?") for p in players[:4]]
+                            notable_trades.append(", ".join(names))
+                    elif tx_type in ("add", "add/drop"):
+                        month_adds += 1
+                        if "drop" in tx_type:
+                            month_drops += 1
+                    elif tx_type == "drop":
+                        month_drops += 1
+
+                if month_trades or month_adds or month_drops:
+                    tx_summary.append(f"交易: {month_trades} 筆 | 撿人: {month_adds} 筆 | 釋出: {month_drops} 筆")
+                    for nt in notable_trades:
+                        tx_summary.append(f"  Trade: {nt}")
+        except Exception as e:
+            print(f"[MonthlyReport] Transaction summary error: {e}")
+
+        # --- 6. Build LINE message ---
+        lines = [f"[5-Man Keeper League] {year} {month_label}月報", ""]
+
+        # Standings with monthly rank change
+        lines.append("-- 排名 --")
+        for s in current_standings:
+            w, l, t = s["wins"], s["losses"], s["ties"]
+            mgr = s["manager_name"]
+            rank = s["rank"]
+            prev_rank = prev_rank_map.get(mgr)
+            if prev_rank is not None and prev_rank != rank:
+                diff = prev_rank - rank
+                change = f" ^{diff}" if diff > 0 else f" v{-diff}"
+            else:
+                change = " --"
+            lines.append(f"{rank}. {mgr} ({w}-{l}-{t}){change}")
+        lines.append("")
+
+        # Monthly team records
+        if team_monthly_record:
+            lines.append(f"-- {month_label}戰績 --")
+            sorted_monthly = sorted(
+                team_monthly_record.items(),
+                key=lambda x: (x[1]["w"], -x[1]["l"]),
+                reverse=True,
+            )
+            for mgr, rec in sorted_monthly:
+                lines.append(f"{mgr}: {rec['w']}-{rec['l']}-{rec['t']}")
+            lines.append("")
+
+        # Top batters
+        if top_batters:
+            lines.append(f"-- {month_label}最佳打者 (Yahoo Pts) --")
+            for idx, b in enumerate(top_batters[:5], 1):
+                name = b.get("name", "?")
+                pos = b.get("position", "")
+                pts = b.get("points", 0)
+                owner = b.get("owner_team", "FA")
+                lines.append(f"{idx}. {name} ({pos}) - {pts:.1f} pts [{owner}]")
+            lines.append("")
+
+        # Top pitchers
+        if top_pitchers:
+            lines.append(f"-- {month_label}最佳投手 (Yahoo Pts) --")
+            for idx, p in enumerate(top_pitchers[:5], 1):
+                name = p.get("name", "?")
+                pos = p.get("position", "")
+                pts = p.get("points", 0)
+                owner = p.get("owner_team", "FA")
+                lines.append(f"{idx}. {name} ({pos}) - {pts:.1f} pts [{owner}]")
+            lines.append("")
+
+        # Transaction summary
+        if tx_summary:
+            lines.append(f"-- {month_label}交易摘要 --")
+            lines.extend(tx_summary)
+            lines.append("")
+
+        lines.append("* Yahoo Fantasy Points (僅供參考)")
+
+        message = "\n".join(lines)
+
+        success, error = send_line_group_message(message)
+        if success:
+            print(f"[MonthlyReport] {month_label} report sent to LINE.")
+        else:
+            print(f"[MonthlyReport] LINE send failed: {error}")
+
+    except YahooTokenError as e:
+        print(f"[MonthlyReport] Token error: {e}")
+    except Exception as e:
+        print(f"[MonthlyReport] Error: {e}")
+
+
 def start_scheduler():
     """Start the background scheduler.
 
@@ -884,6 +1232,7 @@ def start_scheduler():
     6. Season start notification: LINE message on Opening Day
     7. Daily roster ownership sync: fetch rosters, update owner_manager
     8. Weekly war report: every Monday 18:45 during MLB season
+    9. Monthly war report: 1st of each month 19:00 during MLB season
     """
     global _scheduler
 
@@ -994,6 +1343,18 @@ def start_scheduler():
         replace_existing=True,
     )
 
+    # Job 9: Monthly war report (1st of each month at 19:00)
+    _scheduler.add_job(
+        _monthly_war_report_job,
+        CronTrigger(
+            day=1,
+            hour=19,
+            timezone=REMINDER_CRON_TZ,
+        ),
+        id="monthly_report",
+        replace_existing=True,
+    )
+
     _scheduler.start()
     print(f"[Scheduler] Started ({mode} mode). "
           f"Check daily at {REMINDER_CRON_HOUR}:00 {REMINDER_CRON_TZ}")
@@ -1009,6 +1370,7 @@ def start_scheduler():
           f"(Opening Day: {SEASON_START_DATE})")
     print(f"[Scheduler] Daily roster ownership sync: {DAILY_SYNC_HOUR}:30 {REMINDER_CRON_TZ}")
     print("[Scheduler] Weekly war report: every Monday 18:45")
+    print("[Scheduler] Monthly war report: 1st of each month 19:00")
 
 
 def stop_scheduler():
