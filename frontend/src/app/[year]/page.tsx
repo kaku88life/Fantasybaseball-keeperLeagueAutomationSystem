@@ -75,6 +75,10 @@ function YearOverviewContent() {
     () => getLeagueSummary(year + 1),
   );
 
+  // Hide "next year" from dropdown until keeper selections start for that year
+  const currentSeasonYear = new Date().getFullYear();
+  const visibleYears = years.filter((y) => y <= currentSeasonYear);
+
   const error = summaryErr?.message || "";
 
   // Find DB team id by manager name
@@ -91,7 +95,7 @@ function YearOverviewContent() {
           <div className="mt-4">
             <p className="text-sm text-gray-500">切換賽季：</p>
             <div className="mt-2 flex justify-center gap-2">
-              {[...years].reverse().map((y) => (
+              {[...visibleYears].reverse().map((y) => (
                 <Link
                   key={y}
                   href={`/${y}`}
@@ -148,13 +152,13 @@ function YearOverviewContent() {
                 Commissioner
               </Link>
             )}
-            {years.length > 0 && (
+            {visibleYears.length > 0 && (
               <select
                 value={year}
                 onChange={(e) => router.push(`/${e.target.value}`)}
                 className="rounded border border-gray-300 bg-white px-2.5 py-1 text-xs font-medium focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:px-3 sm:text-sm"
               >
-                {[...years].reverse().map((y) => (
+                {[...visibleYears].reverse().map((y) => (
                   <option key={y} value={y}>{y} 賽季</option>
                 ))}
               </select>
