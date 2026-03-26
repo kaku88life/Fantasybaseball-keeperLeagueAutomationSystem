@@ -437,9 +437,16 @@ export default function CommissionerDashboard() {
           </Link>
           <button
             onClick={async () => {
-              if (!confirm("從 Yahoo 同步最新名冊並重建 snapshot？\nSync rosters from Yahoo and rebuild snapshot?")) return;
+              // Always sync current MLB season (current year), not the selected year
+              // e.g. selectedYear=2027 page shows "2026 season roster",
+              // so we sync 2026 rosters and rebuild 2027 snapshot
+              const syncYear = new Date().getFullYear();
+              if (!confirm(
+                `從 Yahoo 同步 ${syncYear} 賽季最新名冊並重建 ${syncYear + 1} snapshot？\n` +
+                `Sync ${syncYear} rosters from Yahoo and rebuild ${syncYear + 1} snapshot?`
+              )) return;
               try {
-                const r = await syncRosters(selectedYear);
+                const r = await syncRosters(syncYear);
                 alert(`同步完成: ${r.teams} 隊, ${r.total_players} 球員`);
               } catch (e) {
                 alert(e instanceof Error ? e.message : "同步失敗");
