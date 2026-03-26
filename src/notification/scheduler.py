@@ -747,8 +747,9 @@ def sync_rosters_and_rebuild(year: int) -> dict:
 
                     players: list[dict] = []
                     if len(roster_section) >= 2:
-                        # Players are directly in roster dict (not under "players" sub-key)
-                        players_section = roster_section[1].get("roster", {})
+                        # Yahoo API structure: roster["0"]["players"]["0"]["player"]
+                        roster_dict = roster_section[1].get("roster", {})
+                        players_section = roster_dict.get("0", {}).get("players", {})
                         p_count = players_section.get("count", 0)
                         for j in range(p_count):
                             player_entry = players_section.get(str(j), {}).get("player", [])
