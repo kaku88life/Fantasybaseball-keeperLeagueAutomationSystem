@@ -747,7 +747,8 @@ def sync_rosters_and_rebuild(year: int) -> dict:
 
                     players: list[dict] = []
                     if len(roster_section) >= 2:
-                        players_section = roster_section[1].get("roster", {}).get("players", {})
+                        # Players are directly in roster dict (not under "players" sub-key)
+                        players_section = roster_section[1].get("roster", {})
                         p_count = players_section.get("count", 0)
                         for j in range(p_count):
                             player_entry = players_section.get(str(j), {}).get("player", [])
