@@ -118,9 +118,11 @@ YAHOO_GAME_KEY = "mlb"
 # Used by scheduler jobs and yahoo_service to resolve league keys
 YAHOO_GAME_KEYS: dict[int, str] = {
     2024: "431", 2025: "458", 2026: "469",
+    2027: "TBD",  # placeholder — update when Yahoo 2027 league is created
 }
 YAHOO_LEAGUE_NUMS: dict[int, str] = {
     2024: "28498", 2025: "40288", 2026: "80910",
+    2027: "TBD",  # placeholder — update when Yahoo 2027 league is created
 }
 
 
