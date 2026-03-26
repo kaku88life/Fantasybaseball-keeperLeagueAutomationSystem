@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useCallback, useContext, useState } from "react";
+import { createContext, useCallback, useContext, useMemo, useState } from "react";
 
 interface ToastItem {
   id: number;
@@ -36,8 +36,10 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     [],
   );
 
+  const contextValue = useMemo(() => ({ showToast }), [showToast]);
+
   return (
-    <ToastContext.Provider value={{ showToast }}>
+    <ToastContext.Provider value={contextValue}>
       {children}
       {/* Toast container */}
       <div className="fixed top-16 right-4 z-50 flex flex-col gap-2">

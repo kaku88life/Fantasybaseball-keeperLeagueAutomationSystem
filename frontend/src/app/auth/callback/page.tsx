@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/components/Toast";
@@ -13,8 +13,13 @@ function CallbackHandler() {
   const { refresh } = useAuth();
   const { showToast } = useToast();
   const [error, setError] = useState("");
+  const didRun = useRef(false);
 
   useEffect(() => {
+    // Prevent double-execution (React 18 Strict Mode or re-renders)
+    if (didRun.current) return;
+    didRun.current = true;
+
     const errorParam = searchParams.get("error");
     const authOk = searchParams.get("auth");
     const fallbackToken = searchParams.get("token");
@@ -84,7 +89,8 @@ function CallbackHandler() {
     };
 
     authenticate();
-  }, [searchParams, refresh, router, showToast]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (error) {
     return (
