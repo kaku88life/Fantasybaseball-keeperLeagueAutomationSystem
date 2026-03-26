@@ -37,7 +37,7 @@ from src.contract.models import (
     SpecialStatus,
     Team,
 )
-from api.database import init_db, save_snapshot, upsert_team, get_all_keeper_selections
+from api.database import init_db, save_snapshot, upsert_team, get_all_keeper_selections, get_synced_roster
 from api.serializers import league_state_to_dict
 
 DRAFT_PATH = ROOT / "data" / "yahoo_2026_draft.json"
@@ -64,9 +64,26 @@ def main():
     with open(DRAFT_PATH, "r", encoding="utf-8") as f:
         draft = json.load(f)
 
-    print("Loading Yahoo 2026 rosters...")
-    with open(ROSTERS_PATH, "r", encoding="utf-8") as f:
-        rosters = json.load(f)
+    # Load rosters: prefer DB synced version (persists across deployments),
+    # fall back to local file, then draft data as last resort.
+    rosters = None
+    try:
+        db_rosters = get_synced_roster(2026)
+        if db_rosters:
+            total_db_players = sum(
+                len(t.get("players", []) if isinstance(t, dict) else [])
+                for t in db_rosters.values()
+            )
+            if total_db_players > 0:
+                rosters = db_rosters
+                print(f"Loaded Yahoo 2026 rosters from DB ({len(rosters)} teams, {total_db_players} players)")
+    except Exception as e:
+        print(f"Could not load synced roster from DB: {e}")
+
+    if rosters is None:
+        print("Loading Yahoo 2026 rosters from file...")
+        with open(ROSTERS_PATH, "r", encoding="utf-8") as f:
+            rosters = json.load(f)
 
     # Validate roster data: must have teams with players
     total_roster_players = sum(
@@ -74,13 +91,11 @@ def main():
         for t in rosters.values()
     )
     if total_roster_players == 0:
-        print("[WARNING] yahoo_2026_rosters.json has 0 players!")
+        print("[WARNING] Roster data has 0 players!")
         print("  Falling back to draft data as roster source...")
-        # Rebuild roster from draft data (each drafted player = on that manager's team)
         rosters = {}
         for d in draft:
             mgr = d["manager"]
-            # Find existing team_key or create placeholder
             matched_key = None
             for tk, ti in rosters.items():
                 if ti["manager"] == mgr:

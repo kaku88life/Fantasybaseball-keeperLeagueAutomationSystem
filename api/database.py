@@ -469,6 +469,16 @@ MIGRATIONS: dict[str, list[str]] = {
         """,
         "CREATE INDEX IF NOT EXISTS idx_weekly_standings_year_week ON weekly_standings(year, week)",
     ],
+    "014_synced_rosters": [
+        """
+        CREATE TABLE IF NOT EXISTS synced_rosters (
+            id SERIAL PRIMARY KEY,
+            year INTEGER NOT NULL UNIQUE,
+            data TEXT NOT NULL,
+            synced_at TIMESTAMPTZ DEFAULT NOW()
+        )
+        """,
+    ],
 }
 
 
@@ -1427,3 +1437,33 @@ def cleanup_old_notifications(retention_days: int = 365):
         except Exception as e:
             conn.rollback()
             print(f"[Cleanup] notification_log cleanup failed (non-fatal): {e}")
+
+
+# ========== Synced Rosters ==========
+
+def save_synced_roster(year: int, data: dict):
+    """Save Yahoo roster JSON to DB (persists across deployments)."""
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """INSERT INTO synced_rosters (year, data, synced_at)
+                   VALUES (%s, %s, NOW())
+                   ON CONFLICT(year) DO UPDATE SET
+                       data = EXCLUDED.data,
+                       synced_at = NOW()""",
+                (year, json.dumps(data, ensure_ascii=False)),
+            )
+        conn.commit()
+
+
+def get_synced_roster(year: int) -> dict | None:
+    """Load synced Yahoo roster from DB. Returns parsed dict or None."""
+    with get_conn() as conn:
+        row = _fetchone(
+            conn,
+            "SELECT data FROM synced_rosters WHERE year = %s",
+            (year,),
+        )
+        if row and row.get("data"):
+            return json.loads(row["data"])
+        return None

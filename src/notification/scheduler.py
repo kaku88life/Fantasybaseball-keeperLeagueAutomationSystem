@@ -828,7 +828,7 @@ def sync_rosters_and_rebuild(year: int) -> dict:
             print(f"[SnapshotRebuild] {msg}")
             raise RuntimeError(msg)
 
-        # Save to yahoo_{year}_rosters.json
+        # Save to yahoo_{year}_rosters.json (local file)
         data_dir = Path(__file__).resolve().parents[2] / "data"
         rosters_path = data_dir / f"yahoo_{year}_rosters.json"
         rosters_path.write_text(
@@ -839,6 +839,11 @@ def sync_rosters_and_rebuild(year: int) -> dict:
             f"[SnapshotRebuild] Saved {rosters_path.name}: "
             f"{len(all_rosters)} teams, {total_players} players"
         )
+
+        # Also save to DB (persists across deployments)
+        from api.database import save_synced_roster
+        save_synced_roster(year, all_rosters)
+        print(f"[SnapshotRebuild] Saved synced roster to DB (year={year})")
 
         # Rebuild next-year snapshot
         next_year = year + 1
