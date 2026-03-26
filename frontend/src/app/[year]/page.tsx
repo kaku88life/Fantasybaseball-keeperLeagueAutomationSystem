@@ -27,6 +27,7 @@ interface TeamSummary {
   salary_cap: number;
   ranking_bonus: number;
   line_name?: string;
+  mlb_team_counts?: [string, number][];
 }
 
 // Total roster slots (active + pitchers + bench), excluding NA and DL
@@ -38,7 +39,7 @@ function getRanking(bonus: number): number | null {
   return map[bonus] ?? null;
 }
 
-type TabKey = "season-end" | "keepers";
+type TabKey = "season-end" | "keepers" | "in-season";
 
 export default function YearOverviewPage() {
   return (
@@ -66,6 +67,12 @@ function YearOverviewContent() {
   const { data: keeperResults, isLoading: keeperLoading } = useSWR(
     activeTab === "keepers" && year ? `keeper-results-${year}` : null,
     () => getKeeperResults(year),
+  );
+
+  // In-season tab: fetch next year's snapshot (which contains current season Yahoo roster)
+  const { data: inSeasonSummary, isLoading: inSeasonLoading } = useSWR(
+    activeTab === "in-season" && year ? `summary-${year + 1}` : null,
+    () => getLeagueSummary(year + 1),
   );
 
   const error = summaryErr?.message || "";
@@ -114,6 +121,11 @@ function YearOverviewContent() {
       key: "keepers",
       label: `${year} 賽季前 Keepers`,
       sublabel: "Pre-Season Keepers",
+    },
+    {
+      key: "in-season",
+      label: `${year} 賽季中名單`,
+      sublabel: "In-Season Roster",
     },
   ];
 
@@ -189,6 +201,24 @@ function YearOverviewContent() {
           year={year}
         />
       )}
+      {activeTab === "in-season" && (
+        inSeasonLoading ? <LoadingSpinner /> :
+        inSeasonSummary ? (
+          <SeasonEndTab
+            summary={inSeasonSummary}
+            user={user}
+            year={year}
+            findTeamId={findTeamId}
+            showMlbTeams
+          />
+        ) : (
+          <div className="py-10 text-center text-gray-400 text-sm">
+            {year} 賽季中名單尚未建立
+            <br />
+            <span className="text-xs">Commissioner 可透過「同步名冊」功能匯入最新 Yahoo 名冊</span>
+          </div>
+        )
+      )}
     </div>
   );
 }
@@ -200,11 +230,13 @@ function SeasonEndTab({
   user,
   year,
   findTeamId,
+  showMlbTeams = false,
 }: {
   summary: { teams: TeamSummary[] };
   user: { manager_name?: string | null } | null;
   year: number;
   findTeamId: (name: string) => number | null;
+  showMlbTeams?: boolean;
 }) {
   return (
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 sm:gap-4">
@@ -282,6 +314,25 @@ function SeasonEndTab({
                 </div>
               )}
             </div>
+            {/* MLB team distribution (top teams with 2+ players) */}
+            {t.mlb_team_counts && t.mlb_team_counts.length > 0 && (
+              <div className="mt-2 flex flex-wrap gap-1 border-t pt-2">
+                {t.mlb_team_counts.map(([team, count]) => (
+                  <span
+                    key={team}
+                    className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${
+                      count >= 5
+                        ? "bg-green-200 text-green-800"
+                        : count >= 3
+                          ? "bg-amber-200 text-amber-800"
+                          : "bg-gray-200 text-gray-600"
+                    }`}
+                  >
+                    {team} {count}
+                  </span>
+                ))}
+              </div>
+            )}
           </Link>
         );
       })}

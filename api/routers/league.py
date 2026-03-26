@@ -101,6 +101,18 @@ async def get_league_summary(year: int, _user: dict = Depends(get_current_user))
     summary = []
     for t in ls.teams:
         team_id = manager_to_team_id.get(t.manager_name)
+
+        # Count MLB team distribution (top 3 teams with 2+ players)
+        mlb_counts: dict[str, int] = {}
+        for p in t.players:
+            mt = getattr(p, "mlb_team", "") or ""
+            if mt:
+                mlb_counts[mt] = mlb_counts.get(mt, 0) + 1
+        top_mlb = sorted(
+            [(team, cnt) for team, cnt in mlb_counts.items() if cnt >= 2],
+            key=lambda x: -x[1],
+        )[:5]
+
         summary.append({
             "manager_name": t.manager_name,
             "team_name": t.team_name,
@@ -113,6 +125,7 @@ async def get_league_summary(year: int, _user: dict = Depends(get_current_user))
             "salary_cap": t.salary_cap,
             "ranking_bonus": t.ranking_bonus,
             "line_name": line_names.get(team_id, "") if team_id else "",
+            "mlb_team_counts": top_mlb,
         })
     return {
         "year": year,
