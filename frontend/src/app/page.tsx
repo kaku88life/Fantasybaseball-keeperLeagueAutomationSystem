@@ -22,13 +22,18 @@ export default function HomePage() {
   }
 
   // --- Authenticated: redirect to league year page ---
+  // Prefer year+1 page (shows current season roster) over year page (shows last season)
+  // e.g. in 2026 season, /2027 shows "2026 Season Roster" which is the current season
   if (user) {
     const currentYear = new Date().getFullYear();
-    const targetYear = years.includes(currentYear)
-      ? currentYear
-      : years.length > 0
-        ? years[years.length - 1]
-        : null;
+    const nextYear = currentYear + 1;
+    const targetYear = years.includes(nextYear)
+      ? nextYear
+      : years.includes(currentYear)
+        ? currentYear
+        : years.length > 0
+          ? years[years.length - 1]
+          : null;
 
     if (targetYear) {
       router.push(`/${targetYear}`);
