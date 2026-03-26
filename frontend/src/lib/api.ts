@@ -552,6 +552,18 @@ export async function getRankingFetchStatus(
   return request(`/api/commissioner/ranking-status/${year}`);
 }
 
+// ========== Roster Sync (Commissioner) ==========
+
+export async function syncRosters(year: number): Promise<{
+  message: string;
+  year: number;
+  teams: number;
+  total_players: number;
+}> {
+  // Longer timeout: fetching 16 teams from Yahoo API takes ~15 seconds
+  return request(`/api/commissioner/sync-rosters/${year}`, { method: "POST" }, 120_000);
+}
+
 // ========== Top 100 Prospects ==========
 
 export async function getProspects(

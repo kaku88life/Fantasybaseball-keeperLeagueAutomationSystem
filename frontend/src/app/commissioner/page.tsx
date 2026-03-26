@@ -21,6 +21,7 @@ import {
   refreshYahooToken,
   testYahooConnection,
   disconnectYahooToken,
+  syncRosters,
 } from "@/lib/api";
 import type { YahooTokenStatus } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
@@ -434,6 +435,20 @@ export default function CommissionerDashboard() {
           >
             匯入 Excel
           </Link>
+          <button
+            onClick={async () => {
+              if (!confirm("從 Yahoo 同步最新名冊並重建 snapshot？\nSync rosters from Yahoo and rebuild snapshot?")) return;
+              try {
+                const r = await syncRosters(selectedYear);
+                alert(`同步完成: ${r.teams} 隊, ${r.total_players} 球員`);
+              } catch (e) {
+                alert(e instanceof Error ? e.message : "同步失敗");
+              }
+            }}
+            className="inline-flex min-h-[44px] items-center rounded bg-teal-600 px-2.5 py-1.5 text-xs text-white hover:bg-teal-500 sm:min-h-0 sm:px-3 sm:text-sm"
+          >
+            同步名冊
+          </button>
         </div>
       </div>
 

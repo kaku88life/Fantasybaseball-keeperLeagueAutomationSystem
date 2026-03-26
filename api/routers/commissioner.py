@@ -1086,6 +1086,25 @@ async def reload_prospects(
     }
 
 
+@router.post("/sync-rosters/{year}")
+async def sync_rosters(
+    year: int,
+    user: dict = Depends(get_current_commissioner),
+):
+    """Fetch latest Yahoo rosters and rebuild next-year snapshot. Commissioner only.
+
+    1. Fetch all 16 team rosters from Yahoo API
+    2. Save to data/yahoo_{year}_rosters.json
+    3. Rebuild year+1 snapshot in DB
+    """
+    from src.notification.scheduler import sync_rosters_and_rebuild
+    try:
+        result = sync_rosters_and_rebuild(year)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @router.post("/fetch-draft-data/{year}")
 async def fetch_draft_data(
     year: int,

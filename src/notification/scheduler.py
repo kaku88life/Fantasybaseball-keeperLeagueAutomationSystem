@@ -601,22 +601,17 @@ def _daily_roster_ownership_sync_job():
         print(f"[RosterSync] Error: {e}")
 
 
-def _daily_roster_snapshot_rebuild_job():
-    """Daily job: fetch full Yahoo rosters to JSON, then rebuild 2027 snapshot.
+def sync_rosters_and_rebuild(year: int) -> dict:
+    """Fetch full Yahoo rosters and rebuild next-year snapshot.
 
-    This keeps /2027 page ("2026 Season Roster") up-to-date with FAAB pickups,
-    IL/NA moves, and other in-season roster changes.
-    Runs after roster_ownership_sync (Job 7) at DAILY_SYNC_HOUR:45.
+    Can be called from scheduler or commissioner API endpoint.
+
+    Args:
+        year: The current season year (e.g. 2026)
+
+    Returns:
+        dict with message, teams count, players count
     """
-    now = datetime.now()
-    month = now.month
-
-    # Only run during MLB season (March-October)
-    if month < 3 or month > 10:
-        print(f"[SnapshotRebuild] Off-season (month {month}), skipping.")
-        return
-
-    year = now.year
     print(f"[SnapshotRebuild] Fetching Yahoo {year} rosters...")
 
     try:
@@ -764,7 +759,7 @@ def _daily_roster_snapshot_rebuild_job():
             f"{len(all_rosters)} teams, {total_players} players"
         )
 
-        # Rebuild 2027 snapshot (year+1)
+        # Rebuild next-year snapshot
         next_year = year + 1
         try:
             from scripts.build_2027_contracts import main as rebuild_snapshot
@@ -773,10 +768,35 @@ def _daily_roster_snapshot_rebuild_job():
         except Exception as e:
             print(f"[SnapshotRebuild] Snapshot rebuild error: {e}")
 
+        return {
+            "message": f"Synced {year} rosters and rebuilt {next_year} snapshot",
+            "year": year,
+            "teams": len(all_rosters),
+            "total_players": total_players,
+        }
+
     except YahooTokenError as e:
         print(f"[SnapshotRebuild] Token error: {e}")
+        raise
     except Exception as e:
         print(f"[SnapshotRebuild] Error: {e}")
+        raise
+
+
+def _daily_roster_snapshot_rebuild_job():
+    """Daily scheduler wrapper for sync_rosters_and_rebuild."""
+    now = datetime.now()
+    month = now.month
+
+    # Only run during MLB season (March-October)
+    if month < 3 or month > 10:
+        print(f"[SnapshotRebuild] Off-season (month {month}), skipping.")
+        return
+
+    try:
+        sync_rosters_and_rebuild(now.year)
+    except Exception as e:
+        print(f"[SnapshotRebuild] Job failed: {e}")
 
 
 def _weekly_war_report_job():
