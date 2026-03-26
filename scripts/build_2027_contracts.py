@@ -66,6 +66,37 @@ def main():
     with open(ROSTERS_PATH, "r", encoding="utf-8") as f:
         rosters = json.load(f)
 
+    # Validate roster data: must have teams with players
+    total_roster_players = sum(
+        len(t.get("players", []) if isinstance(t, dict) else [])
+        for t in rosters.values()
+    )
+    if total_roster_players == 0:
+        print("[WARNING] yahoo_2026_rosters.json has 0 players!")
+        print("  Falling back to draft data as roster source...")
+        # Rebuild roster from draft data (each drafted player = on that manager's team)
+        rosters = {}
+        for d in draft:
+            mgr = d["manager"]
+            # Find existing team_key or create placeholder
+            matched_key = None
+            for tk, ti in rosters.items():
+                if ti["manager"] == mgr:
+                    matched_key = tk
+                    break
+            if not matched_key:
+                matched_key = d.get("team_key", f"fallback.{mgr}")
+                rosters[matched_key] = {"manager": mgr, "team_name": "", "players": []}
+            rosters[matched_key]["players"].append({
+                "name": d["player_name"],
+                "player_key": d.get("player_key", ""),
+                "position": d.get("position", ""),
+                "team": d.get("mlb_team", ""),
+                "selected_position": "",
+                "status": "",
+            })
+        print(f"  Rebuilt {len(rosters)} teams from draft data")
+
     # 2. Build keeper lookup: manager_norm -> player_norm -> contract info
     #    These are pre-2026 keepers (players carried over into 2026 season)
     keeper_lookup: dict[str, dict[str, dict]] = {}
