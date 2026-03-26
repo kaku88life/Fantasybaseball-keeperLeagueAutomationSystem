@@ -685,67 +685,78 @@ def sync_rosters_and_rebuild(year: int) -> dict:
             if not team_key or not manager_name:
                 continue
 
-            # Fetch this team's full roster
-            try:
-                roster_path = f"/team/{team_key}/roster"
-                roster_data = yahoo_api_get(roster_path)
-                roster_section = (
-                    roster_data.get("fantasy_content", {}).get("team", [])
-                )
+            # Fetch this team's full roster (with retry on 429)
+            max_retries = 3
+            for attempt in range(max_retries):
+                try:
+                    roster_path = f"/team/{team_key}/roster"
+                    roster_data = yahoo_api_get(roster_path)
+                    roster_section = (
+                        roster_data.get("fantasy_content", {}).get("team", [])
+                    )
 
-                players: list[dict] = []
-                if len(roster_section) >= 2:
-                    players_section = roster_section[1].get("roster", {}).get("players", {})
-                    p_count = players_section.get("count", 0)
-                    for j in range(p_count):
-                        player_entry = players_section.get(str(j), {}).get("player", [])
-                        if not player_entry:
-                            continue
-                        # Parse full player data (reuse yahoo_client pattern)
-                        info_list = player_entry[0] if isinstance(player_entry, list) else []
-                        p = {
-                            "name": "", "player_key": "", "position": "",
-                            "team": "", "selected_position": "", "status": "",
-                        }
-                        for item in info_list:
-                            if isinstance(item, dict):
-                                if "name" in item:
-                                    p["name"] = item["name"].get("full", "")
-                                if "player_key" in item:
-                                    p["player_key"] = item["player_key"]
-                                if "display_position" in item:
-                                    p["position"] = item["display_position"]
-                                if "editorial_team_abbr" in item:
-                                    p["team"] = item["editorial_team_abbr"]
-                                if "status" in item:
-                                    p["status"] = item["status"]
-                        # Selected position
-                        if len(player_entry) > 1 and isinstance(player_entry[1], dict):
-                            sp_data = player_entry[1].get("selected_position", [])
-                            if isinstance(sp_data, list):
-                                for s in sp_data:
-                                    if isinstance(s, dict) and "position" in s:
-                                        p["selected_position"] = s["position"]
-                        if p["name"]:
-                            players.append(p)
+                    players: list[dict] = []
+                    if len(roster_section) >= 2:
+                        players_section = roster_section[1].get("roster", {}).get("players", {})
+                        p_count = players_section.get("count", 0)
+                        for j in range(p_count):
+                            player_entry = players_section.get(str(j), {}).get("player", [])
+                            if not player_entry:
+                                continue
+                            # Parse full player data (reuse yahoo_client pattern)
+                            info_list = player_entry[0] if isinstance(player_entry, list) else []
+                            p = {
+                                "name": "", "player_key": "", "position": "",
+                                "team": "", "selected_position": "", "status": "",
+                            }
+                            for item in info_list:
+                                if isinstance(item, dict):
+                                    if "name" in item:
+                                        p["name"] = item["name"].get("full", "")
+                                    if "player_key" in item:
+                                        p["player_key"] = item["player_key"]
+                                    if "display_position" in item:
+                                        p["position"] = item["display_position"]
+                                    if "editorial_team_abbr" in item:
+                                        p["team"] = item["editorial_team_abbr"]
+                                    if "status" in item:
+                                        p["status"] = item["status"]
+                            # Selected position
+                            if len(player_entry) > 1 and isinstance(player_entry[1], dict):
+                                sp_data = player_entry[1].get("selected_position", [])
+                                if isinstance(sp_data, list):
+                                    for s in sp_data:
+                                        if isinstance(s, dict) and "position" in s:
+                                            p["selected_position"] = s["position"]
+                            if p["name"]:
+                                players.append(p)
 
-                all_rosters[team_key] = {
-                    "manager": manager_name,
-                    "team_name": team_name,
-                    "players": players,
-                }
-                total_players += len(players)
-                time.sleep(0.6)
+                    all_rosters[team_key] = {
+                        "manager": manager_name,
+                        "team_name": team_name,
+                        "players": players,
+                    }
+                    total_players += len(players)
+                    time.sleep(1.0)
+                    break  # success, exit retry loop
 
-            except Exception as e:
-                if "429" in str(e):
-                    time.sleep(10)
-                else:
-                    print(f"[SnapshotRebuild] Error fetching {team_key}: {e}")
+                except Exception as e:
+                    if "429" in str(e) and attempt < max_retries - 1:
+                        wait_secs = 15 * (attempt + 1)
+                        print(f"[SnapshotRebuild] 429 rate limit for {manager_name}, "
+                              f"waiting {wait_secs}s (attempt {attempt + 1}/{max_retries})")
+                        time.sleep(wait_secs)
+                    else:
+                        print(f"[SnapshotRebuild] Error fetching {team_key} ({manager_name}): {e}")
+                        break
 
-        if not all_rosters:
-            print("[SnapshotRebuild] No roster data fetched, aborting.")
-            return
+        # Validate: require ALL teams with players before saving
+        teams_with_players = sum(1 for t in all_rosters.values() if len(t.get("players", [])) > 0)
+        if teams_with_players < 16:
+            msg = (f"Only {teams_with_players}/16 teams have player data. "
+                   f"Aborting to prevent data loss. Try again later.")
+            print(f"[SnapshotRebuild] {msg}")
+            raise RuntimeError(msg)
 
         # Save to yahoo_{year}_rosters.json
         data_dir = Path(__file__).resolve().parents[2] / "data"
