@@ -560,8 +560,8 @@ export async function syncRosters(year: number): Promise<{
   teams: number;
   total_players: number;
 }> {
-  // Longer timeout: fetching 16 teams from Yahoo API takes ~15 seconds
-  return request(`/api/commissioner/sync-rosters/${year}`, { method: "POST" }, 120_000);
+  // Long timeout: 16 team roster fetches with rate-limit retries (~1-3 min)
+  return request(`/api/commissioner/sync-rosters/${year}`, { method: "POST" }, 180_000);
 }
 
 // ========== Top 100 Prospects ==========

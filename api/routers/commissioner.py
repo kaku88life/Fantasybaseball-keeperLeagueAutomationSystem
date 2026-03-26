@@ -1097,9 +1097,12 @@ async def sync_rosters(
     2. Save to data/yahoo_{year}_rosters.json
     3. Rebuild year+1 snapshot in DB
     """
+    import asyncio
     from src.notification.scheduler import sync_rosters_and_rebuild
     try:
-        result = sync_rosters_and_rebuild(year)
+        # Run in thread pool to avoid blocking the event loop
+        # (sync_rosters_and_rebuild uses time.sleep for rate limiting)
+        result = await asyncio.to_thread(sync_rosters_and_rebuild, year)
         if result is None:
             raise HTTPException(
                 status_code=500,
