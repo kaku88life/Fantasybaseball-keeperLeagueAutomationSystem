@@ -697,6 +697,20 @@ def get_keeper_selections(year: int, team_id: int) -> list[dict]:
         )
 
 
+def get_all_keeper_selections(year: int) -> list[dict]:
+    """Get all keeper selections for a year across all teams (with manager name)."""
+    with get_conn() as conn:
+        return _fetchall(
+            conn,
+            """SELECT ks.*, t.manager_name
+               FROM keeper_selections ks
+               JOIN teams t ON ks.team_id = t.id
+               WHERE ks.year = %s
+               ORDER BY t.manager_name, ks.player_name""",
+            (year,),
+        )
+
+
 def upsert_keeper_selection(
     year: int,
     team_id: int,

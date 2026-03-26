@@ -3,13 +3,15 @@ Build 2027 season snapshot from Yahoo 2026 roster + 2026 keeper contracts.
 
 Logic:
   1. Start from Yahoo 2026 season roster (yahoo_2026_rosters.json, 27~33 players/team)
-  2. Cross-reference with 2026 keepers (2026_contracts_v2.json) for contract types
-  3. Players IN keeper list -> keep their 2026 contract as-is (B/N/O/R, no evolution)
-  4. Players NOT in keeper list -> acquired in 2026 draft or FAAB -> A contract
-  5. ALL players are included (including O contracts)
-
-The /2027 page shows "2026 Season Roster" which is the current season state,
-NOT an evolved projection. Contract evolution happens during keeper selection.
+  2. Cross-reference with 2026 keepers (2026_contracts_v2.json) for base contract types
+  3. Apply 2026 keeper_selections from DB (if submitted):
+     - keep: A->B, B->O, R->R (reflected in next_contract)
+     - activate: R->A
+     - extend: B->N(x), salary += x*$5
+     - release/fa: marked as FA
+  4. If no keeper_selections exist for a team, use base contract as-is
+  5. Players NOT in keeper list -> acquired in 2026 draft or FAAB -> A contract
+  6. ALL players are included (including O/FA contracts)
 
 Produces data/2027_contracts_v1.json and loads into DB as year=2027.
 
@@ -35,7 +37,7 @@ from src.contract.models import (
     SpecialStatus,
     Team,
 )
-from api.database import init_db, save_snapshot, upsert_team
+from api.database import init_db, save_snapshot, upsert_team, get_all_keeper_selections
 from api.serializers import league_state_to_dict
 
 DRAFT_PATH = ROOT / "data" / "yahoo_2026_draft.json"
@@ -117,6 +119,23 @@ def main():
     for d in draft:
         draft_lookup[(norm(d["manager"]), norm(d["player_name"]))] = d
 
+    # 4. Load 2026 keeper selections from DB (actual GM decisions)
+    #    These reflect activate/extend/keep/release choices made by each GM.
+    #    Only applied when selections exist; otherwise fall back to base contract.
+    selection_lookup: dict[tuple[str, str], dict] = {}
+    try:
+        selections = get_all_keeper_selections(year=2026)
+        for sel in selections:
+            key = (norm(sel["manager_name"]), norm(sel["player_name"]))
+            selection_lookup[key] = sel
+        if selections:
+            print(f"Loaded {len(selections)} keeper selections from DB (2026)")
+        else:
+            print("No 2026 keeper selections found in DB (will use base contracts)")
+    except Exception as e:
+        print(f"Could not load keeper selections from DB: {e}")
+        print("  Using base contracts without evolution")
+
     salary_cap = get_salary_cap(YEAR)
     print(f"\nBuilding 2027 snapshot (salary cap: ${salary_cap})")
     print("=" * 60)
@@ -127,7 +146,7 @@ def main():
     total_draft = 0
     total_faab = 0
 
-    # 4. Iterate Yahoo rosters (the actual 2026 season roster, 27~33 players/team)
+    # 5. Iterate Yahoo rosters (the actual 2026 season roster, 27~33 players/team)
     for team_key, team_info in sorted(rosters.items(), key=lambda x: x[1]["manager"]):
         mgr = team_info["manager"]
         mgr_norm = norm(mgr)
@@ -150,11 +169,39 @@ def main():
             # Check 1: Is this player in the 2026 keepers list?
             k = mgr_keepers.get(pname_norm)
             if k is not None:
-                # Keeper: use their 2026 contract as-is (no evolution)
+                # Start with base 2026 contract
                 ct = k["contract_type"]
                 salary = k["salary"]
                 ext = k["ext"]
                 source = k["source"]
+
+                # Apply keeper selection if exists (evolve contract based on GM choice)
+                sel = selection_lookup.get((mgr_norm, pname_norm))
+                if sel and sel.get("next_contract"):
+                    nc = sel["next_contract"]  # e.g. "$14/B", "$1/A", "$35/N3"
+                    # Parse next_contract: "$salary/type[ext]"
+                    if "/" in nc:
+                        nc_salary_str, nc_type_str = nc.split("/", 1)
+                        nc_salary = int(nc_salary_str.replace("$", "").strip())
+                        # Extract contract type and extension years (e.g. "N3" -> "N", 3)
+                        nc_ext = 0
+                        nc_ct = nc_type_str
+                        if nc_ct.startswith("N") and len(nc_ct) > 1 and nc_ct[1:].isdigit():
+                            nc_ext = int(nc_ct[1:])
+                            nc_ct = "N"
+                        # Apply evolved contract
+                        ct = nc_ct
+                        salary = nc_salary
+                        ext = nc_ext
+
+                    # If action is release/fa, player is gone but still on Yahoo roster
+                    action = sel.get("action", "")
+                    if action in ("release", "release_normal", "fa"):
+                        ct = "FA"
+                        salary = 0
+                        ext = 0
+                        source = "released"
+
                 mgr_keeper_count += 1
             else:
                 # Check 2: Is this player in the 2026 draft?
