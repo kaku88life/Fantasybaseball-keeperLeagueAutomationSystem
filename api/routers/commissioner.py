@@ -1100,8 +1100,17 @@ async def sync_rosters(
     from src.notification.scheduler import sync_rosters_and_rebuild
     try:
         result = sync_rosters_and_rebuild(year)
+        if result is None:
+            raise HTTPException(
+                status_code=500,
+                detail="Sync returned no result. Check server logs for details."
+            )
         return result
+    except HTTPException:
+        raise
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
 

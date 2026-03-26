@@ -624,21 +624,28 @@ def sync_rosters_and_rebuild(year: int) -> dict:
 
         league_key = get_league_key(year)
         if not league_key:
-            print(f"[SnapshotRebuild] No league key for year {year}")
-            return
+            raise RuntimeError(f"No league key configured for year {year}")
 
+        print(f"[SnapshotRebuild] League key: {league_key}")
         db_teams = get_all_teams()
 
         # Fetch teams list from Yahoo
         teams_path = f"/league/{league_key}/teams"
+        print(f"[SnapshotRebuild] Fetching teams from: {teams_path}")
         teams_data = yahoo_api_get(teams_path)
         league_section = teams_data.get("fantasy_content", {}).get("league", [])
         if len(league_section) < 2:
-            print("[SnapshotRebuild] No teams data from Yahoo API")
-            return
+            raise RuntimeError(
+                f"Yahoo API returned no teams data. Response keys: "
+                f"{list(teams_data.get('fantasy_content', {}).keys())}"
+            )
 
         teams_section = league_section[1].get("teams", {})
         team_count = teams_section.get("count", 0)
+        print(f"[SnapshotRebuild] Found {team_count} teams from Yahoo API")
+
+        if team_count == 0:
+            raise RuntimeError("Yahoo API returned 0 teams. Check league key or API status.")
 
         # Map yahoo_team_id -> manager_name from DB
         yahoo_id_to_manager: dict[str, str] = {}
@@ -737,6 +744,10 @@ def sync_rosters_and_rebuild(year: int) -> dict:
                         "players": players,
                     }
                     total_players += len(players)
+                    print(
+                        f"[SnapshotRebuild] {manager_name}: {len(players)} players "
+                        f"({len(all_rosters)}/{team_count} teams done)"
+                    )
                     time.sleep(1.0)
                     break  # success, exit retry loop
 
