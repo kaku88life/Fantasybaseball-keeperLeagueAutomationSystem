@@ -1,14 +1,15 @@
 """
-Build 2027 contract projections from the 2026 post-draft state.
+Build 2027 season snapshot from Yahoo 2026 roster + 2026 keeper contracts.
 
-Evolves all 2026 contracts to 2027 according to league rules:
-  A -> B (salary unchanged)
-  B -> O (salary unchanged, expiring year)
-  N(x) -> N(x-1) when x > 1
-  N(1) -> O
-  O -> EXPIRED (free agent)
-  R -> R (farm rookie, unchanged)
-  Draft (A) -> B next year
+Logic:
+  1. Start from Yahoo 2026 season roster (yahoo_2026_rosters.json, 27~33 players/team)
+  2. Cross-reference with 2026 keepers (2026_contracts_v2.json) for contract types
+  3. Players IN keeper list -> keep their 2026 contract as-is (B/N/O/R, no evolution)
+  4. Players NOT in keeper list -> acquired in 2026 draft or FAAB -> A contract
+  5. ALL players are included (including O contracts)
+
+The /2027 page shows "2026 Season Roster" which is the current season state,
+NOT an evolved projection. Contract evolution happens during keeper selection.
 
 Produces data/2027_contracts_v1.json and loads into DB as year=2027.
 
@@ -51,196 +52,171 @@ def norm(name: str) -> str:
     return unicodedata.normalize("NFKC", name).lower().strip()
 
 
-def evolve_contract(ct: str, salary: int, ext: int) -> tuple[str, int, int, bool]:
-    """Evolve a 2026 contract to its 2027 state.
-
-    Returns (new_type, new_salary, new_ext, is_expired).
-    Salary is unchanged in all evolution steps (per league rules).
-    """
-    if ct == "A":
-        return "B", salary, 0, False
-    elif ct == "B":
-        return "O", salary, 0, False
-    elif ct == "N":
-        if ext > 1:
-            return "N", salary, ext - 1, False
-        else:
-            # N(1) -> O
-            return "O", salary, 0, False
-    elif ct == "O":
-        return "O", 0, 0, True  # EXPIRED
-    elif ct == "R":
-        return "R", salary, 0, False
-    else:
-        return "A", salary, 0, False
-
-
 def main():
-    # 1. Load 2026 keeper contracts + draft results to build complete 2026 state
-    print("Loading 2026 contracts...")
+    # 1. Load data sources
+    print("Loading 2026 keeper contracts...")
     with open(CONTRACTS_PATH, "r", encoding="utf-8") as f:
         contracts_data = json.load(f)
 
-    print("Loading 2026 draft...")
+    print("Loading 2026 draft results...")
     with open(DRAFT_PATH, "r", encoding="utf-8") as f:
         draft = json.load(f)
 
-    print("Loading 2026 rosters...")
+    print("Loading Yahoo 2026 rosters...")
     with open(ROSTERS_PATH, "r", encoding="utf-8") as f:
         rosters = json.load(f)
 
-    # Build keeper lookup
-    keeper_lookup: dict[str, dict] = {}
+    # 2. Build keeper lookup: manager_norm -> player_norm -> contract info
+    #    These are pre-2026 keepers (players carried over into 2026 season)
+    keeper_lookup: dict[str, dict[str, dict]] = {}
     for mgr, team_data in contracts_data["teams"].items():
+        mgr_norm = norm(mgr)
+        keeper_lookup[mgr_norm] = {}
         for p in team_data["players"]:
-            keeper_lookup[norm(p["name"])] = {
-                "manager": mgr,
-                "contract_2026": p.get("contract_2026", ""),
-                "contract_2026_type": p.get("contract_2026_type", ""),
-                "contract_2026_salary": p.get("contract_2026_salary", 0),
-                "contract_2026_ext": p.get("contract_2026_ext", 0),
-                "source": p.get("source", ""),
+            keeper_lookup[mgr_norm][norm(p["name"])] = {
+                "contract_type": p.get("contract_2026_type") or "A",
+                "salary": p.get("contract_2026_salary") or 0,
+                "ext": p.get("contract_2026_ext") or 0,
+                "source": p.get("source", "keeper"),
+                "contract_display": p.get("contract_2026", ""),
             }
 
-    # Build roster info
-    roster_lookup: dict[str, dict[str, dict]] = {}
-    manager_team_keys: dict[str, str] = {}
-    for team_key, team_info in rosters.items():
-        mgr = team_info["manager"]
-        manager_team_keys[mgr] = team_key
-        roster_lookup[mgr] = {}
-        for p in team_info["players"]:
-            roster_lookup[mgr][norm(p["name"])] = p
-
-    # 2. Build 2026 state and evolve to 2027
-    from collections import defaultdict
-    draft_by_manager: defaultdict[str, list[dict]] = defaultdict(list)
+    # 3. Build draft lookup: (manager_norm, player_norm) -> draft info
+    draft_lookup: dict[tuple[str, str], dict] = {}
     for d in draft:
-        draft_by_manager[d["manager"]].append(d)
+        draft_lookup[(norm(d["manager"]), norm(d["player_name"]))] = d
 
     salary_cap = get_salary_cap(YEAR)
-    print(f"\nBuilding 2027 contracts (salary cap: ${salary_cap})")
+    print(f"\nBuilding 2027 snapshot (salary cap: ${salary_cap})")
     print("=" * 60)
 
     output_teams: dict[str, dict] = {}
     teams: list[Team] = []
-    total_kept = 0
-    total_expired = 0
+    total_keeper = 0
+    total_draft = 0
+    total_faab = 0
 
-    for mgr, picks in sorted(draft_by_manager.items()):
-        players_2027: list[dict] = []
+    # 4. Iterate Yahoo rosters (the actual 2026 season roster, 27~33 players/team)
+    for team_key, team_info in sorted(rosters.items(), key=lambda x: x[1]["manager"]):
+        mgr = team_info["manager"]
+        mgr_norm = norm(mgr)
+        team_name = team_info.get("team_name", "")
+        mgr_keepers = keeper_lookup.get(mgr_norm, {})
+
+        players_out: list[dict] = []
         model_players: list[Player] = []
-        mgr_kept = 0
-        mgr_expired = 0
+        mgr_keeper_count = 0
+        mgr_draft_count = 0
+        mgr_faab_count = 0
 
-        for d in picks:
-            pname = d["player_name"]
+        for rp in team_info["players"]:
+            pname = rp["name"]
             pname_norm = norm(pname)
-            roster_info = roster_lookup.get(mgr, {}).get(pname_norm, {})
-            position = d.get("position", "") or roster_info.get("position", "")
-            mlb_team = (d.get("mlb_team", "") or roster_info.get("team", "")).upper()
+            position = rp.get("position", "")
+            mlb_team = rp.get("team", "").upper()
+            player_key = rp.get("player_key", "")
 
-            # Determine 2026 contract
-            k = keeper_lookup.get(pname_norm)
-            is_keeper = (
-                k is not None
-                and k["manager"] == mgr
-                and k["contract_2026"] != "EXPIRED"
-            )
-
-            if is_keeper:
-                ct_2026 = k["contract_2026_type"]
-                salary_2026 = k["contract_2026_salary"]
-                ext_2026 = k["contract_2026_ext"]
+            # Check 1: Is this player in the 2026 keepers list?
+            k = mgr_keepers.get(pname_norm)
+            if k is not None:
+                # Keeper: use their 2026 contract as-is (no evolution)
+                ct = k["contract_type"]
+                salary = k["salary"]
+                ext = k["ext"]
                 source = k["source"]
+                mgr_keeper_count += 1
             else:
-                ct_2026 = "A"
-                salary_2026 = d["cost"]
-                ext_2026 = 0
-                source = "draft"
+                # Check 2: Is this player in the 2026 draft?
+                d = draft_lookup.get((mgr_norm, pname_norm))
+                if d is not None:
+                    ct = "A"
+                    salary = d["cost"]
+                    ext = 0
+                    source = "draft"
+                    # Use draft data for position/team if roster data is missing
+                    position = position or d.get("position", "")
+                    mlb_team = mlb_team or (d.get("mlb_team", "")).upper()
+                    player_key = player_key or d.get("player_key", "")
+                    mgr_draft_count += 1
+                else:
+                    # Not in keepers or draft -> FAAB pickup during 2026 season
+                    ct = "A"
+                    salary = 1  # FAAB minimum bid
+                    ext = 0
+                    source = "faab"
+                    mgr_faab_count += 1
 
-            # Evolve to 2027
-            ct_2027, salary_2027, ext_2027, is_expired = evolve_contract(
-                ct_2026, salary_2026, ext_2026
-            )
-
-            if is_expired:
-                mgr_expired += 1
-                # EXPIRED players are free agents — do NOT include in 2027 roster
-                continue
-
-            mgr_kept += 1
-            ext_str = str(ext_2027) if ext_2027 > 0 else ""
-            contract_2027_str = f"${salary_2027}/{ct_2027}{ext_str}"
+            ext_str = str(ext) if ext > 0 else ""
+            contract_display = f"${salary}/{ct}{ext_str}"
 
             # JSON record
-            players_2027.append({
+            players_out.append({
                 "name": pname,
-                "player_key": d.get("player_key", ""),
+                "player_key": player_key,
                 "position": position,
                 "mlb_team": mlb_team,
                 "source": source,
-                "contract_2026": f"${salary_2026}/{ct_2026}{ext_2026 if ext_2026 else ''}",
-                "contract_2026_type": ct_2026,
-                "contract_2026_salary": salary_2026,
-                "contract_2027_type": ct_2027,
-                "contract_2027_salary": salary_2027,
-                "contract_2027_ext": ext_2027,
-                "contract_2027": contract_2027_str,
-                "can_keep": ct_2027 != "O",
+                "contract_type": ct,
+                "salary": salary,
+                "extension_years": ext,
+                "contract_display": contract_display,
             })
 
-            # Model for DB
-            ct_enum = CT_MAP.get(ct_2027, ContractType.A)
+            # Model for DB snapshot
+            ct_enum = CT_MAP.get(ct, ContractType.A)
             contract = Contract(
                 contract_type=ct_enum,
-                salary=salary_2027,
-                extension_years=ext_2027,
+                salary=salary,
+                extension_years=ext,
                 special_status=SpecialStatus.NONE,
             )
             model_players.append(Player(
                 name=pname,
                 position=position,
                 contract=contract,
-                yahoo_player_id=d.get("player_key", ""),
+                yahoo_player_id=player_key,
                 is_active_keeper=(ct_enum != ContractType.R),
                 source=source,
                 mlb_team=mlb_team,
             ))
 
         output_teams[mgr] = {
-            "team_key": manager_team_keys.get(mgr, ""),
-            "players": players_2027,
+            "team_key": team_key,
+            "players": players_out,
         }
 
         team = Team(
             manager_name=mgr,
-            team_name="",
-            yahoo_team_id=manager_team_keys.get(mgr, ""),
+            team_name=team_name,
+            yahoo_team_id=team_key,
             players=model_players,
             buyout_records=[],
             salary_cap=salary_cap,
             faab_budget=FAAB_BASE,
-            ranking_bonus=0,  # 2026 season hasn't happened yet
+            ranking_bonus=0,  # 2026 season hasn't ended yet
             trade_compensation=0,
         )
         teams.append(team)
 
-        total_kept += mgr_kept
-        total_expired += mgr_expired
-        print(f"  {mgr}: {mgr_kept} keepable + {mgr_expired} expired = {len(picks)}")
+        total_keeper += mgr_keeper_count
+        total_draft += mgr_draft_count
+        total_faab += mgr_faab_count
+        print(
+            f"  {mgr:20s} {len(team_info['players']):3d} players "
+            f"(keeper:{mgr_keeper_count} draft:{mgr_draft_count} faab:{mgr_faab_count})"
+        )
 
-    # 3. Save JSON
+    # 5. Save JSON
     output = {
         "year": YEAR,
-        "source": "auto_evolved_from_2026",
+        "source": "yahoo_2026_roster_with_contracts",
         "teams": output_teams,
     }
     with open(OUTPUT_PATH, "w", encoding="utf-8") as f:
         json.dump(output, f, ensure_ascii=False, indent=2)
     print(f"\nSaved {OUTPUT_PATH.name}")
 
-    # 4. Save to DB
+    # 6. Save to DB
     ls = LeagueState(year=YEAR, teams=teams)
     ls_dict = league_state_to_dict(ls)
 
@@ -262,8 +238,8 @@ def main():
 
     # Summary
     print(f"\n{'=' * 60}")
-    print(f"2027 projections: {total_kept} keepable + {total_expired} expired")
-    print(f"Salary cap: ${salary_cap}")
+    print(f"Total: {total_keeper} keepers + {total_draft} draft + {total_faab} faab")
+    print(f"Teams: {len(teams)} | Salary cap: ${salary_cap}")
     print(f"Output: {OUTPUT_PATH}")
 
 
