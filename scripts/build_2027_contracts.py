@@ -222,7 +222,15 @@ def main():
 
     try:
         import asyncio
-        asyncio.run(init_db())
+        # init_db is async — handle both standalone and scheduler contexts
+        try:
+            loop = asyncio.get_running_loop()
+            # Already in an event loop (e.g. scheduler context) — skip async init
+            # DB tables should already exist from startup lifespan
+        except RuntimeError:
+            # No running loop (standalone script) — safe to use asyncio.run
+            asyncio.run(init_db())
+
         save_snapshot(year=YEAR, data=ls_dict, source_file="2027_contracts_v1.json")
         print(f"Saved league snapshot for year {YEAR}")
 

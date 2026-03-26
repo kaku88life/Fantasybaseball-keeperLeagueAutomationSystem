@@ -601,6 +601,184 @@ def _daily_roster_ownership_sync_job():
         print(f"[RosterSync] Error: {e}")
 
 
+def _daily_roster_snapshot_rebuild_job():
+    """Daily job: fetch full Yahoo rosters to JSON, then rebuild 2027 snapshot.
+
+    This keeps /2027 page ("2026 Season Roster") up-to-date with FAAB pickups,
+    IL/NA moves, and other in-season roster changes.
+    Runs after roster_ownership_sync (Job 7) at DAILY_SYNC_HOUR:45.
+    """
+    now = datetime.now()
+    month = now.month
+
+    # Only run during MLB season (March-October)
+    if month < 3 or month > 10:
+        print(f"[SnapshotRebuild] Off-season (month {month}), skipping.")
+        return
+
+    year = now.year
+    print(f"[SnapshotRebuild] Fetching Yahoo {year} rosters...")
+
+    try:
+        from api.yahoo_service import yahoo_api_get, YahooTokenError
+        from api.database import get_all_teams
+        from config.settings import get_league_key
+        import json as json_mod
+        import time
+        from pathlib import Path
+
+        league_key = get_league_key(year)
+        if not league_key:
+            print(f"[SnapshotRebuild] No league key for year {year}")
+            return
+
+        db_teams = get_all_teams()
+
+        # Fetch teams list from Yahoo
+        teams_path = f"/league/{league_key}/teams"
+        teams_data = yahoo_api_get(teams_path)
+        league_section = teams_data.get("fantasy_content", {}).get("league", [])
+        if len(league_section) < 2:
+            print("[SnapshotRebuild] No teams data from Yahoo API")
+            return
+
+        teams_section = league_section[1].get("teams", {})
+        team_count = teams_section.get("count", 0)
+
+        # Map yahoo_team_id -> manager_name from DB
+        yahoo_id_to_manager: dict[str, str] = {}
+        for db_team in db_teams:
+            if db_team.get("yahoo_team_id"):
+                yahoo_id_to_manager[str(db_team["yahoo_team_id"])] = db_team["manager_name"]
+
+        # Build full rosters dict: team_key -> {manager, team_name, players[]}
+        all_rosters: dict[str, dict] = {}
+        total_players = 0
+
+        for i in range(team_count):
+            team_entry = teams_section.get(str(i), {}).get("team", [])
+            if not team_entry:
+                continue
+
+            # Extract team info
+            team_info_list = team_entry[0] if isinstance(team_entry, list) else []
+            team_key = ""
+            team_name = ""
+            manager_name = ""
+
+            for item in team_info_list:
+                if isinstance(item, dict):
+                    if "team_key" in item:
+                        team_key = item["team_key"]
+                    if "name" in item:
+                        team_name = item["name"]
+
+            # Resolve manager name from DB mapping
+            team_id_str = team_key.split(".")[-1] if team_key else ""
+            manager_name = yahoo_id_to_manager.get(team_key, "")
+            if not manager_name:
+                # Fallback: try from Yahoo managers field
+                managers_list = next(
+                    (item["managers"] for item in team_info_list
+                     if isinstance(item, dict) and "managers" in item),
+                    []
+                )
+                if managers_list and isinstance(managers_list, list):
+                    mgr = managers_list[0].get("manager", {})
+                    manager_name = mgr.get("nickname", "")
+
+            if not team_key or not manager_name:
+                continue
+
+            # Fetch this team's full roster
+            try:
+                roster_path = f"/team/{team_key}/roster"
+                roster_data = yahoo_api_get(roster_path)
+                roster_section = (
+                    roster_data.get("fantasy_content", {}).get("team", [])
+                )
+
+                players: list[dict] = []
+                if len(roster_section) >= 2:
+                    players_section = roster_section[1].get("roster", {}).get("players", {})
+                    p_count = players_section.get("count", 0)
+                    for j in range(p_count):
+                        player_entry = players_section.get(str(j), {}).get("player", [])
+                        if not player_entry:
+                            continue
+                        # Parse full player data (reuse yahoo_client pattern)
+                        info_list = player_entry[0] if isinstance(player_entry, list) else []
+                        p = {
+                            "name": "", "player_key": "", "position": "",
+                            "team": "", "selected_position": "", "status": "",
+                        }
+                        for item in info_list:
+                            if isinstance(item, dict):
+                                if "name" in item:
+                                    p["name"] = item["name"].get("full", "")
+                                if "player_key" in item:
+                                    p["player_key"] = item["player_key"]
+                                if "display_position" in item:
+                                    p["position"] = item["display_position"]
+                                if "editorial_team_abbr" in item:
+                                    p["team"] = item["editorial_team_abbr"]
+                                if "status" in item:
+                                    p["status"] = item["status"]
+                        # Selected position
+                        if len(player_entry) > 1 and isinstance(player_entry[1], dict):
+                            sp_data = player_entry[1].get("selected_position", [])
+                            if isinstance(sp_data, list):
+                                for s in sp_data:
+                                    if isinstance(s, dict) and "position" in s:
+                                        p["selected_position"] = s["position"]
+                        if p["name"]:
+                            players.append(p)
+
+                all_rosters[team_key] = {
+                    "manager": manager_name,
+                    "team_name": team_name,
+                    "players": players,
+                }
+                total_players += len(players)
+                time.sleep(0.6)
+
+            except Exception as e:
+                if "429" in str(e):
+                    time.sleep(10)
+                else:
+                    print(f"[SnapshotRebuild] Error fetching {team_key}: {e}")
+
+        if not all_rosters:
+            print("[SnapshotRebuild] No roster data fetched, aborting.")
+            return
+
+        # Save to yahoo_{year}_rosters.json
+        data_dir = Path(__file__).resolve().parents[2] / "data"
+        rosters_path = data_dir / f"yahoo_{year}_rosters.json"
+        rosters_path.write_text(
+            json_mod.dumps(all_rosters, indent=2, ensure_ascii=False),
+            encoding="utf-8",
+        )
+        print(
+            f"[SnapshotRebuild] Saved {rosters_path.name}: "
+            f"{len(all_rosters)} teams, {total_players} players"
+        )
+
+        # Rebuild 2027 snapshot (year+1)
+        next_year = year + 1
+        try:
+            from scripts.build_2027_contracts import main as rebuild_snapshot
+            rebuild_snapshot()
+            print(f"[SnapshotRebuild] Rebuilt year {next_year} snapshot successfully.")
+        except Exception as e:
+            print(f"[SnapshotRebuild] Snapshot rebuild error: {e}")
+
+    except YahooTokenError as e:
+        print(f"[SnapshotRebuild] Token error: {e}")
+    except Exception as e:
+        print(f"[SnapshotRebuild] Error: {e}")
+
+
 def _weekly_war_report_job():
     """Weekly job (Monday 18:45): generate and send weekly war report to LINE."""
     now = datetime.now()
@@ -1530,6 +1708,18 @@ def start_scheduler():
         replace_existing=True,
     )
 
+    # Job 11: Daily roster fetch + snapshot rebuild (after Job 7 roster ownership sync)
+    _scheduler.add_job(
+        _daily_roster_snapshot_rebuild_job,
+        CronTrigger(
+            hour=DAILY_SYNC_HOUR,
+            minute=45,
+            timezone=REMINDER_CRON_TZ,
+        ),
+        id="roster_snapshot_rebuild",
+        replace_existing=True,
+    )
+
     # Job 8: Weekly war report (every Monday at 18:45 - after ranking refresh)
     _scheduler.add_job(
         _weekly_war_report_job,
@@ -1569,6 +1759,7 @@ def start_scheduler():
     print(f"[Scheduler] Season start notification: {DAILY_SYNC_HOUR}:00 {REMINDER_CRON_TZ} "
           f"(Opening Day: {SEASON_START_DATE})")
     print(f"[Scheduler] Daily roster ownership sync: {DAILY_SYNC_HOUR}:30 {REMINDER_CRON_TZ}")
+    print(f"[Scheduler] Daily roster + snapshot rebuild: {DAILY_SYNC_HOUR}:45 {REMINDER_CRON_TZ}")
     print("[Scheduler] Weekly war report: every Monday 18:45")
     # Job 10: Annual prospect ranking update (Aug 15)
     _scheduler.add_job(
