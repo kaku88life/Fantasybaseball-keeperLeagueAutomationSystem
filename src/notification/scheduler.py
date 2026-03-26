@@ -647,19 +647,28 @@ def sync_rosters_and_rebuild(year: int) -> dict:
         if team_count == 0:
             raise RuntimeError("Yahoo API returned 0 teams. Check league key or API status.")
 
-        # Map yahoo_team_id -> manager_name from DB
+        # Map yahoo_team_id -> manager_name from DB (multiple key formats)
         yahoo_id_to_manager: dict[str, str] = {}
         for db_team in db_teams:
-            if db_team.get("yahoo_team_id"):
-                yahoo_id_to_manager[str(db_team["yahoo_team_id"])] = db_team["manager_name"]
+            ytid = db_team.get("yahoo_team_id")
+            if ytid:
+                ytid_str = str(ytid)
+                yahoo_id_to_manager[ytid_str] = db_team["manager_name"]
+                # Also index by just the team number (e.g. "1" from "469.l.80910.t.1")
+                if "." in ytid_str:
+                    yahoo_id_to_manager[ytid_str.split(".")[-1]] = db_team["manager_name"]
+
+        print(f"[SnapshotRebuild] DB team mappings: {yahoo_id_to_manager}")
 
         # Build full rosters dict: team_key -> {manager, team_name, players[]}
         all_rosters: dict[str, dict] = {}
         total_players = 0
+        skipped_teams: list[str] = []
 
         for i in range(team_count):
             team_entry = teams_section.get(str(i), {}).get("team", [])
             if not team_entry:
+                skipped_teams.append(f"team_{i}: no entry")
                 continue
 
             # Extract team info
@@ -675,9 +684,12 @@ def sync_rosters_and_rebuild(year: int) -> dict:
                     if "name" in item:
                         team_name = item["name"]
 
-            # Resolve manager name from DB mapping
-            team_id_str = team_key.split(".")[-1] if team_key else ""
-            manager_name = yahoo_id_to_manager.get(team_key, "")
+            # Resolve manager name from DB mapping (try full key, then number only)
+            team_num = team_key.split(".")[-1] if team_key else ""
+            manager_name = (
+                yahoo_id_to_manager.get(team_key, "")
+                or yahoo_id_to_manager.get(team_num, "")
+            )
             if not manager_name:
                 # Fallback: try from Yahoo managers field
                 managers_list = next(
@@ -690,6 +702,11 @@ def sync_rosters_and_rebuild(year: int) -> dict:
                     manager_name = mgr.get("nickname", "")
 
             if not team_key or not manager_name:
+                skipped_teams.append(
+                    f"team_{i}: key={team_key!r} name={team_name!r} manager={manager_name!r}"
+                )
+                print(f"[SnapshotRebuild] SKIPPING team_{i}: "
+                      f"key={team_key!r} manager={manager_name!r}")
                 continue
 
             # Fetch this team's full roster (with retry on 429)
@@ -764,8 +781,21 @@ def sync_rosters_and_rebuild(year: int) -> dict:
         # Validate: require ALL teams with players before saving
         teams_with_players = sum(1 for t in all_rosters.values() if len(t.get("players", [])) > 0)
         if teams_with_players < 16:
-            msg = (f"Only {teams_with_players}/16 teams have player data. "
-                   f"Aborting to prevent data loss. Try again later.")
+            # Build diagnostic details
+            empty_teams = [
+                f"{t['manager']}({tk}): {len(t.get('players', []))}p"
+                for tk, t in all_rosters.items()
+                if len(t.get("players", [])) == 0
+            ]
+            diag = (
+                f"teams_in_api={team_count}, "
+                f"teams_matched={len(all_rosters)}, "
+                f"teams_with_players={teams_with_players}, "
+                f"skipped={skipped_teams}, "
+                f"empty={empty_teams}"
+            )
+            msg = (f"Only {teams_with_players}/{team_count} teams have player data. "
+                   f"Aborting to prevent data loss. Diagnostic: {diag}")
             print(f"[SnapshotRebuild] {msg}")
             raise RuntimeError(msg)
 
