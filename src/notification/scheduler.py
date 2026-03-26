@@ -664,6 +664,7 @@ def sync_rosters_and_rebuild(year: int) -> dict:
         all_rosters: dict[str, dict] = {}
         total_players = 0
         skipped_teams: list[str] = []
+        debug_logs: list[str] = []
 
         for i in range(team_count):
             team_entry = teams_section.get(str(i), {}).get("team", [])
@@ -718,6 +719,31 @@ def sync_rosters_and_rebuild(year: int) -> dict:
                     roster_section = (
                         roster_data.get("fantasy_content", {}).get("team", [])
                     )
+
+                    # Debug: log structure of first team's response
+                    if i == 0:
+                        import json as _dbg_json
+                        dbg = f"roster_section type={type(roster_section).__name__}, len={len(roster_section) if isinstance(roster_section, (list, dict)) else '?'}"
+                        debug_logs.append(dbg)
+                        print(f"[SnapshotRebuild] DEBUG {dbg}")
+                        if isinstance(roster_section, list) and len(roster_section) >= 2:
+                            rs1 = roster_section[1]
+                            dbg2 = f"rs[1] keys={list(rs1.keys()) if isinstance(rs1, dict) else type(rs1).__name__}"
+                            debug_logs.append(dbg2)
+                            if isinstance(rs1, dict) and "roster" in rs1:
+                                ri = rs1["roster"]
+                                dbg3 = f"roster keys={list(ri.keys()) if isinstance(ri, dict) else type(ri).__name__}"
+                                debug_logs.append(dbg3)
+                                if isinstance(ri, dict) and "players" in ri:
+                                    ps = ri["players"]
+                                    dbg4 = f"players keys={list(ps.keys())[:5] if isinstance(ps, dict) else type(ps).__name__}, count={ps.get('count','?') if isinstance(ps, dict) else '?'}"
+                                    debug_logs.append(dbg4)
+                            else:
+                                snippet = _dbg_json.dumps(rs1, ensure_ascii=False)[:400]
+                                debug_logs.append(f"rs[1]={snippet}")
+                        else:
+                            snippet = _dbg_json.dumps(roster_section, ensure_ascii=False)[:400]
+                            debug_logs.append(f"full={snippet}")
 
                     players: list[dict] = []
                     if len(roster_section) >= 2:
@@ -791,6 +817,7 @@ def sync_rosters_and_rebuild(year: int) -> dict:
                 f"teams_in_api={team_count}, "
                 f"teams_matched={len(all_rosters)}, "
                 f"teams_with_players={teams_with_players}, "
+                f"debug={debug_logs}, "
                 f"skipped={skipped_teams}, "
                 f"empty={empty_teams}"
             )
