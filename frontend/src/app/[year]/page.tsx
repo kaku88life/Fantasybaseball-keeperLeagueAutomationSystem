@@ -55,7 +55,7 @@ function YearOverviewContent() {
   const { user } = useAuth();
   const router = useRouter();
 
-  const [activeTab, setActiveTab] = useState<TabKey>("season-end");
+  const [activeTab, setActiveTab] = useState<TabKey>("in-season");
 
   // SWR cached data fetches
   const { data: years = [] } = useSWR("years", getYears);
@@ -117,9 +117,9 @@ function YearOverviewContent() {
 
   const tabs: { key: TabKey; label: string; sublabel: string }[] = [
     {
-      key: "season-end",
-      label: `${year - 1} 賽季名單`,
-      sublabel: "Season-End Roster",
+      key: "in-season",
+      label: `${year} 賽季中名單`,
+      sublabel: "In-Season Roster",
     },
     {
       key: "keepers",
@@ -127,9 +127,9 @@ function YearOverviewContent() {
       sublabel: "Pre-Season Keepers",
     },
     {
-      key: "in-season",
-      label: `${year} 賽季中名單`,
-      sublabel: "In-Season Roster",
+      key: "season-end",
+      label: `${year - 1} 賽季名單`,
+      sublabel: "Season-End Roster",
     },
   ];
 
@@ -215,6 +215,7 @@ function YearOverviewContent() {
             findTeamId={findTeamId}
             showMlbTeams
             linkSuffix="?view=roster"
+            isInSeason
           />
         ) : (
           <div className="py-10 text-center text-gray-400 text-sm">
@@ -237,6 +238,7 @@ function SeasonEndTab({
   findTeamId,
   showMlbTeams = false,
   linkSuffix = "",
+  isInSeason = false,
 }: {
   summary: { teams: TeamSummary[] };
   user: { manager_name?: string | null } | null;
@@ -244,6 +246,7 @@ function SeasonEndTab({
   findTeamId: (name: string) => number | null;
   showMlbTeams?: boolean;
   linkSuffix?: string;
+  isInSeason?: boolean;
 }) {
   return (
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 sm:gap-4">
@@ -298,27 +301,31 @@ function SeasonEndTab({
                   )}
                 </span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-500">團隊薪資:</span>
-                <span className="font-medium">${t.total_keeper_cost}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-500">可用薪資:</span>
-                <span
-                  className={
-                    t.available_salary < 20
-                      ? "font-medium text-red-600"
-                      : "text-green-700"
-                  }
-                >
-                  ${t.available_salary}
-                </span>
-              </div>
-              {t.ranking_bonus > 0 && (
-                <div className="flex justify-between">
-                  <span className="text-gray-500">排名獎勵:</span>
-                  <span className="text-yellow-600">+${t.ranking_bonus}</span>
-                </div>
+              {!isInSeason && (
+                <>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">團隊薪資:</span>
+                    <span className="font-medium">${t.total_keeper_cost}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">可用薪資:</span>
+                    <span
+                      className={
+                        t.available_salary < 20
+                          ? "font-medium text-red-600"
+                          : "text-green-700"
+                      }
+                    >
+                      ${t.available_salary}
+                    </span>
+                  </div>
+                  {t.ranking_bonus > 0 && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">排名獎勵:</span>
+                      <span className="text-yellow-600">+${t.ranking_bonus}</span>
+                    </div>
+                  )}
+                </>
               )}
             </div>
             {/* MLB team distribution (top teams with 2+ players) */}
