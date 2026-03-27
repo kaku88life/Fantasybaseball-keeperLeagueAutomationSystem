@@ -10,6 +10,7 @@ import {
   submitKeeperList,
   updateKeeperSelections,
 } from "@/lib/api";
+import { getTopMLBTeams, mlbTeamBadgeColor } from "@/lib/team-stats";
 import { useAuth } from "@/lib/auth";
 import ContractBadge from "@/components/ContractBadge";
 import LoadingSpinner from "@/components/LoadingSpinner";
@@ -23,12 +24,67 @@ import {
 } from "@/lib/validation";
 import type {
   ContractType,
+  Player,
   PlayerKeeperOptions,
   Team,
   ValidationResult,
 } from "@/types";
 
 // ========== Read-only Roster View (for in-season tab) ==========
+
+// Shared roster table for both Active and Farm sections (read-only view)
+function RosterTable({
+  players,
+  variant,
+  onPlayerClick,
+}: {
+  players: Player[];
+  variant: "active" | "farm";
+  onPlayerClick: (name: string, position: string) => void;
+}) {
+  const isFarm = variant === "farm";
+  const thColor = isFarm ? "text-purple-400" : "text-gray-400";
+  const headBg = isFarm ? "bg-purple-50" : "bg-gray-50";
+  const hoverBg = isFarm ? "hover:bg-purple-50" : "hover:bg-gray-50";
+
+  return (
+    <div className="overflow-x-auto rounded-lg border border-gray-200">
+      <table className="min-w-full divide-y divide-gray-200 text-xs sm:text-sm">
+        <thead className={headBg}>
+          <tr>
+            <th className={`px-2 py-1.5 text-left text-[10px] font-medium uppercase ${thColor} sm:px-3`}>球員</th>
+            <th className={`px-2 py-1.5 text-center text-[10px] font-medium uppercase ${thColor} sm:px-3`}>位置</th>
+            <th className={`px-2 py-1.5 text-center text-[10px] font-medium uppercase ${thColor} sm:px-3`}>MLB</th>
+            <th className={`px-2 py-1.5 text-center text-[10px] font-medium uppercase ${thColor} sm:px-3`}>合約</th>
+            <th className={`px-2 py-1.5 text-right text-[10px] font-medium uppercase ${thColor} sm:px-3`}>薪資</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-gray-100 bg-white">
+          {players.map((p) => (
+            <tr
+              key={p.name}
+              className={`${hoverBg} cursor-pointer`}
+              onClick={() => onPlayerClick(p.name, p.position)}
+            >
+              <td className="whitespace-nowrap px-2 py-1.5 font-medium text-gray-900 sm:px-3">{p.name}</td>
+              <td className="px-2 py-1.5 text-center text-gray-500 sm:px-3">{p.position}</td>
+              <td className="px-2 py-1.5 text-center text-gray-600 sm:px-3">{p.mlb_team || "—"}</td>
+              <td className="px-2 py-1.5 text-center sm:px-3">
+                <ContractBadge
+                  type={p.contract.contract_type as ContractType}
+                  display={p.contract.display || `$${p.contract.salary}/${p.contract.contract_type}`}
+                />
+              </td>
+              <td className="whitespace-nowrap px-2 py-1.5 text-right font-bold tabular-nums text-indigo-700 sm:px-3">
+                ${p.contract.salary}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
 
 function RosterView({ year, teamId }: { year: number; teamId: number }) {
   const { data: roster, error, isLoading } = useSWR(
@@ -37,27 +93,24 @@ function RosterView({ year, teamId }: { year: number; teamId: number }) {
   );
   const [statsPlayer, setStatsPlayer] = useState<{ name: string; position: string } | null>(null);
 
+  // Single-pass partition + MLB team stats (memoized)
+  const { active, farm, topTeams } = useMemo(() => {
+    if (!roster) return { active: [] as Player[], farm: [] as Player[], topTeams: [] as [string, number][] };
+    const a: Player[] = [];
+    const f: Player[] = [];
+    for (const p of roster.players) {
+      (p.contract.contract_type === "R" ? f : a).push(p);
+    }
+    return { active: a, farm: f, topTeams: getTopMLBTeams(roster.players, 1, 8) };
+  }, [roster]);
+
+  const handlePlayerClick = useCallback((name: string, position: string) => {
+    setStatsPlayer({ name, position });
+  }, []);
+
   if (isLoading) return <LoadingSpinner />;
   if (error) return <div className="py-10 text-center text-red-500">Failed to load roster</div>;
   if (!roster) return null;
-
-  // Group players by position category
-  const active = roster.players.filter(
-    (p) => p.contract.contract_type !== "R",
-  );
-  const farm = roster.players.filter(
-    (p) => p.contract.contract_type === "R",
-  );
-
-  // MLB team concentration
-  const teamCounts: Record<string, number> = {};
-  for (const p of roster.players) {
-    const t = p.mlb_team || "???";
-    teamCounts[t] = (teamCounts[t] || 0) + 1;
-  }
-  const sortedTeams = Object.entries(teamCounts)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 8);
 
   return (
     <div className="pb-10">
@@ -77,15 +130,8 @@ function RosterView({ year, teamId }: { year: number; teamId: number }) {
       <div className="mb-4 rounded-lg border bg-white p-3 sm:p-4">
         <h3 className="mb-2 text-xs font-semibold text-gray-500 uppercase">MLB 球隊分布</h3>
         <div className="flex flex-wrap gap-1.5">
-          {sortedTeams.map(([team, count]) => (
-            <span
-              key={team}
-              className={`rounded px-2 py-0.5 text-xs font-bold ${
-                count >= 5 ? "bg-green-200 text-green-800" :
-                count >= 3 ? "bg-amber-200 text-amber-800" :
-                "bg-gray-200 text-gray-600"
-              }`}
-            >
+          {topTeams.map(([team, count]) => (
+            <span key={team} className={`rounded px-2 py-0.5 text-xs font-bold ${mlbTeamBadgeColor(count)}`}>
               {team} {count}
             </span>
           ))}
@@ -95,87 +141,15 @@ function RosterView({ year, teamId }: { year: number; teamId: number }) {
         </p>
       </div>
 
-      {/* Active Players */}
-      <h3 className="mb-2 text-sm font-semibold text-gray-700">
-        Active Roster ({active.length})
-      </h3>
-      <div className="mb-6 overflow-x-auto rounded-lg border border-gray-200">
-        <table className="min-w-full divide-y divide-gray-200 text-xs sm:text-sm">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-2 py-1.5 text-left text-[10px] font-medium uppercase text-gray-400 sm:px-3">球員</th>
-              <th className="px-2 py-1.5 text-center text-[10px] font-medium uppercase text-gray-400 sm:px-3">位置</th>
-              <th className="px-2 py-1.5 text-center text-[10px] font-medium uppercase text-gray-400 sm:px-3">MLB</th>
-              <th className="px-2 py-1.5 text-center text-[10px] font-medium uppercase text-gray-400 sm:px-3">合約</th>
-              <th className="px-2 py-1.5 text-right text-[10px] font-medium uppercase text-gray-400 sm:px-3">薪資</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100 bg-white">
-            {active.map((p) => (
-              <tr
-                key={p.name}
-                className="hover:bg-gray-50 cursor-pointer"
-                onClick={() => setStatsPlayer({ name: p.name, position: p.position })}
-              >
-                <td className="whitespace-nowrap px-2 py-1.5 font-medium text-gray-900 sm:px-3">
-                  {p.name}
-                </td>
-                <td className="px-2 py-1.5 text-center text-gray-500 sm:px-3">{p.position}</td>
-                <td className="px-2 py-1.5 text-center sm:px-3">
-                  <span className="text-gray-600">{p.mlb_team || "—"}</span>
-                </td>
-                <td className="px-2 py-1.5 text-center sm:px-3">
-                  <ContractBadge type={p.contract.contract_type as ContractType} display={p.contract.display || `$${p.contract.salary}/${p.contract.contract_type}`} />
-                </td>
-                <td className="whitespace-nowrap px-2 py-1.5 text-right font-bold tabular-nums text-indigo-700 sm:px-3">
-                  ${p.contract.salary}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <h3 className="mb-2 text-sm font-semibold text-gray-700">Active Roster ({active.length})</h3>
+      <div className="mb-6">
+        <RosterTable players={active} variant="active" onPlayerClick={handlePlayerClick} />
       </div>
 
-      {/* Farm Rookies */}
       {farm.length > 0 && (
         <>
-          <h3 className="mb-2 text-sm font-semibold text-gray-700">
-            Farm Rookies ({farm.length})
-          </h3>
-          <div className="overflow-x-auto rounded-lg border border-gray-200">
-            <table className="min-w-full divide-y divide-gray-200 text-xs sm:text-sm">
-              <thead className="bg-purple-50">
-                <tr>
-                  <th className="px-2 py-1.5 text-left text-[10px] font-medium uppercase text-purple-400 sm:px-3">球員</th>
-                  <th className="px-2 py-1.5 text-center text-[10px] font-medium uppercase text-purple-400 sm:px-3">位置</th>
-                  <th className="px-2 py-1.5 text-center text-[10px] font-medium uppercase text-purple-400 sm:px-3">MLB</th>
-                  <th className="px-2 py-1.5 text-center text-[10px] font-medium uppercase text-purple-400 sm:px-3">合約</th>
-                  <th className="px-2 py-1.5 text-right text-[10px] font-medium uppercase text-purple-400 sm:px-3">薪資</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100 bg-white">
-                {farm.map((p) => (
-                  <tr
-                    key={p.name}
-                    className="hover:bg-purple-50 cursor-pointer"
-                    onClick={() => setStatsPlayer({ name: p.name, position: p.position })}
-                  >
-                    <td className="whitespace-nowrap px-2 py-1.5 font-medium text-gray-900 sm:px-3">
-                      {p.name}
-                    </td>
-                    <td className="px-2 py-1.5 text-center text-gray-500 sm:px-3">{p.position}</td>
-                    <td className="px-2 py-1.5 text-center text-gray-600 sm:px-3">{p.mlb_team || "—"}</td>
-                    <td className="px-2 py-1.5 text-center sm:px-3">
-                      <ContractBadge type="R" display={`$${p.contract.salary}/R`} />
-                    </td>
-                    <td className="whitespace-nowrap px-2 py-1.5 text-right font-bold tabular-nums text-indigo-700 sm:px-3">
-                      ${p.contract.salary}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <h3 className="mb-2 text-sm font-semibold text-gray-700">Farm Rookies ({farm.length})</h3>
+          <RosterTable players={farm} variant="farm" onPlayerClick={handlePlayerClick} />
         </>
       )}
 

@@ -12,6 +12,7 @@ import {
 } from "@/lib/api";
 import type { KeeperResultTeam } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
+import { mlbTeamBadgeColor } from "@/lib/team-stats";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import AuthGate from "@/components/AuthGate";
 import type { DBTeam } from "@/types";
@@ -334,13 +335,7 @@ function SeasonEndTab({
                 {t.mlb_team_counts.map(([team, count]) => (
                   <span
                     key={team}
-                    className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${
-                      count >= 5
-                        ? "bg-green-200 text-green-800"
-                        : count >= 3
-                          ? "bg-amber-200 text-amber-800"
-                          : "bg-gray-200 text-gray-600"
-                    }`}
+                    className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${mlbTeamBadgeColor(count)}`}
                   >
                     {team} {count}
                   </span>
