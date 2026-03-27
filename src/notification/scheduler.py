@@ -135,39 +135,42 @@ def _daily_rookie_monitor_job():
         print(f"[RookieScheduler] Error: {e}")
 
 
-def _weekly_ranking_refresh_job():
-    """Weekly job: refresh Yahoo player rankings + status during MLB season."""
+def _daily_ar_rank_refresh_job():
+    """Daily job: refresh Yahoo AR (Actual Rank) during MLB season.
+
+    AR-Rank reflects real in-season performance and changes daily.
+    O-Rank is pre-season projection and rarely changes — fetch manually via Commissioner.
+    """
     now = datetime.now()
     month = now.month
 
     # Only run during MLB season (March-October)
     if month < 3 or month > 10:
-        print(f"[RankingRefresh] Off-season (month {month}), skipping.")
+        print(f"[ARRankRefresh] Off-season (month {month}), skipping.")
         return
 
     year = now.year
-    print(f"[RankingRefresh] Refreshing player rankings for {year}...")
+    print(f"[ARRankRefresh] Refreshing AR (Actual Rank) for {year}...")
 
     try:
         from api.yahoo_service import yahoo_api_get, YahooTokenError
-        from api.database import bulk_upsert_player_rankings, update_ar_ranks
+        from api.database import update_ar_ranks
 
-        # Resolve league key
         from config.settings import get_league_key
         league_key = get_league_key(year)
         if not league_key:
-            print(f"[RankingRefresh] No league key for year {year}")
+            print(f"[ARRankRefresh] No league key for year {year}")
             return
 
-        # Fetch OR rankings (25 players per batch)
         import time
-        all_players: list[dict] = []
+        ar_rank_map: dict[str, int] = {}
+
         for start in range(0, 1500, 25):
             try:
                 path = (
                     f"/league/{league_key}/players"
-                    f";start={start};count=25;sort=OR"
-                    f";sort_type=season;out=stats"
+                    f";start={start};count=25;sort=AR"
+                    f";sort_type=season"
                 )
                 data = yahoo_api_get(path)
                 league_data = data.get("fantasy_content", {}).get("league", [])
@@ -179,43 +182,37 @@ def _weekly_ranking_refresh_job():
                 if count == 0:
                     break
 
-                from api.routers.commissioner import _parse_yahoo_player, _parse_yahoo_stats
-                batch_players = []
+                from api.routers.commissioner import _parse_yahoo_player
+                batch_count = 0
                 for key, val in players_section.items():
                     if key == "count":
                         continue
                     if isinstance(val, dict) and "player" in val:
                         pdata = val["player"]
-                        if isinstance(pdata, list) and len(pdata) >= 2:
+                        if isinstance(pdata, list) and len(pdata) >= 1:
                             player_info = _parse_yahoo_player(pdata[0])
-                            stats_info = _parse_yahoo_stats(
-                                pdata[1].get("player_stats", {}),
-                                prefix="proj",
-                            )
-                            player_info.update(stats_info)
-                            batch_players.append(player_info)
+                            player_key = player_info.get("player_key", "")
+                            if player_key:
+                                ar_rank_map[player_key] = start + batch_count + 1
+                            batch_count += 1
 
-                if not batch_players:
+                if batch_count == 0:
                     break
 
-                for i, p in enumerate(batch_players):
-                    p["o_rank"] = start + i + 1
-
-                all_players.extend(batch_players)
                 time.sleep(1)
 
             except Exception as e:
                 if "429" in str(e):
-                    time.sleep(10)
+                    time.sleep(15)
                 else:
-                    print(f"[RankingRefresh] Batch error at {start}: {e}")
+                    print(f"[ARRankRefresh] Batch error at {start}: {e}")
                     break
 
-        if all_players:
-            bulk_upsert_player_rankings(year, all_players)
-            print(f"[RankingRefresh] Updated {len(all_players)} player rankings for {year}")
+        if ar_rank_map:
+            update_ar_ranks(year, ar_rank_map)
+            print(f"[ARRankRefresh] Updated {len(ar_rank_map)} AR rankings for {year}")
         else:
-            print("[RankingRefresh] No players fetched")
+            print("[ARRankRefresh] No AR rankings fetched")
 
     except YahooTokenError as e:
         print(f"[RankingRefresh] Token error: {e}")
@@ -1754,15 +1751,15 @@ def start_scheduler():
             replace_existing=True,
         )
 
-    # Job 3: Weekly ranking refresh (every Monday at 18:00 - after Yahoo settles stats)
+    # Job 3: Daily AR-Rank refresh (6:00 AM Taiwan = after US games end)
     _scheduler.add_job(
-        _weekly_ranking_refresh_job,
+        _daily_ar_rank_refresh_job,
         CronTrigger(
-            day_of_week="mon",
-            hour=18,
+            hour=6,
+            minute=0,
             timezone=REMINDER_CRON_TZ,
         ),
-        id="ranking_refresh",
+        id="ar_rank_refresh",
         replace_existing=True,
     )
 
