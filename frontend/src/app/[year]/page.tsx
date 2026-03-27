@@ -214,6 +214,7 @@ function YearOverviewContent() {
             year={year}
             findTeamId={findTeamId}
             showMlbTeams
+            linkSuffix="?view=roster"
           />
         ) : (
           <div className="py-10 text-center text-gray-400 text-sm">
@@ -235,12 +236,14 @@ function SeasonEndTab({
   year,
   findTeamId,
   showMlbTeams = false,
+  linkSuffix = "",
 }: {
   summary: { teams: TeamSummary[] };
   user: { manager_name?: string | null } | null;
   year: number;
   findTeamId: (name: string) => number | null;
   showMlbTeams?: boolean;
+  linkSuffix?: string;
 }) {
   return (
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 sm:gap-4">
@@ -252,7 +255,7 @@ function SeasonEndTab({
         return (
           <Link
             key={t.manager_name}
-            href={teamId ? `/${year}/${teamId}` : "#"}
+            href={teamId ? `/${year}/${teamId}${linkSuffix}` : "#"}
             className={`block rounded-lg border p-3 transition hover:shadow-md sm:p-4 ${
               isMyTeam
                 ? "border-indigo-300 bg-indigo-50"
