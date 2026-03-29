@@ -136,9 +136,14 @@ def _daily_rookie_monitor_job():
 
 
 def _daily_ar_rank_refresh_job():
-    """Daily job: refresh Yahoo AR (Actual Rank) during MLB season.
+    """Daily job: refresh Yahoo AR (Actual Rank) + season stats during MLB season.
 
-    AR-Rank reflects real in-season performance and changes daily.
+    Runs at 18:00 Taiwan time (= 6 AM ET) — after all US games end and Yahoo
+    finishes processing stats from the previous day.
+
+    Pass 1: AR-Rank (Actual Rank) — in-season performance ranking
+    Pass 2: Season Stats — current year hitting/pitching stats (stat_* columns)
+
     O-Rank is pre-season projection and rarely changes — fetch manually via Commissioner.
     """
     now = datetime.now()
@@ -146,23 +151,26 @@ def _daily_ar_rank_refresh_job():
 
     # Only run during MLB season (March-October)
     if month < 3 or month > 10:
-        print(f"[ARRankRefresh] Off-season (month {month}), skipping.")
+        print(f"[DailyRankStats] Off-season (month {month}), skipping.")
         return
 
     year = now.year
-    print(f"[ARRankRefresh] Refreshing AR (Actual Rank) for {year}...")
+    print(f"[DailyRankStats] Starting daily AR-Rank + season stats refresh for {year}...")
 
     try:
         from api.yahoo_service import yahoo_api_get, YahooTokenError
-        from api.database import update_ar_ranks
+        from api.database import update_ar_ranks, update_last_season_stats
 
         from config.settings import get_league_key
         league_key = get_league_key(year)
         if not league_key:
-            print(f"[ARRankRefresh] No league key for year {year}")
+            print(f"[DailyRankStats] No league key for year {year}")
             return
 
         import time
+
+        # === Pass 1: AR-Rank ===
+        print(f"[DailyRankStats] Pass 1: Fetching AR (Actual Rank)...")
         ar_rank_map: dict[str, int] = {}
 
         for start in range(0, 1500, 25):
@@ -205,19 +213,43 @@ def _daily_ar_rank_refresh_job():
                 if "429" in str(e):
                     time.sleep(15)
                 else:
-                    print(f"[ARRankRefresh] Batch error at {start}: {e}")
+                    print(f"[DailyRankStats] AR batch error at {start}: {e}")
                     break
 
         if ar_rank_map:
             update_ar_ranks(year, ar_rank_map)
-            print(f"[ARRankRefresh] Updated {len(ar_rank_map)} AR rankings for {year}")
+            print(f"[DailyRankStats] Pass 1 done: updated {len(ar_rank_map)} AR rankings")
         else:
-            print("[ARRankRefresh] No AR rankings fetched")
+            print("[DailyRankStats] Pass 1: no AR rankings fetched")
+
+        # === Pass 2: Season Stats ===
+        print(f"[DailyRankStats] Pass 2: Fetching season stats...")
+        try:
+            from api.routers.commissioner import _fetch_yahoo_players_batch
+
+            stats_players, stats_errors = _fetch_yahoo_players_batch(
+                league_key, sort="OR", sort_type="season",
+                max_players=1500, stat_prefix="stat",
+            )
+
+            if stats_players:
+                update_last_season_stats(year, stats_players, sort_type="season")
+                print(f"[DailyRankStats] Pass 2 done: updated stats for {len(stats_players)} players")
+            else:
+                print("[DailyRankStats] Pass 2: no stats fetched")
+
+            if stats_errors:
+                print(f"[DailyRankStats] Pass 2 errors: {stats_errors[:3]}")
+
+        except Exception as e:
+            print(f"[DailyRankStats] Pass 2 error: {e}")
+
+        print(f"[DailyRankStats] Daily refresh complete for {year}")
 
     except YahooTokenError as e:
-        print(f"[RankingRefresh] Token error: {e}")
+        print(f"[DailyRankStats] Token error: {e}")
     except Exception as e:
-        print(f"[RankingRefresh] Error: {e}")
+        print(f"[DailyRankStats] Error: {e}")
 
 
 def _daily_player_status_job():
@@ -1751,11 +1783,12 @@ def start_scheduler():
             replace_existing=True,
         )
 
-    # Job 3: Daily AR-Rank refresh (6:00 AM Taiwan = after US games end)
+    # Job 3: Daily AR-Rank + season stats refresh
+    # 18:00 Taiwan = 6:00 AM ET — after all US games end + Yahoo stats processed
     _scheduler.add_job(
         _daily_ar_rank_refresh_job,
         CronTrigger(
-            hour=6,
+            hour=18,
             minute=0,
             timezone=REMINDER_CRON_TZ,
         ),
