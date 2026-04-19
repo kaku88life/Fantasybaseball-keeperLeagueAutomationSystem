@@ -16,6 +16,7 @@ import {
   getReminderStatus,
   getPendingTeams,
   testLineConnection,
+  testLinePush,
   verifyCommissionerPassword,
   getYahooTokenStatus,
   refreshYahooToken,
@@ -177,6 +178,14 @@ export default function CommissionerDashboard() {
     success: boolean; message: string; group_id: string | null;
   } | null>(null);
 
+  // LINE push test state (personal user / group / room)
+  const [linePushTargetId, setLinePushTargetId] = useState("");
+  const [linePushMessage, setLinePushMessage] = useState("");
+  const [linePushLoading, setLinePushLoading] = useState(false);
+  const [linePushResult, setLinePushResult] = useState<{
+    success: boolean; message: string; target_id_preview: string;
+  } | null>(null);
+
   // Yahoo API token state
   const [yahooToken, setYahooToken] = useState<YahooTokenStatus | null>(null);
   const [yahooTokenLoading, setYahooTokenLoading] = useState(false);
@@ -309,6 +318,28 @@ export default function CommissionerDashboard() {
       });
     } finally {
       setLineTestLoading(false);
+    }
+  };
+
+  const handleLinePushTest = async () => {
+    const target = linePushTargetId.trim();
+    if (!target) {
+      alert("請輸入 Target ID (U.../C.../R...)");
+      return;
+    }
+    setLinePushLoading(true);
+    setLinePushResult(null);
+    try {
+      const result = await testLinePush(target, linePushMessage.trim() || undefined);
+      setLinePushResult(result);
+    } catch (e) {
+      setLinePushResult({
+        success: false,
+        message: e instanceof Error ? e.message : "Push failed",
+        target_id_preview: target.slice(0, 6) + "...",
+      });
+    } finally {
+      setLinePushLoading(false);
     }
   };
 
@@ -777,6 +808,49 @@ export default function CommissionerDashboard() {
                 )}
               </div>
             )}
+
+            {/* LINE push test (personal / arbitrary target) */}
+            <div className="mb-4 rounded border border-blue-200 bg-blue-50 p-3">
+              <p className="mb-2 text-xs font-semibold text-blue-800">
+                LINE 個人推送測試 Personal Push Test
+              </p>
+              <p className="mb-2 text-xs text-gray-600">
+                指定 LINE Target ID（U... 使用者 / C... 群組 / R... 聊天室）。Bot 需為對方好友或群組成員才能推送成功。
+              </p>
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <input
+                  type="text"
+                  value={linePushTargetId}
+                  onChange={(e) => setLinePushTargetId(e.target.value)}
+                  placeholder="Target ID (U... / C... / R...)"
+                  className="flex-1 rounded border border-gray-300 px-2 py-1 text-sm font-mono focus:border-indigo-500 focus:ring-indigo-500"
+                />
+                <input
+                  type="text"
+                  value={linePushMessage}
+                  onChange={(e) => setLinePushMessage(e.target.value)}
+                  placeholder="自訂訊息 (可留空，使用預設測試文字)"
+                  className="flex-1 rounded border border-gray-300 px-2 py-1 text-sm focus:border-indigo-500 focus:ring-indigo-500"
+                />
+                <button
+                  onClick={handleLinePushTest}
+                  disabled={linePushLoading}
+                  className="rounded bg-blue-600 px-3 py-1 text-sm font-medium text-white hover:bg-blue-500 disabled:opacity-50"
+                >
+                  {linePushLoading ? "推送中..." : "推送 Push"}
+                </button>
+              </div>
+              {linePushResult && (
+                <div className={`mt-2 rounded border p-2 text-xs ${
+                  linePushResult.success ? "border-green-200 bg-green-100" : "border-red-200 bg-red-100"
+                }`}>
+                  <p className={linePushResult.success ? "text-green-700" : "text-red-700"}>
+                    {linePushResult.success ? "推送成功" : "推送失敗"}：{linePushResult.message}
+                  </p>
+                  <p className="mt-1 text-gray-500">Target: {linePushResult.target_id_preview}</p>
+                </div>
+              )}
+            </div>
 
             {/* Send result */}
             {reminderResult && (

@@ -484,6 +484,40 @@ async def test_line_connection_endpoint(
     return test_line_connection()
 
 
+@router.post("/line/test-push")
+async def test_line_push_endpoint(
+    payload: dict,
+    user: dict = Depends(get_current_commissioner),
+):
+    """Send a test LINE push message to an arbitrary target ID (user/group/room).
+
+    Body: {"target_id": "U...", "message": "optional custom text"}
+
+    The LINE Bot must already be added as a friend (for user IDs) or be a
+    member of the target group/room for the push to succeed.
+    """
+    from src.notification.line_service import send_line_push_message
+
+    target_id = (payload.get("target_id") or "").strip()
+    message = (payload.get("message") or "").strip()
+
+    if not target_id:
+        raise HTTPException(status_code=400, detail="target_id is required")
+
+    if not message:
+        message = (
+            f"[5-Man Keeper League] LINE push test OK\n"
+            f"Target: {target_id[:6]}...{target_id[-4:]}"
+        )
+
+    success, error = send_line_push_message(target_id, message)
+    return {
+        "success": success,
+        "message": "Push message sent" if success else error,
+        "target_id_preview": f"{target_id[:6]}...{target_id[-4:]}",
+    }
+
+
 # ========== Buyout Management ==========
 
 @router.get("/buyouts/{year}")

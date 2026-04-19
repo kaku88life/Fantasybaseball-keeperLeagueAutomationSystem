@@ -37,6 +37,19 @@ async def lifespan(app: FastAPI):
         print(f"[Startup] DB init/seed error (non-fatal): {e}", flush=True)
         traceback.print_exc()
 
+    # Refresh 2026 post-draft snapshot (keepers + draft merge).
+    # Runs after init_db so schema is guaranteed ready. Non-fatal on failure
+    # so uvicorn still comes up even if source data files are missing.
+    try:
+        from scripts.update_2026_post_draft import run_post_draft_update
+        result = run_post_draft_update(verbose=False)
+        print(f"[Startup] 2026 post-draft snapshot refreshed: {result}", flush=True)
+    except FileNotFoundError as e:
+        print(f"[Startup] 2026 post-draft skipped (missing data file): {e}", flush=True)
+    except Exception as e:
+        print(f"[Startup] 2026 post-draft load error (non-fatal): {e}", flush=True)
+        traceback.print_exc()
+
     # Start reminder scheduler (no-op if env vars not configured)
     try:
         from src.notification.scheduler import start_scheduler, stop_scheduler

@@ -86,7 +86,9 @@ export default function PlayersPage() {
   const [activeTab, setActiveTab] = useState<TabId>("database");
 
   // SWR cached data
-  const { data: years = [] } = useSWR("years", getYears);
+  const { data: allYears = [] } = useSWR("years", getYears);
+  // Player Database only supports up to current season; hide future projections (e.g. 2027)
+  const years = useMemo(() => allYears.filter((y) => y <= 2026), [allYears]);
   const [selectedYear, setSelectedYear] = useState<number>(0);
   const effectiveYear = selectedYear || (years.length > 0 ? Math.max(...years) : new Date().getFullYear());
 

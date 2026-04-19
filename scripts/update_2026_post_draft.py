@@ -5,8 +5,13 @@ Merges keeper contracts from 2026_contracts_v2.json with new draft picks
 from yahoo_2026_draft.json, using yahoo_2026_rosters.json for latest
 positions and MLB teams.
 
-Usage:
+Usage (CLI):
     python -m scripts.update_2026_post_draft
+
+Usage (programmatic, called from FastAPI lifespan):
+    from scripts.update_2026_post_draft import run_post_draft_update
+    result = run_post_draft_update(verbose=False)
+    # result = {"teams": 16, "keepers": 240, "new_draft": 192, ...}
 """
 from __future__ import annotations
 
@@ -28,7 +33,7 @@ from src.contract.models import (
     SpecialStatus,
     Team,
 )
-from api.database import init_db, save_snapshot, upsert_team
+from api.database import save_snapshot, upsert_team
 from api.serializers import league_state_to_dict
 
 CONTRACTS_PATH = ROOT / "data" / "2026_contracts_v2.json"
@@ -67,9 +72,19 @@ def parse_contract_2026(contract_str: str) -> tuple[str, int, int]:
     raise ValueError(f"Cannot parse contract: {contract_str}")
 
 
-def main():
+def run_post_draft_update(verbose: bool = True) -> dict:
+    """Merge 2026 keeper contracts with draft results and save to DB.
+
+    Returns a summary dict: {teams, keepers, new_draft, expired_redraft, year}.
+    Safe to call from a running event loop (does not invoke init_db).
+    Raises on file/IO errors so callers can log a stack trace.
+    """
+    def log(msg: str) -> None:
+        if verbose:
+            print(msg)
+
     # 1. Load existing keeper contracts
-    print("Loading keeper contracts...")
+    log("Loading keeper contracts...")
     with open(CONTRACTS_PATH, "r", encoding="utf-8") as f:
         contracts_data = json.load(f)
 
@@ -87,12 +102,12 @@ def main():
             }
 
     # 2. Load draft results
-    print("Loading draft results...")
+    log("Loading draft results...")
     with open(DRAFT_PATH, "r", encoding="utf-8") as f:
         draft = json.load(f)
 
     # 3. Load rosters (for latest positions and MLB teams)
-    print("Loading rosters...")
+    log("Loading rosters...")
     with open(ROSTERS_PATH, "r", encoding="utf-8") as f:
         rosters = json.load(f)
 
@@ -108,8 +123,8 @@ def main():
 
     # 4. Build final 2026 teams
     salary_cap = get_salary_cap(YEAR)
-    print(f"\nBuilding 2026 post-draft state (salary cap: ${salary_cap})")
-    print("=" * 60)
+    log(f"\nBuilding 2026 post-draft state (salary cap: ${salary_cap})")
+    log("=" * 60)
 
     # Group draft picks by manager
     from collections import defaultdict
@@ -202,8 +217,8 @@ def main():
         total_new += mgr_new
         keeper_cost = sum(p.contract.salary for p in players if p.source != "draft")
         draft_cost = sum(p.contract.salary for p in players if p.source == "draft")
-        print(f"  {mgr}: {mgr_keepers} keepers + {mgr_new} draft = {len(players)} "
-              f"(keeper ${keeper_cost} + draft ${draft_cost} = ${keeper_cost + draft_cost})")
+        log(f"  {mgr}: {mgr_keepers} keepers + {mgr_new} draft = {len(players)} "
+            f"(keeper ${keeper_cost} + draft ${draft_cost} = ${keeper_cost + draft_cost})")
 
     # Load buyout records
     if BUYOUT_PATH.exists():
@@ -230,17 +245,15 @@ def main():
                     note=br.get("note", ""),
                 ))
                 loaded += 1
-        print(f"\nBuyout records carried over: {loaded}")
+        log(f"\nBuyout records carried over: {loaded}")
 
-    # Save to DB
+    # Save to DB (init_db is expected to have been called by the caller,
+    # e.g. FastAPI lifespan or CLI wrapper below).
     ls = LeagueState(year=YEAR, teams=teams)
     ls_dict = league_state_to_dict(ls)
 
-    import asyncio
-    asyncio.run(init_db())
-
     save_snapshot(year=YEAR, data=ls_dict, source_file="post_draft_2026")
-    print(f"\nSaved league snapshot for year {YEAR}")
+    log(f"\nSaved league snapshot for year {YEAR}")
 
     for team in teams:
         upsert_team(
@@ -248,15 +261,29 @@ def main():
             team_name=team.team_name,
             yahoo_team_id=team.yahoo_team_id,
         )
-    print(f"Upserted {len(teams)} team records")
+    log(f"Upserted {len(teams)} team records")
 
     # Summary
-    print(f"\n{'=' * 60}")
-    print(f"Total: {total_keepers} keepers + {total_new} new draft = {total_keepers + total_new}")
-    print(f"Expired players re-drafted as new A: {total_expired_redraft}")
-    print(f"Salary cap: ${salary_cap}")
-    print(f"\nDone! Year {YEAR} snapshot updated with post-draft data.")
+    log(f"\n{'=' * 60}")
+    log(f"Total: {total_keepers} keepers + {total_new} new draft = {total_keepers + total_new}")
+    log(f"Expired players re-drafted as new A: {total_expired_redraft}")
+    log(f"Salary cap: ${salary_cap}")
+    log(f"\nDone! Year {YEAR} snapshot updated with post-draft data.")
+
+    return {
+        "year": YEAR,
+        "teams": len(teams),
+        "keepers": total_keepers,
+        "new_draft": total_new,
+        "expired_redraft": total_expired_redraft,
+        "salary_cap": salary_cap,
+    }
 
 
 if __name__ == "__main__":
-    main()
+    # CLI entry point: init DB explicitly, then run the update.
+    import asyncio
+    from api.database import init_db
+
+    asyncio.run(init_db())
+    run_post_draft_update(verbose=True)

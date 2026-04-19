@@ -6,9 +6,8 @@ set -e
 
 echo "=== Keeper League API - Startup ==="
 
-# Load/refresh 2026 contract data (post-draft) into DB
-echo "Loading 2026 post-draft contracts..."
-python -m scripts.update_2026_post_draft || echo "WARNING: 2026 post-draft loading failed, continuing..."
+# 2026 post-draft contract refresh is now handled by FastAPI lifespan
+# (see api/main.py) so errors surface in logs and DB is guaranteed ready.
 
 # Load/refresh 2027 contract projections into DB
 echo "Loading 2027 contract projections..."

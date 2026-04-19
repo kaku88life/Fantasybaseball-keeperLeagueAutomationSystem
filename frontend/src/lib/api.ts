@@ -433,6 +433,20 @@ export async function testLineConnection(): Promise<{
   });
 }
 
+export async function testLinePush(
+  targetId: string,
+  message?: string,
+): Promise<{
+  success: boolean;
+  message: string;
+  target_id_preview: string;
+}> {
+  return request(`/api/commissioner/line/test-push`, {
+    method: "POST",
+    body: JSON.stringify({ target_id: targetId, message: message ?? "" }),
+  });
+}
+
 // ========== Buyout Management (Commissioner) ==========
 
 export async function getAllBuyouts(year: number): Promise<{

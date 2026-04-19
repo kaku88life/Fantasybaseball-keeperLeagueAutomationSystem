@@ -49,6 +49,44 @@ def send_line_group_message(message: str) -> tuple[bool, str]:
         return False, str(e)
 
 
+def send_line_push_message(to_id: str, message: str) -> tuple[bool, str]:
+    """
+    Send a text push message to any LINE target ID (user / group / room).
+    Returns (success, error_message).
+    """
+    if not LINE_CHANNEL_ACCESS_TOKEN:
+        return False, "LINE_CHANNEL_ACCESS_TOKEN not configured"
+    if not to_id:
+        return False, "Empty to_id"
+    if not message.strip():
+        return False, "Empty message"
+
+    try:
+        from linebot.v3.messaging import (
+            ApiClient,
+            Configuration,
+            MessagingApi,
+            PushMessageRequest,
+            TextMessage,
+        )
+
+        configuration = Configuration(access_token=LINE_CHANNEL_ACCESS_TOKEN)
+        with ApiClient(configuration) as api_client:
+            messaging_api = MessagingApi(api_client)
+            messaging_api.push_message(
+                PushMessageRequest(
+                    to=to_id,
+                    messages=[TextMessage(text=message)],
+                )
+            )
+        return True, ""
+
+    except ImportError:
+        return False, "line-bot-sdk not installed"
+    except Exception as e:
+        return False, str(e)
+
+
 def test_line_connection() -> dict:
     """
     Test LINE Bot connection by sending a test message to the group.
