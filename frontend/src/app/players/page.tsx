@@ -703,12 +703,12 @@ export default function PlayersPage() {
                       </th>
                       {isAuth && (
                         <th className="px-2 py-2 text-left text-xs font-medium uppercase text-gray-500">
-                          2025
+                          {effectiveYear}
                         </th>
                       )}
                       {isAuth && (
                         <th className="px-2 py-2 text-left text-xs font-medium uppercase text-gray-500">
-                          2026
+                          {effectiveYear + 1}
                         </th>
                       )}
                       {isAuth && <SortTh col="salary" label="$" />}
@@ -786,7 +786,7 @@ export default function PlayersPage() {
                             {p.mlb_team || "-"}
                           </td>
 
-                          {/* 2025 Contract (auth only) */}
+                          {/* Current-year contract (auth only) */}
                           {isAuth && (
                             <td className="whitespace-nowrap px-2 py-1.5">
                               {p.contract_display ? (
@@ -800,7 +800,7 @@ export default function PlayersPage() {
                             </td>
                           )}
 
-                          {/* 2026 Status (auth only) */}
+                          {/* Next-year projection (auth only) */}
                           {isAuth && (
                             <td className="whitespace-nowrap px-2 py-1.5">
                               {p.next_contract_display ? (

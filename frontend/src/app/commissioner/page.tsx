@@ -17,6 +17,7 @@ import {
   getPendingTeams,
   testLineConnection,
   testLinePush,
+  testLineReminder,
   verifyCommissionerPassword,
   getYahooTokenStatus,
   refreshYahooToken,
@@ -186,6 +187,17 @@ export default function CommissionerDashboard() {
     success: boolean; message: string; target_id_preview: string;
   } | null>(null);
 
+  // LINE reminder preview state (pushes the actual reminder template to admin)
+  const [lineReminderLoading, setLineReminderLoading] = useState(false);
+  const [lineReminderResult, setLineReminderResult] = useState<{
+    success: boolean;
+    message: string;
+    target_id_preview: string;
+    year: number;
+    pending_count: number;
+    pending_managers: string[];
+  } | null>(null);
+
   // Yahoo API token state
   const [yahooToken, setYahooToken] = useState<YahooTokenStatus | null>(null);
   const [yahooTokenLoading, setYahooTokenLoading] = useState(false);
@@ -340,6 +352,27 @@ export default function CommissionerDashboard() {
       });
     } finally {
       setLinePushLoading(false);
+    }
+  };
+
+  const handleLineReminderPreview = async () => {
+    const target = linePushTargetId.trim();
+    setLineReminderLoading(true);
+    setLineReminderResult(null);
+    try {
+      const result = await testLineReminder(target || undefined);
+      setLineReminderResult(result);
+    } catch (e) {
+      setLineReminderResult({
+        success: false,
+        message: e instanceof Error ? e.message : "Preview failed",
+        target_id_preview: target ? target.slice(0, 6) + "..." : "(env)",
+        year: new Date().getFullYear(),
+        pending_count: 0,
+        pending_managers: [],
+      });
+    } finally {
+      setLineReminderLoading(false);
     }
   };
 
@@ -850,6 +883,32 @@ export default function CommissionerDashboard() {
                   <p className="mt-1 text-gray-500">Target: {linePushResult.target_id_preview}</p>
                 </div>
               )}
+
+              {/* Reminder preview: sends the actual scheduled reminder template */}
+              <div className="mt-3 border-t border-blue-200 pt-3">
+                <p className="mb-1 text-xs text-gray-600">
+                  以上方 Target ID 為目標（留空則使用環境變數 <code className="rounded bg-blue-100 px-1 font-mono">LINE_ADMIN_USER_ID</code>），預覽實際催繳提醒文字：
+                </p>
+                <button
+                  onClick={handleLineReminderPreview}
+                  disabled={lineReminderLoading}
+                  className="rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-50"
+                >
+                  {lineReminderLoading ? "發送中..." : "預覽催繳提醒 Preview Reminder"}
+                </button>
+                {lineReminderResult && (
+                  <div className={`mt-2 rounded border p-2 text-xs ${
+                    lineReminderResult.success ? "border-green-200 bg-green-100" : "border-red-200 bg-red-100"
+                  }`}>
+                    <p className={lineReminderResult.success ? "text-green-700" : "text-red-700"}>
+                      {lineReminderResult.success ? "預覽已發送" : "預覽失敗"}：{lineReminderResult.message}
+                    </p>
+                    <p className="mt-1 text-gray-500">
+                      Target: {lineReminderResult.target_id_preview}　Year: {lineReminderResult.year}　未繳交: {lineReminderResult.pending_count}
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Send result */}

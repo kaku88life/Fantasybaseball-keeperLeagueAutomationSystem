@@ -309,8 +309,11 @@ async def get_player_database(
 
     league_state = dict_to_league_state(snapshot["data"])
 
-    # 1b. Load submission data for next-year contract status
-    submissions = get_all_submissions(year)
+    # 1b. Load NEXT year's submission data to project next-year contracts.
+    # Submissions for year Y represent keeper decisions for going INTO year Y
+    # (i.e. what to keep from year Y-1 rosters). To project year+1 contracts
+    # from year's roster, we need submissions(year + 1).
+    submissions = get_all_submissions(year + 1)
     submitted_managers: set[str] = set()
     selection_lookup: dict[str, dict] = {}  # "manager::player_name" -> selection
     for sub in submissions:

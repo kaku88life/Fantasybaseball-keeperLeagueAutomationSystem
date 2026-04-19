@@ -447,6 +447,26 @@ export async function testLinePush(
   });
 }
 
+export async function testLineReminder(
+  targetId?: string,
+  year?: number,
+): Promise<{
+  success: boolean;
+  message: string;
+  target_id_preview: string;
+  year: number;
+  pending_count: number;
+  pending_managers: string[];
+}> {
+  const body: Record<string, unknown> = {};
+  if (targetId && targetId.trim()) body.target_id = targetId.trim();
+  if (year) body.year = year;
+  return request(`/api/commissioner/line/test-reminder`, {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
 // ========== Buyout Management (Commissioner) ==========
 
 export async function getAllBuyouts(year: number): Promise<{

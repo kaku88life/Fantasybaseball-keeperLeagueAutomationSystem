@@ -518,6 +518,60 @@ async def test_line_push_endpoint(
     }
 
 
+@router.post("/line/test-reminder")
+async def test_line_reminder_endpoint(
+    payload: dict,
+    user: dict = Depends(get_current_commissioner),
+):
+    """Preview the actual keeper-reminder message by pushing it to an admin.
+
+    Uses the real reminder template (same as the scheduled group push) but
+    sends to a single target — useful for verifying wording/URL before the
+    group blast.
+
+    Body: {"target_id"?: "U...", "year"?: 2026}
+    - target_id defaults to env LINE_ADMIN_USER_ID
+    - year defaults to current calendar year
+
+    Does NOT write notification_log and does NOT respect cooldown (it's a test).
+    """
+    import os
+    from datetime import datetime
+
+    from src.notification.line_service import send_line_push_message
+    from src.notification.reminder import build_reminder_text, get_pending_teams
+
+    target_id = (payload.get("target_id") or "").strip()
+    if not target_id:
+        target_id = (os.getenv("LINE_ADMIN_USER_ID") or "").strip()
+    if not target_id:
+        raise HTTPException(
+            status_code=400,
+            detail="target_id not provided and LINE_ADMIN_USER_ID env var not set",
+        )
+
+    year = payload.get("year") or datetime.now().year
+    pending = get_pending_teams(int(year))
+
+    if not pending:
+        message = (
+            f"[5-Man Keeper League] {year} \u7559\u7528\u540d\u55ae\u50ac\u7e73 (\u9810\u89bd)\n"
+            f"All teams have already submitted — no reminder would be sent."
+        )
+    else:
+        message = build_reminder_text(pending, int(year))
+
+    success, error = send_line_push_message(target_id, message)
+    return {
+        "success": success,
+        "message": "Reminder preview sent" if success else error,
+        "target_id_preview": f"{target_id[:6]}...{target_id[-4:]}",
+        "year": int(year),
+        "pending_count": len(pending),
+        "pending_managers": [t["manager_name"] for t in pending],
+    }
+
+
 # ========== Buyout Management ==========
 
 @router.get("/buyouts/{year}")
