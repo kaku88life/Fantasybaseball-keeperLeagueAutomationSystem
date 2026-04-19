@@ -7,8 +7,7 @@ Jobs:
 3. Weekly ranking refresh: every Monday during MLB season.
 4. Daily player status update: IL/DTD/NA/O status during MLB season.
 5. Daily transaction fetch: Yahoo transactions during MLB season.
-6. Season start notification: LINE message on Opening Day (US midnight).
-7. Daily roster ownership sync: fetch team rosters, update owner_manager (US midnight).
+6. Daily roster ownership sync: fetch team rosters, update owner_manager (US midnight).
 
 Yearly auto-mode: set REMINDER_MONTH / REMINDER_START_DAY / REMINDER_END_DAY
 to define a fixed annual window (e.g. March 1-15 every year).
@@ -37,11 +36,7 @@ ROOKIE_MONITOR_ENABLED = os.getenv("ROOKIE_MONITOR_ENABLED", "true").lower() == 
 ROOKIE_MONITOR_START_MONTH = int(os.getenv("ROOKIE_MONITOR_START_MONTH", "3"))
 ROOKIE_MONITOR_END_MONTH = int(os.getenv("ROOKIE_MONITOR_END_MONTH", "9"))
 
-# --- Season start notification + daily roster sync ---
-# US midnight = 13:00 Taiwan time (UTC+8, EST is UTC-5; 0:00 EST = 05:00 UTC = 13:00 TWN)
-# During DST (EDT, UTC-4): 0:00 EDT = 04:00 UTC = 12:00 TWN
-# We use 13:00 TWN as a safe default (between the two offsets)
-SEASON_START_DATE = os.getenv("SEASON_START_DATE", "2026-03-26")  # Opening Day date
+# --- Daily roster sync ---
 DAILY_SYNC_HOUR = int(os.getenv("DAILY_SYNC_HOUR", "0"))           # midnight Taiwan time
 
 _scheduler = None
@@ -481,33 +476,6 @@ def _daily_transaction_fetch_job():
 
     except Exception as e:
         print(f"[TransactionFetch] Error: {e}")
-
-
-def _season_start_notification_job():
-    """Daily job (at DAILY_SYNC_HOUR): send LINE notification on Opening Day."""
-    import zoneinfo
-    tz = zoneinfo.ZoneInfo(REMINDER_CRON_TZ)
-    today_str = datetime.now(tz).strftime("%Y-%m-%d")
-    if today_str != SEASON_START_DATE:
-        return
-
-    year = datetime.now().year
-    print(f"[SeasonStart] Today is Opening Day ({today_str})! Sending LINE notification...")
-
-    try:
-        from src.notification.line_service import send_line_group_message
-        message = (
-            f"[5-Man Keeper League]\n"
-            f"\u26be {year} 賽季正式開始！Play Ball! \u26be\n"
-            f"祝各位 GM 本季順利，好球連發！"
-        )
-        success, error = send_line_group_message(message)
-        if success:
-            print(f"[SeasonStart] LINE notification sent for {year} Opening Day.")
-        else:
-            print(f"[SeasonStart] LINE notification failed: {error}")
-    except Exception as e:
-        print(f"[SeasonStart] Error sending notification: {e}")
 
 
 def _daily_roster_ownership_sync_job():
@@ -1172,6 +1140,21 @@ def _weekly_war_report_job():
 
         lines.append("* Yahoo Fantasy Points (僅供參考)")
 
+        # --- 6. AI commentary (OpenAI; no-op if OPENAI_API_KEY not set) ---
+        try:
+            from src.notification.ai_summary import generate_weekly_ai_summary
+            ai_text = generate_weekly_ai_summary(
+                report_week,
+                current_standings,
+                prev_standings,
+            )
+            if ai_text:
+                lines.append("")
+                lines.append("-- AI 短評 --")
+                lines.append(ai_text)
+        except Exception as e:
+            print(f"[WarReport] AI summary failed (non-fatal): {e}")
+
         message = "\n".join(lines)
 
         # Send LINE message
@@ -1820,19 +1803,7 @@ def start_scheduler():
         replace_existing=True,
     )
 
-    # Job 6: Season start notification (Opening Day LINE message)
-    _scheduler.add_job(
-        _season_start_notification_job,
-        CronTrigger(
-            hour=DAILY_SYNC_HOUR,
-            minute=0,
-            timezone=REMINDER_CRON_TZ,
-        ),
-        id="season_start_notification",
-        replace_existing=True,
-    )
-
-    # Job 7: Daily roster ownership sync (US midnight = DAILY_SYNC_HOUR Taiwan)
+    # Job 6: Daily roster ownership sync (US midnight = DAILY_SYNC_HOUR Taiwan)
     _scheduler.add_job(
         _daily_roster_ownership_sync_job,
         CronTrigger(
@@ -1892,8 +1863,6 @@ def start_scheduler():
     print("[Scheduler] Weekly ranking refresh: every Monday 18:00")
     print("[Scheduler] Daily player status update + injury notification: 12:30 PM")
     print(f"[Scheduler] Daily transaction fetch: {DAILY_SYNC_HOUR}:15 {REMINDER_CRON_TZ}")
-    print(f"[Scheduler] Season start notification: {DAILY_SYNC_HOUR}:00 {REMINDER_CRON_TZ} "
-          f"(Opening Day: {SEASON_START_DATE})")
     print(f"[Scheduler] Daily roster ownership sync: {DAILY_SYNC_HOUR}:30 {REMINDER_CRON_TZ}")
     print(f"[Scheduler] Daily roster + snapshot rebuild: {DAILY_SYNC_HOUR}:45 {REMINDER_CRON_TZ}")
     print("[Scheduler] Weekly war report: every Monday 18:45")
