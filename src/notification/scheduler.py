@@ -39,6 +39,10 @@ ROOKIE_MONITOR_END_MONTH = int(os.getenv("ROOKIE_MONITOR_END_MONTH", "9"))
 # --- Daily roster sync ---
 DAILY_SYNC_HOUR = int(os.getenv("DAILY_SYNC_HOUR", "0"))           # midnight Taiwan time
 
+# --- Injury notification batching ---
+# Batch every N days so we don't spam LINE daily with tiny status changes.
+INJURY_BATCH_DAYS = int(os.getenv("INJURY_BATCH_DAYS", "3"))
+
 _scheduler = None
 
 
@@ -263,7 +267,7 @@ def _daily_player_status_job():
 
     try:
         from api.yahoo_service import yahoo_api_get, YahooTokenError
-        from api.database import get_db, get_player_statuses
+        from api.database import get_db
         import time
 
         # Resolve league key
@@ -273,11 +277,7 @@ def _daily_player_status_job():
             print(f"[StatusUpdate] No league key for year {year}")
             return
 
-        # Step 1: Snapshot old statuses BEFORE update
-        old_statuses = get_player_statuses(year)
-        has_old_data = bool(old_statuses)
-
-        # Step 2: Fetch and update statuses from Yahoo
+        # Step 1: Fetch and update statuses from Yahoo (top 500 by overall rank)
         from api.routers.commissioner import _parse_yahoo_player
         updated = 0
         for start in range(0, 500, 25):
@@ -332,22 +332,46 @@ def _daily_player_status_job():
 
         print(f"[StatusUpdate] Updated {updated} player statuses for {year}")
 
-        # Step 3: Detect changes and send LINE notification
-        if has_old_data:
-            _send_injury_change_notification(year, old_statuses)
-        else:
-            print("[StatusUpdate] First run (no previous data), skipping injury notification.")
+        # Step 2: Batched injury notification (every INJURY_BATCH_DAYS days).
+        # DB updates happen daily for UI freshness, but LINE digest only every N days.
+        from api.database import get_injury_baseline, save_injury_baseline, get_player_statuses
+
+        baseline, last_checked_at = get_injury_baseline(year)
+        current_statuses = get_player_statuses(year)
+
+        if baseline is None:
+            # First run: seed baseline, don't send.
+            save_injury_baseline(year, current_statuses)
+            print("[StatusUpdate] Injury baseline seeded, will notify on next cycle.")
+            return
+
+        # Cooldown check
+        from datetime import datetime as _dt, timezone as _tz
+        now = _dt.now(_tz.utc)
+        # last_checked_at from psycopg2 is tz-aware UTC
+        days_since = (now - last_checked_at).total_seconds() / 86400 if last_checked_at else 999
+        if days_since < INJURY_BATCH_DAYS:
+            print(f"[StatusUpdate] {days_since:.1f}d since last injury digest "
+                  f"(<{INJURY_BATCH_DAYS}d), skipping LINE send.")
+            return
+
+        sent_or_empty = _send_injury_change_notification(year, baseline, current_statuses)
+        if sent_or_empty:
+            # Only advance baseline on successful send OR when there was nothing to send;
+            # LINE API failures keep the baseline so we retry next day.
+            save_injury_baseline(year, current_statuses)
 
     except Exception as e:
         print(f"[StatusUpdate] Error: {e}")
 
 
-def _send_injury_change_notification(year: int, old_statuses: dict[str, dict]):
-    """Compare old vs new player statuses and send LINE notification for changes."""
-    from api.database import get_player_statuses
+def _send_injury_change_notification(
+    year: int,
+    old_statuses: dict[str, dict],
+    new_statuses: dict[str, dict],
+) -> bool:
+    """Compare old vs new statuses; send LINE digest. Return True on success/no-op, False on LINE failure."""
     from src.notification.line_service import send_line_group_message
-
-    new_statuses = get_player_statuses(year)
 
     # Categorize changes (only for owned players)
     new_injuries: list[str] = []      # NULL/empty -> IL/DTD/IL-LT
@@ -380,12 +404,13 @@ def _send_injury_change_notification(year: int, old_statuses: dict[str, dict]):
         elif old_status in injury_statuses and new_status in injury_statuses and old_status != new_status:
             status_changes.append(f"{label} -> {new_status} (was {old_status})")
 
-    # Build message only if there are changes
+    # No changes in the batch window — treat as success so baseline advances.
     if not new_injuries and not recovered and not status_changes:
-        print("[StatusUpdate] No injury status changes detected.")
-        return
+        print("[StatusUpdate] No injury status changes in batch window.")
+        return True
 
-    lines = ["[5-Man Keeper League] 傷兵異動通知", ""]
+    header = f"[5-Man Keeper League] 傷兵異動彙整（近 {INJURY_BATCH_DAYS} 天）"
+    lines = [header, ""]
 
     if new_injuries:
         lines.append("進入傷兵/異常名單:")
@@ -407,9 +432,10 @@ def _send_injury_change_notification(year: int, old_statuses: dict[str, dict]):
 
     success, error = send_line_group_message(message)
     if success:
-        print(f"[StatusUpdate] LINE injury notification sent ({total} changes).")
-    else:
-        print(f"[StatusUpdate] LINE notification failed: {error}")
+        print(f"[StatusUpdate] LINE injury digest sent ({total} changes).")
+        return True
+    print(f"[StatusUpdate] LINE notification failed: {error}")
+    return False
 
 
 def _daily_transaction_fetch_job():

@@ -479,6 +479,15 @@ MIGRATIONS: dict[str, list[str]] = {
         )
         """,
     ],
+    "015_injury_notification_state": [
+        """
+        CREATE TABLE IF NOT EXISTS injury_notification_state (
+            year INTEGER PRIMARY KEY,
+            baseline JSONB NOT NULL,
+            last_checked_at TIMESTAMPTZ DEFAULT NOW()
+        )
+        """,
+    ],
 }
 
 
@@ -1262,6 +1271,38 @@ def get_player_statuses(year: int) -> dict[str, dict]:
             for row in rows
             if row["player_key"]
         }
+
+
+def get_injury_baseline(year: int):
+    """Return (baseline_dict, last_checked_at) or (None, None) if not recorded."""
+    with get_conn() as conn:
+        row = _fetchone(
+            conn,
+            "SELECT baseline, last_checked_at FROM injury_notification_state WHERE year = %s",
+            (year,),
+        )
+    if not row:
+        return None, None
+    baseline = row["baseline"]
+    if isinstance(baseline, str):
+        baseline = json.loads(baseline)
+    return baseline, row["last_checked_at"]
+
+
+def save_injury_baseline(year: int, statuses: dict[str, dict]):
+    """Upsert baseline statuses and bump last_checked_at to NOW()."""
+    payload = json.dumps(statuses, ensure_ascii=False)
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """INSERT INTO injury_notification_state (year, baseline, last_checked_at)
+                   VALUES (%s, %s::jsonb, NOW())
+                   ON CONFLICT(year) DO UPDATE SET
+                       baseline = EXCLUDED.baseline,
+                       last_checked_at = NOW()""",
+                (year, payload),
+            )
+        conn.commit()
 
 
 def sync_roster_ownership(year: int, ownership_map: dict[str, str]):
