@@ -48,6 +48,83 @@ INJURY_BATCH_DAYS = int(os.getenv("INJURY_BATCH_DAYS", "3"))
 _scheduler = None
 
 
+# --- MLB team abbreviation mapping for war report matchup display ---
+# Keywords (lowercase) -> 3-letter MLB abbreviation. Fuzzy substring match,
+# longer keywords tried first to avoid false matches (e.g. "white sox" before "sox").
+_MLB_TEAM_ABBR_KEYWORDS: list[tuple[str, str]] = [
+    ("diamondbacks", "ARI"), ("d-backs", "ARI"), ("dbacks", "ARI"), ("arizona", "ARI"),
+    ("braves", "ATL"), ("atlanta", "ATL"),
+    ("orioles", "BAL"), ("baltimore", "BAL"),
+    ("red sox", "BOS"), ("boston", "BOS"),
+    ("white sox", "CWS"),
+    ("cubs", "CHC"),
+    ("reds", "CIN"), ("cincinnati", "CIN"),
+    ("guardians", "CLE"), ("indians", "CLE"), ("cleveland", "CLE"),
+    ("rockies", "COL"), ("colorado", "COL"),
+    ("tigers", "DET"), ("detroit", "DET"),
+    ("astros", "HOU"), ("houston", "HOU"),
+    ("royals", "KC"), ("kansas city", "KC"),
+    ("angels", "LAA"),
+    ("dodgers", "LAD"), ("dodge", "LAD"),
+    ("marlins", "MIA"), ("miami", "MIA"),
+    ("brewers", "MIL"), ("milwaukee", "MIL"),
+    ("twins", "MIN"), ("minnesota", "MIN"),
+    ("yankees", "NYY"),
+    ("mets", "NYM"),
+    ("athletics", "OAK"), ("oakland", "OAK"),
+    ("phillies", "PHI"), ("philadelphia", "PHI"),
+    ("pirates", "PIT"), ("pittsburgh", "PIT"),
+    ("padres", "SD"), ("san diego", "SD"),
+    ("mariners", "SEA"), ("seattle", "SEA"),
+    ("giants", "SF"), ("san francisco", "SF"),
+    ("cardinals", "STL"), ("st. louis", "STL"), ("st louis", "STL"),
+    ("rays", "TB"), ("tampa bay", "TB"), ("tampa", "TB"),
+    ("rangers", "TEX"), ("texas", "TEX"),
+    ("blue jays", "TOR"), ("jays", "TOR"), ("toronto", "TOR"),
+    ("nationals", "WSH"), ("washington", "WSH"),
+]
+# Pre-sort by keyword length descending so longer/more specific matches win.
+_MLB_TEAM_ABBR_KEYWORDS.sort(key=lambda x: -len(x[0]))
+
+
+def _fantasy_team_to_mlb_abbr(team_name: str) -> str:
+    """Return 3-letter MLB abbrev matched from a fantasy team name, or "" if no match."""
+    if not team_name:
+        return ""
+    name_lower = team_name.lower()
+    for kw, abbr in _MLB_TEAM_ABBR_KEYWORDS:
+        if kw in name_lower:
+            return abbr
+    return ""
+
+
+# --- Yahoo stat_id -> display name (MLB standard) ---
+# Used to parse player_stats in war report top batter/pitcher sections.
+# IDs verified against Yahoo Fantasy MLB public docs; may need adjustment
+# if league custom stats diverge (debug log in scheduler dumps first player's
+# raw stats to help verify).
+_YAHOO_STAT_ID_NAME: dict[str, str] = {
+    # Batting
+    "3": "AVG",
+    "6": "AB",
+    "7": "R",
+    "8": "H",
+    "12": "HR",
+    "13": "RBI",
+    "16": "SB",
+    "55": "OPS",
+    # Pitching
+    "50": "IP",
+    "26": "ERA",
+    "27": "WHIP",
+    "28": "W",
+    "32": "SV",
+    "42": "K",
+    "57": "HLD",
+    "83": "QS",
+}
+
+
 def _is_in_reminder_period(today: datetime) -> tuple[bool, str]:
     """Check if today falls within the reminder period.
 
@@ -1011,13 +1088,47 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
                             except (ValueError, TypeError):
                                 pts = 0.0
                         p_info["points"] = pts
+
+                        # Parse weekly stats: map stat_id -> value, then name -> value
+                        raw_stats: dict[str, str] = {}
+                        if len(p_entry) > 1:
+                            stats_section = p_entry[1].get("player_stats", {})
+                            if isinstance(stats_section, dict):
+                                stats_list = stats_section.get("stats", [])
+                                if isinstance(stats_list, list):
+                                    for stat_wrapper in stats_list:
+                                        if isinstance(stat_wrapper, dict):
+                                            stat_obj = stat_wrapper.get("stat", {})
+                                            sid = str(stat_obj.get("stat_id", ""))
+                                            val = stat_obj.get("value", "")
+                                            if sid:
+                                                raw_stats[sid] = str(val)
+                        named_stats: dict[str, str] = {}
+                        for sid, name in _YAHOO_STAT_ID_NAME.items():
+                            if sid in raw_stats:
+                                named_stats[name] = raw_stats[sid]
+                        p_info["stats"] = named_stats
+                        # Debug: dump first player's full stats once per category
+                        if len(result_list) == 0:
+                            print(
+                                f"[WarReport] First {pos_type} player stats sample: "
+                                f"name={p_info.get('name')!r} raw_stat_ids={list(raw_stats.keys())} "
+                                f"named={named_stats}"
+                            )
                         result_list.append(p_info)
                 time.sleep(1)
             except Exception as e:
                 print(f"[WarReport] Error fetching top {pos_type} players: {e}")
 
         # --- 5. Build LINE message ---
-        lines = [f"[5-Man Keeper League] 第 {report_week} 週戰報", ""]
+        divider = "━━━━━━━━━━━━━━━━━━━━━"
+        lines: list[str] = [
+            divider,
+            " 5-Man Keeper League",
+            f"    第 {report_week} 週戰報",
+            divider,
+            "",
+        ]
 
         def _format_standing_line(s: dict, rank_override: int | None = None) -> str:
             w, l, t = s["wins"], s["losses"], s["ties"]
@@ -1036,10 +1147,10 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
                 change = f" ^{diff}" if diff > 0 else f" v{-diff}"
             else:
                 change = " --"
-            return f"{rank}. {team} [{mgr}] ({w}-{l}-{t}){change}"
+            return f"{rank:>2}. {team} [{mgr}] ({w}-{l}-{t}){change}"
 
         # Overall standings
-        lines.append("-- 聯盟總排名 --")
+        lines.append("【聯盟總排名】")
         for s in current_standings:
             lines.append(_format_standing_line(s))
         lines.append("")
@@ -1051,49 +1162,94 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
             if div:
                 divisions.setdefault(div, []).append(s)
         if divisions:
+            lines.append("【分區排名】")
             for div_id in sorted(divisions.keys()):
                 div_teams = sorted(divisions[div_id], key=lambda x: x["rank"] or 999)
-                lines.append(f"-- 分區 {div_id} --")
+                lines.append(f"▸ 分區 {div_id}")
                 for idx, s in enumerate(div_teams, 1):
-                    lines.append(_format_standing_line(s, rank_override=idx))
+                    w, l, t = s["wins"], s["losses"], s["ties"]
+                    mgr = s["manager_name"] or "?"
+                    team = s["team_name"] or "?"
+                    lines.append(f"  {idx}. {team} [{mgr}] ({w}-{l}-{t})")
                 lines.append("")
 
-        # Matchup results
+        # Matchup results — use MLB abbreviations for clean compact display
         if matchups:
-            lines.append("-- 本週對戰 --")
+            lines.append("【本週對戰】")
             for m in matchups:
                 t1, t2 = m[0], m[1]
                 p1, p2 = t1["points"], t2["points"]
-                name1 = t1["name"] or t1["manager"] or "?"
-                name2 = t2["name"] or t2["manager"] or "?"
+                abbr1 = _fantasy_team_to_mlb_abbr(t1.get("name", "")) or t1.get("manager", "") or "?"
+                abbr2 = _fantasy_team_to_mlb_abbr(t2.get("name", "")) or t2.get("manager", "") or "?"
                 w1 = " W" if t1["is_winner"] else ""
                 w2 = " W" if t2["is_winner"] else ""
-                lines.append(f"{name1} {p1:.0f}{w1} - {p2:.0f}{w2} {name2}")
+                lines.append(f"● {abbr1} {p1:.0f}{w1}  vs  {abbr2} {p2:.0f}{w2}")
             lines.append("")
 
-        # Top batters
+        def _fmt_avg(v: str) -> str:
+            """Format rate stats like .350 (drop leading 0)."""
+            if not v or v in ("-", "INF"):
+                return v or "-"
+            try:
+                f = float(v)
+                s = f"{f:.3f}"
+                return s[1:] if s.startswith("0.") else s
+            except (ValueError, TypeError):
+                return v
+
+        def _fmt_era(v: str) -> str:
+            """Format rate stats like 1.80 (keep leading digits)."""
+            if not v or v in ("-", "INF", "-----"):
+                return v or "-"
+            try:
+                return f"{float(v):.2f}"
+            except (ValueError, TypeError):
+                return v
+
+        # Top batters — 2 lines per player, sorted by Yahoo Points (number hidden)
         if top_batters:
-            lines.append("-- 本週最佳打者 (Yahoo Pts) --")
+            lines.append("【本週最佳打者】(依 Yahoo Pts 排序)")
             for idx, b in enumerate(top_batters[:5], 1):
                 name = b.get("name", "?")
                 pos = b.get("position", "")
-                pts = b.get("points", 0)
                 owner = b.get("owner_team", "FA")
-                lines.append(f"{idx}. {name} ({pos}) - {pts:.1f} pts [{owner}]")
+                owner_abbr = _fantasy_team_to_mlb_abbr(owner) or owner
+                lines.append(f" {idx}. {name} ({pos})  [{owner_abbr}]")
+                st = b.get("stats", {})
+                h = st.get("H", "-")
+                ab = st.get("AB", "-")
+                avg = _fmt_avg(st.get("AVG", "-"))
+                ops = _fmt_avg(st.get("OPS", "-"))
+                hr = st.get("HR", "0")
+                rbi = st.get("RBI", "0")
+                r = st.get("R", "0")
+                sb = st.get("SB", "0")
+                lines.append(f"    {h}/{ab}  {avg}/{ops}  {hr}HR {rbi}RBI {r}R {sb}SB")
             lines.append("")
 
-        # Top pitchers
+        # Top pitchers — 2 lines per player, sorted by Yahoo Points (number hidden)
         if top_pitchers:
-            lines.append("-- 本週最佳投手 (Yahoo Pts) --")
+            lines.append("【本週最佳投手】(依 Yahoo Pts 排序)")
             for idx, p in enumerate(top_pitchers[:5], 1):
                 name = p.get("name", "?")
                 pos = p.get("position", "")
-                pts = p.get("points", 0)
                 owner = p.get("owner_team", "FA")
-                lines.append(f"{idx}. {name} ({pos}) - {pts:.1f} pts [{owner}]")
+                owner_abbr = _fantasy_team_to_mlb_abbr(owner) or owner
+                lines.append(f" {idx}. {name} ({pos})  [{owner_abbr}]")
+                st = p.get("stats", {})
+                ip = st.get("IP", "-")
+                w = st.get("W", "0")
+                sv = st.get("SV", "0")
+                hld = st.get("HLD", "0")
+                k = st.get("K", "0")
+                era = _fmt_era(st.get("ERA", "-"))
+                whip = _fmt_era(st.get("WHIP", "-"))
+                qs = st.get("QS", "0")
+                lines.append(f"    {ip} IP  {w}W {k}K {qs}QS {sv}SV {hld}HLD  {era} ERA / {whip} WHIP")
             lines.append("")
 
-        lines.append("* Yahoo Fantasy Points (僅供參考)")
+        lines.append(divider)
+        lines.append("* Yahoo Fantasy Points 僅供參考")
 
         # --- 6. AI commentary (OpenAI; no-op if OPENAI_API_KEY not set) ---
         try:
@@ -1105,7 +1261,7 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
             )
             if ai_text:
                 lines.append("")
-                lines.append("-- AI 短評 --")
+                lines.append("【AI 短評】")
                 lines.append(ai_text)
         except Exception as e:
             print(f"[WarReport] AI summary failed (non-fatal): {e}")
