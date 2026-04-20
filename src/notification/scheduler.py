@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import os
 from datetime import datetime
+from typing import Any
 
 # --- New: fixed annual window (preferred) ---
 REMINDER_MONTH = int(os.getenv("REMINDER_MONTH", "3"))          # default March
@@ -1050,13 +1051,34 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
         time.sleep(1)
         top_batters: list[dict] = []
         top_pitchers: list[dict] = []
+        stats_debug: dict[str, Any] = {}
+
+        def _walk_stats(obj: Any, out: dict[str, str]) -> None:
+            """Recursively scan a Yahoo player payload for stat_id/value pairs.
+            Yahoo wraps stats in varying depths depending on subresource ordering;
+            this catches them regardless of which list-dict branch they live in."""
+            if isinstance(obj, dict):
+                if "stat_id" in obj and "value" in obj:
+                    sid = str(obj.get("stat_id", ""))
+                    if sid:
+                        out[sid] = str(obj.get("value", ""))
+                    return
+                for v in obj.values():
+                    _walk_stats(v, out)
+            elif isinstance(obj, list):
+                for v in obj:
+                    _walk_stats(v, out)
 
         for pos_type, result_list in [("B", top_batters), ("P", top_pitchers)]:
             try:
+                # Subresource path form (e.g. /players/stats) yields player_stats
+                # reliably; `out=stats,ownership` sometimes drops stats entirely
+                # for week-scoped queries.
                 players_path = (
                     f"/league/{league_key}/players"
                     f";sort=PTS;sort_type=week;sort_week={report_week}"
-                    f";position={pos_type};count=5;out=stats,ownership"
+                    f";position={pos_type};count=5"
+                    f"/stats;type=week;week={report_week}"
                 )
                 pdata = yahoo_api_get(players_path)
                 p_league = pdata.get("fantasy_content", {}).get("league", [])
@@ -1089,20 +1111,10 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
                                 pts = 0.0
                         p_info["points"] = pts
 
-                        # Parse weekly stats: map stat_id -> value, then name -> value
+                        # Parse weekly stats: walk the full entry to find stat pairs,
+                        # resilient to Yahoo's inconsistent nesting.
                         raw_stats: dict[str, str] = {}
-                        if len(p_entry) > 1:
-                            stats_section = p_entry[1].get("player_stats", {})
-                            if isinstance(stats_section, dict):
-                                stats_list = stats_section.get("stats", [])
-                                if isinstance(stats_list, list):
-                                    for stat_wrapper in stats_list:
-                                        if isinstance(stat_wrapper, dict):
-                                            stat_obj = stat_wrapper.get("stat", {})
-                                            sid = str(stat_obj.get("stat_id", ""))
-                                            val = stat_obj.get("value", "")
-                                            if sid:
-                                                raw_stats[sid] = str(val)
+                        _walk_stats(p_entry, raw_stats)
                         named_stats: dict[str, str] = {}
                         for sid, name in _YAHOO_STAT_ID_NAME.items():
                             if sid in raw_stats:
@@ -1115,10 +1127,18 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
                                 f"name={p_info.get('name')!r} raw_stat_ids={list(raw_stats.keys())} "
                                 f"named={named_stats}"
                             )
+                            stats_debug[pos_type] = {
+                                "name": p_info.get("name"),
+                                "raw_stat_ids": list(raw_stats.keys()),
+                                "raw_stats": raw_stats,
+                                "named": named_stats,
+                                "points": pts,
+                            }
                         result_list.append(p_info)
                 time.sleep(1)
             except Exception as e:
                 print(f"[WarReport] Error fetching top {pos_type} players: {e}")
+                stats_debug[pos_type] = {"error": str(e)}
 
         # --- 5. Build LINE message ---
 
@@ -1408,7 +1428,12 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
 
         if dry_run:
             print(f"[WarReport] Dry-run: returning week {report_week} report text.")
-            return {"success": True, "message": "Dry-run (no LINE push)", "report": message}
+            return {
+                "success": True,
+                "message": "Dry-run (no LINE push)",
+                "report": message,
+                "stats_debug": stats_debug,
+            }
 
         # Send LINE message
         if target_id:
