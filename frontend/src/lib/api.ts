@@ -467,6 +467,24 @@ export async function testLineReminder(
   });
 }
 
+export async function triggerWarReport(): Promise<{
+  success: boolean;
+  message: string;
+}> {
+  return request(`/api/commissioner/line/trigger-war-report`, {
+    method: "POST",
+  });
+}
+
+export async function triggerInjuryDigest(): Promise<{
+  success: boolean;
+  message: string;
+}> {
+  return request(`/api/commissioner/line/trigger-injury-digest`, {
+    method: "POST",
+  });
+}
+
 // ========== Buyout Management (Commissioner) ==========
 
 export async function getAllBuyouts(year: number): Promise<{

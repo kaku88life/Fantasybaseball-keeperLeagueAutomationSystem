@@ -18,6 +18,8 @@ import {
   testLineConnection,
   testLinePush,
   testLineReminder,
+  triggerWarReport,
+  triggerInjuryDigest,
   verifyCommissionerPassword,
   getYahooTokenStatus,
   refreshYahooToken,
@@ -198,6 +200,12 @@ export default function CommissionerDashboard() {
     pending_managers: string[];
   } | null>(null);
 
+  // Manual scheduler trigger state (war report / injury digest)
+  const [warReportLoading, setWarReportLoading] = useState(false);
+  const [warReportResult, setWarReportResult] = useState<{ success: boolean; message: string } | null>(null);
+  const [injuryDigestLoading, setInjuryDigestLoading] = useState(false);
+  const [injuryDigestResult, setInjuryDigestResult] = useState<{ success: boolean; message: string } | null>(null);
+
   // Yahoo API token state
   const [yahooToken, setYahooToken] = useState<YahooTokenStatus | null>(null);
   const [yahooTokenLoading, setYahooTokenLoading] = useState(false);
@@ -373,6 +381,40 @@ export default function CommissionerDashboard() {
       });
     } finally {
       setLineReminderLoading(false);
+    }
+  };
+
+  const handleTriggerWarReport = async () => {
+    if (!confirm("確認觸發週戰報？此動作會實際推送訊息到 LINE 群組。")) return;
+    setWarReportLoading(true);
+    setWarReportResult(null);
+    try {
+      const result = await triggerWarReport();
+      setWarReportResult(result);
+    } catch (e) {
+      setWarReportResult({
+        success: false,
+        message: e instanceof Error ? e.message : "Trigger failed",
+      });
+    } finally {
+      setWarReportLoading(false);
+    }
+  };
+
+  const handleTriggerInjuryDigest = async () => {
+    if (!confirm("確認觸發傷兵彙整？若 INJURY_BATCH_DAYS 冷卻未到會被跳過。")) return;
+    setInjuryDigestLoading(true);
+    setInjuryDigestResult(null);
+    try {
+      const result = await triggerInjuryDigest();
+      setInjuryDigestResult(result);
+    } catch (e) {
+      setInjuryDigestResult({
+        success: false,
+        message: e instanceof Error ? e.message : "Trigger failed",
+      });
+    } finally {
+      setInjuryDigestLoading(false);
     }
   };
 
@@ -905,6 +947,47 @@ export default function CommissionerDashboard() {
                     </p>
                     <p className="mt-1 text-gray-500">
                       Target: {lineReminderResult.target_id_preview}　Year: {lineReminderResult.year}　未繳交: {lineReminderResult.pending_count}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Manual scheduler triggers (war report / injury digest) */}
+              <div className="mt-3 border-t border-blue-200 pt-3">
+                <p className="mb-2 text-xs text-gray-600">
+                  手動觸發排程作業（實際推送到 LINE 群組，無冷卻保護）：
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={handleTriggerWarReport}
+                    disabled={warReportLoading}
+                    className="rounded bg-emerald-600 px-3 py-1 text-sm font-medium text-white hover:bg-emerald-500 disabled:opacity-50"
+                  >
+                    {warReportLoading ? "執行中..." : "觸發週戰報 Trigger War Report"}
+                  </button>
+                  <button
+                    onClick={handleTriggerInjuryDigest}
+                    disabled={injuryDigestLoading}
+                    className="rounded bg-amber-600 px-3 py-1 text-sm font-medium text-white hover:bg-amber-500 disabled:opacity-50"
+                  >
+                    {injuryDigestLoading ? "執行中..." : "觸發傷兵彙整 Trigger Injury Digest"}
+                  </button>
+                </div>
+                {warReportResult && (
+                  <div className={`mt-2 rounded border p-2 text-xs ${
+                    warReportResult.success ? "border-green-200 bg-green-100" : "border-red-200 bg-red-100"
+                  }`}>
+                    <p className={warReportResult.success ? "text-green-700" : "text-red-700"}>
+                      週戰報：{warReportResult.message}
+                    </p>
+                  </div>
+                )}
+                {injuryDigestResult && (
+                  <div className={`mt-2 rounded border p-2 text-xs ${
+                    injuryDigestResult.success ? "border-green-200 bg-green-100" : "border-red-200 bg-red-100"
+                  }`}>
+                    <p className={injuryDigestResult.success ? "text-green-700" : "text-red-700"}>
+                      傷兵彙整：{injuryDigestResult.message}
                     </p>
                   </div>
                 )}
