@@ -1121,7 +1121,6 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
                 print(f"[WarReport] Error fetching top {pos_type} players: {e}")
 
         # --- 5. Build LINE message ---
-        divider = "━━━━━━━━━━━━━━━━━━━━━"  # ~21 "cells" wide (each ━ ≈ 1 ASCII cell)
 
         def _visual_width(s: str) -> int:
             """Rough visual width: CJK/fullwidth chars ≈ 2 cells, ASCII ≈ 1."""
@@ -1150,25 +1149,17 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
             pad = max(0, (width - _visual_width(text)) // 2)
             return " " * pad + text
 
-        title_width = _visual_width(divider)
-        lines: list[str] = [
-            divider,
-            _center("5-Man Keeper League", title_width),
-            _center(f"第 {report_week} 週戰報", title_width),
-            divider,
-            "",
-        ]
-
         def _pad_right_visual(s: str, width: int) -> str:
             return s + " " * max(0, width - _visual_width(s))
 
         def _team_mgr_block(s: dict) -> str:
-            team = s["team_name"] or "?"
+            # MLB abbreviation + manager for compact mobile-friendly display.
+            team_name = s["team_name"] or ""
+            abbr = _fantasy_team_to_mlb_abbr(team_name) or team_name or "?"
             mgr = s["manager_name"] or "?"
-            return f"{team} [{mgr}]"
+            return f"{abbr} [{mgr}]"
 
-        # Compute max visual width of "TeamName [Manager]" across all teams
-        # so overall + division sections use identical column layout.
+        # Column width for "ABBR [Manager]" — shared by overall + division sections.
         max_left_vw = max(
             (_visual_width(_team_mgr_block(s)) for s in current_standings),
             default=0,
@@ -1201,55 +1192,49 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
                 change = ""
             return f"{indent}{rank:>2}. {left}  {record}{change}"
 
+        # --- Build content sections first, so page_width matches actual content. ---
+
         # Overall standings
-        lines.append("【聯盟總排名】")
-        for s in current_standings:
-            lines.append(_format_standing_line(s))
-        lines.append("")
+        standings_lines: list[str] = [
+            _format_standing_line(s) for s in current_standings
+        ]
 
         # Division standings: group by division_id, rank within each division.
-        # Change indicator omitted in division section (overall rank change
-        # would be confusing beside a division-local rank).
         divisions: dict[str, list[dict]] = {}
         for s in current_standings:
             div = s.get("division_id", "")
             if div:
                 divisions.setdefault(div, []).append(s)
-        if divisions:
-            lines.append("【分區排名】")
-            for div_id in sorted(divisions.keys()):
-                div_teams = sorted(divisions[div_id], key=lambda x: x["rank"] or 999)
-                lines.append(f"▸ 分區 {div_id}")
-                for idx, s in enumerate(div_teams, 1):
-                    lines.append(
-                        _format_standing_line(
-                            s,
-                            rank_override=idx,
-                            indent="  ",
-                            show_change=False,
-                        )
-                    )
-                lines.append("")
+        division_blocks: list[tuple[str, list[str]]] = []
+        for div_id in sorted(divisions.keys()):
+            div_teams = sorted(divisions[div_id], key=lambda x: x["rank"] or 999)
+            team_lines = [
+                _format_standing_line(
+                    s,
+                    rank_override=idx,
+                    indent="  ",
+                    show_change=False,
+                )
+                for idx, s in enumerate(div_teams, 1)
+            ]
+            division_blocks.append((f"▸ 分區 {div_id}", team_lines))
 
-        # Matchup results — scoreboard style, MLB abbrev, W marker on winner's outer side.
-        # Blank line between matchups for a "table-like" breathing layout.
-        if matchups:
-            lines.append("【本週對戰】")
-            for idx_m, m in enumerate(matchups):
-                t1, t2 = m[0], m[1]
-                p1, p2 = t1["points"], t2["points"]
-                abbr1 = _fantasy_team_to_mlb_abbr(t1.get("name", "")) or t1.get("manager", "") or "?"
-                abbr2 = _fantasy_team_to_mlb_abbr(t2.get("name", "")) or t2.get("manager", "") or "?"
-                if t1.get("is_winner"):
-                    row = f"W {p1:>2.0f} {abbr1:<3}  vs  {abbr2:<3} {p2:>2.0f}"
-                elif t2.get("is_winner"):
-                    row = f"  {p1:>2.0f} {abbr1:<3}  vs  {abbr2:<3} {p2:>2.0f} W"
-                else:
-                    row = f"  {p1:>2.0f} {abbr1:<3}  vs  {abbr2:<3} {p2:>2.0f}"
-                lines.append(row)
-                if idx_m < len(matchups) - 1:
-                    lines.append("")
-            lines.append("")
+        # Matchups — scoreboard style, MLB abbrev, W marker on winner's outer side.
+        matchup_lines: list[str] = []
+        for idx_m, m in enumerate(matchups):
+            t1, t2 = m[0], m[1]
+            p1, p2 = t1["points"], t2["points"]
+            abbr1 = _fantasy_team_to_mlb_abbr(t1.get("name", "")) or t1.get("manager", "") or "?"
+            abbr2 = _fantasy_team_to_mlb_abbr(t2.get("name", "")) or t2.get("manager", "") or "?"
+            if t1.get("is_winner"):
+                row = f"W {p1:>2.0f} {abbr1:<3}  vs  {abbr2:<3} {p2:>2.0f}"
+            elif t2.get("is_winner"):
+                row = f"  {p1:>2.0f} {abbr1:<3}  vs  {abbr2:<3} {p2:>2.0f} W"
+            else:
+                row = f"  {p1:>2.0f} {abbr1:<3}  vs  {abbr2:<3} {p2:>2.0f}"
+            matchup_lines.append(row)
+            if idx_m < len(matchups) - 1:
+                matchup_lines.append("")
 
         def _fmt_avg(v: str) -> str:
             """Format rate stats like .350 (drop leading 0)."""
@@ -1271,61 +1256,126 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
             except (ValueError, TypeError):
                 return v
 
-        # Top batters — 2 lines per player, sorted by Yahoo Points (number hidden)
-        if top_batters:
-            lines.append("【本週最佳打者】(依 Yahoo Pts 排序)")
-            for idx, b in enumerate(top_batters[:5], 1):
-                name = b.get("name", "?")
-                pos = b.get("position", "")
-                owner = b.get("owner_team", "FA")
-                owner_abbr = _fantasy_team_to_mlb_abbr(owner) or owner
-                lines.append(f" {idx}. {name} ({pos})  [{owner_abbr}]")
-                st = b.get("stats", {})
-                h = st.get("H", "-")
-                ab = st.get("AB", "-")
-                avg = _fmt_avg(st.get("AVG", "-"))
-                ops = _fmt_avg(st.get("OPS", "-"))
-                hr = st.get("HR", "0")
-                rbi = st.get("RBI", "0")
-                r = st.get("R", "0")
-                sb = st.get("SB", "0")
-                lines.append(f"    {h}-{ab}  {avg}/{ops}  {hr}HR {rbi}RBI {r}R {sb}SB")
+        # Top batters — 3 lines per player: name / rate stats / counting stats.
+        batter_lines: list[str] = []
+        for idx, b in enumerate(top_batters[:5], 1):
+            name = b.get("name", "?")
+            pos = b.get("position", "")
+            owner = b.get("owner_team", "FA")
+            owner_abbr = _fantasy_team_to_mlb_abbr(owner) or owner
+            st = b.get("stats", {})
+            h = st.get("H", "-")
+            ab = st.get("AB", "-")
+            avg = _fmt_avg(st.get("AVG", "-"))
+            ops = _fmt_avg(st.get("OPS", "-"))
+            hr = st.get("HR", "0")
+            rbi = st.get("RBI", "0")
+            r = st.get("R", "0")
+            sb = st.get("SB", "0")
+            batter_lines.append(f" {idx}. {name} ({pos})  [{owner_abbr}]")
+            batter_lines.append(f"    {h}-{ab}  {avg}/{ops}")
+            batter_lines.append(f"    {hr}HR {rbi}RBI {r}R {sb}SB")
+
+        # Top pitchers — 3 lines per player: name / IP + counting / ERA / WHIP.
+        # SP hides SV/HLD, RP hides QS.
+        pitcher_lines: list[str] = []
+        for idx, p in enumerate(top_pitchers[:5], 1):
+            name = p.get("name", "?")
+            pos = p.get("position", "")
+            owner = p.get("owner_team", "FA")
+            owner_abbr = _fantasy_team_to_mlb_abbr(owner) or owner
+            st = p.get("stats", {})
+            ip = st.get("IP", "-")
+            w = st.get("W", "0")
+            sv = st.get("SV", "0")
+            hld = st.get("HLD", "0")
+            k = st.get("K", "0")
+            era = _fmt_era(st.get("ERA", "-"))
+            whip = _fmt_era(st.get("WHIP", "-"))
+            qs = st.get("QS", "0")
+            pos_upper = (pos or "").upper()
+            is_sp = "SP" in pos_upper
+            is_rp = "RP" in pos_upper
+            counting_parts = [f"{w}W", f"{k}K"]
+            if is_sp and not is_rp:
+                counting_parts.append(f"{qs}QS")
+            elif is_rp and not is_sp:
+                counting_parts.extend([f"{sv}SV", f"{hld}HLD"])
+            else:
+                counting_parts.extend([f"{qs}QS", f"{sv}SV", f"{hld}HLD"])
+            counting = " ".join(counting_parts)
+            pitcher_lines.append(f" {idx}. {name} ({pos})  [{owner_abbr}]")
+            pitcher_lines.append(f"    {ip} IP  {counting}")
+            pitcher_lines.append(f"    {era} ERA / {whip} WHIP")
+
+        # page_width: widest non-blank line (content + section headers), floor 28.
+        # Headers are included so that long titles like "【本週最佳打者】(...)"
+        # still receive symmetric padding when _center() is applied.
+        all_content: list[str] = []
+        all_content.extend(standings_lines)
+        for _sub_header, team_lines in division_blocks:
+            all_content.extend(team_lines)
+        all_content.extend(l for l in matchup_lines if l)
+        all_content.extend(batter_lines)
+        all_content.extend(pitcher_lines)
+
+        section_headers: list[str] = ["【聯盟總排名】"]
+        if division_blocks:
+            section_headers.append("【分區排名】")
+            section_headers.extend(h for h, _ in division_blocks)
+        if matchup_lines:
+            section_headers.append("【本週對戰】")
+        if batter_lines:
+            section_headers.append("【本週最佳打者】")
+        if pitcher_lines:
+            section_headers.append("【本週最佳投手】")
+
+        page_width = max(
+            (_visual_width(l) for l in (all_content + section_headers) if l and l.strip()),
+            default=28,
+        )
+        page_width = max(page_width, 28)
+
+        # Divider: 12 cells, centered within page_width (mobile-friendly).
+        divider_raw = "━" * 12
+        divider_line = _center(divider_raw, page_width)
+
+        # Assemble final message with centered section headers.
+        lines: list[str] = [
+            divider_line,
+            _center("5-Man Keeper League", page_width),
+            _center(f"第 {report_week} 週戰報", page_width),
+            divider_line,
+            "",
+            _center("【聯盟總排名】", page_width),
+        ]
+        lines.extend(standings_lines)
+        lines.append("")
+
+        if division_blocks:
+            lines.append(_center("【分區排名】", page_width))
+            for sub_header, team_lines in division_blocks:
+                lines.append(_center(sub_header, page_width))
+                lines.extend(team_lines)
+                lines.append("")
+
+        if matchup_lines:
+            lines.append(_center("【本週對戰】", page_width))
+            for ml in matchup_lines:
+                lines.append(_center(ml, page_width) if ml else ml)
             lines.append("")
 
-        # Top pitchers — hide SV/HLD for pure SP, hide QS for pure RP.
-        if top_pitchers:
-            lines.append("【本週最佳投手】(依 Yahoo Pts 排序)")
-            for idx, p in enumerate(top_pitchers[:5], 1):
-                name = p.get("name", "?")
-                pos = p.get("position", "")
-                owner = p.get("owner_team", "FA")
-                owner_abbr = _fantasy_team_to_mlb_abbr(owner) or owner
-                lines.append(f" {idx}. {name} ({pos})  [{owner_abbr}]")
-                st = p.get("stats", {})
-                ip = st.get("IP", "-")
-                w = st.get("W", "0")
-                sv = st.get("SV", "0")
-                hld = st.get("HLD", "0")
-                k = st.get("K", "0")
-                era = _fmt_era(st.get("ERA", "-"))
-                whip = _fmt_era(st.get("WHIP", "-"))
-                qs = st.get("QS", "0")
-                # Position-based stat filtering
-                pos_upper = (pos or "").upper()
-                is_sp = "SP" in pos_upper
-                is_rp = "RP" in pos_upper
-                counting_parts = [f"{w}W", f"{k}K"]
-                if is_sp and not is_rp:
-                    counting_parts.append(f"{qs}QS")
-                elif is_rp and not is_sp:
-                    counting_parts.extend([f"{sv}SV", f"{hld}HLD"])
-                else:
-                    counting_parts.extend([f"{qs}QS", f"{sv}SV", f"{hld}HLD"])
-                counting = " ".join(counting_parts)
-                lines.append(f"    {ip} IP  {counting}  {era} ERA / {whip} WHIP")
+        if batter_lines:
+            lines.append(_center("【本週最佳打者】", page_width))
+            lines.extend(batter_lines)
             lines.append("")
 
-        lines.append(divider)
+        if pitcher_lines:
+            lines.append(_center("【本週最佳投手】", page_width))
+            lines.extend(pitcher_lines)
+            lines.append("")
+
+        lines.append(divider_line)
         lines.append("* Yahoo Fantasy Points 僅供參考")
 
         # --- 6. AI commentary (OpenAI; no-op if OPENAI_API_KEY not set) ---
@@ -1338,7 +1388,7 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
             )
             if ai_text:
                 lines.append("")
-                lines.append("【AI 短評】")
+                lines.append(_center("【AI 短評】", page_width))
                 lines.append(ai_text)
         except Exception as e:
             print(f"[WarReport] AI summary failed (non-fatal): {e}")
