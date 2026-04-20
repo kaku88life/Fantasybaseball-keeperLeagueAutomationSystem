@@ -1121,11 +1121,40 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
                 print(f"[WarReport] Error fetching top {pos_type} players: {e}")
 
         # --- 5. Build LINE message ---
-        divider = "━━━━━━━━━━━━━━━━━━━━━"
+        divider = "━━━━━━━━━━━━━━━━━━━━━"  # ~21 "cells" wide (each ━ ≈ 1 ASCII cell)
+
+        def _visual_width(s: str) -> int:
+            """Rough visual width: CJK/fullwidth chars ≈ 2 cells, ASCII ≈ 1."""
+            w = 0
+            for c in s:
+                o = ord(c)
+                if (
+                    0x1100 <= o <= 0x115F
+                    or 0x2E80 <= o <= 0x303E
+                    or 0x3041 <= o <= 0x33FF
+                    or 0x3400 <= o <= 0x4DBF
+                    or 0x4E00 <= o <= 0x9FFF
+                    or 0xA000 <= o <= 0xA4CF
+                    or 0xAC00 <= o <= 0xD7A3
+                    or 0xF900 <= o <= 0xFAFF
+                    or 0xFE30 <= o <= 0xFE4F
+                    or 0xFF00 <= o <= 0xFF60
+                    or 0xFFE0 <= o <= 0xFFE6
+                ):
+                    w += 2
+                else:
+                    w += 1
+            return w
+
+        def _center(text: str, width: int) -> str:
+            pad = max(0, (width - _visual_width(text)) // 2)
+            return " " * pad + text
+
+        title_width = _visual_width(divider)
         lines: list[str] = [
             divider,
-            " 5-Man Keeper League",
-            f"    第 {report_week} 週戰報",
+            _center("5-Man Keeper League", title_width),
+            _center(f"第 {report_week} 週戰報", title_width),
             divider,
             "",
         ]
@@ -1173,17 +1202,24 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
                     lines.append(f"  {idx}. {team} [{mgr}] ({w}-{l}-{t})")
                 lines.append("")
 
-        # Matchup results — use MLB abbreviations for clean compact display
+        # Matchup results — scoreboard style, MLB abbrev, W marker on winner's outer side.
+        # Blank line between matchups for a "table-like" breathing layout.
         if matchups:
             lines.append("【本週對戰】")
-            for m in matchups:
+            for idx_m, m in enumerate(matchups):
                 t1, t2 = m[0], m[1]
                 p1, p2 = t1["points"], t2["points"]
                 abbr1 = _fantasy_team_to_mlb_abbr(t1.get("name", "")) or t1.get("manager", "") or "?"
                 abbr2 = _fantasy_team_to_mlb_abbr(t2.get("name", "")) or t2.get("manager", "") or "?"
-                w1 = " W" if t1["is_winner"] else ""
-                w2 = " W" if t2["is_winner"] else ""
-                lines.append(f"● {abbr1} {p1:.0f}{w1}  vs  {abbr2} {p2:.0f}{w2}")
+                if t1.get("is_winner"):
+                    row = f"W {p1:>2.0f} {abbr1:<3}  vs  {abbr2:<3} {p2:>2.0f}"
+                elif t2.get("is_winner"):
+                    row = f"  {p1:>2.0f} {abbr1:<3}  vs  {abbr2:<3} {p2:>2.0f} W"
+                else:
+                    row = f"  {p1:>2.0f} {abbr1:<3}  vs  {abbr2:<3} {p2:>2.0f}"
+                lines.append(row)
+                if idx_m < len(matchups) - 1:
+                    lines.append("")
             lines.append("")
 
         def _fmt_avg(v: str) -> str:
@@ -1224,10 +1260,10 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
                 rbi = st.get("RBI", "0")
                 r = st.get("R", "0")
                 sb = st.get("SB", "0")
-                lines.append(f"    {h}/{ab}  {avg}/{ops}  {hr}HR {rbi}RBI {r}R {sb}SB")
+                lines.append(f"    {h}-{ab}  {avg}/{ops}  {hr}HR {rbi}RBI {r}R {sb}SB")
             lines.append("")
 
-        # Top pitchers — 2 lines per player, sorted by Yahoo Points (number hidden)
+        # Top pitchers — hide SV/HLD for pure SP, hide QS for pure RP.
         if top_pitchers:
             lines.append("【本週最佳投手】(依 Yahoo Pts 排序)")
             for idx, p in enumerate(top_pitchers[:5], 1):
@@ -1245,7 +1281,19 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
                 era = _fmt_era(st.get("ERA", "-"))
                 whip = _fmt_era(st.get("WHIP", "-"))
                 qs = st.get("QS", "0")
-                lines.append(f"    {ip} IP  {w}W {k}K {qs}QS {sv}SV {hld}HLD  {era} ERA / {whip} WHIP")
+                # Position-based stat filtering
+                pos_upper = (pos or "").upper()
+                is_sp = "SP" in pos_upper
+                is_rp = "RP" in pos_upper
+                counting_parts = [f"{w}W", f"{k}K"]
+                if is_sp and not is_rp:
+                    counting_parts.append(f"{qs}QS")
+                elif is_rp and not is_sp:
+                    counting_parts.extend([f"{sv}SV", f"{hld}HLD"])
+                else:
+                    counting_parts.extend([f"{qs}QS", f"{sv}SV", f"{hld}HLD"])
+                counting = " ".join(counting_parts)
+                lines.append(f"    {ip} IP  {counting}  {era} ERA / {whip} WHIP")
             lines.append("")
 
         lines.append(divider)
