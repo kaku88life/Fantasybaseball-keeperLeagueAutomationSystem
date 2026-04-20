@@ -1198,7 +1198,7 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
                     change = "  --"
             else:
                 change = ""
-            return f"{indent}{rank:>2}. {left}  {record}{change}"
+            return f"{indent}{rank:>2}. {left}  {record:>7}{change}"
 
         # --- Build content sections first, so page_width matches actual content. ---
 
@@ -1343,10 +1343,13 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
             default=28,
         )
         page_width = max(page_width, 28)
+        # Force even so centered (even-width) text is pixel-symmetric in fullwidths.
+        if page_width % 2 == 1:
+            page_width += 1
 
-        # Divider: 12 cells, centered within page_width (mobile-friendly).
-        divider_raw = "━" * 12
-        divider_line = _center(divider_raw, page_width)
+        # Divider spans full page width — clean, always aligned with content edges.
+        divider_raw = "━" * (page_width // 2)
+        divider_line = divider_raw
 
         # Assemble final message with centered section headers.
         lines: list[str] = [
@@ -1365,7 +1368,7 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
             for sub_header, team_lines in division_blocks:
                 lines.append(sub_header)
                 lines.extend(team_lines)
-                lines.append("")
+            lines.append("")
 
         if matchup_lines:
             lines.append(_center("【本週對戰】", page_width))
