@@ -821,46 +821,89 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
 
         teams_section = league_standings[1].get("standings", [{}])[0].get("teams", {})
         team_count = teams_section.get("count", 0)
+        try:
+            team_count = int(team_count or 0)
+        except (ValueError, TypeError):
+            team_count = 0
 
-        from api.routers.commissioner import _parse_yahoo_player
+        def _safe_int(v, default=0):
+            try:
+                return int(v) if v not in (None, "") else default
+            except (ValueError, TypeError):
+                return default
+
+        def _find_section(items, key):
+            """Find `key` anywhere inside the tail of team_raw (handles dict or list wrappers)."""
+            for elem in items:
+                if isinstance(elem, dict) and key in elem:
+                    return elem[key]
+                if isinstance(elem, list):
+                    for sub in elem:
+                        if isinstance(sub, dict) and key in sub:
+                            return sub[key]
+            return {}
 
         current_standings: list[dict] = []
         for i in range(team_count):
             team_raw = teams_section.get(str(i), {}).get("team", [])
-            if not team_raw:
+            if not team_raw or not isinstance(team_raw, list):
                 continue
-            # Parse team info
-            info_list = team_raw[0] if isinstance(team_raw, list) else []
+
+            # Element 0: list of info dicts (name, team_key, division_id, managers, ...)
+            info_list = team_raw[0] if isinstance(team_raw[0], list) else []
             team_name = ""
+            team_key = ""
             manager_name = ""
+            division_id = ""
             for item in info_list:
-                if isinstance(item, dict):
-                    if "name" in item:
-                        team_name = item["name"]
-                    if "managers" in item:
-                        mgrs = item["managers"]
-                        if isinstance(mgrs, list) and mgrs:
-                            manager_name = mgrs[0].get("manager", {}).get("nickname", "")
-            # Parse standings
-            standing = {}
-            if len(team_raw) > 1:
-                standing = team_raw[1].get("team_standings", {})
-            rank = int(standing.get("rank", 0))
-            record = standing.get("outcome_totals", {})
-            wins = int(record.get("wins", 0))
-            losses = int(record.get("losses", 0))
-            ties = int(record.get("ties", 0))
+                if not isinstance(item, dict):
+                    continue
+                if "name" in item:
+                    team_name = str(item["name"])
+                if "team_key" in item:
+                    team_key = str(item["team_key"])
+                if "division_id" in item:
+                    division_id = str(item["division_id"])
+                if "managers" in item:
+                    mgrs = item["managers"]
+                    if isinstance(mgrs, list) and mgrs and isinstance(mgrs[0], dict):
+                        manager_name = str(mgrs[0].get("manager", {}).get("nickname", ""))
+
+            # Element 1+: team_stats / team_points / team_standings (dict- or list-wrapped)
+            standing = _find_section(team_raw[1:], "team_standings")
+            if not isinstance(standing, dict):
+                standing = {}
+
+            rank = _safe_int(standing.get("rank"))
+            outcome = standing.get("outcome_totals", {}) if isinstance(standing, dict) else {}
+            if not isinstance(outcome, dict):
+                outcome = {}
+            wins = _safe_int(outcome.get("wins"))
+            losses = _safe_int(outcome.get("losses"))
+            ties = _safe_int(outcome.get("ties"))
+
+            if i == 0:
+                print(
+                    f"[WarReport] First team sample: team_name={team_name!r} "
+                    f"manager={manager_name!r} division={division_id!r} "
+                    f"rank={rank} W-L-T={wins}-{losses}-{ties} "
+                    f"standing_keys={list(standing.keys()) if standing else 'EMPTY'}"
+                )
 
             current_standings.append({
                 "team_name": team_name,
+                "team_key": team_key,
                 "manager_name": manager_name,
+                "division_id": division_id,
                 "rank": rank,
                 "wins": wins,
                 "losses": losses,
                 "ties": ties,
             })
 
-        current_standings.sort(key=lambda x: x["rank"])
+        # Sort by rank; fall back to preserving Yahoo's order if ranks are all 0
+        if any(s["rank"] > 0 for s in current_standings):
+            current_standings.sort(key=lambda x: x["rank"] or 999)
 
         # Save current standings for next week's comparison
         save_weekly_standings(year, report_week, current_standings)
@@ -976,21 +1019,38 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
         # --- 5. Build LINE message ---
         lines = [f"[5-Man Keeper League] 第 {report_week} 週戰報", ""]
 
-        # Standings
-        lines.append("-- 排名 --")
-        for s in current_standings:
+        def _format_standing_line(s: dict, rank_override: int | None = None) -> str:
             w, l, t = s["wins"], s["losses"], s["ties"]
-            mgr = s["manager_name"]
-            rank = s["rank"]
-            # Rank change indicator
+            mgr = s["manager_name"] or "?"
+            team = s["team_name"] or "?"
+            rank = rank_override if rank_override is not None else s["rank"]
             prev_rank = prev_rank_map.get(mgr)
-            if prev_rank is not None and prev_rank != rank:
-                diff = prev_rank - rank  # positive = improved
+            if prev_rank is not None and prev_rank != s["rank"] and s["rank"] > 0:
+                diff = prev_rank - s["rank"]  # positive = improved
                 change = f" ^{diff}" if diff > 0 else f" v{-diff}"
             else:
                 change = " --"
-            lines.append(f"{rank}. {mgr} ({w}-{l}-{t}){change}")
+            return f"{rank}. {team} [{mgr}] ({w}-{l}-{t}){change}"
+
+        # Overall standings
+        lines.append("-- 聯盟總排名 --")
+        for s in current_standings:
+            lines.append(_format_standing_line(s))
         lines.append("")
+
+        # Division standings: group by division_id, rank within each division
+        divisions: dict[str, list[dict]] = {}
+        for s in current_standings:
+            div = s.get("division_id", "")
+            if div:
+                divisions.setdefault(div, []).append(s)
+        if divisions:
+            for div_id in sorted(divisions.keys()):
+                div_teams = sorted(divisions[div_id], key=lambda x: x["rank"] or 999)
+                lines.append(f"-- 分區 {div_id} --")
+                for idx, s in enumerate(div_teams, 1):
+                    lines.append(_format_standing_line(s, rank_override=idx))
+                lines.append("")
 
         # Matchup results
         if matchups:
