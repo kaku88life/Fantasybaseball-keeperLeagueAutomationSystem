@@ -572,6 +572,42 @@ async def test_line_reminder_endpoint(
     }
 
 
+@router.post("/line/trigger-war-report")
+async def trigger_war_report_endpoint(
+    user: dict = Depends(get_current_commissioner),
+):
+    """Manually fire the weekly war report job.
+
+    Useful when the scheduled Monday 18:45 job was missed (e.g. the container
+    was redeploying at that moment).
+    """
+    from src.notification.scheduler import _weekly_war_report_job
+
+    try:
+        _weekly_war_report_job()
+        return {"success": True, "message": "War report job executed. Check Zeabur logs + LINE group for result."}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"War report failed: {e}")
+
+
+@router.post("/line/trigger-injury-digest")
+async def trigger_injury_digest_endpoint(
+    user: dict = Depends(get_current_commissioner),
+):
+    """Manually fire the daily player status + injury digest job.
+
+    Useful for testing after deploy. Respects the INJURY_BATCH_DAYS cooldown,
+    so it may just update DB without sending LINE (check returned message).
+    """
+    from src.notification.scheduler import _daily_player_status_job
+
+    try:
+        _daily_player_status_job()
+        return {"success": True, "message": "Status update job executed. Check Zeabur logs."}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Status job failed: {e}")
+
+
 # ========== Buyout Management ==========
 
 @router.get("/buyouts/{year}")
