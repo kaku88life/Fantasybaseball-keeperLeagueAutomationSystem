@@ -8,7 +8,7 @@ import tempfile
 from pathlib import Path
 from typing import Optional
 
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from fastapi import APIRouter, BackgroundTasks, Depends, File, HTTPException, UploadFile
 from pydantic import BaseModel
 
 from api.database import (
@@ -581,29 +581,40 @@ class TriggerWarReportRequest(BaseModel):
 
 @router.post("/line/trigger-war-report")
 async def trigger_war_report_endpoint(
+    background_tasks: BackgroundTasks,
     payload: TriggerWarReportRequest | None = None,
     user: dict = Depends(get_current_commissioner),
 ):
     """Manually fire the weekly war report job.
 
-    Useful when the scheduled Monday 21:00 job was missed (e.g. container
-    was redeploying), or to preview the report to admin LINE before sending
-    to the group.
-
-    Body (optional):
-        target_id: if set (U.../C.../R...), push to that target instead of group
-        dry_run:   if true, skip LINE entirely and return the full message text
+    dry_run=true is kept synchronous so the caller can inspect the rendered
+    text. target/group push modes are dispatched to BackgroundTasks so the
+    HTTP request returns immediately (avoids client timeouts when Yahoo API
+    takes 30-60s under cold start).
     """
     from src.notification.scheduler import _weekly_war_report_job
 
     target_id = (payload.target_id if payload else None) or ""
     dry_run = bool(payload.dry_run if payload else False)
 
-    try:
-        result = _weekly_war_report_job(target_id=target_id, dry_run=dry_run)
-        return result
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"War report failed: {e}")
+    if dry_run:
+        try:
+            return _weekly_war_report_job(target_id=target_id, dry_run=True)
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"War report failed: {e}")
+
+    def _run_bg(tid: str) -> None:
+        try:
+            _weekly_war_report_job(target_id=tid, dry_run=False)
+        except Exception as e:
+            print(f"[CommissionerAPI] Background war report failed: {e}")
+
+    background_tasks.add_task(_run_bg, target_id)
+    return {
+        "status": "scheduled",
+        "mode": "target" if target_id else "group",
+        "message": "War report dispatched in background. Check LINE in 30-90s.",
+    }
 
 
 @router.post("/line/trigger-injury-digest")

@@ -1129,6 +1129,9 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
                 o = ord(c)
                 if (
                     0x1100 <= o <= 0x115F
+                    or 0x2600 <= o <= 0x26FF
+                    or 0x2700 <= o <= 0x27BF
+                    or 0x2B00 <= o <= 0x2BFF
                     or 0x2E80 <= o <= 0x303E
                     or 0x3041 <= o <= 0x33FF
                     or 0x3400 <= o <= 0x4DBF
@@ -1139,6 +1142,7 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
                     or 0xFE30 <= o <= 0xFE4F
                     or 0xFF00 <= o <= 0xFF60
                     or 0xFFE0 <= o <= 0xFFE6
+                    or 0x1F300 <= o <= 0x1FAFF
                 ):
                     w += 2
                 else:
@@ -1146,8 +1150,12 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
             return w
 
         def _center(text: str, width: int) -> str:
-            pad = max(0, (width - _visual_width(text)) // 2)
-            return " " * pad + text
+            # Use fullwidth space (2 cells) for bulk padding so desktop LINE's
+            # proportional font does not collapse leading ASCII spaces.
+            pad_cells = max(0, (width - _visual_width(text)) // 2)
+            fw = "\u3000" * (pad_cells // 2)
+            sp = " " * (pad_cells % 2)
+            return fw + sp + text
 
         def _pad_right_visual(s: str, width: int) -> str:
             return s + " " * max(0, width - _visual_width(s))
@@ -1157,7 +1165,7 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
             team_name = s["team_name"] or ""
             abbr = _fantasy_team_to_mlb_abbr(team_name) or team_name or "?"
             mgr = s["manager_name"] or "?"
-            return f"{abbr} [{mgr}]"
+            return f"{abbr}  ({mgr})"
 
         # Column width for "ABBR [Manager]" — shared by overall + division sections.
         max_left_vw = max(
@@ -1227,11 +1235,11 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
             abbr1 = _fantasy_team_to_mlb_abbr(t1.get("name", "")) or t1.get("manager", "") or "?"
             abbr2 = _fantasy_team_to_mlb_abbr(t2.get("name", "")) or t2.get("manager", "") or "?"
             if t1.get("is_winner"):
-                row = f"W {p1:>2.0f} {abbr1:<3}  vs  {abbr2:<3} {p2:>2.0f}"
+                row = f"⭐ {p1:>2.0f} {abbr1:<3}  vs  {abbr2:<3} {p2:>2.0f}"
             elif t2.get("is_winner"):
-                row = f"  {p1:>2.0f} {abbr1:<3}  vs  {abbr2:<3} {p2:>2.0f} W"
+                row = f"   {p1:>2.0f} {abbr1:<3}  vs  {abbr2:<3} {p2:>2.0f} ⭐"
             else:
-                row = f"  {p1:>2.0f} {abbr1:<3}  vs  {abbr2:<3} {p2:>2.0f}"
+                row = f"   {p1:>2.0f} {abbr1:<3}  vs  {abbr2:<3} {p2:>2.0f}"
             matchup_lines.append(row)
             if idx_m < len(matchups) - 1:
                 matchup_lines.append("")
@@ -1272,7 +1280,7 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
             rbi = st.get("RBI", "0")
             r = st.get("R", "0")
             sb = st.get("SB", "0")
-            batter_lines.append(f" {idx}. {name} ({pos})  [{owner_abbr}]")
+            batter_lines.append(f" {idx}. {name} {pos} {owner_abbr}")
             batter_lines.append(f"    {h}-{ab}  {avg}/{ops}")
             batter_lines.append(f"    {hr}HR {rbi}RBI {r}R {sb}SB")
 
@@ -1304,7 +1312,7 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
             else:
                 counting_parts.extend([f"{qs}QS", f"{sv}SV", f"{hld}HLD"])
             counting = " ".join(counting_parts)
-            pitcher_lines.append(f" {idx}. {name} ({pos})  [{owner_abbr}]")
+            pitcher_lines.append(f" {idx}. {name} {pos} {owner_abbr}")
             pitcher_lines.append(f"    {ip} IP  {counting}")
             pitcher_lines.append(f"    {era} ERA / {whip} WHIP")
 
@@ -1355,7 +1363,7 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
         if division_blocks:
             lines.append(_center("【分區排名】", page_width))
             for sub_header, team_lines in division_blocks:
-                lines.append(_center(sub_header, page_width))
+                lines.append(sub_header)
                 lines.extend(team_lines)
                 lines.append("")
 
@@ -1376,7 +1384,7 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
             lines.append("")
 
         lines.append(divider_line)
-        lines.append("* Yahoo Fantasy Points 僅供參考")
+        lines.append("最佳球員排名依據：Yahoo Fantasy Points")
 
         # --- 6. AI commentary (OpenAI; no-op if OPENAI_API_KEY not set) ---
         try:
