@@ -467,12 +467,19 @@ export async function testLineReminder(
   });
 }
 
-export async function triggerWarReport(): Promise<{
+export async function triggerWarReport(
+  opts?: { targetId?: string; dryRun?: boolean },
+): Promise<{
   success: boolean;
   message: string;
+  report?: string;
 }> {
+  const body: Record<string, unknown> = {};
+  if (opts?.targetId && opts.targetId.trim()) body.target_id = opts.targetId.trim();
+  if (opts?.dryRun) body.dry_run = true;
   return request(`/api/commissioner/line/trigger-war-report`, {
     method: "POST",
+    body: JSON.stringify(body),
   });
 }
 

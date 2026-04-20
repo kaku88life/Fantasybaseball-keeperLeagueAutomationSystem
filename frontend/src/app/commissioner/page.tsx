@@ -202,7 +202,7 @@ export default function CommissionerDashboard() {
 
   // Manual scheduler trigger state (war report / injury digest)
   const [warReportLoading, setWarReportLoading] = useState(false);
-  const [warReportResult, setWarReportResult] = useState<{ success: boolean; message: string } | null>(null);
+  const [warReportResult, setWarReportResult] = useState<{ success: boolean; message: string; report?: string } | null>(null);
   const [injuryDigestLoading, setInjuryDigestLoading] = useState(false);
   const [injuryDigestResult, setInjuryDigestResult] = useState<{ success: boolean; message: string } | null>(null);
 
@@ -384,12 +384,27 @@ export default function CommissionerDashboard() {
     }
   };
 
-  const handleTriggerWarReport = async () => {
-    if (!confirm("確認觸發週戰報？此動作會實際推送訊息到 LINE 群組。")) return;
+  const handleTriggerWarReport = async (mode: "group" | "target" | "dry_run") => {
+    const targetId = linePushTargetId.trim();
+    if (mode === "target" && !targetId) {
+      alert("請先填入上方的 Target ID 才能推送到個人/特定目標。");
+      return;
+    }
+    const prompts: Record<typeof mode, string> = {
+      group: "確認觸發週戰報並推送到 LINE 群組？",
+      target: `確認觸發週戰報並推送到 Target ${targetId.slice(0, 6)}...？`,
+      dry_run: "確認產生戰報但不推送（回傳訊息文字）？",
+    };
+    if (!confirm(prompts[mode])) return;
     setWarReportLoading(true);
     setWarReportResult(null);
     try {
-      const result = await triggerWarReport();
+      const opts = mode === "target"
+        ? { targetId }
+        : mode === "dry_run"
+          ? { dryRun: true }
+          : undefined;
+      const result = await triggerWarReport(opts);
       setWarReportResult(result);
     } catch (e) {
       setWarReportResult({
@@ -955,15 +970,29 @@ export default function CommissionerDashboard() {
               {/* Manual scheduler triggers (war report / injury digest) */}
               <div className="mt-3 border-t border-blue-200 pt-3">
                 <p className="mb-2 text-xs text-gray-600">
-                  手動觸發排程作業（實際推送到 LINE 群組，無冷卻保護）：
+                  手動觸發排程作業。週戰報可選「推群組」、「推個人/目標 (用上方 Target ID)」或「只產文字 Dry-run」：
                 </p>
                 <div className="flex flex-wrap gap-2">
                   <button
-                    onClick={handleTriggerWarReport}
+                    onClick={() => handleTriggerWarReport("group")}
                     disabled={warReportLoading}
                     className="rounded bg-emerald-600 px-3 py-1 text-sm font-medium text-white hover:bg-emerald-500 disabled:opacity-50"
                   >
-                    {warReportLoading ? "執行中..." : "觸發週戰報 Trigger War Report"}
+                    {warReportLoading ? "執行中..." : "戰報→群組 War→Group"}
+                  </button>
+                  <button
+                    onClick={() => handleTriggerWarReport("target")}
+                    disabled={warReportLoading}
+                    className="rounded bg-emerald-500 px-3 py-1 text-sm font-medium text-white hover:bg-emerald-400 disabled:opacity-50"
+                  >
+                    戰報→Target War→Target
+                  </button>
+                  <button
+                    onClick={() => handleTriggerWarReport("dry_run")}
+                    disabled={warReportLoading}
+                    className="rounded bg-slate-600 px-3 py-1 text-sm font-medium text-white hover:bg-slate-500 disabled:opacity-50"
+                  >
+                    戰報→Dry-run (只看文字)
                   </button>
                   <button
                     onClick={handleTriggerInjuryDigest}
@@ -980,6 +1009,11 @@ export default function CommissionerDashboard() {
                     <p className={warReportResult.success ? "text-green-700" : "text-red-700"}>
                       週戰報：{warReportResult.message}
                     </p>
+                    {warReportResult.report && (
+                      <pre className="mt-2 max-h-96 overflow-auto whitespace-pre-wrap rounded bg-white p-2 font-mono text-[11px] text-gray-700">
+                        {warReportResult.report}
+                      </pre>
+                    )}
                   </div>
                 )}
                 {injuryDigestResult && (

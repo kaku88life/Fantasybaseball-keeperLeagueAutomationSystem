@@ -6,8 +6,10 @@ from __future__ import annotations
 import os
 import tempfile
 from pathlib import Path
+from typing import Optional
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from pydantic import BaseModel
 
 from api.database import (
     approve_submission,
@@ -572,20 +574,34 @@ async def test_line_reminder_endpoint(
     }
 
 
+class TriggerWarReportRequest(BaseModel):
+    target_id: Optional[str] = None   # None => scheduled behavior (LINE group)
+    dry_run: bool = False              # True => skip LINE, return text only
+
+
 @router.post("/line/trigger-war-report")
 async def trigger_war_report_endpoint(
+    payload: TriggerWarReportRequest | None = None,
     user: dict = Depends(get_current_commissioner),
 ):
     """Manually fire the weekly war report job.
 
-    Useful when the scheduled Monday 18:45 job was missed (e.g. the container
-    was redeploying at that moment).
+    Useful when the scheduled Monday 21:00 job was missed (e.g. container
+    was redeploying), or to preview the report to admin LINE before sending
+    to the group.
+
+    Body (optional):
+        target_id: if set (U.../C.../R...), push to that target instead of group
+        dry_run:   if true, skip LINE entirely and return the full message text
     """
     from src.notification.scheduler import _weekly_war_report_job
 
+    target_id = (payload.target_id if payload else None) or ""
+    dry_run = bool(payload.dry_run if payload else False)
+
     try:
-        _weekly_war_report_job()
-        return {"success": True, "message": "War report job executed. Check Zeabur logs + LINE group for result."}
+        result = _weekly_war_report_job(target_id=target_id, dry_run=dry_run)
+        return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"War report failed: {e}")
 
@@ -750,6 +766,28 @@ async def disconnect_yahoo_token(
     """Disconnect Yahoo API (delete stored token). Commissioner only."""
     delete_yahoo_token(user["id"])
     return {"message": "Yahoo API token disconnected"}
+
+
+@router.get("/yahoo-debug/raw")
+async def yahoo_debug_raw(
+    path: str,
+    user: dict = Depends(get_current_commissioner),
+):
+    """Debug: proxy a raw Yahoo Fantasy API GET and return the JSON.
+
+    Example: /api/commissioner/yahoo-debug/raw?path=/league/469.l.80910/standings
+    Commissioner only. Use to inspect Yahoo response shapes when parsing breaks.
+    """
+    from api.yahoo_service import YahooTokenError, yahoo_api_get
+
+    if not path.startswith("/"):
+        path = "/" + path
+    try:
+        return yahoo_api_get(path)
+    except YahooTokenError as e:
+        raise HTTPException(status_code=401, detail=str(e))
+    except RuntimeError as e:
+        raise HTTPException(status_code=502, detail=str(e))
 
 
 # ========== Player Rankings (Yahoo API Fetch) ==========

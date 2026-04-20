@@ -756,11 +756,21 @@ def _daily_roster_snapshot_rebuild_job():
         print(f"[SnapshotRebuild] Job failed: {e}")
 
 
-def _weekly_war_report_job():
+def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
     """Weekly job (Monday 21:00): generate and send weekly war report to LINE.
 
     Scheduled 3 hours after 18:00 AR-Rank refresh to fully clear any Yahoo
     short-term throttle window before we fetch standings/scoreboard/top players.
+
+    Args:
+        target_id: If empty, push to LINE_GROUP_ID (scheduled behavior).
+                   If set (U.../C.../R...), push to that target instead — useful
+                   for previewing to admin LINE without spamming the group.
+        dry_run:   If True, skip LINE send entirely and just return the message
+                   text for inspection.
+
+    Returns:
+        {"success": bool, "message": str (status or error), "report": str (full text)}
     """
     now = datetime.now()
     month = now.month
@@ -768,7 +778,7 @@ def _weekly_war_report_job():
     # Only run during MLB season (March-October)
     if month < 3 or month > 10:
         print(f"[WarReport] Off-season (month {month}), skipping.")
-        return
+        return {"success": False, "message": f"Off-season (month {month})", "report": ""}
 
     year = now.year
     print(f"[WarReport] Generating weekly war report for {year}...")
@@ -783,7 +793,7 @@ def _weekly_war_report_job():
         league_key = get_league_key(year)
         if not league_key:
             print(f"[WarReport] No league key for year {year}")
-            return
+            return {"success": False, "message": f"No league key for {year}", "report": ""}
 
         # --- 1. Get current week from league metadata ---
         meta_path = f"/league/{league_key}/metadata"
@@ -807,7 +817,7 @@ def _weekly_war_report_job():
         league_standings = standings_data.get("fantasy_content", {}).get("league", [])
         if len(league_standings) < 2:
             print("[WarReport] No standings data.")
-            return
+            return {"success": False, "message": "No standings data from Yahoo", "report": ""}
 
         teams_section = league_standings[1].get("standings", [{}])[0].get("teams", {})
         team_count = teams_section.get("count", 0)
@@ -1035,17 +1045,31 @@ def _weekly_war_report_job():
 
         message = "\n".join(lines)
 
+        if dry_run:
+            print(f"[WarReport] Dry-run: returning week {report_week} report text.")
+            return {"success": True, "message": "Dry-run (no LINE push)", "report": message}
+
         # Send LINE message
-        success, error = send_line_group_message(message)
-        if success:
-            print(f"[WarReport] Week {report_week} war report sent to LINE.")
+        if target_id:
+            from src.notification.line_service import send_line_push_message
+            success, error = send_line_push_message(target_id, message)
+            destination = f"target {target_id[:6]}..."
         else:
-            print(f"[WarReport] LINE send failed: {error}")
+            success, error = send_line_group_message(message)
+            destination = "LINE group"
+
+        if success:
+            print(f"[WarReport] Week {report_week} war report sent to {destination}.")
+            return {"success": True, "message": f"Sent to {destination}", "report": message}
+        print(f"[WarReport] LINE send failed: {error}")
+        return {"success": False, "message": f"LINE send failed: {error}", "report": message}
 
     except YahooTokenError as e:
         print(f"[WarReport] Token error: {e}")
+        return {"success": False, "message": f"Token error: {e}", "report": ""}
     except Exception as e:
         print(f"[WarReport] Error: {e}")
+        return {"success": False, "message": f"Error: {e}", "report": ""}
 
 
 def _monthly_war_report_job():
