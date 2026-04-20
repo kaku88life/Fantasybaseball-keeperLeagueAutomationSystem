@@ -25,8 +25,11 @@ BASE_URL = "https://fantasysports.yahooapis.com/fantasy/v2"
 # Buffer before expiry to trigger proactive refresh (5 minutes)
 _REFRESH_BUFFER_SECONDS = 300
 
-# Rate limiting: minimum interval between Yahoo API requests (seconds)
-_RATE_LIMIT_INTERVAL = 1.0
+# Rate limiting: minimum interval between Yahoo API requests (seconds).
+# Yahoo does not publish rate limits, but community evidence (yfpy #51,
+# yahoo-fantasy-sports-api #81) suggests ~1 req/sec sustained is safe and
+# bursts trigger 2-24hr app-ID bans. We stay well under that ceiling.
+_RATE_LIMIT_INTERVAL = 2.0
 _last_request_time = 0.0
 _rate_lock = threading.Lock()
 
@@ -211,9 +214,12 @@ def yahoo_api_get(path: str, _retry_count: int = 0) -> dict:
             _wait_for_rate_limit()
             resp = requests.get(url, headers=headers, timeout=15)
 
-    # Retry on 429 (rate limited) with exponential backoff, up to 3 times
+    # Retry on 429 (rate limited) with long backoff, up to 3 times.
+    # Yahoo bans are typically 2-24hr at app-ID level, so short retries (~35s)
+    # are ineffective. Long waits (60s/120s/300s = ~8min total) better tolerate
+    # short-lived throttling; a true long ban is given up on after 3 tries.
     if resp.status_code == 429 and _retry_count < 3:
-        wait = 5 * (2 ** _retry_count)  # 5s, 10s, 20s
+        wait = [60, 120, 300][_retry_count]
         print(
             f"[YahooService] Rate limited (429), retrying in {wait}s "
             f"(attempt {_retry_count + 1}/3)",

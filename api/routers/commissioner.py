@@ -936,7 +936,8 @@ def _fetch_yahoo_players_batch(
                 f";sort_type={sort_type};out=stats"
             )
 
-            # Retry loop for 429 rate limit errors
+            # Retry loop for 429 rate limit errors.
+            # Long backoff (60s/120s/300s) because Yahoo bans are hours-long.
             data = None
             for attempt in range(max_retries):
                 try:
@@ -944,7 +945,7 @@ def _fetch_yahoo_players_batch(
                     break
                 except RuntimeError as api_err:
                     if "429" in str(api_err):
-                        wait = 5 * (attempt + 1)  # 5s, 10s, 15s backoff
+                        wait = [60, 120, 300][attempt]
                         print(
                             f"[FetchRankings] Rate limited (429) at start={start}, "
                             f"retry {attempt + 1}/{max_retries} after {wait}s...",

@@ -4,10 +4,12 @@ APScheduler-based background scheduler.
 Jobs:
 1. Keeper reminder: LINE group reminders every N days during keeper period.
 2. Rookie call-up monitor: daily check for R-contract player MLB debuts.
-3. Weekly ranking refresh: every Monday during MLB season.
+3. Daily AR-Rank + season stats refresh: single-pass at 18:00 during MLB season.
 4. Daily player status update: IL/DTD/NA/O status during MLB season.
 5. Daily transaction fetch: Yahoo transactions during MLB season.
-6. Daily roster ownership sync: fetch team rosters, update owner_manager (US midnight).
+6. Daily roster + snapshot rebuild (with owner_manager sync): 00:30 Taiwan time.
+7. Weekly war report: Monday 21:00 during MLB season.
+8. Monthly war report: 1st of each month 20:45 during MLB season.
 
 Yearly auto-mode: set REMINDER_MONTH / REMINDER_START_DAY / REMINDER_END_DAY
 to define a fixed annual window (e.g. March 1-15 every year).
@@ -135,14 +137,13 @@ def _daily_rookie_monitor_job():
 
 
 def _daily_ar_rank_refresh_job():
-    """Daily job: refresh Yahoo AR (Actual Rank) + season stats during MLB season.
+    """Daily job: refresh Yahoo AR (Actual Rank) + season stats in a single pass.
 
     Runs at 18:00 Taiwan time (= 6 AM ET) — after all US games end and Yahoo
     finishes processing stats from the previous day.
 
-    Pass 1: AR-Rank (Actual Rank) — in-season performance ranking
-    Pass 2: Season Stats — current year hitting/pitching stats (stat_* columns)
-
+    Single pass: sort=AR + out=stats returns AR-sorted players WITH stats in one
+    request stream, so we only fetch the top 1500 once (60 calls total).
     O-Rank is pre-season projection and rarely changes — fetch manually via Commissioner.
     """
     now = datetime.now()
@@ -154,96 +155,47 @@ def _daily_ar_rank_refresh_job():
         return
 
     year = now.year
-    print(f"[DailyRankStats] Starting daily AR-Rank + season stats refresh for {year}...")
+    print(f"[DailyRankStats] Starting AR-Rank + season stats refresh for {year}...")
 
     try:
-        from api.yahoo_service import yahoo_api_get, YahooTokenError
+        from api.yahoo_service import YahooTokenError
         from api.database import update_ar_ranks, update_last_season_stats
-
+        from api.routers.commissioner import _fetch_yahoo_players_batch
         from config.settings import get_league_key
+
         league_key = get_league_key(year)
         if not league_key:
             print(f"[DailyRankStats] No league key for year {year}")
             return
 
-        import time
+        # One pass: AR-sorted players + season stats (out=stats via batch helper).
+        players, errors = _fetch_yahoo_players_batch(
+            league_key, sort="AR", sort_type="season",
+            max_players=1500, stat_prefix="stat",
+        )
 
-        # === Pass 1: AR-Rank ===
-        print(f"[DailyRankStats] Pass 1: Fetching AR (Actual Rank)...")
-        ar_rank_map: dict[str, int] = {}
+        if not players:
+            print("[DailyRankStats] No players fetched.")
+            if errors:
+                print(f"[DailyRankStats] Errors: {errors[:3]}")
+            return
 
-        for start in range(0, 1500, 25):
-            try:
-                path = (
-                    f"/league/{league_key}/players"
-                    f";start={start};count=25;sort=AR"
-                    f";sort_type=season"
-                )
-                data = yahoo_api_get(path)
-                league_data = data.get("fantasy_content", {}).get("league", [])
-                if len(league_data) < 2:
-                    break
-
-                players_section = league_data[1].get("players", {})
-                count = players_section.get("count", 0)
-                if count == 0:
-                    break
-
-                from api.routers.commissioner import _parse_yahoo_player
-                batch_count = 0
-                for key, val in players_section.items():
-                    if key == "count":
-                        continue
-                    if isinstance(val, dict) and "player" in val:
-                        pdata = val["player"]
-                        if isinstance(pdata, list) and len(pdata) >= 1:
-                            player_info = _parse_yahoo_player(pdata[0])
-                            player_key = player_info.get("player_key", "")
-                            if player_key:
-                                ar_rank_map[player_key] = start + batch_count + 1
-                            batch_count += 1
-
-                if batch_count == 0:
-                    break
-
-                time.sleep(1)
-
-            except Exception as e:
-                if "429" in str(e):
-                    time.sleep(15)
-                else:
-                    print(f"[DailyRankStats] AR batch error at {start}: {e}")
-                    break
-
+        ar_rank_map = {
+            p["player_key"]: p["_rank"]
+            for p in players
+            if p.get("player_key") and p.get("_rank")
+        }
         if ar_rank_map:
             update_ar_ranks(year, ar_rank_map)
-            print(f"[DailyRankStats] Pass 1 done: updated {len(ar_rank_map)} AR rankings")
-        else:
-            print("[DailyRankStats] Pass 1: no AR rankings fetched")
+            print(f"[DailyRankStats] Updated {len(ar_rank_map)} AR rankings")
 
-        # === Pass 2: Season Stats ===
-        print(f"[DailyRankStats] Pass 2: Fetching season stats...")
-        try:
-            from api.routers.commissioner import _fetch_yahoo_players_batch
+        update_last_season_stats(year, players, sort_type="season")
+        print(f"[DailyRankStats] Updated season stats for {len(players)} players")
 
-            stats_players, stats_errors = _fetch_yahoo_players_batch(
-                league_key, sort="OR", sort_type="season",
-                max_players=1500, stat_prefix="stat",
-            )
+        if errors:
+            print(f"[DailyRankStats] Partial errors: {errors[:3]}")
 
-            if stats_players:
-                update_last_season_stats(year, stats_players, sort_type="season")
-                print(f"[DailyRankStats] Pass 2 done: updated stats for {len(stats_players)} players")
-            else:
-                print("[DailyRankStats] Pass 2: no stats fetched")
-
-            if stats_errors:
-                print(f"[DailyRankStats] Pass 2 errors: {stats_errors[:3]}")
-
-        except Exception as e:
-            print(f"[DailyRankStats] Pass 2 error: {e}")
-
-        print(f"[DailyRankStats] Daily refresh complete for {year}")
+        print(f"[DailyRankStats] Refresh complete for {year}")
 
     except YahooTokenError as e:
         print(f"[DailyRankStats] Token error: {e}")
@@ -504,126 +456,6 @@ def _daily_transaction_fetch_job():
         print(f"[TransactionFetch] Error: {e}")
 
 
-def _daily_roster_ownership_sync_job():
-    """Daily job (at DAILY_SYNC_HOUR): fetch Yahoo team rosters and sync owner_manager."""
-    now = datetime.now()
-    month = now.month
-
-    # Only run during MLB season (March-October)
-    if month < 3 or month > 10:
-        print(f"[RosterSync] Off-season (month {month}), skipping.")
-        return
-
-    year = now.year
-    print(f"[RosterSync] Syncing roster ownership for {year}...")
-
-    try:
-        from api.yahoo_service import yahoo_api_get, YahooTokenError
-        from api.database import sync_roster_ownership, get_all_teams
-        from config.settings import get_league_key
-        import time
-
-        league_key = get_league_key(year)
-        if not league_key:
-            print(f"[RosterSync] No league key for year {year}")
-            return
-
-        # Get all teams from Yahoo to map team_key -> manager_name
-        db_teams = get_all_teams()
-
-        # Fetch all teams from Yahoo API
-        teams_path = f"/league/{league_key}/teams"
-        teams_data = yahoo_api_get(teams_path)
-        league_section = teams_data.get("fantasy_content", {}).get("league", [])
-        if len(league_section) < 2:
-            print("[RosterSync] No teams data from Yahoo API")
-            return
-
-        teams_section = league_section[1].get("teams", {})
-        team_count = teams_section.get("count", 0)
-
-        # Map yahoo_team_id -> manager_name using DB
-        yahoo_id_to_manager: dict[str, str] = {}
-        for db_team in db_teams:
-            if db_team.get("yahoo_team_id"):
-                yahoo_id_to_manager[str(db_team["yahoo_team_id"])] = db_team["manager_name"]
-
-        # Build ownership_map: player_key -> manager_name
-        ownership_map: dict[str, str] = {}
-
-        for i in range(team_count):
-            team_entry = teams_section.get(str(i), {}).get("team", [])
-            if not team_entry:
-                continue
-
-            # Extract yahoo team key and ID
-            team_info_list = team_entry[0] if isinstance(team_entry, list) else []
-            team_key = ""
-            team_id_str = ""
-            for item in team_info_list:
-                if isinstance(item, dict):
-                    if "team_key" in item:
-                        team_key = item["team_key"]
-                    if "team_id" in item:
-                        team_id_str = str(item["team_id"])
-
-            manager_name = yahoo_id_to_manager.get(team_id_str, "")
-            if not manager_name:
-                # Fallback: try manager name from Yahoo data
-                managers_list = next(
-                    (item["managers"] for item in team_info_list
-                     if isinstance(item, dict) and "managers" in item),
-                    []
-                )
-                if managers_list and isinstance(managers_list, list):
-                    mgr = managers_list[0].get("manager", {})
-                    manager_name = mgr.get("nickname", "")
-
-            if not team_key:
-                continue
-
-            # Fetch this team's roster
-            try:
-                roster_path = f"/team/{team_key}/roster"
-                roster_data = yahoo_api_get(roster_path)
-                roster_section = (
-                    roster_data.get("fantasy_content", {})
-                    .get("team", [])
-                )
-                if len(roster_section) >= 2:
-                    players_section = roster_section[1].get("roster", {}).get("players", {})
-                    p_count = players_section.get("count", 0)
-                    for j in range(p_count):
-                        player_entry = players_section.get(str(j), {}).get("player", [])
-                        if not player_entry:
-                            continue
-                        player_info_list = player_entry[0] if isinstance(player_entry, list) else []
-                        player_key = ""
-                        for item in player_info_list:
-                            if isinstance(item, dict) and "player_key" in item:
-                                player_key = item["player_key"]
-                                break
-                        if player_key and manager_name:
-                            ownership_map[player_key] = manager_name
-                time.sleep(0.6)
-            except Exception as e:
-                if "429" in str(e):
-                    time.sleep(10)
-                else:
-                    print(f"[RosterSync] Error fetching roster for team {team_key}: {e}")
-
-        if ownership_map:
-            sync_roster_ownership(year, ownership_map)
-            print(f"[RosterSync] Ownership sync complete: {len(ownership_map)} players mapped.")
-        else:
-            print("[RosterSync] No ownership data fetched.")
-
-    except YahooTokenError as e:
-        print(f"[RosterSync] Token error: {e}")
-    except Exception as e:
-        print(f"[RosterSync] Error: {e}")
-
-
 def sync_rosters_and_rebuild(year: int) -> dict:
     """Fetch full Yahoo rosters and rebuild next-year snapshot.
 
@@ -685,6 +517,10 @@ def sync_rosters_and_rebuild(year: int) -> dict:
 
         # Build full rosters dict: team_key -> {manager, team_name, players[]}
         all_rosters: dict[str, dict] = {}
+        # Track player_key -> manager_name for owner_manager sync (replaces
+        # the separate _daily_roster_ownership_sync_job that used to re-fetch
+        # the same 16 rosters an hour earlier).
+        ownership_map: dict[str, str] = {}
         total_players = 0
         skipped_teams: list[str] = []
         debug_logs: list[str] = []
@@ -805,6 +641,8 @@ def sync_rosters_and_rebuild(year: int) -> dict:
                                             p["selected_position"] = s["position"]
                             if p["name"]:
                                 players.append(p)
+                                if p.get("player_key") and manager_name:
+                                    ownership_map[p["player_key"]] = manager_name
 
                     all_rosters[team_key] = {
                         "manager": manager_name,
@@ -864,9 +702,15 @@ def sync_rosters_and_rebuild(year: int) -> dict:
         )
 
         # Also save to DB (persists across deployments)
-        from api.database import save_synced_roster
+        from api.database import save_synced_roster, sync_roster_ownership
         save_synced_roster(year, all_rosters)
         print(f"[SnapshotRebuild] Saved synced roster to DB (year={year})")
+
+        # Sync owner_manager on player_rankings in the same pass — no extra
+        # Yahoo API calls needed since we already parsed every roster.
+        if ownership_map:
+            sync_roster_ownership(year, ownership_map)
+            print(f"[SnapshotRebuild] Synced ownership for {len(ownership_map)} players")
 
         # Rebuild next-year snapshot
         next_year = year + 1
@@ -893,7 +737,11 @@ def sync_rosters_and_rebuild(year: int) -> dict:
 
 
 def _daily_roster_snapshot_rebuild_job():
-    """Daily scheduler wrapper for sync_rosters_and_rebuild."""
+    """Daily scheduler wrapper for sync_rosters_and_rebuild.
+
+    Also syncs owner_manager on player_rankings in the same pass
+    (replaces the old separate _daily_roster_ownership_sync_job).
+    """
     now = datetime.now()
     month = now.month
 
@@ -909,7 +757,11 @@ def _daily_roster_snapshot_rebuild_job():
 
 
 def _weekly_war_report_job():
-    """Weekly job (Monday 18:45): generate and send weekly war report to LINE."""
+    """Weekly job (Monday 21:00): generate and send weekly war report to LINE.
+
+    Scheduled 3 hours after 18:00 AR-Rank refresh to fully clear any Yahoo
+    short-term throttle window before we fetch standings/scoreboard/top players.
+    """
     now = datetime.now()
     month = now.month
 
@@ -1197,7 +1049,7 @@ def _weekly_war_report_job():
 
 
 def _monthly_war_report_job():
-    """Monthly job (1st of each month, 19:00): generate monthly summary report."""
+    """Monthly job (1st of each month, 20:45): generate monthly summary report."""
     now = datetime.now()
     month = now.month
 
@@ -1747,14 +1599,13 @@ def start_scheduler():
     Jobs:
     1. Keeper reminder: daily cron during keeper period
     2. Rookie call-up monitor: daily cron during MLB season
-    3. Weekly ranking refresh: every Monday 18:00 during MLB season
+    3. Daily AR-Rank + season stats refresh: 18:00 during MLB season (single pass)
     4. Daily player status update + injury notification: during MLB season
     5. Daily transaction fetch: daily during MLB season
-    6. Season start notification: LINE message on Opening Day
-    7. Daily roster ownership sync: fetch rosters, update owner_manager
-    8. Weekly war report: every Monday 18:45 during MLB season
-    9. Monthly war report: 1st of each month 19:00 during MLB season
-    10. Prospect ranking update: Aug 15 annually, fetch MLB API + compare R players
+    6. Daily roster + snapshot + ownership sync: 00:30 Taiwan time (merged)
+    7. Weekly war report: Monday 21:00 during MLB season
+    8. Monthly war report: 1st of each month 20:45 during MLB season
+    9. Prospect ranking update: Aug 15 annually, fetch MLB API + compare R players
     """
     global _scheduler
 
@@ -1829,49 +1680,39 @@ def start_scheduler():
         replace_existing=True,
     )
 
-    # Job 6: Daily roster ownership sync (US midnight = DAILY_SYNC_HOUR Taiwan)
-    _scheduler.add_job(
-        _daily_roster_ownership_sync_job,
-        CronTrigger(
-            hour=DAILY_SYNC_HOUR,
-            minute=30,
-            timezone=REMINDER_CRON_TZ,
-        ),
-        id="roster_ownership_sync",
-        replace_existing=True,
-    )
-
-    # Job 11: Daily roster fetch + snapshot rebuild (after Job 7 roster ownership sync)
+    # Job 6: Daily roster fetch + snapshot rebuild + ownership sync
+    # (merged: the separate 00:30 ownership sync was duplicating these 16 roster fetches)
     _scheduler.add_job(
         _daily_roster_snapshot_rebuild_job,
         CronTrigger(
             hour=DAILY_SYNC_HOUR,
-            minute=45,
+            minute=30,
             timezone=REMINDER_CRON_TZ,
         ),
         id="roster_snapshot_rebuild",
         replace_existing=True,
     )
 
-    # Job 8: Weekly war report (every Monday at 18:45 - after ranking refresh)
+    # Job 7: Weekly war report (Monday 21:00 - 3hr buffer after 18:00 AR-Rank refresh)
     _scheduler.add_job(
         _weekly_war_report_job,
         CronTrigger(
             day_of_week="mon",
-            hour=18,
-            minute=45,
+            hour=21,
+            minute=0,
             timezone=REMINDER_CRON_TZ,
         ),
         id="war_report",
         replace_existing=True,
     )
 
-    # Job 9: Monthly war report (1st of each month at 19:00)
+    # Job 8: Monthly war report (1st of each month at 20:45)
     _scheduler.add_job(
         _monthly_war_report_job,
         CronTrigger(
             day=1,
-            hour=19,
+            hour=20,
+            minute=45,
             timezone=REMINDER_CRON_TZ,
         ),
         id="monthly_report",
@@ -1886,12 +1727,11 @@ def start_scheduler():
     if ROOKIE_MONITOR_ENABLED:
         print(f"[Scheduler] Rookie monitor active "
               f"(months {ROOKIE_MONITOR_START_MONTH}-{ROOKIE_MONITOR_END_MONTH})")
-    print("[Scheduler] Weekly ranking refresh: every Monday 18:00")
+    print("[Scheduler] Daily AR-Rank + stats refresh: 18:00")
     print("[Scheduler] Daily player status update + injury notification: 12:30 PM")
     print(f"[Scheduler] Daily transaction fetch: {DAILY_SYNC_HOUR}:15 {REMINDER_CRON_TZ}")
-    print(f"[Scheduler] Daily roster ownership sync: {DAILY_SYNC_HOUR}:30 {REMINDER_CRON_TZ}")
-    print(f"[Scheduler] Daily roster + snapshot rebuild: {DAILY_SYNC_HOUR}:45 {REMINDER_CRON_TZ}")
-    print("[Scheduler] Weekly war report: every Monday 18:45")
+    print(f"[Scheduler] Daily roster + snapshot + ownership sync: {DAILY_SYNC_HOUR}:30 {REMINDER_CRON_TZ}")
+    print("[Scheduler] Weekly war report: every Monday 21:00")
     # Job 10: Annual prospect ranking update (Aug 15)
     _scheduler.add_job(
         _prospect_ranking_update_job,
@@ -1905,7 +1745,7 @@ def start_scheduler():
         replace_existing=True,
     )
 
-    print("[Scheduler] Monthly war report: 1st of each month 19:00")
+    print("[Scheduler] Monthly war report: 1st of each month 20:45")
     print("[Scheduler] Prospect ranking update: Aug 15 19:00")
 
 
