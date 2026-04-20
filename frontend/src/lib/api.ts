@@ -477,10 +477,12 @@ export async function triggerWarReport(
   const body: Record<string, unknown> = {};
   if (opts?.targetId && opts.targetId.trim()) body.target_id = opts.targetId.trim();
   if (opts?.dryRun) body.dry_run = true;
-  return request(`/api/commissioner/line/trigger-war-report`, {
-    method: "POST",
-    body: JSON.stringify(body),
-  });
+  // War report does 5+ Yahoo API calls + OpenAI summary; can take 30-60s
+  return request(
+    `/api/commissioner/line/trigger-war-report`,
+    { method: "POST", body: JSON.stringify(body) },
+    120_000,
+  );
 }
 
 export async function triggerInjuryDigest(): Promise<{
