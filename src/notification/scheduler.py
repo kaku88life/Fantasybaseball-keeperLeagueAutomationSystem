@@ -1025,7 +1025,13 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
             team = s["team_name"] or "?"
             rank = rank_override if rank_override is not None else s["rank"]
             prev_rank = prev_rank_map.get(mgr)
-            if prev_rank is not None and prev_rank != s["rank"] and s["rank"] > 0:
+            # Only show ^/v when both current and previous ranks are valid (>0)
+            if (
+                prev_rank is not None
+                and prev_rank > 0
+                and s["rank"] > 0
+                and prev_rank != s["rank"]
+            ):
                 diff = prev_rank - s["rank"]  # positive = improved
                 change = f" ^{diff}" if diff > 0 else f" v{-diff}"
             else:
@@ -1058,10 +1064,11 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
             for m in matchups:
                 t1, t2 = m[0], m[1]
                 p1, p2 = t1["points"], t2["points"]
-                m1, m2 = t1["manager"] or t1["name"], t2["manager"] or t2["name"]
+                name1 = t1["name"] or t1["manager"] or "?"
+                name2 = t2["name"] or t2["manager"] or "?"
                 w1 = " W" if t1["is_winner"] else ""
                 w2 = " W" if t2["is_winner"] else ""
-                lines.append(f"{m1} {p1:.0f}{w1} - {p2:.0f}{w2} {m2}")
+                lines.append(f"{name1} {p1:.0f}{w1} - {p2:.0f}{w2} {name2}")
             lines.append("")
 
         # Top batters
