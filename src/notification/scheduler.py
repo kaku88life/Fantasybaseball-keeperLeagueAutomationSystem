@@ -1159,24 +1159,47 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
             "",
         ]
 
-        def _format_standing_line(s: dict, rank_override: int | None = None) -> str:
-            w, l, t = s["wins"], s["losses"], s["ties"]
-            mgr = s["manager_name"] or "?"
+        def _pad_right_visual(s: str, width: int) -> str:
+            return s + " " * max(0, width - _visual_width(s))
+
+        def _team_mgr_block(s: dict) -> str:
             team = s["team_name"] or "?"
+            mgr = s["manager_name"] or "?"
+            return f"{team} [{mgr}]"
+
+        # Compute max visual width of "TeamName [Manager]" across all teams
+        # so overall + division sections use identical column layout.
+        max_left_vw = max(
+            (_visual_width(_team_mgr_block(s)) for s in current_standings),
+            default=0,
+        )
+
+        def _format_standing_line(
+            s: dict,
+            rank_override: int | None = None,
+            indent: str = "",
+            show_change: bool = True,
+        ) -> str:
+            w, l, t = s["wins"], s["losses"], s["ties"]
             rank = rank_override if rank_override is not None else s["rank"]
-            prev_rank = prev_rank_map.get(mgr)
-            # Only show ^/v when both current and previous ranks are valid (>0)
-            if (
-                prev_rank is not None
-                and prev_rank > 0
-                and s["rank"] > 0
-                and prev_rank != s["rank"]
-            ):
-                diff = prev_rank - s["rank"]  # positive = improved
-                change = f" ^{diff}" if diff > 0 else f" v{-diff}"
+            left = _pad_right_visual(_team_mgr_block(s), max_left_vw)
+            record = f"{w}-{l}-{t}"
+            if show_change:
+                mgr = s["manager_name"] or "?"
+                prev_rank = prev_rank_map.get(mgr)
+                if (
+                    prev_rank is not None
+                    and prev_rank > 0
+                    and s["rank"] > 0
+                    and prev_rank != s["rank"]
+                ):
+                    diff = prev_rank - s["rank"]
+                    change = f"  ^{diff}" if diff > 0 else f"  v{-diff}"
+                else:
+                    change = "  --"
             else:
-                change = " --"
-            return f"{rank:>2}. {team} [{mgr}] ({w}-{l}-{t}){change}"
+                change = ""
+            return f"{indent}{rank:>2}. {left}  {record}{change}"
 
         # Overall standings
         lines.append("【聯盟總排名】")
@@ -1184,7 +1207,9 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
             lines.append(_format_standing_line(s))
         lines.append("")
 
-        # Division standings: group by division_id, rank within each division
+        # Division standings: group by division_id, rank within each division.
+        # Change indicator omitted in division section (overall rank change
+        # would be confusing beside a division-local rank).
         divisions: dict[str, list[dict]] = {}
         for s in current_standings:
             div = s.get("division_id", "")
@@ -1196,10 +1221,14 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
                 div_teams = sorted(divisions[div_id], key=lambda x: x["rank"] or 999)
                 lines.append(f"▸ 分區 {div_id}")
                 for idx, s in enumerate(div_teams, 1):
-                    w, l, t = s["wins"], s["losses"], s["ties"]
-                    mgr = s["manager_name"] or "?"
-                    team = s["team_name"] or "?"
-                    lines.append(f"  {idx}. {team} [{mgr}] ({w}-{l}-{t})")
+                    lines.append(
+                        _format_standing_line(
+                            s,
+                            rank_override=idx,
+                            indent="  ",
+                            show_change=False,
+                        )
+                    )
                 lines.append("")
 
         # Matchup results — scoreboard style, MLB abbrev, W marker on winner's outer side.
