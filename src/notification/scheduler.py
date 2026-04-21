@@ -1071,20 +1071,27 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
 
         for pos_type, result_list in [("B", top_batters), ("P", top_pitchers)]:
             try:
-                # Subresource path form (e.g. /players/stats) yields player_stats
-                # reliably; `out=stats,ownership` sometimes drops stats entirely
-                # for week-scoped queries.
                 players_path = (
                     f"/league/{league_key}/players"
                     f";sort=PTS;sort_type=week;sort_week={report_week}"
-                    f";position={pos_type};count=5"
-                    f"/stats;type=week;week={report_week}"
+                    f";position={pos_type};count=5;out=stats,ownership"
                 )
                 pdata = yahoo_api_get(players_path)
                 p_league = pdata.get("fantasy_content", {}).get("league", [])
+                if len(p_league) < 2:
+                    stats_debug[pos_type] = {
+                        "error": f"p_league length {len(p_league)} < 2",
+                        "raw_keys": list(pdata.get("fantasy_content", {}).keys()),
+                    }
                 if len(p_league) >= 2:
                     p_section = p_league[1].get("players", {})
-                    for pk_idx in range(p_section.get("count", 0)):
+                    count_val = p_section.get("count", 0)
+                    if count_val == 0:
+                        stats_debug[pos_type] = {
+                            "error": "players count=0",
+                            "p_section_keys": list(p_section.keys()) if isinstance(p_section, dict) else None,
+                        }
+                    for pk_idx in range(count_val):
                         p_entry = p_section.get(str(pk_idx), {}).get("player", [])
                         if not p_entry or not isinstance(p_entry, list):
                             continue
