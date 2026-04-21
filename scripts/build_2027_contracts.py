@@ -181,63 +181,80 @@ def main():
             mlb_team = rp.get("team", "").upper()
             player_key = rp.get("player_key", "")
 
-            # Check 1: Is this player in the 2026 keepers list?
+            # Compute expected 2026 keeper contract (base + keeper_selections
+            # overlay), then cross-check against draft cost to detect players
+            # who were released and redrafted by the same manager.
             k = mgr_keepers.get(pname_norm)
-            if k is not None:
-                # Start with base 2026 contract
-                ct = k["contract_type"]
-                salary = k["salary"]
-                ext = k["ext"]
-                source = k["source"]
+            sel = selection_lookup.get((mgr_norm, pname_norm))
+            d = draft_lookup.get((mgr_norm, pname_norm))
 
-                # Apply keeper selection if exists (evolve contract based on GM choice)
-                sel = selection_lookup.get((mgr_norm, pname_norm))
+            expected_ct: str | None = None
+            expected_salary = 0
+            expected_ext = 0
+            expected_source = ""
+            if k is not None and k.get("contract_display") != "EXPIRED":
+                expected_ct = k["contract_type"]
+                expected_salary = k["salary"]
+                expected_ext = k["ext"]
+                expected_source = k["source"]
+
                 if sel and sel.get("next_contract"):
                     nc = sel["next_contract"]  # e.g. "$14/B", "$1/A", "$35/N3"
-                    # Parse next_contract: "$salary/type[ext]"
                     if "/" in nc:
                         nc_salary_str, nc_type_str = nc.split("/", 1)
-                        nc_salary = int(nc_salary_str.replace("$", "").strip())
-                        # Extract contract type and extension years (e.g. "N3" -> "N", 3)
+                        try:
+                            nc_salary = int(nc_salary_str.replace("$", "").strip())
+                        except ValueError:
+                            nc_salary = expected_salary
                         nc_ext = 0
                         nc_ct = nc_type_str
                         if nc_ct.startswith("N") and len(nc_ct) > 1 and nc_ct[1:].isdigit():
                             nc_ext = int(nc_ct[1:])
                             nc_ct = "N"
-                        # Apply evolved contract
-                        ct = nc_ct
-                        salary = nc_salary
-                        ext = nc_ext
+                        if nc_ct in CT_MAP:
+                            expected_ct = nc_ct
+                            expected_salary = nc_salary
+                            expected_ext = nc_ext
 
-                    # If action is release/fa, player is gone but still on Yahoo roster
-                    action = sel.get("action", "")
-                    if action in ("release", "release_normal", "fa"):
-                        ct = "FA"
-                        salary = 0
-                        ext = 0
-                        source = "released"
+            released_by_gm = bool(sel) and sel.get("action", "") in (
+                "release",
+                "release_normal",
+                "fa",
+            )
 
+            # A player is only a keeper when: we have an expected contract,
+            # GM didn't mark release, AND either wasn't in the draft at all
+            # OR was in the draft at exactly the expected keeper salary.
+            # Salary mismatch => released and redrafted => fresh A at draft cost.
+            is_keeper = (
+                expected_ct is not None
+                and not released_by_gm
+                and (d is None or d["cost"] == expected_salary)
+            )
+
+            if is_keeper:
+                ct = expected_ct
+                salary = expected_salary
+                ext = expected_ext
+                source = expected_source
                 mgr_keeper_count += 1
+            elif d is not None:
+                # In 2026 draft (new pick or released-then-redrafted) -> A
+                ct = "A"
+                salary = d["cost"]
+                ext = 0
+                source = "draft"
+                position = position or d.get("position", "")
+                mlb_team = mlb_team or (d.get("mlb_team", "")).upper()
+                player_key = player_key or d.get("player_key", "")
+                mgr_draft_count += 1
             else:
-                # Check 2: Is this player in the 2026 draft?
-                d = draft_lookup.get((mgr_norm, pname_norm))
-                if d is not None:
-                    ct = "A"
-                    salary = d["cost"]
-                    ext = 0
-                    source = "draft"
-                    # Use draft data for position/team if roster data is missing
-                    position = position or d.get("position", "")
-                    mlb_team = mlb_team or (d.get("mlb_team", "")).upper()
-                    player_key = player_key or d.get("player_key", "")
-                    mgr_draft_count += 1
-                else:
-                    # Not in keepers or draft -> FAAB pickup during 2026 season
-                    ct = "A"
-                    salary = 1  # FAAB minimum bid
-                    ext = 0
-                    source = "faab"
-                    mgr_faab_count += 1
+                # Not in keepers or draft -> FAAB pickup during 2026 season
+                ct = "A"
+                salary = 1  # FAAB minimum bid
+                ext = 0
+                source = "faab"
+                mgr_faab_count += 1
 
             ext_str = str(ext) if ext > 0 else ""
             contract_display = f"${salary}/{ct}{ext_str}"
