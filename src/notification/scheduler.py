@@ -2246,18 +2246,18 @@ def start_scheduler():
     print("[Scheduler] Prospect ranking update: Aug 15 19:00")
 
     # One-off test push: today's MLB games preview.
-    # Fires 2026-04-22 00:30 Taiwan time then never again (DateTrigger is
+    # Fires 2026-04-22 01:10 Taiwan time then never again (DateTrigger is
     # idempotent after the time passes — safe to keep in code).
     try:
         from datetime import datetime as _dt
         from zoneinfo import ZoneInfo as _ZI
         tz = _ZI(REMINDER_CRON_TZ)
-        run_at = _dt(2026, 4, 22, 0, 30, 0, tzinfo=tz)
+        run_at = _dt(2026, 4, 22, 1, 10, 0, tzinfo=tz)
         if run_at > _dt.now(tz):
             _scheduler.add_job(
                 _daily_games_preview_job,
                 DateTrigger(run_date=run_at),
-                id="one_off_games_preview_20260422",
+                id="one_off_games_preview_20260422_0110",
                 replace_existing=True,
             )
             print(f"[Scheduler] One-off games preview scheduled: {run_at}")
