@@ -9,12 +9,21 @@ import os
 
 LINE_CHANNEL_ACCESS_TOKEN = os.getenv("LINE_CHANNEL_ACCESS_TOKEN", "")
 LINE_GROUP_ID = os.getenv("LINE_GROUP_ID", "")
+# When set, every successful or failed group push is also mirrored to this
+# personal user ID — useful for testing/observing scheduled messages without
+# depending on bot membership in the group.
+LINE_MIRROR_USER_ID = os.getenv("LINE_MIRROR_USER_ID", "")
 
 
 def send_line_group_message(message: str) -> tuple[bool, str]:
     """
     Send a text message to the configured LINE group.
     Returns (success, error_message).
+
+    If LINE_MIRROR_USER_ID env var is set, the same message is also pushed to
+    that personal user (attempted independently — group success/failure does
+    not affect the mirror, and vice versa). The returned tuple still reflects
+    the group push result only.
     """
     if not LINE_CHANNEL_ACCESS_TOKEN:
         return False, "LINE_CHANNEL_ACCESS_TOKEN not configured"
@@ -35,13 +44,30 @@ def send_line_group_message(message: str) -> tuple[bool, str]:
         configuration = Configuration(access_token=LINE_CHANNEL_ACCESS_TOKEN)
         with ApiClient(configuration) as api_client:
             messaging_api = MessagingApi(api_client)
-            messaging_api.push_message(
-                PushMessageRequest(
-                    to=LINE_GROUP_ID,
-                    messages=[TextMessage(text=message)],
+            try:
+                messaging_api.push_message(
+                    PushMessageRequest(
+                        to=LINE_GROUP_ID,
+                        messages=[TextMessage(text=message)],
+                    )
                 )
-            )
-        return True, ""
+                group_success, group_error = True, ""
+            except Exception as e:
+                group_success, group_error = False, str(e)
+
+            if LINE_MIRROR_USER_ID:
+                try:
+                    messaging_api.push_message(
+                        PushMessageRequest(
+                            to=LINE_MIRROR_USER_ID,
+                            messages=[TextMessage(text=message)],
+                        )
+                    )
+                    print(f"[LINE] Mirrored to {LINE_MIRROR_USER_ID[:6]}...")
+                except Exception as e:
+                    print(f"[LINE] Mirror push failed: {e}")
+
+        return group_success, group_error
 
     except ImportError:
         return False, "line-bot-sdk not installed"
