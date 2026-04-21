@@ -175,8 +175,19 @@ def run_post_draft_update(verbose: bool = True) -> dict:
 
             # Check if this is a keeper
             k = keeper_lookup.get(pname_norm)
+            sel = selection_lookup.get((norm(mgr), pname_norm))
+            # A GM-chosen release/fa overrides whatever v2.json auto-evolution says.
+            # Without this, a player released in the keeper deadline but redrafted
+            # by the same team would inherit their old B/N/O contract instead of
+            # getting a fresh A contract at draft cost.
+            released_by_gm = bool(sel) and sel.get("action", "") in (
+                "release",
+                "release_normal",
+                "fa",
+            )
             is_keeper = (
-                k is not None
+                not released_by_gm
+                and k is not None
                 and k["manager"] == mgr
                 and k["contract_2026"] != "EXPIRED"
             )
@@ -190,7 +201,6 @@ def run_post_draft_update(verbose: bool = True) -> dict:
 
                 # Overlay GM keeper selection if it exists in DB.
                 # next_contract examples: "$20/B", "$35/N3", "$1/A" (activate R)
-                sel = selection_lookup.get((norm(mgr), pname_norm))
                 if sel and sel.get("next_contract"):
                     nc = sel["next_contract"]
                     if "/" in nc:
