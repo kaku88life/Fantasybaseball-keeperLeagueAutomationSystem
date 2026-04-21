@@ -619,20 +619,30 @@ async def trigger_war_report_endpoint(
 
 @router.post("/line/trigger-injury-digest")
 async def trigger_injury_digest_endpoint(
+    background_tasks: BackgroundTasks,
     user: dict = Depends(get_current_commissioner),
 ):
     """Manually fire the daily player status + injury digest job.
 
-    Useful for testing after deploy. Respects the INJURY_BATCH_DAYS cooldown,
-    so it may just update DB without sending LINE (check returned message).
+    Runs in the background because the full roster scan across 16 teams
+    easily exceeds the client timeout. Respects INJURY_BATCH_DAYS cooldown,
+    so it may just update DB without sending LINE. Check Zeabur logs /
+    LINE group for results.
     """
     from src.notification.scheduler import _daily_player_status_job
 
-    try:
-        _daily_player_status_job()
-        return {"success": True, "message": "Status update job executed. Check Zeabur logs."}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Status job failed: {e}")
+    def _run_bg() -> None:
+        try:
+            _daily_player_status_job()
+        except Exception as e:
+            print(f"[CommissionerAPI] Background injury digest failed: {e}")
+
+    background_tasks.add_task(_run_bg)
+    return {
+        "success": True,
+        "status": "scheduled",
+        "message": "Injury digest dispatched in background. Check LINE / Zeabur logs in 30-90s.",
+    }
 
 
 # ========== Buyout Management ==========
@@ -1373,20 +1383,29 @@ async def get_available_draft_years(
 @router.post("/rookie-monitor/{year}/check")
 async def check_rookie_callups_endpoint(
     year: int,
+    background_tasks: BackgroundTasks,
     user: dict = Depends(get_current_commissioner),
 ):
     """Manually trigger rookie call-up check. Commissioner only.
 
-    Scans all R-contract players for MLB debuts or roster additions,
-    sends LINE notification for newly detected call-ups.
+    Runs in the background because scanning every R-contract player against
+    MLB Stats API can exceed client timeouts. Check Zeabur logs / LINE for
+    actual results.
     """
     from src.notification.rookie_monitor import send_callup_notifications
 
-    try:
-        result = send_callup_notifications(year)
-        return result
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Rookie monitor error: {e}")
+    def _run_bg() -> None:
+        try:
+            send_callup_notifications(year)
+        except Exception as e:
+            print(f"[CommissionerAPI] Background rookie monitor failed: {e}")
+
+    background_tasks.add_task(_run_bg)
+    return {
+        "success": True,
+        "status": "scheduled",
+        "message": "Rookie call-up check dispatched in background. Check LINE / Zeabur logs in 30-90s.",
+    }
 
 
 @router.get("/rookie-monitor/{year}/log")

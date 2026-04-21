@@ -834,6 +834,85 @@ def _daily_roster_snapshot_rebuild_job():
         print(f"[SnapshotRebuild] Job failed: {e}")
 
 
+def _daily_games_preview_job(target_id: str = "", dry_run: bool = False) -> dict:
+    """Fetch today's MLB schedule and push a compact matchup list to LINE.
+
+    Source: MLB Stats API /schedule?sportId=1&date=YYYY-MM-DD.
+    Time basis: ET (eastern time, where MLB's schedule day pivots at midnight
+    local-east). We pass today's date in Taiwan time as best-effort; this is
+    intended as a one-off verification push so exact calendar pivot doesn't
+    matter much.
+
+    Args:
+        target_id: if set, push to that LINE id instead of LINE_GROUP_ID
+        dry_run: skip the LINE push, return payload for inspection
+    """
+    import urllib.request
+    import json as _json
+    from datetime import date as _date
+
+    today = _date.today().isoformat()  # Taiwan time (scheduler tz)
+    url = f"https://statsapi.mlb.com/api/v1/schedule?sportId=1&date={today}"
+    print(f"[GamesPreview] Fetching MLB schedule for {today}...")
+
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": "KeeperLeagueBot/1.0"})
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            data = _json.loads(resp.read().decode("utf-8"))
+    except Exception as e:
+        err = f"MLB Stats API fetch failed: {e}"
+        print(f"[GamesPreview] {err}")
+        if dry_run:
+            return {"success": False, "error": err}
+        return {"success": False, "error": err}
+
+    games = []
+    for d in data.get("dates", []):
+        for g in d.get("games", []):
+            away = g.get("teams", {}).get("away", {}).get("team", {}).get("abbreviation", "")
+            home = g.get("teams", {}).get("home", {}).get("team", {}).get("abbreviation", "")
+            status = g.get("status", {}).get("detailedState", "")
+            game_time = g.get("gameDate", "")  # ISO UTC
+            games.append({"away": away, "home": home, "status": status, "time": game_time})
+
+    lines: list[str] = []
+    lines.append(f"⚾ 今日 MLB 賽事一覽（{today}）")
+    lines.append("━" * 14)
+    if not games:
+        lines.append("（今日無賽事）")
+    else:
+        lines.append(f"共 {len(games)} 場")
+        lines.append("")
+        for g in games:
+            away = g["away"] or "?"
+            home = g["home"] or "?"
+            lines.append(f"  {away:>3}  @  {home:<3}   {g['status']}")
+    lines.append("")
+    lines.append("（資料來源：MLB Stats API）")
+    message = "\n".join(lines)
+
+    if dry_run:
+        return {"success": True, "preview": message, "games_count": len(games)}
+
+    from src.notification.line_service import (
+        LINE_GROUP_ID,
+        send_line_group_message,
+        send_line_push_message,
+    )
+    if target_id:
+        success, error = send_line_push_message(target_id, message)
+        dest = target_id[:6] + "..."
+    else:
+        success, error = send_line_group_message(message)
+        dest = f"group {LINE_GROUP_ID[:8]}..." if LINE_GROUP_ID else "group(unset)"
+
+    if success:
+        print(f"[GamesPreview] Pushed to {dest} ({len(games)} games)")
+    else:
+        print(f"[GamesPreview] Push failed to {dest}: {error}")
+    return {"success": success, "error": error, "games_count": len(games), "dest": dest}
+
+
 def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
     """Weekly job (Monday 21:00): generate and send weekly war report to LINE.
 
@@ -2037,6 +2116,7 @@ def start_scheduler():
     try:
         from apscheduler.schedulers.background import BackgroundScheduler
         from apscheduler.triggers.cron import CronTrigger
+        from apscheduler.triggers.date import DateTrigger
     except ImportError:
         print("[Scheduler] apscheduler not installed, scheduler disabled.")
         return
@@ -2164,6 +2244,27 @@ def start_scheduler():
 
     print("[Scheduler] Monthly war report: 1st of each month 20:45")
     print("[Scheduler] Prospect ranking update: Aug 15 19:00")
+
+    # One-off test push: today's MLB games preview.
+    # Fires 2026-04-22 00:30 Taiwan time then never again (DateTrigger is
+    # idempotent after the time passes — safe to keep in code).
+    try:
+        from datetime import datetime as _dt
+        from zoneinfo import ZoneInfo as _ZI
+        tz = _ZI(REMINDER_CRON_TZ)
+        run_at = _dt(2026, 4, 22, 0, 30, 0, tzinfo=tz)
+        if run_at > _dt.now(tz):
+            _scheduler.add_job(
+                _daily_games_preview_job,
+                DateTrigger(run_date=run_at),
+                id="one_off_games_preview_20260422",
+                replace_existing=True,
+            )
+            print(f"[Scheduler] One-off games preview scheduled: {run_at}")
+        else:
+            print(f"[Scheduler] One-off games preview skipped (already past: {run_at})")
+    except Exception as e:
+        print(f"[Scheduler] One-off games preview registration failed: {e}")
 
 
 def stop_scheduler():
