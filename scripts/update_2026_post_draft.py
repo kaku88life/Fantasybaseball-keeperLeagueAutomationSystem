@@ -33,7 +33,7 @@ from src.contract.models import (
     SpecialStatus,
     Team,
 )
-from api.database import save_snapshot, upsert_team
+from api.database import get_all_keeper_selections, save_snapshot, upsert_team
 from api.serializers import league_state_to_dict
 
 CONTRACTS_PATH = ROOT / "data" / "2026_contracts_v2.json"
@@ -101,7 +101,23 @@ def run_post_draft_update(verbose: bool = True) -> dict:
                 "source": p.get("source", ""),
             }
 
-    # 2. Load draft results
+    # 2a. Load 2026 keeper selections from DB — GM actual decisions
+    #     (B→N extend, R→activate, release, etc.). These override the default
+    #     contract evolution baked into 2026_contracts_v2.json.
+    selection_lookup: dict[tuple[str, str], dict] = {}
+    try:
+        selections = get_all_keeper_selections(year=YEAR)
+        for sel in selections:
+            key = (norm(sel["manager_name"]), norm(sel["player_name"]))
+            selection_lookup[key] = sel
+        if selections:
+            log(f"Loaded {len(selections)} keeper selections from DB (year={YEAR})")
+        else:
+            log(f"No {YEAR} keeper selections in DB — using base evolution only")
+    except Exception as e:
+        log(f"Could not load keeper selections from DB: {e}")
+
+    # 2b. Load draft results
     log("Loading draft results...")
     with open(DRAFT_PATH, "r", encoding="utf-8") as f:
         draft = json.load(f)
@@ -166,11 +182,32 @@ def run_post_draft_update(verbose: bool = True) -> dict:
             )
 
             if is_keeper:
-                # Use evolved 2026 contract
+                # Start from evolved base contract in v2.json
                 ct_str = k["contract_2026_type"]
                 salary = k["contract_2026_salary"]
                 ext = k["contract_2026_ext"]
                 source = k["source"]
+
+                # Overlay GM keeper selection if it exists in DB.
+                # next_contract examples: "$20/B", "$35/N3", "$1/A" (activate R)
+                sel = selection_lookup.get((norm(mgr), pname_norm))
+                if sel and sel.get("next_contract"):
+                    nc = sel["next_contract"]
+                    if "/" in nc:
+                        nc_salary_str, nc_type_str = nc.split("/", 1)
+                        try:
+                            nc_salary = int(nc_salary_str.replace("$", "").strip())
+                        except ValueError:
+                            nc_salary = salary
+                        nc_ext = 0
+                        nc_ct = nc_type_str
+                        if nc_ct.startswith("N") and len(nc_ct) > 1 and nc_ct[1:].isdigit():
+                            nc_ext = int(nc_ct[1:])
+                            nc_ct = "N"
+                        if nc_ct in CT_MAP:
+                            ct_str = nc_ct
+                            salary = nc_salary
+                            ext = nc_ext
                 mgr_keepers += 1
             else:
                 # New draft pick or expired player re-drafted -> A contract
