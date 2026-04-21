@@ -167,40 +167,33 @@ def run_post_draft_update(verbose: bool = True) -> dict:
         for d in picks:
             pname = d["player_name"]
             pname_norm = norm(pname)
+            draft_cost = d["cost"]
 
             # Look up roster info for position/mlb_team
             roster_info = roster_lookup.get(mgr, {}).get(pname_norm, {})
             position = d.get("position", "") or roster_info.get("position", "")
             mlb_team = d.get("mlb_team", "") or roster_info.get("team", "")
 
-            # Check if this is a keeper
+            # Compute expected keeper contract (base from v2.json + optional
+            # keeper_selections overlay for B->N extend, R->A activate, etc).
             k = keeper_lookup.get(pname_norm)
             sel = selection_lookup.get((norm(mgr), pname_norm))
-            # A GM-chosen release/fa overrides whatever v2.json auto-evolution says.
-            # Without this, a player released in the keeper deadline but redrafted
-            # by the same team would inherit their old B/N/O contract instead of
-            # getting a fresh A contract at draft cost.
-            released_by_gm = bool(sel) and sel.get("action", "") in (
-                "release",
-                "release_normal",
-                "fa",
-            )
-            is_keeper = (
-                not released_by_gm
-                and k is not None
+
+            expected_ct_str: str | None = None
+            expected_salary = 0
+            expected_ext = 0
+            expected_source = ""
+
+            if (
+                k is not None
                 and k["manager"] == mgr
                 and k["contract_2026"] != "EXPIRED"
-            )
+            ):
+                expected_ct_str = k["contract_2026_type"]
+                expected_salary = k["contract_2026_salary"]
+                expected_ext = k["contract_2026_ext"]
+                expected_source = k["source"]
 
-            if is_keeper:
-                # Start from evolved base contract in v2.json
-                ct_str = k["contract_2026_type"]
-                salary = k["contract_2026_salary"]
-                ext = k["contract_2026_ext"]
-                source = k["source"]
-
-                # Overlay GM keeper selection if it exists in DB.
-                # next_contract examples: "$20/B", "$35/N3", "$1/A" (activate R)
                 if sel and sel.get("next_contract"):
                     nc = sel["next_contract"]
                     if "/" in nc:
@@ -208,21 +201,45 @@ def run_post_draft_update(verbose: bool = True) -> dict:
                         try:
                             nc_salary = int(nc_salary_str.replace("$", "").strip())
                         except ValueError:
-                            nc_salary = salary
+                            nc_salary = expected_salary
                         nc_ext = 0
                         nc_ct = nc_type_str
                         if nc_ct.startswith("N") and len(nc_ct) > 1 and nc_ct[1:].isdigit():
                             nc_ext = int(nc_ct[1:])
                             nc_ct = "N"
                         if nc_ct in CT_MAP:
-                            ct_str = nc_ct
-                            salary = nc_salary
-                            ext = nc_ext
+                            expected_ct_str = nc_ct
+                            expected_salary = nc_salary
+                            expected_ext = nc_ext
+
+            # GM-chosen release overrides auto-evolution even when v2 has keeper.
+            released_by_gm = bool(sel) and sel.get("action", "") in (
+                "release",
+                "release_normal",
+                "fa",
+            )
+
+            # Salary-match heuristic: a player is only kept if their draft cost
+            # equals the expected keeper salary. If the cost differs, they were
+            # released (explicitly or by omission) and redrafted — so they get
+            # a fresh A contract at the actual draft price, not the old contract.
+            # This correctly handles: release->redraft, O->redraft at higher bid,
+            # R->redraft (R stashes dropped then re-auctioned).
+            is_keeper = (
+                not released_by_gm
+                and expected_ct_str is not None
+                and draft_cost == expected_salary
+            )
+
+            if is_keeper:
+                ct_str = expected_ct_str
+                salary = expected_salary
+                ext = expected_ext
+                source = expected_source
                 mgr_keepers += 1
             else:
-                # New draft pick or expired player re-drafted -> A contract
                 ct_str = "A"
-                salary = d["cost"]
+                salary = draft_cost
                 ext = 0
                 source = "draft"
                 mgr_new += 1
