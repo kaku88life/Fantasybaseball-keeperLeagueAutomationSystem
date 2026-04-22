@@ -331,38 +331,82 @@ def fetch_league_settings(league_key: str) -> dict:
 
 
 def fetch_transactions_full(league_key: str) -> dict:
-    """Fetch all transactions with full player details for a league."""
-    data = yahoo_api_get(f"/league/{league_key}/transactions")
-    tx_data = data["fantasy_content"]["league"][1]["transactions"]
-    count = tx_data.get("count", 0)
+    """Fetch all transactions with full player details for a league.
 
-    transactions = []
-    for i in range(count):
-        tx_raw = tx_data[str(i)]["transaction"]
-        meta = tx_raw[0] if isinstance(tx_raw, list) else tx_raw
-        players_section = tx_raw[1] if isinstance(tx_raw, list) and len(tx_raw) > 1 else {}
+    Yahoo's /transactions endpoint returns at most 25 records per call; we
+    paginate with start/count until an empty page is returned, so mid- and
+    late-season FAAB adds are not silently dropped.
+    """
+    import time
 
-        tx_entry = {
-            "transaction_id": meta.get("transaction_id", ""),
-            "type": meta.get("type", ""),
-            "status": meta.get("status", ""),
-            "timestamp": meta.get("timestamp", ""),
-            "faab_bid": None,
-            "players": [],
-        }
+    transactions: list[dict] = []
+    batch_size = 25
+    start = 0
 
-        if "faab_bid" in meta:
-            tx_entry["faab_bid"] = int(meta["faab_bid"])
+    while True:
+        data = yahoo_api_get(
+            f"/league/{league_key}/transactions;start={start};count={batch_size}"
+        )
+        league_data = data.get("fantasy_content", {}).get("league", [])
+        if len(league_data) < 2 or not isinstance(league_data[1], dict):
+            break
+        tx_data = league_data[1].get("transactions", {})
+        if not isinstance(tx_data, dict):
+            break
+        count = tx_data.get("count", 0)
+        try:
+            count = int(count or 0)
+        except (ValueError, TypeError):
+            count = 0
+        if count == 0:
+            break
 
-        if "players" in players_section:
-            players_data = players_section["players"]
-            p_count = players_data.get("count", 0)
-            for j in range(p_count):
-                p_raw = players_data[str(j)]["player"]
-                player_info = _parse_tx_player(p_raw)
-                tx_entry["players"].append(player_info)
+        for i in range(count):
+            entry = tx_data.get(str(i), {})
+            tx_raw = entry.get("transaction") if isinstance(entry, dict) else None
+            if tx_raw is None:
+                continue
+            meta = tx_raw[0] if isinstance(tx_raw, list) else tx_raw
+            players_section = (
+                tx_raw[1] if isinstance(tx_raw, list) and len(tx_raw) > 1 else {}
+            )
 
-        transactions.append(tx_entry)
+            tx_entry = {
+                "transaction_id": meta.get("transaction_id", ""),
+                "type": meta.get("type", ""),
+                "status": meta.get("status", ""),
+                "timestamp": meta.get("timestamp", ""),
+                "faab_bid": None,
+                "players": [],
+            }
+
+            if "faab_bid" in meta:
+                try:
+                    tx_entry["faab_bid"] = int(meta["faab_bid"])
+                except (ValueError, TypeError):
+                    tx_entry["faab_bid"] = None
+
+            if isinstance(players_section, dict) and "players" in players_section:
+                players_data = players_section["players"]
+                p_count = players_data.get("count", 0)
+                try:
+                    p_count = int(p_count or 0)
+                except (ValueError, TypeError):
+                    p_count = 0
+                for j in range(p_count):
+                    p_raw = players_data.get(str(j), {}).get("player")
+                    if p_raw is None:
+                        continue
+                    player_info = _parse_tx_player(p_raw)
+                    tx_entry["players"].append(player_info)
+
+            transactions.append(tx_entry)
+
+        # Stop when Yahoo returned fewer than a full page.
+        if count < batch_size:
+            break
+        start += batch_size
+        time.sleep(0.3)
 
     return {"transactions": transactions}
 

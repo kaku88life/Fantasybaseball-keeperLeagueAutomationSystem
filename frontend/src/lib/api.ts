@@ -494,6 +494,15 @@ export async function triggerInjuryDigest(): Promise<{
   });
 }
 
+export async function refreshTransactions(): Promise<{
+  success: boolean;
+  message: string;
+}> {
+  return request(`/api/commissioner/refresh-transactions`, {
+    method: "POST",
+  });
+}
+
 // ========== Buyout Management (Commissioner) ==========
 
 export async function getAllBuyouts(year: number): Promise<{

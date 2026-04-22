@@ -500,35 +500,27 @@ def _daily_transaction_fetch_job():
             print("[TransactionFetch] No transactions found.")
             return
 
-        # Load existing file and merge (dedup by transaction_id)
+        # Full overwrite (not append-merge). Yahoo returns the full season
+        # history each call, and the container filesystem is ephemeral on
+        # redeploy — rewriting the file from scratch every day keeps the data
+        # self-healing instead of drifting away from git's checked-in copy.
         data_dir = Path(__file__).resolve().parent.parent.parent / "data"
         tx_file = data_dir / f"yahoo_{year}_transactions.json"
 
-        existing_tx = []
-        if tx_file.exists():
-            with open(tx_file, "r", encoding="utf-8") as f:
-                existing_data = json.load(f)
-            if isinstance(existing_data, dict):
-                existing_tx = existing_data.get("transactions", [])
-            elif isinstance(existing_data, list):
-                existing_tx = existing_data
-
-        # Dedup by transaction_id
-        existing_ids = {tx.get("transaction_id") for tx in existing_tx}
-        added = 0
-        for tx in new_transactions:
-            if tx.get("transaction_id") not in existing_ids:
-                existing_tx.append(tx)
-                added += 1
-
-        # Save merged data
-        save_data = {"transactions": existing_tx}
+        save_data = {"transactions": new_transactions}
         with open(tx_file, "w", encoding="utf-8") as f:
             json.dump(save_data, f, indent=2, ensure_ascii=False)
 
-        print(f"[TransactionFetch] {len(new_transactions)} total, "
-              f"{added} new transactions added. "
-              f"File: {tx_file.name} ({len(existing_tx)} total)")
+        faab_count = sum(
+            1 for t in new_transactions
+            if t.get("faab_bid") and t["faab_bid"] > 0
+        )
+        trade_count = sum(1 for t in new_transactions if t.get("type") == "trade")
+        print(
+            f"[TransactionFetch] Rewrote {tx_file.name}: "
+            f"{len(new_transactions)} total "
+            f"(FAAB adds: {faab_count}, trades: {trade_count})"
+        )
 
     except Exception as e:
         print(f"[TransactionFetch] Error: {e}")

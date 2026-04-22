@@ -645,6 +645,39 @@ async def trigger_injury_digest_endpoint(
     }
 
 
+@router.post("/refresh-transactions")
+async def refresh_transactions_endpoint(
+    background_tasks: BackgroundTasks,
+    user: dict = Depends(get_current_commissioner),
+):
+    """Manually fire the daily transaction fetch job (paginated, overwrites file).
+
+    The scheduled job runs at 00:15 Taiwan time. Use this endpoint right after
+    a deploy to immediately refresh FAAB / trade / add-drop data on the
+    container's filesystem, so analytics pages (draft stats, pickup counts)
+    show up-to-date numbers without waiting for the nightly cron.
+
+    Runs in background because a full-season paginated fetch can take 30-60s.
+    """
+    from src.notification.scheduler import _daily_transaction_fetch_job
+
+    def _run_bg() -> None:
+        try:
+            _daily_transaction_fetch_job()
+        except Exception as e:
+            print(f"[CommissionerAPI] Background transaction refresh failed: {e}")
+
+    background_tasks.add_task(_run_bg)
+    return {
+        "success": True,
+        "status": "scheduled",
+        "message": (
+            "Transaction fetch dispatched. Stats should update in 30-90s; "
+            "check Zeabur logs for [TransactionFetch] output."
+        ),
+    }
+
+
 # ========== Buyout Management ==========
 
 @router.get("/buyouts/{year}")

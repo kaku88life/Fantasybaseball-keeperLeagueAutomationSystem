@@ -20,6 +20,7 @@ import {
   testLineReminder,
   triggerWarReport,
   triggerInjuryDigest,
+  refreshTransactions,
   verifyCommissionerPassword,
   getYahooTokenStatus,
   refreshYahooToken,
@@ -205,6 +206,8 @@ export default function CommissionerDashboard() {
   const [warReportResult, setWarReportResult] = useState<{ success: boolean; message: string; report?: string } | null>(null);
   const [injuryDigestLoading, setInjuryDigestLoading] = useState(false);
   const [injuryDigestResult, setInjuryDigestResult] = useState<{ success: boolean; message: string } | null>(null);
+  const [txRefreshLoading, setTxRefreshLoading] = useState(false);
+  const [txRefreshResult, setTxRefreshResult] = useState<{ success: boolean; message: string } | null>(null);
 
   // Yahoo API token state
   const [yahooToken, setYahooToken] = useState<YahooTokenStatus | null>(null);
@@ -430,6 +433,23 @@ export default function CommissionerDashboard() {
       });
     } finally {
       setInjuryDigestLoading(false);
+    }
+  };
+
+  const handleRefreshTransactions = async () => {
+    if (!confirm("重新抓取本年度全部交易紀錄（paginated）？")) return;
+    setTxRefreshLoading(true);
+    setTxRefreshResult(null);
+    try {
+      const result = await refreshTransactions();
+      setTxRefreshResult(result);
+    } catch (e) {
+      setTxRefreshResult({
+        success: false,
+        message: e instanceof Error ? e.message : "Refresh failed",
+      });
+    } finally {
+      setTxRefreshLoading(false);
     }
   };
 
@@ -1001,6 +1021,13 @@ export default function CommissionerDashboard() {
                   >
                     {injuryDigestLoading ? "執行中..." : "觸發傷兵彙整 Trigger Injury Digest"}
                   </button>
+                  <button
+                    onClick={handleRefreshTransactions}
+                    disabled={txRefreshLoading}
+                    className="rounded bg-sky-600 px-3 py-1 text-sm font-medium text-white hover:bg-sky-500 disabled:opacity-50"
+                  >
+                    {txRefreshLoading ? "執行中..." : "重抓交易紀錄 Refresh Transactions"}
+                  </button>
                 </div>
                 {warReportResult && (
                   <div className={`mt-2 rounded border p-2 text-xs ${
@@ -1022,6 +1049,15 @@ export default function CommissionerDashboard() {
                   }`}>
                     <p className={injuryDigestResult.success ? "text-green-700" : "text-red-700"}>
                       傷兵彙整：{injuryDigestResult.message}
+                    </p>
+                  </div>
+                )}
+                {txRefreshResult && (
+                  <div className={`mt-2 rounded border p-2 text-xs ${
+                    txRefreshResult.success ? "border-green-200 bg-green-100" : "border-red-200 bg-red-100"
+                  }`}>
+                    <p className={txRefreshResult.success ? "text-green-700" : "text-red-700"}>
+                      交易重抓：{txRefreshResult.message}
                     </p>
                   </div>
                 )}
