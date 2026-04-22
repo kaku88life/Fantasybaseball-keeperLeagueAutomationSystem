@@ -50,6 +50,28 @@ async def lifespan(app: FastAPI):
         print(f"[Startup] 2026 post-draft load error (non-fatal): {e}", flush=True)
         traceback.print_exc()
 
+    # Refresh current-year transactions JSON.
+    # Zeabur container filesystem is ephemeral — redeploy reverts this file to
+    # the git baseline (commish-only), wiping FAAB pickup stats. Re-fetch from
+    # Yahoo API on startup to restore analytics immediately.
+    try:
+        import json as _json
+        from datetime import datetime as _dt
+        from pathlib import Path as _Path
+        from api.yahoo_service import discover_league_keys, fetch_transactions_full
+
+        _year = _dt.now().year
+        _keys = discover_league_keys()
+        if _year in _keys:
+            _txs = fetch_transactions_full(_keys[_year])
+            _path = _Path(__file__).resolve().parents[1] / "data" / f"yahoo_{_year}_transactions.json"
+            _path.write_text(_json.dumps(_txs, indent=2, ensure_ascii=False), encoding="utf-8")
+            print(f"[Startup] Refreshed {_year} transactions: {len(_txs.get('transactions', []))} records", flush=True)
+        else:
+            print(f"[Startup] No Yahoo league for year {_year}; skip transaction refresh", flush=True)
+    except Exception as e:
+        print(f"[Startup] Transaction refresh error (non-fatal): {e}", flush=True)
+
     # Start reminder scheduler (no-op if env vars not configured)
     try:
         from src.notification.scheduler import start_scheduler, stop_scheduler
