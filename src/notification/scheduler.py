@@ -126,6 +126,98 @@ _YAHOO_STAT_ID_NAME: dict[str, str] = {
 }
 
 
+# --- Shared formatting helpers for LINE reports (weekly / monthly war reports) ---
+
+def _visual_width(s: str) -> int:
+    """Rough visual width: CJK/fullwidth chars ≈ 2 cells, ASCII ≈ 1."""
+    w = 0
+    for c in s:
+        o = ord(c)
+        if (
+            0x1100 <= o <= 0x115F
+            or 0x2600 <= o <= 0x26FF
+            or 0x2700 <= o <= 0x27BF
+            or 0x2B00 <= o <= 0x2BFF
+            or 0x2E80 <= o <= 0x303E
+            or 0x3041 <= o <= 0x33FF
+            or 0x3400 <= o <= 0x4DBF
+            or 0x4E00 <= o <= 0x9FFF
+            or 0xA000 <= o <= 0xA4CF
+            or 0xAC00 <= o <= 0xD7A3
+            or 0xF900 <= o <= 0xFAFF
+            or 0xFE30 <= o <= 0xFE4F
+            or 0xFF00 <= o <= 0xFF60
+            or 0xFFE0 <= o <= 0xFFE6
+            or 0x1F300 <= o <= 0x1FAFF
+        ):
+            w += 2
+        else:
+            w += 1
+    return w
+
+
+def _center_line(text: str, width: int) -> str:
+    """Center `text` within a `width`-cell row using fullwidth spaces for bulk padding.
+    LINE's desktop proportional font collapses leading ASCII spaces, so we bias toward
+    fullwidth (\u3000) padding which takes 2 cells and renders reliably.
+    """
+    pad_cells = max(0, (width - _visual_width(text)) // 2)
+    fw = "\u3000" * (pad_cells // 2)
+    sp = " " * (pad_cells % 2)
+    return fw + sp + text
+
+
+def _pad_right_visual(s: str, width: int) -> str:
+    return s + " " * max(0, width - _visual_width(s))
+
+
+def _team_mgr_block(team_name: str, manager_name: str) -> str:
+    """Format `ABBR (manager)` or fall back to raw team name / ? when abbr lookup fails."""
+    abbr = _fantasy_team_to_mlb_abbr(team_name or "") or team_name or "?"
+    mgr = manager_name or "?"
+    return f"{abbr}  ({mgr})"
+
+
+def _walk_stats(obj, out: dict) -> None:
+    """Recursively scan a Yahoo player payload for stat_id/value pairs.
+    Yahoo wraps stats in varying depths depending on subresource ordering;
+    this catches them regardless of which list-dict branch they live in.
+    """
+    if isinstance(obj, dict):
+        if "stat_id" in obj and "value" in obj:
+            sid = str(obj.get("stat_id", ""))
+            if sid:
+                out[sid] = str(obj.get("value", ""))
+            return
+        for v in obj.values():
+            _walk_stats(v, out)
+    elif isinstance(obj, list):
+        for v in obj:
+            _walk_stats(v, out)
+
+
+def _fmt_avg(v: str) -> str:
+    """Format rate stats like .350 (drop leading 0)."""
+    if not v or v in ("-", "INF"):
+        return v or "-"
+    try:
+        f = float(v)
+        s = f"{f:.3f}"
+        return s[1:] if s.startswith("0.") else s
+    except (ValueError, TypeError):
+        return v
+
+
+def _fmt_era(v: str) -> str:
+    """Format rate stats like 1.80 (keep leading digits)."""
+    if not v or v in ("-", "INF", "-----"):
+        return v or "-"
+    try:
+        return f"{float(v):.2f}"
+    except (ValueError, TypeError):
+        return v
+
+
 def _is_in_reminder_period(today: datetime) -> tuple[bool, str]:
     """Check if today falls within the reminder period.
 
@@ -1124,22 +1216,6 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
         top_pitchers: list[dict] = []
         stats_debug: dict[str, Any] = {}
 
-        def _walk_stats(obj: Any, out: dict[str, str]) -> None:
-            """Recursively scan a Yahoo player payload for stat_id/value pairs.
-            Yahoo wraps stats in varying depths depending on subresource ordering;
-            this catches them regardless of which list-dict branch they live in."""
-            if isinstance(obj, dict):
-                if "stat_id" in obj and "value" in obj:
-                    sid = str(obj.get("stat_id", ""))
-                    if sid:
-                        out[sid] = str(obj.get("value", ""))
-                    return
-                for v in obj.values():
-                    _walk_stats(v, out)
-            elif isinstance(obj, list):
-                for v in obj:
-                    _walk_stats(v, out)
-
         for pos_type, result_list in [("B", top_batters), ("P", top_pitchers)]:
             try:
                 players_path = (
@@ -1218,56 +1294,14 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
                 print(f"[WarReport] Error fetching top {pos_type} players: {e}")
                 stats_debug[pos_type] = {"error": str(e)}
 
-        # --- 5. Build LINE message ---
+        # --- 5. Build LINE message (using shared module-level formatting helpers) ---
 
-        def _visual_width(s: str) -> int:
-            """Rough visual width: CJK/fullwidth chars ≈ 2 cells, ASCII ≈ 1."""
-            w = 0
-            for c in s:
-                o = ord(c)
-                if (
-                    0x1100 <= o <= 0x115F
-                    or 0x2600 <= o <= 0x26FF
-                    or 0x2700 <= o <= 0x27BF
-                    or 0x2B00 <= o <= 0x2BFF
-                    or 0x2E80 <= o <= 0x303E
-                    or 0x3041 <= o <= 0x33FF
-                    or 0x3400 <= o <= 0x4DBF
-                    or 0x4E00 <= o <= 0x9FFF
-                    or 0xA000 <= o <= 0xA4CF
-                    or 0xAC00 <= o <= 0xD7A3
-                    or 0xF900 <= o <= 0xFAFF
-                    or 0xFE30 <= o <= 0xFE4F
-                    or 0xFF00 <= o <= 0xFF60
-                    or 0xFFE0 <= o <= 0xFFE6
-                    or 0x1F300 <= o <= 0x1FAFF
-                ):
-                    w += 2
-                else:
-                    w += 1
-            return w
-
-        def _center(text: str, width: int) -> str:
-            # Use fullwidth space (2 cells) for bulk padding so desktop LINE's
-            # proportional font does not collapse leading ASCII spaces.
-            pad_cells = max(0, (width - _visual_width(text)) // 2)
-            fw = "\u3000" * (pad_cells // 2)
-            sp = " " * (pad_cells % 2)
-            return fw + sp + text
-
-        def _pad_right_visual(s: str, width: int) -> str:
-            return s + " " * max(0, width - _visual_width(s))
-
-        def _team_mgr_block(s: dict) -> str:
-            # MLB abbreviation + manager for compact mobile-friendly display.
-            team_name = s["team_name"] or ""
-            abbr = _fantasy_team_to_mlb_abbr(team_name) or team_name or "?"
-            mgr = s["manager_name"] or "?"
-            return f"{abbr}  ({mgr})"
-
-        # Column width for "ABBR [Manager]" — shared by overall + division sections.
+        # Column width for "ABBR (Manager)" — shared by overall + division sections.
         max_left_vw = max(
-            (_visual_width(_team_mgr_block(s)) for s in current_standings),
+            (
+                _visual_width(_team_mgr_block(s["team_name"], s["manager_name"]))
+                for s in current_standings
+            ),
             default=0,
         )
 
@@ -1279,7 +1313,10 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
         ) -> str:
             w, l, t = s["wins"], s["losses"], s["ties"]
             rank = rank_override if rank_override is not None else s["rank"]
-            left = _pad_right_visual(_team_mgr_block(s), max_left_vw)
+            left = _pad_right_visual(
+                _team_mgr_block(s["team_name"], s["manager_name"]),
+                max_left_vw,
+            )
             record = f"{w}-{l}-{t}"
             if show_change:
                 mgr = s["manager_name"] or "?"
@@ -1341,26 +1378,6 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
             matchup_lines.append(row)
             if idx_m < len(matchups) - 1:
                 matchup_lines.append("")
-
-        def _fmt_avg(v: str) -> str:
-            """Format rate stats like .350 (drop leading 0)."""
-            if not v or v in ("-", "INF"):
-                return v or "-"
-            try:
-                f = float(v)
-                s = f"{f:.3f}"
-                return s[1:] if s.startswith("0.") else s
-            except (ValueError, TypeError):
-                return v
-
-        def _fmt_era(v: str) -> str:
-            """Format rate stats like 1.80 (keep leading digits)."""
-            if not v or v in ("-", "INF", "-----"):
-                return v or "-"
-            try:
-                return f"{float(v):.2f}"
-            except (ValueError, TypeError):
-                return v
 
         # Top batters — 3 lines per player: name / rate stats / counting stats.
         batter_lines: list[str] = []
@@ -1452,35 +1469,35 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
         # Assemble final message with centered section headers.
         lines: list[str] = [
             divider_line,
-            _center("5-Man Keeper League", page_width),
-            _center(f"第 {report_week} 週戰報", page_width),
+            _center_line("5-Man Keeper League", page_width),
+            _center_line(f"第 {report_week} 週戰報", page_width),
             divider_line,
             "",
-            _center("【聯盟總排名】", page_width),
+            _center_line("【聯盟總排名】", page_width),
         ]
         lines.extend(standings_lines)
         lines.append("")
 
         if division_blocks:
-            lines.append(_center("【分區排名】", page_width))
+            lines.append(_center_line("【分區排名】", page_width))
             for sub_header, team_lines in division_blocks:
                 lines.append(sub_header)
                 lines.extend(team_lines)
             lines.append("")
 
         if matchup_lines:
-            lines.append(_center("【本週對戰】", page_width))
+            lines.append(_center_line("【本週對戰】", page_width))
             for ml in matchup_lines:
-                lines.append(_center(ml, page_width) if ml else ml)
+                lines.append(_center_line(ml, page_width) if ml else ml)
             lines.append("")
 
         if batter_lines:
-            lines.append(_center("【本週最佳打者】", page_width))
+            lines.append(_center_line("【本週最佳打者】", page_width))
             lines.extend(batter_lines)
             lines.append("")
 
         if pitcher_lines:
-            lines.append(_center("【本週最佳投手】", page_width))
+            lines.append(_center_line("【本週最佳投手】", page_width))
             lines.extend(pitcher_lines)
             lines.append("")
 
@@ -1497,7 +1514,7 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
             )
             if ai_text:
                 lines.append("")
-                lines.append(_center("【AI 短評】", page_width))
+                lines.append(_center_line("【AI 短評】", page_width))
                 lines.append(ai_text)
         except Exception as e:
             print(f"[WarReport] AI summary failed (non-fatal): {e}")
@@ -1536,15 +1553,24 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
         return {"success": False, "message": f"Error: {e}", "report": ""}
 
 
-def _monthly_war_report_job():
-    """Monthly job (1st of each month, 20:45): generate monthly summary report."""
+def _monthly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
+    """Monthly job (1st of each month, 20:45): generate monthly summary report.
+
+    Styled to match the weekly war report: centered headers, ABBR (manager),
+    3-line per-player stat blocks, division standings, playoff-berth distance,
+    full transaction list, and optional AI commentary.
+
+    Args:
+        target_id: If empty, push to LINE_GROUP_ID. If set, push to that target.
+        dry_run:   If True, skip LINE push and return the composed text only.
+    """
     now = datetime.now()
     month = now.month
 
     # Only run during MLB season (April-October; skips March since no full month data yet)
     if month < 4 or month > 10:
         print(f"[MonthlyReport] Off-season or too early (month {month}), skipping.")
-        return
+        return {"success": False, "message": f"Off-season (month {month})", "report": ""}
 
     year = now.year
     report_month = month - 1  # Report covers the previous month
@@ -1557,7 +1583,10 @@ def _monthly_war_report_job():
     try:
         from api.yahoo_service import yahoo_api_get, YahooTokenError
         from api.database import get_weekly_standings
-        from src.notification.line_service import send_line_group_message
+        from src.notification.line_service import (
+            send_line_group_message,
+            send_line_push_message,
+        )
         from config.settings import get_league_key
         import time
         import json
@@ -1566,87 +1595,103 @@ def _monthly_war_report_job():
         league_key = get_league_key(year)
         if not league_key:
             print(f"[MonthlyReport] No league key for year {year}")
-            return
+            return {"success": False, "message": f"No league key for {year}", "report": ""}
 
-        # --- 1. Get current week to determine which weeks belong to the report month ---
+        # --- 1. Current week (to bracket the report month's weeks) ---
         meta_path = f"/league/{league_key}/metadata"
         meta_data = yahoo_api_get(meta_path)
         league_meta = meta_data.get("fantasy_content", {}).get("league", [])
         current_week = 1
-        start_date_str = ""
         if isinstance(league_meta, list):
             for item in league_meta:
-                if isinstance(item, dict):
-                    if "current_week" in item:
-                        current_week = int(item["current_week"])
-                    if "start_date" in item:
-                        start_date_str = item["start_date"]
+                if isinstance(item, dict) and "current_week" in item:
+                    current_week = int(item["current_week"])
+                    break
+        report_week_end = max(current_week - 1, 1)
 
-        # Estimate which weeks fall in the report month
-        # Yahoo seasons typically start late March; each week is 7 days
-        # We use the weekly_standings table to find weeks with data in the report month
-        report_week_end = current_week - 1  # Last completed week
+        def _safe_int(v, default=0):
+            try:
+                return int(v) if v not in (None, "") else default
+            except (ValueError, TypeError):
+                return default
 
-        # --- 2. Fetch current standings for month-end snapshot ---
+        def _find_section(items, key):
+            for elem in items:
+                if isinstance(elem, dict) and key in elem:
+                    return elem[key]
+                if isinstance(elem, list):
+                    for sub in elem:
+                        if isinstance(sub, dict) and key in sub:
+                            return sub[key]
+            return {}
+
+        # --- 2. Current standings (month-end snapshot) ---
         time.sleep(1)
         standings_path = f"/league/{league_key}/standings"
         standings_data = yahoo_api_get(standings_path)
         league_standings = standings_data.get("fantasy_content", {}).get("league", [])
         if len(league_standings) < 2:
             print("[MonthlyReport] No standings data.")
-            return
+            return {"success": False, "message": "No standings data", "report": ""}
 
         teams_section = league_standings[1].get("standings", [{}])[0].get("teams", {})
-        team_count = teams_section.get("count", 0)
+        team_count = _safe_int(teams_section.get("count", 0))
 
         current_standings: list[dict] = []
         for i in range(team_count):
             team_raw = teams_section.get(str(i), {}).get("team", [])
-            if not team_raw:
+            if not team_raw or not isinstance(team_raw, list):
                 continue
-            info_list = team_raw[0] if isinstance(team_raw, list) else []
+            info_list = team_raw[0] if isinstance(team_raw[0], list) else []
             team_name = ""
+            team_key = ""
             manager_name = ""
+            division_id = ""
             for item in info_list:
-                if isinstance(item, dict):
-                    if "name" in item:
-                        team_name = item["name"]
-                    if "managers" in item:
-                        mgrs = item["managers"]
-                        if isinstance(mgrs, list) and mgrs:
-                            manager_name = mgrs[0].get("manager", {}).get("nickname", "")
-            standing = {}
-            if len(team_raw) > 1:
-                standing = team_raw[1].get("team_standings", {})
-            rank = int(standing.get("rank", 0))
-            record = standing.get("outcome_totals", {})
-            wins = int(record.get("wins", 0))
-            losses = int(record.get("losses", 0))
-            ties = int(record.get("ties", 0))
+                if not isinstance(item, dict):
+                    continue
+                if "name" in item:
+                    team_name = str(item["name"])
+                if "team_key" in item:
+                    team_key = str(item["team_key"])
+                if "division_id" in item:
+                    division_id = str(item["division_id"])
+                if "managers" in item:
+                    mgrs = item["managers"]
+                    if isinstance(mgrs, list) and mgrs and isinstance(mgrs[0], dict):
+                        manager_name = str(mgrs[0].get("manager", {}).get("nickname", ""))
+            standing = _find_section(team_raw[1:], "team_standings")
+            if not isinstance(standing, dict):
+                standing = {}
+            rank = _safe_int(standing.get("rank"))
+            outcome = standing.get("outcome_totals", {}) if isinstance(standing, dict) else {}
+            if not isinstance(outcome, dict):
+                outcome = {}
+            wins = _safe_int(outcome.get("wins"))
+            losses = _safe_int(outcome.get("losses"))
+            ties = _safe_int(outcome.get("ties"))
             current_standings.append({
                 "team_name": team_name,
+                "team_key": team_key,
                 "manager_name": manager_name,
+                "division_id": division_id,
                 "rank": rank,
                 "wins": wins,
                 "losses": losses,
                 "ties": ties,
             })
-        current_standings.sort(key=lambda x: x["rank"])
+        if any(s["rank"] > 0 for s in current_standings):
+            current_standings.sort(key=lambda x: x["rank"] or 999)
 
-        # Find the earliest week of the report month from weekly_standings
-        # We look for the week saved ~4 weeks ago as start-of-month reference
+        # Start-of-month standings — we stored each week's snapshot, so use the
+        # week ~4 weeks before month-end as the baseline for rank/record delta.
         month_start_week = max(report_week_end - 4, 1)
         prev_month_standings = get_weekly_standings(year, month_start_week)
         prev_rank_map = {s["manager_name"]: s["rank"] for s in prev_month_standings}
-        # Also compute W-L changes (monthly record)
-        prev_record_map = {
-            s["manager_name"]: (s.get("wins", 0), s.get("losses", 0), s.get("ties", 0))
-            for s in prev_month_standings
-        }
 
-        # --- 3. Monthly matchup summary (aggregate all weeks in the month) ---
+        # --- 3. Monthly scoreboard (aggregate weekly W-L for teams) ---
         time.sleep(1)
-        team_monthly_record: dict[str, dict] = {}  # manager -> {w, l, t}
+        team_monthly_record: dict[str, dict] = {}
         for wk in range(month_start_week + 1, report_week_end + 1):
             try:
                 sb_path = f"/league/{league_key}/scoreboard;week={wk}"
@@ -1655,20 +1700,20 @@ def _monthly_war_report_job():
                 if len(sb_league) < 2:
                     continue
                 sb = sb_league[1].get("scoreboard", {})
-                matchups_section = None
-                if "0" in sb and "matchups" in sb["0"]:
-                    matchups_section = sb["0"]["matchups"]
-                elif "matchups" in sb:
-                    matchups_section = sb["matchups"]
+                matchups_section = (
+                    sb["0"]["matchups"]
+                    if "0" in sb and "matchups" in sb["0"]
+                    else sb.get("matchups")
+                )
                 if not matchups_section:
                     continue
 
-                m_count = matchups_section.get("count", 0)
+                m_count = _safe_int(matchups_section.get("count", 0))
                 for mi in range(m_count):
                     m_raw = matchups_section.get(str(mi), {}).get("matchup", {})
                     teams_data = m_raw.get("0", {}).get("teams", {})
                     winner_key = m_raw.get("winner_team_key", "")
-                    t_count = teams_data.get("count", 0)
+                    t_count = _safe_int(teams_data.get("count", 0))
 
                     match_info = []
                     for ti in range(t_count):
@@ -1686,20 +1731,12 @@ def _monthly_war_report_job():
                                     mgrs = item["managers"]
                                     if isinstance(mgrs, list) and mgrs:
                                         t_mgr = mgrs[0].get("manager", {}).get("nickname", "")
-                        pts = 0.0
-                        if len(t_raw) > 1:
-                            tp = t_raw[1].get("team_points", {})
-                            try:
-                                pts = float(tp.get("total", 0))
-                            except (ValueError, TypeError):
-                                pass
-                        match_info.append({"key": t_key, "mgr": t_mgr, "pts": pts})
+                        match_info.append({"key": t_key, "mgr": t_mgr})
 
                     if len(match_info) == 2:
                         for mi_t in match_info:
-                            mgr = mi_t["mgr"]
-                            if mgr not in team_monthly_record:
-                                team_monthly_record[mgr] = {"w": 0, "l": 0, "t": 0}
+                            mgr = mi_t["mgr"] or "?"
+                            team_monthly_record.setdefault(mgr, {"w": 0, "l": 0, "t": 0})
                             if mi_t["key"] == winner_key:
                                 team_monthly_record[mgr]["w"] += 1
                             elif winner_key:
@@ -1714,14 +1751,13 @@ def _monthly_war_report_job():
                 else:
                     print(f"[MonthlyReport] Scoreboard error week {wk}: {e}")
 
-        # --- 4. Top 5 hitters and pitchers (month stats) ---
+        # --- 4. Top 5 hitters/pitchers using Yahoo lastmonth sort + full stat walk ---
         time.sleep(1)
         top_batters: list[dict] = []
         top_pitchers: list[dict] = []
 
         for pos_type, result_list in [("B", top_batters), ("P", top_pitchers)]:
             try:
-                # Use season sort_type=lastmonth if available, otherwise season
                 players_path = (
                     f"/league/{league_key}/players"
                     f";sort=PTS;sort_type=lastmonth"
@@ -1729,39 +1765,51 @@ def _monthly_war_report_job():
                 )
                 pdata = yahoo_api_get(players_path)
                 p_league = pdata.get("fantasy_content", {}).get("league", [])
-                if len(p_league) >= 2:
-                    p_section = p_league[1].get("players", {})
-                    for pk_idx in range(p_section.get("count", 0)):
-                        p_entry = p_section.get(str(pk_idx), {}).get("player", [])
-                        if not p_entry or not isinstance(p_entry, list):
-                            continue
-                        p_info = {}
-                        for item in (p_entry[0] if isinstance(p_entry[0], list) else [p_entry[0]]):
-                            if isinstance(item, dict):
-                                if "name" in item:
-                                    p_info["name"] = item["name"].get("full", "")
-                                if "display_position" in item:
-                                    p_info["position"] = item["display_position"]
-                                if "editorial_team_abbr" in item:
-                                    p_info["mlb_team"] = item["editorial_team_abbr"]
-                                if "ownership" in item:
-                                    owner = item["ownership"]
-                                    p_info["owner_team"] = owner.get("owner_team_name", "FA")
-                        pts = 0.0
-                        if len(p_entry) > 1:
-                            player_pts = p_entry[1].get("player_points", {})
-                            try:
-                                pts = float(player_pts.get("total", 0))
-                            except (ValueError, TypeError):
-                                pts = 0.0
-                        p_info["points"] = pts
-                        result_list.append(p_info)
+                if len(p_league) < 2:
+                    continue
+                p_section = p_league[1].get("players", {})
+                for pk_idx in range(_safe_int(p_section.get("count", 0))):
+                    p_entry = p_section.get(str(pk_idx), {}).get("player", [])
+                    if not p_entry or not isinstance(p_entry, list):
+                        continue
+                    p_info: dict = {}
+                    for item in (p_entry[0] if isinstance(p_entry[0], list) else [p_entry[0]]):
+                        if isinstance(item, dict):
+                            if "name" in item:
+                                p_info["name"] = item["name"].get("full", "")
+                            if "display_position" in item:
+                                p_info["position"] = item["display_position"]
+                            if "editorial_team_abbr" in item:
+                                p_info["mlb_team"] = item["editorial_team_abbr"]
+                            if "ownership" in item:
+                                owner = item["ownership"]
+                                p_info["owner_team"] = owner.get("owner_team_name", "FA")
+                    pts = 0.0
+                    if len(p_entry) > 1:
+                        player_pts = p_entry[1].get("player_points", {})
+                        try:
+                            pts = float(player_pts.get("total", 0))
+                        except (ValueError, TypeError):
+                            pts = 0.0
+                    p_info["points"] = pts
+
+                    raw_stats: dict[str, str] = {}
+                    _walk_stats(p_entry, raw_stats)
+                    named_stats: dict[str, str] = {}
+                    for sid, name in _YAHOO_STAT_ID_NAME.items():
+                        if sid in raw_stats:
+                            named_stats[name] = raw_stats[sid]
+                    p_info["stats"] = named_stats
+                    result_list.append(p_info)
                 time.sleep(1)
             except Exception as e:
                 print(f"[MonthlyReport] Error fetching top {pos_type}: {e}")
 
-        # --- 5. Transaction summary from JSON file ---
-        tx_summary: list[str] = []
+        # --- 5. Transaction summary (read local JSON) ---
+        month_trades = 0
+        month_adds = 0
+        month_drops = 0
+        trade_details: list[str] = []
         try:
             data_dir = Path(__file__).resolve().parent.parent.parent / "data"
             tx_file = data_dir / f"yahoo_{year}_transactions.json"
@@ -1769,13 +1817,6 @@ def _monthly_war_report_job():
                 with open(tx_file, "r", encoding="utf-8") as f:
                     tx_data = json.load(f)
                 all_tx = tx_data.get("transactions", [])
-
-                # Filter transactions from the report month
-                month_trades = 0
-                month_adds = 0
-                month_drops = 0
-                notable_trades: list[str] = []
-
                 for tx in all_tx:
                     ts = tx.get("timestamp", "")
                     if not ts:
@@ -1787,101 +1828,312 @@ def _monthly_war_report_job():
                             continue
                     except (ValueError, TypeError):
                         continue
-
                     tx_type = tx.get("type", "")
                     if tx_type == "trade":
                         month_trades += 1
-                        # Collect notable trade details (first 3)
-                        if len(notable_trades) < 3:
-                            players = tx.get("players", [])
-                            names = [p.get("name", "?") for p in players[:4]]
-                            notable_trades.append(", ".join(names))
+                        players = tx.get("players", [])
+                        names = [p.get("name", "?") for p in players[:4]]
+                        if names:
+                            trade_details.append(", ".join(names))
                     elif tx_type in ("add", "add/drop"):
                         month_adds += 1
                         if "drop" in tx_type:
                             month_drops += 1
                     elif tx_type == "drop":
                         month_drops += 1
-
-                if month_trades or month_adds or month_drops:
-                    tx_summary.append(f"交易: {month_trades} 筆 | 撿人: {month_adds} 筆 | 釋出: {month_drops} 筆")
-                    for nt in notable_trades:
-                        tx_summary.append(f"  Trade: {nt}")
         except Exception as e:
             print(f"[MonthlyReport] Transaction summary error: {e}")
 
-        # --- 6. Build LINE message ---
-        lines = [f"[5-Man Keeper League] {year} {month_label}月報", ""]
+        # --- 6. Build LINE message (weekly-style layout) ---
 
-        # Standings with monthly rank change
-        lines.append("-- 排名 --")
-        for s in current_standings:
+        # Column width shared by overall + division lines.
+        max_left_vw = max(
+            (
+                _visual_width(_team_mgr_block(s["team_name"], s["manager_name"]))
+                for s in current_standings
+            ),
+            default=0,
+        )
+
+        def _format_standing_line(
+            s: dict,
+            rank_override: int | None = None,
+            indent: str = "",
+            show_change: bool = True,
+        ) -> str:
             w, l, t = s["wins"], s["losses"], s["ties"]
-            mgr = s["manager_name"]
-            rank = s["rank"]
-            prev_rank = prev_rank_map.get(mgr)
-            if prev_rank is not None and prev_rank != rank:
-                diff = prev_rank - rank
-                change = f" ^{diff}" if diff > 0 else f" v{-diff}"
+            rank = rank_override if rank_override is not None else s["rank"]
+            left = _pad_right_visual(
+                _team_mgr_block(s["team_name"], s["manager_name"]),
+                max_left_vw,
+            )
+            record = f"{w}-{l}-{t}"
+            if show_change:
+                mgr = s["manager_name"] or "?"
+                prev_rank = prev_rank_map.get(mgr)
+                if (
+                    prev_rank is not None
+                    and prev_rank > 0
+                    and s["rank"] > 0
+                    and prev_rank != s["rank"]
+                ):
+                    diff = prev_rank - s["rank"]
+                    change = f"  ^{diff}" if diff > 0 else f"  v{-diff}"
+                else:
+                    change = "  --"
             else:
-                change = " --"
-            lines.append(f"{rank}. {mgr} ({w}-{l}-{t}){change}")
-        lines.append("")
+                change = ""
+            return f"{indent}{rank:>2}. {left}  {record:>7}{change}"
 
-        # Monthly team records
+        # Overall standings.
+        standings_lines = [_format_standing_line(s) for s in current_standings]
+
+        # Division standings.
+        divisions: dict[str, list[dict]] = {}
+        for s in current_standings:
+            div = s.get("division_id", "")
+            if div:
+                divisions.setdefault(div, []).append(s)
+        division_blocks: list[tuple[str, list[str]]] = []
+        for div_id in sorted(divisions.keys()):
+            div_teams = sorted(divisions[div_id], key=lambda x: x["rank"] or 999)
+            team_lines = [
+                _format_standing_line(s, rank_override=idx, indent="  ", show_change=False)
+                for idx, s in enumerate(div_teams, 1)
+            ]
+            division_blocks.append((f"▸ 分區 {div_id}", team_lines))
+
+        # Monthly W-L-T ranking (hot/cold — sorted best to worst for the month).
+        monthly_record_lines: list[str] = []
         if team_monthly_record:
-            lines.append(f"-- {month_label}戰績 --")
             sorted_monthly = sorted(
                 team_monthly_record.items(),
                 key=lambda x: (x[1]["w"], -x[1]["l"]),
                 reverse=True,
             )
-            for mgr, rec in sorted_monthly:
-                lines.append(f"{mgr}: {rec['w']}-{rec['l']}-{rec['t']}")
+            max_mgr_vw = max(
+                (_visual_width(mgr) for mgr, _ in sorted_monthly),
+                default=0,
+            )
+            for idx, (mgr, rec) in enumerate(sorted_monthly, 1):
+                left = _pad_right_visual(mgr or "?", max_mgr_vw)
+                monthly_record_lines.append(
+                    f" {idx:>2}. {left}  {rec['w']}-{rec['l']}-{rec['t']}"
+                )
+
+        # Playoff gate — wins relative to 8th place (top 8 = playoffs).
+        playoff_lines: list[str] = []
+        if len(current_standings) >= 8:
+            eighth = current_standings[7]
+            eighth_wins = eighth["wins"]
+            eighth_mgr = eighth["manager_name"] or "?"
+            max_mgr_vw_po = max(
+                (_visual_width(s["manager_name"] or "?") for s in current_standings),
+                default=0,
+            )
+            for s in current_standings:
+                mgr = s["manager_name"] or "?"
+                left = _pad_right_visual(mgr, max_mgr_vw_po)
+                if s["rank"] == 8:
+                    marker = "—— 第 8 名 ——"
+                    playoff_lines.append(f"  {left}  {marker}")
+                else:
+                    diff = s["wins"] - eighth_wins
+                    if diff > 0:
+                        tag = f"+{diff}W"
+                    elif diff < 0:
+                        tag = f"{diff}W"
+                    else:
+                        tag = "同勝"
+                    playoff_lines.append(f"  {left}  {tag}")
+            playoff_lines.append("")
+            playoff_lines.append(f"  （以第 8 名 {eighth_mgr} 的勝場為基準）")
+
+        # Top batters — 3 lines per player (weekly-style).
+        batter_lines: list[str] = []
+        for idx, b in enumerate(top_batters[:5], 1):
+            name = b.get("name", "?")
+            pos = b.get("position", "")
+            owner = b.get("owner_team", "FA")
+            owner_abbr = _fantasy_team_to_mlb_abbr(owner) or owner
+            st = b.get("stats", {})
+            h = st.get("H", "-")
+            ab = st.get("AB", "-")
+            avg = _fmt_avg(st.get("AVG", "-"))
+            ops = _fmt_avg(st.get("OPS", "-"))
+            hr = st.get("HR", "0")
+            rbi = st.get("RBI", "0")
+            r = st.get("R", "0")
+            sb = st.get("SB", "0")
+            batter_lines.append(f" {idx}. {name} {pos} {owner_abbr}")
+            batter_lines.append(f"    {h}-{ab}  {avg}/{ops}")
+            batter_lines.append(f"    {hr}HR {rbi}RBI {r}R {sb}SB")
+
+        # Top pitchers — 3 lines per player (weekly-style, position-aware).
+        pitcher_lines: list[str] = []
+        for idx, p in enumerate(top_pitchers[:5], 1):
+            name = p.get("name", "?")
+            pos = p.get("position", "")
+            owner = p.get("owner_team", "FA")
+            owner_abbr = _fantasy_team_to_mlb_abbr(owner) or owner
+            st = p.get("stats", {})
+            ip = st.get("IP", "-")
+            w = st.get("W", "0")
+            sv = st.get("SV", "0")
+            hld = st.get("HLD", "0")
+            k = st.get("K", "0")
+            era = _fmt_era(st.get("ERA", "-"))
+            whip = _fmt_era(st.get("WHIP", "-"))
+            qs = st.get("QS", "0")
+            pos_upper = (pos or "").upper()
+            is_sp = "SP" in pos_upper
+            is_rp = "RP" in pos_upper
+            counting_parts = [f"{w}W", f"{k}K"]
+            if is_sp and not is_rp:
+                counting_parts.append(f"{qs}QS")
+            elif is_rp and not is_sp:
+                counting_parts.extend([f"{sv}SV", f"{hld}HLD"])
+            else:
+                counting_parts.extend([f"{qs}QS", f"{sv}SV", f"{hld}HLD"])
+            pitcher_lines.append(f" {idx}. {name} {pos} {owner_abbr}")
+            pitcher_lines.append(f"    {ip} IP  {' '.join(counting_parts)}")
+            pitcher_lines.append(f"    {era} ERA / {whip} WHIP")
+
+        # Transaction summary — totals + full trade list.
+        tx_lines: list[str] = []
+        if month_trades or month_adds or month_drops:
+            tx_lines.append(
+                f"  交易: {month_trades} 筆 | 撿人: {month_adds} 筆 | 釋出: {month_drops} 筆"
+            )
+            if trade_details:
+                tx_lines.append("")
+                tx_lines.append("  交易明細：")
+                for nt in trade_details:
+                    tx_lines.append(f"    • {nt}")
+
+        # Collect content to size the page width.
+        all_content: list[str] = []
+        all_content.extend(standings_lines)
+        for _sh, lines_sub in division_blocks:
+            all_content.extend(lines_sub)
+        all_content.extend(monthly_record_lines)
+        all_content.extend(l for l in playoff_lines if l)
+        all_content.extend(batter_lines)
+        all_content.extend(pitcher_lines)
+        all_content.extend(l for l in tx_lines if l)
+
+        section_headers: list[str] = ["【聯盟總排名】"]
+        if division_blocks:
+            section_headers.append("【分區排名】")
+            section_headers.extend(h for h, _ in division_blocks)
+        if monthly_record_lines:
+            section_headers.append(f"【{month_label}戰績排名】")
+        if playoff_lines:
+            section_headers.append("【季後賽門票】")
+        if batter_lines:
+            section_headers.append(f"【{month_label}最佳打者】")
+        if pitcher_lines:
+            section_headers.append(f"【{month_label}最佳投手】")
+        if tx_lines:
+            section_headers.append(f"【{month_label}交易摘要】")
+
+        page_width = max(
+            (_visual_width(l) for l in (all_content + section_headers) if l and l.strip()),
+            default=28,
+        )
+        page_width = max(page_width, 28)
+        if page_width % 2 == 1:
+            page_width += 1
+
+        divider_line = "━" * (page_width // 2)
+
+        lines: list[str] = [
+            divider_line,
+            _center_line("5-Man Keeper League", page_width),
+            _center_line(f"{year} {month_label}月報", page_width),
+            divider_line,
+            "",
+            _center_line("【聯盟總排名】", page_width),
+        ]
+        lines.extend(standings_lines)
+        lines.append("")
+
+        if division_blocks:
+            lines.append(_center_line("【分區排名】", page_width))
+            for sub_header, team_lines in division_blocks:
+                lines.append(sub_header)
+                lines.extend(team_lines)
             lines.append("")
 
-        # Top batters
-        if top_batters:
-            lines.append(f"-- {month_label}最佳打者 (Yahoo Pts) --")
-            for idx, b in enumerate(top_batters[:5], 1):
-                name = b.get("name", "?")
-                pos = b.get("position", "")
-                pts = b.get("points", 0)
-                owner = b.get("owner_team", "FA")
-                lines.append(f"{idx}. {name} ({pos}) - {pts:.1f} pts [{owner}]")
+        if monthly_record_lines:
+            lines.append(_center_line(f"【{month_label}戰績排名】", page_width))
+            lines.extend(monthly_record_lines)
             lines.append("")
 
-        # Top pitchers
-        if top_pitchers:
-            lines.append(f"-- {month_label}最佳投手 (Yahoo Pts) --")
-            for idx, p in enumerate(top_pitchers[:5], 1):
-                name = p.get("name", "?")
-                pos = p.get("position", "")
-                pts = p.get("points", 0)
-                owner = p.get("owner_team", "FA")
-                lines.append(f"{idx}. {name} ({pos}) - {pts:.1f} pts [{owner}]")
+        if playoff_lines:
+            lines.append(_center_line("【季後賽門票】", page_width))
+            lines.extend(playoff_lines)
             lines.append("")
 
-        # Transaction summary
-        if tx_summary:
-            lines.append(f"-- {month_label}交易摘要 --")
-            lines.extend(tx_summary)
+        if batter_lines:
+            lines.append(_center_line(f"【{month_label}最佳打者】", page_width))
+            lines.extend(batter_lines)
             lines.append("")
 
-        lines.append("* Yahoo Fantasy Points (僅供參考)")
+        if pitcher_lines:
+            lines.append(_center_line(f"【{month_label}最佳投手】", page_width))
+            lines.extend(pitcher_lines)
+            lines.append("")
+
+        if tx_lines:
+            lines.append(_center_line(f"【{month_label}交易摘要】", page_width))
+            lines.extend(tx_lines)
+            lines.append("")
+
+        lines.append(divider_line)
+        lines.append("最佳球員排名依據：Yahoo Fantasy Points")
+
+        # AI commentary (monthly variant).
+        try:
+            from src.notification.ai_summary import generate_monthly_ai_summary
+            ai_text = generate_monthly_ai_summary(
+                month_label,
+                current_standings,
+                prev_month_standings,
+                team_monthly_record,
+            )
+            if ai_text:
+                lines.append("")
+                lines.append(_center_line("【AI 短評】", page_width))
+                lines.append(ai_text)
+        except Exception as e:
+            print(f"[MonthlyReport] AI summary failed (non-fatal): {e}")
 
         message = "\n".join(lines)
 
-        success, error = send_line_group_message(message)
-        if success:
-            print(f"[MonthlyReport] {month_label} report sent to LINE.")
+        if dry_run:
+            print(f"[MonthlyReport] Dry-run: returning {month_label} report text.")
+            return {"success": True, "message": "Dry-run (no LINE push)", "report": message}
+
+        if target_id:
+            success, error = send_line_push_message(target_id, message)
+            dest = f"target {target_id[:6]}..."
         else:
-            print(f"[MonthlyReport] LINE send failed: {error}")
+            success, error = send_line_group_message(message)
+            dest = "LINE group"
+
+        if success:
+            print(f"[MonthlyReport] {month_label} report sent to {dest}.")
+            return {"success": True, "message": f"Sent to {dest}", "report": message}
+        print(f"[MonthlyReport] LINE send failed: {error}")
+        return {"success": False, "message": f"LINE send failed: {error}", "report": message}
 
     except YahooTokenError as e:
         print(f"[MonthlyReport] Token error: {e}")
+        return {"success": False, "message": f"Token error: {e}", "report": ""}
     except Exception as e:
         print(f"[MonthlyReport] Error: {e}")
+        return {"success": False, "message": f"Error: {e}", "report": ""}
 
 
 def _prospect_ranking_update_job():

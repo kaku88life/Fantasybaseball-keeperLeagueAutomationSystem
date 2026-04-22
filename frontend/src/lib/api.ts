@@ -485,6 +485,23 @@ export async function triggerWarReport(
   );
 }
 
+export async function triggerMonthlyReport(
+  opts?: { targetId?: string; dryRun?: boolean },
+): Promise<{
+  success: boolean;
+  message: string;
+  report?: string;
+}> {
+  const body: Record<string, unknown> = {};
+  if (opts?.targetId && opts.targetId.trim()) body.target_id = opts.targetId.trim();
+  if (opts?.dryRun) body.dry_run = true;
+  return request(
+    `/api/commissioner/line/trigger-monthly-report`,
+    { method: "POST", body: JSON.stringify(body) },
+    120_000,
+  );
+}
+
 export async function triggerInjuryDigest(): Promise<{
   success: boolean;
   message: string;

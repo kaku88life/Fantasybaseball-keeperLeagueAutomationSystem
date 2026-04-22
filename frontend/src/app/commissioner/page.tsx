@@ -19,6 +19,7 @@ import {
   testLinePush,
   testLineReminder,
   triggerWarReport,
+  triggerMonthlyReport,
   triggerInjuryDigest,
   refreshTransactions,
   verifyCommissionerPassword,
@@ -204,6 +205,8 @@ export default function CommissionerDashboard() {
   // Manual scheduler trigger state (war report / injury digest)
   const [warReportLoading, setWarReportLoading] = useState(false);
   const [warReportResult, setWarReportResult] = useState<{ success: boolean; message: string; report?: string } | null>(null);
+  const [monthlyReportLoading, setMonthlyReportLoading] = useState(false);
+  const [monthlyReportResult, setMonthlyReportResult] = useState<{ success: boolean; message: string; report?: string } | null>(null);
   const [injuryDigestLoading, setInjuryDigestLoading] = useState(false);
   const [injuryDigestResult, setInjuryDigestResult] = useState<{ success: boolean; message: string } | null>(null);
   const [txRefreshLoading, setTxRefreshLoading] = useState(false);
@@ -416,6 +419,38 @@ export default function CommissionerDashboard() {
       });
     } finally {
       setWarReportLoading(false);
+    }
+  };
+
+  const handleTriggerMonthlyReport = async (mode: "group" | "target" | "dry_run") => {
+    const targetId = linePushTargetId.trim();
+    if (mode === "target" && !targetId) {
+      alert("請先填入上方的 Target ID 才能推送到個人/特定目標。");
+      return;
+    }
+    const prompts: Record<typeof mode, string> = {
+      group: "確認觸發月戰報並推送到 LINE 群組？",
+      target: `確認觸發月戰報並推送到 Target ${targetId.slice(0, 6)}...？`,
+      dry_run: "確認產生月戰報但不推送（回傳訊息文字）？",
+    };
+    if (!confirm(prompts[mode])) return;
+    setMonthlyReportLoading(true);
+    setMonthlyReportResult(null);
+    try {
+      const opts = mode === "target"
+        ? { targetId }
+        : mode === "dry_run"
+          ? { dryRun: true }
+          : undefined;
+      const result = await triggerMonthlyReport(opts);
+      setMonthlyReportResult(result);
+    } catch (e) {
+      setMonthlyReportResult({
+        success: false,
+        message: e instanceof Error ? e.message : "Trigger failed",
+      });
+    } finally {
+      setMonthlyReportLoading(false);
     }
   };
 
@@ -1015,6 +1050,27 @@ export default function CommissionerDashboard() {
                     戰報→Dry-run (只看文字)
                   </button>
                   <button
+                    onClick={() => handleTriggerMonthlyReport("group")}
+                    disabled={monthlyReportLoading}
+                    className="rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-50"
+                  >
+                    {monthlyReportLoading ? "執行中..." : "月報→群組 Monthly→Group"}
+                  </button>
+                  <button
+                    onClick={() => handleTriggerMonthlyReport("target")}
+                    disabled={monthlyReportLoading}
+                    className="rounded bg-indigo-500 px-3 py-1 text-sm font-medium text-white hover:bg-indigo-400 disabled:opacity-50"
+                  >
+                    月報→Target Monthly→Target
+                  </button>
+                  <button
+                    onClick={() => handleTriggerMonthlyReport("dry_run")}
+                    disabled={monthlyReportLoading}
+                    className="rounded bg-slate-500 px-3 py-1 text-sm font-medium text-white hover:bg-slate-400 disabled:opacity-50"
+                  >
+                    月報→Dry-run (只看文字)
+                  </button>
+                  <button
                     onClick={handleTriggerInjuryDigest}
                     disabled={injuryDigestLoading}
                     className="rounded bg-amber-600 px-3 py-1 text-sm font-medium text-white hover:bg-amber-500 disabled:opacity-50"
@@ -1039,6 +1095,20 @@ export default function CommissionerDashboard() {
                     {warReportResult.report && (
                       <pre className="mt-2 max-h-96 overflow-auto whitespace-pre-wrap rounded bg-white p-2 font-mono text-[11px] text-gray-700">
                         {warReportResult.report}
+                      </pre>
+                    )}
+                  </div>
+                )}
+                {monthlyReportResult && (
+                  <div className={`mt-2 rounded border p-2 text-xs ${
+                    monthlyReportResult.success ? "border-green-200 bg-green-100" : "border-red-200 bg-red-100"
+                  }`}>
+                    <p className={monthlyReportResult.success ? "text-green-700" : "text-red-700"}>
+                      月戰報：{monthlyReportResult.message}
+                    </p>
+                    {monthlyReportResult.report && (
+                      <pre className="mt-2 max-h-96 overflow-auto whitespace-pre-wrap rounded bg-white p-2 font-mono text-[11px] text-gray-700">
+                        {monthlyReportResult.report}
                       </pre>
                     )}
                   </div>

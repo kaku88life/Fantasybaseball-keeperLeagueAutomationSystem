@@ -617,6 +617,42 @@ async def trigger_war_report_endpoint(
     }
 
 
+@router.post("/line/trigger-monthly-report")
+async def trigger_monthly_report_endpoint(
+    background_tasks: BackgroundTasks,
+    payload: TriggerWarReportRequest | None = None,
+    user: dict = Depends(get_current_commissioner),
+):
+    """Manually fire the monthly war report job.
+
+    Mirrors trigger-war-report: dry_run=true is synchronous (returns rendered
+    text); target/group modes dispatch to BackgroundTasks.
+    """
+    from src.notification.scheduler import _monthly_war_report_job
+
+    target_id = (payload.target_id if payload else None) or ""
+    dry_run = bool(payload.dry_run if payload else False)
+
+    if dry_run:
+        try:
+            return _monthly_war_report_job(target_id=target_id, dry_run=True)
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Monthly report failed: {e}")
+
+    def _run_bg(tid: str) -> None:
+        try:
+            _monthly_war_report_job(target_id=tid, dry_run=False)
+        except Exception as e:
+            print(f"[CommissionerAPI] Background monthly report failed: {e}")
+
+    background_tasks.add_task(_run_bg, target_id)
+    return {
+        "status": "scheduled",
+        "mode": "target" if target_id else "group",
+        "message": "Monthly report dispatched in background. Check LINE in 30-90s.",
+    }
+
+
 @router.post("/line/trigger-injury-digest")
 async def trigger_injury_digest_endpoint(
     background_tasks: BackgroundTasks,
