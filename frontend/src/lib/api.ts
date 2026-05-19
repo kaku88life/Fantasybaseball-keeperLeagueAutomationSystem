@@ -467,16 +467,21 @@ export async function testLineReminder(
   });
 }
 
-export async function triggerWarReport(
-  opts?: { targetId?: string; dryRun?: boolean },
-): Promise<{
+type ManualReportResponse = {
   success: boolean;
   message: string;
+  status?: "completed" | "scheduled";
+  mode?: "group" | "target" | "dry_run";
   report?: string;
-}> {
+};
+
+export async function triggerWarReport(
+  opts?: { targetId?: string; dryRun?: boolean; asyncMode?: boolean },
+): Promise<ManualReportResponse> {
   const body: Record<string, unknown> = {};
   if (opts?.targetId && opts.targetId.trim()) body.target_id = opts.targetId.trim();
   if (opts?.dryRun) body.dry_run = true;
+  if (opts?.asyncMode) body.async_mode = true;
   // War report does 5+ Yahoo API calls + OpenAI summary; can take 30-60s
   return request(
     `/api/commissioner/line/trigger-war-report`,
@@ -486,15 +491,12 @@ export async function triggerWarReport(
 }
 
 export async function triggerMonthlyReport(
-  opts?: { targetId?: string; dryRun?: boolean },
-): Promise<{
-  success: boolean;
-  message: string;
-  report?: string;
-}> {
+  opts?: { targetId?: string; dryRun?: boolean; asyncMode?: boolean },
+): Promise<ManualReportResponse> {
   const body: Record<string, unknown> = {};
   if (opts?.targetId && opts.targetId.trim()) body.target_id = opts.targetId.trim();
   if (opts?.dryRun) body.dry_run = true;
+  if (opts?.asyncMode) body.async_mode = true;
   return request(
     `/api/commissioner/line/trigger-monthly-report`,
     { method: "POST", body: JSON.stringify(body) },

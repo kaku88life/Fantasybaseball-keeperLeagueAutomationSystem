@@ -25,30 +25,19 @@ def _load_r_contract_players(year: int) -> list[dict]:
     """Load R-contract players from the contracts JSON file.
 
     Returns list of dicts with: name, player_key, position, mlb_team,
-    owner_manager, owner_team_id.
+    owner_manager, owner_team_name, owner_team_id.
     """
-    # Try to load from DB first (player has R contract for this year)
+    manager_to_team: dict[str, dict] = {}
     try:
-        from api.database import get_db
-        conn = get_db()
-        try:
-            with conn.cursor() as cur:
-                cur.execute(
-                    """SELECT ks.player_name, t.manager_name, t.id as team_id
-                       FROM keeper_selections ks
-                       JOIN teams t ON ks.team_id = t.id
-                       WHERE ks.year = %s AND ks.action = 'keep'
-                       AND ks.player_name IN (
-                           SELECT player_name FROM keeper_selections
-                           WHERE year = %s
-                       )""",
-                    (year, year),
-                )
-                # This is a fallback; primary source is the JSON
-        finally:
-            conn.close()
-    except Exception:
-        pass
+        from api.database import get_all_teams
+
+        manager_to_team = {
+            team.get("manager_name", ""): team
+            for team in get_all_teams()
+            if team.get("manager_name")
+        }
+    except Exception as e:
+        print(f"[RookieMonitor] Could not load fantasy team names: {e}")
 
     # Primary: load from contracts JSON (nested structure: teams -> manager -> players)
     contracts_path = DATA_DIR / f"{year}_contracts_v2.json"
@@ -62,6 +51,7 @@ def _load_r_contract_players(year: int) -> list[dict]:
     r_players = []
     teams_data = contracts.get("teams", {})
     for manager_name, team_data in teams_data.items():
+        team_row = manager_to_team.get(manager_name, {})
         for player in team_data.get("players", []):
             ct = player.get("contract_2026_type", player.get("contract_type", ""))
             if ct == "R":
@@ -71,10 +61,25 @@ def _load_r_contract_players(year: int) -> list[dict]:
                     "position": player.get("position", ""),
                     "mlb_team": player.get("mlb_team", ""),
                     "owner_manager": manager_name,
-                    "owner_team_id": 0,
+                    "owner_team_name": (
+                        team_row.get("team_name") or team_data.get("team_name", "")
+                    ),
+                    "owner_team_id": team_row.get("id") or 0,
                 })
 
     return r_players
+
+
+def _format_owner_label(player: dict) -> str:
+    manager = (player.get("owner_manager") or "").strip()
+    team_name = (player.get("owner_team_name") or "").strip()
+    if team_name and manager and team_name != manager:
+        return f"{team_name}（{manager}）"
+    return team_name or manager or "FA"
+
+
+def _format_player_meta(position: str, mlb_team: str = "") -> str:
+    return "/".join(part for part in (position, mlb_team) if part)
 
 
 def _search_mlb_id(name: str) -> int | None:
@@ -236,11 +241,13 @@ def send_callup_notifications(year: int) -> dict:
     for cu in new_callups:
         di = cu["debut_info"]
         debut_str = f" (debut: {di['debut_date']})" if di.get("is_debut_this_year") else ""
+        player_meta = _format_player_meta(cu.get("position", ""))
+        player_label = f"{cu['name']} ({player_meta})" if player_meta else cu["name"]
         lines.append(
-            f"  {cu['name']} ({cu['position']}) - {cu['owner_manager']} 隊"
+            f"  {player_label} - {_format_owner_label(cu)}"
         )
         lines.append(
-            f"  -> {di.get('current_team', cu['mlb_team'])}{debut_str}"
+            f"  MLB: {di.get('current_team', cu['mlb_team'])}{debut_str}"
         )
         lines.append("")
 

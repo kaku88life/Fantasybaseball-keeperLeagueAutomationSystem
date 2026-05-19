@@ -657,6 +657,64 @@ def upsert_team(manager_name: str, team_name: str = "", yahoo_team_id: str = "")
         return get_team_by_manager(manager_name)
 
 
+def sync_team_names_from_rosters(rosters: dict) -> dict:
+    """Backfill teams.team_name/yahoo_team_id from a Yahoo roster payload.
+
+    Expected shape: {team_key: {manager, team_name, players}}. Empty team names
+    are skipped so they cannot overwrite an existing fantasy team name.
+    """
+    result: dict = {"upserted": 0, "skipped": []}
+    if not isinstance(rosters, dict):
+        result["skipped"].append({"key": "", "reason": "rosters is not a dict"})
+        return result
+
+    rows: list[tuple[str, str, str]] = []
+    for roster_key, team_data in rosters.items():
+        if not isinstance(team_data, dict):
+            result["skipped"].append({
+                "key": str(roster_key),
+                "reason": "team payload is not a dict",
+            })
+            continue
+
+        manager_name = str(team_data.get("manager") or "").strip()
+        team_name = str(team_data.get("team_name") or "").strip()
+        yahoo_team_id = str(team_data.get("team_key") or roster_key or "").strip()
+
+        if not manager_name:
+            result["skipped"].append({
+                "key": yahoo_team_id,
+                "reason": "missing manager",
+            })
+            continue
+        if not team_name:
+            result["skipped"].append({
+                "key": yahoo_team_id,
+                "manager": manager_name,
+                "reason": "missing team_name",
+            })
+            continue
+
+        rows.append((manager_name, team_name, yahoo_team_id))
+
+    if not rows:
+        return result
+
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            for manager_name, team_name, yahoo_team_id in rows:
+                cur.execute(
+                    """INSERT INTO teams (manager_name, team_name, yahoo_team_id)
+                       VALUES (%s, %s, %s)
+                       ON CONFLICT(manager_name) DO UPDATE SET
+                           team_name = COALESCE(NULLIF(EXCLUDED.team_name, ''), teams.team_name),
+                           yahoo_team_id = COALESCE(NULLIF(EXCLUDED.yahoo_team_id, ''), teams.yahoo_team_id)""",
+                    (manager_name, team_name, yahoo_team_id),
+                )
+    result["upserted"] = len(rows)
+    return result
+
+
 def update_team_adjustments(team_id: int, trade_compensation: int, faab_adjustment: int):
     with get_conn() as conn:
         with conn.cursor() as cur:
@@ -1251,13 +1309,17 @@ def get_player_statuses(year: int) -> dict[str, dict]:
     """Get current player statuses for a year (for injury change detection).
 
     Returns:
-        dict mapping player_key -> {player_name, status, owner_manager, position, mlb_team}
+        dict mapping player_key -> status metadata, including fantasy owner team.
     """
     with get_conn() as conn:
         rows = _fetchall(
             conn,
-            """SELECT player_key, player_name, status, owner_manager, position, mlb_team
-               FROM player_rankings WHERE year = %s""",
+            """SELECT pr.player_key, pr.player_name, pr.status, pr.owner_manager,
+                      t.team_name AS owner_team_name, t.id AS owner_team_id,
+                      pr.position, pr.mlb_team
+               FROM player_rankings pr
+               LEFT JOIN teams t ON t.manager_name = pr.owner_manager
+               WHERE pr.year = %s""",
             (year,),
         )
         return {
@@ -1265,6 +1327,8 @@ def get_player_statuses(year: int) -> dict[str, dict]:
                 "player_name": row["player_name"],
                 "status": row["status"] or "",
                 "owner_manager": row["owner_manager"] or "",
+                "owner_team_name": row["owner_team_name"] or "",
+                "owner_team_id": row["owner_team_id"] or 0,
                 "position": row["position"] or "",
                 "mlb_team": row["mlb_team"] or "",
             }

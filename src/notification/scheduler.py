@@ -178,6 +178,19 @@ def _team_mgr_block(team_name: str, manager_name: str) -> str:
     return f"{abbr}  ({mgr})"
 
 
+def _format_owner_label(info: dict[str, Any]) -> str:
+    """Prefer the Yahoo fantasy team name, with manager as a disambiguator."""
+    manager = (info.get("owner_manager") or "").strip()
+    team_name = (info.get("owner_team_name") or "").strip()
+    if team_name and manager and team_name != manager:
+        return f"{team_name}（{manager}）"
+    return team_name or manager or "FA"
+
+
+def _format_player_meta(position: str, mlb_team: str) -> str:
+    return "/".join(part for part in (position, mlb_team) if part)
+
+
 def _walk_stats(obj, out: dict) -> None:
     """Recursively scan a Yahoo player payload for stat_id/value pairs.
     Yahoo wraps stats in varying depths depending on subresource ordering;
@@ -516,8 +529,14 @@ def _send_injury_change_notification(
 
         name = new_info["player_name"]
         pos = new_info.get("position", "")
-        team = new_info.get("mlb_team", "")
-        label = f"  {name} ({pos}/{team}) - {owner}" if pos else f"  {name} - {owner}"
+        mlb_team = new_info.get("mlb_team", "")
+        player_meta = _format_player_meta(pos, mlb_team)
+        owner_label = _format_owner_label(new_info)
+        label = (
+            f"  {name} ({player_meta}) - {owner_label}"
+            if player_meta
+            else f"  {name} - {owner_label}"
+        )
 
         if (not old_status or old_status not in injury_statuses) and new_status in injury_statuses:
             new_injuries.append(f"{label} -> {new_status}")
@@ -864,9 +883,23 @@ def sync_rosters_and_rebuild(year: int) -> dict:
         )
 
         # Also save to DB (persists across deployments)
-        from api.database import save_synced_roster, sync_roster_ownership
+        from api.database import (
+            save_synced_roster,
+            sync_roster_ownership,
+            sync_team_names_from_rosters,
+        )
         save_synced_roster(year, all_rosters)
         print(f"[SnapshotRebuild] Saved synced roster to DB (year={year})")
+
+        try:
+            team_name_result = sync_team_names_from_rosters(all_rosters)
+            print(
+                "[SnapshotRebuild] Synced team names: "
+                f"{team_name_result['upserted']} upserted, "
+                f"{len(team_name_result['skipped'])} skipped"
+            )
+        except Exception as e:
+            print(f"[SnapshotRebuild] Team name sync failed (non-fatal): {e}")
 
         # Sync owner_manager on player_rankings in the same pass — no extra
         # Yahoo API calls needed since we already parsed every roster.
@@ -2298,9 +2331,15 @@ def _prospect_ranking_update_job():
                 rank_str = f"#{pi['rank']}" if pi.get("rank") else ""
                 age_str = f", {pi['age']}歲" if pi.get("age") else ""
                 debut_str = f" (已升大聯盟 {pi['debut']})" if pi.get("debut") else ""
+                player_meta = _format_player_meta(
+                    pi.get("position", m["position"]),
+                    pi.get("team", m["mlb_team"]),
+                )
+                player_label = (
+                    f"{m['name']} ({player_meta})" if player_meta else m["name"]
+                )
                 lines.append(
-                    f"  {m['name']} ({pi.get('position', m['position'])}/{pi.get('team', m['mlb_team'])})"
-                    f" - {m['owner_manager']} 隊"
+                    f"  {player_label} - {_format_owner_label(m)}"
                 )
                 if rank_str or age_str or debut_str:
                     lines.append(f"    {rank_str}{age_str}{debut_str}")
@@ -2309,8 +2348,12 @@ def _prospect_ranking_update_job():
         if unmatched:
             lines.append("-- 未在 MLB API 中找到 --")
             for u in unmatched:
+                player_meta = _format_player_meta(u["position"], u["mlb_team"])
+                player_label = (
+                    f"{u['name']} ({player_meta})" if player_meta else u["name"]
+                )
                 lines.append(
-                    f"  {u['name']} ({u['position']}/{u['mlb_team']}) - {u['owner_manager']} 隊"
+                    f"  {player_label} - {_format_owner_label(u)}"
                 )
             lines.append("")
 

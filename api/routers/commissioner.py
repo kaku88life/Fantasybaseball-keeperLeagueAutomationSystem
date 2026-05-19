@@ -577,6 +577,7 @@ async def test_line_reminder_endpoint(
 class TriggerWarReportRequest(BaseModel):
     target_id: Optional[str] = None   # None => scheduled behavior (LINE group)
     dry_run: bool = False              # True => skip LINE, return text only
+    async_mode: bool = False            # True => dispatch in BackgroundTasks
 
 
 @router.post("/line/trigger-war-report")
@@ -588,20 +589,27 @@ async def trigger_war_report_endpoint(
     """Manually fire the weekly war report job.
 
     dry_run=true is kept synchronous so the caller can inspect the rendered
-    text. target/group push modes are dispatched to BackgroundTasks so the
-    HTTP request returns immediately (avoids client timeouts when Yahoo API
-    takes 30-60s under cold start).
+    text. target/group push modes run synchronously by default so the
+    Commissioner UI can show the actual LINE push result. async_mode=true can
+    still dispatch to BackgroundTasks when immediate return is preferred.
     """
     from src.notification.scheduler import _weekly_war_report_job
 
     target_id = (payload.target_id if payload else None) or ""
     dry_run = bool(payload.dry_run if payload else False)
+    async_mode = bool(payload.async_mode if payload else False)
+    mode = "target" if target_id else "group"
 
     if dry_run:
         try:
-            return _weekly_war_report_job(target_id=target_id, dry_run=True)
+            result = _weekly_war_report_job(target_id=target_id, dry_run=True)
+            return {**result, "status": "completed", "mode": "dry_run"}
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"War report failed: {e}")
+
+    if not async_mode:
+        result = _weekly_war_report_job(target_id=target_id, dry_run=False)
+        return {**result, "status": "completed", "mode": mode}
 
     def _run_bg(tid: str) -> None:
         try:
@@ -611,8 +619,9 @@ async def trigger_war_report_endpoint(
 
     background_tasks.add_task(_run_bg, target_id)
     return {
+        "success": True,
         "status": "scheduled",
-        "mode": "target" if target_id else "group",
+        "mode": mode,
         "message": "War report dispatched in background. Check LINE in 30-90s.",
     }
 
@@ -626,18 +635,26 @@ async def trigger_monthly_report_endpoint(
     """Manually fire the monthly war report job.
 
     Mirrors trigger-war-report: dry_run=true is synchronous (returns rendered
-    text); target/group modes dispatch to BackgroundTasks.
+    text); target/group modes run synchronously by default and can opt into
+    BackgroundTasks with async_mode=true.
     """
     from src.notification.scheduler import _monthly_war_report_job
 
     target_id = (payload.target_id if payload else None) or ""
     dry_run = bool(payload.dry_run if payload else False)
+    async_mode = bool(payload.async_mode if payload else False)
+    mode = "target" if target_id else "group"
 
     if dry_run:
         try:
-            return _monthly_war_report_job(target_id=target_id, dry_run=True)
+            result = _monthly_war_report_job(target_id=target_id, dry_run=True)
+            return {**result, "status": "completed", "mode": "dry_run"}
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Monthly report failed: {e}")
+
+    if not async_mode:
+        result = _monthly_war_report_job(target_id=target_id, dry_run=False)
+        return {**result, "status": "completed", "mode": mode}
 
     def _run_bg(tid: str) -> None:
         try:
@@ -647,8 +664,9 @@ async def trigger_monthly_report_endpoint(
 
     background_tasks.add_task(_run_bg, target_id)
     return {
+        "success": True,
         "status": "scheduled",
-        "mode": "target" if target_id else "group",
+        "mode": mode,
         "message": "Monthly report dispatched in background. Check LINE in 30-90s.",
     }
 
