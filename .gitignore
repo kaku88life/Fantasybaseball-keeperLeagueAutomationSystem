@@ -30,11 +30,13 @@ nul
 
 # Reports output
 reports/
+data/rookie_eligibility_audit*.json
 
 # Node / Next.js
 frontend/node_modules/
 frontend/.next/
 frontend/out/
+frontend/tsconfig.tsbuildinfo
 
 # Database
 *.db
