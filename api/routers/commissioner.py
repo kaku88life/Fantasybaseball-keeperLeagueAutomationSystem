@@ -676,12 +676,11 @@ async def trigger_injury_digest_endpoint(
     background_tasks: BackgroundTasks,
     user: dict = Depends(get_current_commissioner),
 ):
-    """Manually fire the daily player status + injury digest job.
+    """Manually fire the daily player status job.
 
     Runs in the background because the full roster scan across 16 teams
-    easily exceeds the client timeout. Respects INJURY_BATCH_DAYS cooldown,
-    so it may just update DB without sending LINE. Check Zeabur logs /
-    LINE group for results.
+    easily exceeds the client timeout. LINE injury digest is sent only when
+    INJURY_LINE_ENABLED is enabled in the backend environment.
     """
     from src.notification.scheduler import _daily_player_status_job
 
@@ -695,7 +694,7 @@ async def trigger_injury_digest_endpoint(
     return {
         "success": True,
         "status": "scheduled",
-        "message": "Injury digest dispatched in background. Check LINE / Zeabur logs in 30-90s.",
+        "message": "Injury status update dispatched in background. Check Zeabur logs in 30-90s.",
     }
 
 

@@ -2,14 +2,14 @@
 APScheduler-based background scheduler.
 
 Jobs:
-1. Keeper reminder: LINE group reminders every N days during keeper period.
-2. Rookie call-up monitor: daily check for R-contract player MLB debuts.
+1. Keeper reminder: optional LINE group reminders every N days during keeper period.
+2. Rookie call-up monitor: optional daily check for R-contract player MLB debuts.
 3. Daily AR-Rank + season stats refresh: single-pass at 18:00 during MLB season.
-4. Daily player status update: IL/DTD/NA/O status during MLB season.
+4. Daily player status update: IL/DTD/NA/O status during MLB season; LINE digest optional.
 5. Daily transaction fetch: Yahoo transactions during MLB season.
 6. Daily roster + snapshot rebuild (with owner_manager sync): 00:30 Taiwan time.
 7. Weekly war report: Monday 21:00 during MLB season.
-8. Monthly war report: 1st of each month 20:45 during MLB season.
+8. Monthly war report + rookie watch: 1st of each month 20:45 during MLB season.
 
 Yearly auto-mode: set REMINDER_MONTH / REMINDER_START_DAY / REMINDER_END_DAY
 to define a fixed annual window (e.g. March 1-15 every year).
@@ -19,6 +19,11 @@ from __future__ import annotations
 import os
 from datetime import datetime
 from typing import Any
+
+
+def _env_flag(name: str, default: str = "false") -> bool:
+    return os.getenv(name, default).strip().lower() in {"1", "true", "yes", "on"}
+
 
 # --- New: fixed annual window (preferred) ---
 REMINDER_MONTH = int(os.getenv("REMINDER_MONTH", "3"))          # default March
@@ -32,12 +37,21 @@ KEEPER_REMINDER_END = os.getenv("KEEPER_REMINDER_END", "")
 REMINDER_CRON_HOUR = int(os.getenv("REMINDER_CRON_HOUR", "12"))
 REMINDER_CRON_TZ = os.getenv("REMINDER_CRON_TZ", "Asia/Taipei")
 REMINDER_INTERVAL_DAYS = int(os.getenv("REMINDER_INTERVAL_DAYS", "3"))
+KEEPER_REMINDER_ENABLED = _env_flag("KEEPER_REMINDER_ENABLED", "false")
 
 # --- Rookie call-up monitoring ---
-# Active during MLB season (April-September by default)
-ROOKIE_MONITOR_ENABLED = os.getenv("ROOKIE_MONITOR_ENABLED", "true").lower() == "true"
+# Immediate call-up LINE pushes are off by default; monthly rookie watch covers
+# the group-facing summary without burning quota on each small event.
+ROOKIE_MONITOR_ENABLED = _env_flag("ROOKIE_MONITOR_ENABLED", "false")
 ROOKIE_MONITOR_START_MONTH = int(os.getenv("ROOKIE_MONITOR_START_MONTH", "3"))
 ROOKIE_MONITOR_END_MONTH = int(os.getenv("ROOKIE_MONITOR_END_MONTH", "9"))
+ROOKIE_WATCH_R_LIMIT = int(os.getenv("ROOKIE_WATCH_R_LIMIT", "3"))
+ROOKIE_WATCH_FA_LIMIT = int(os.getenv("ROOKIE_WATCH_FA_LIMIT", "5"))
+ROOKIE_WATCH_STATS_ENABLED = _env_flag("ROOKIE_WATCH_STATS_ENABLED", "true")
+ROOKIE_WATCH_STATS_LIMIT = int(os.getenv("ROOKIE_WATCH_STATS_LIMIT", "8"))
+ROOKIE_WATCH_STATS_TIMEOUT_SECONDS = float(
+    os.getenv("ROOKIE_WATCH_STATS_TIMEOUT_SECONDS", "25")
+)
 
 # --- Daily roster sync ---
 DAILY_SYNC_HOUR = int(os.getenv("DAILY_SYNC_HOUR", "0"))           # midnight Taiwan time
@@ -45,8 +59,13 @@ DAILY_SYNC_HOUR = int(os.getenv("DAILY_SYNC_HOUR", "0"))           # midnight Ta
 # --- Injury notification batching ---
 # Batch every N days so we don't spam LINE daily with tiny status changes.
 INJURY_BATCH_DAYS = int(os.getenv("INJURY_BATCH_DAYS", "3"))
+INJURY_LINE_ENABLED = _env_flag("INJURY_LINE_ENABLED", "false")
+PROSPECT_UPDATE_LINE_ENABLED = _env_flag("PROSPECT_UPDATE_LINE_ENABLED", "false")
 
 _scheduler = None
+MLB_STATS_API_BASE = "https://statsapi.mlb.com/api/v1"
+_MLB_PERSON_CACHE: dict[str, dict | None] = {}
+_ROOKIE_MONTH_STATS_CACHE: dict[tuple[str, str, int, int], str] = {}
 
 
 # --- MLB team abbreviation mapping for war report matchup display ---
@@ -189,6 +208,468 @@ def _format_owner_label(info: dict[str, Any]) -> str:
 
 def _format_player_meta(position: str, mlb_team: str) -> str:
     return "/".join(part for part in (position, mlb_team) if part)
+
+
+def _normalize_player_name(name: str) -> str:
+    """Normalize names for cross-source matching."""
+    import unicodedata
+
+    cleaned = (name or "").split("(")[0].strip()
+    cleaned = unicodedata.normalize("NFKD", cleaned)
+    cleaned = cleaned.encode("ascii", "ignore").decode("ascii")
+    cleaned = cleaned.lower().strip()
+    for suffix in (" jr.", " jr", " sr.", " sr", " iii", " ii", " iv"):
+        if cleaned.endswith(suffix):
+            cleaned = cleaned[: -len(suffix)].strip()
+    return cleaned.replace(".", "").replace("-", " ")
+
+
+def _format_stats_unavailable(label: str) -> list[str]:
+    return [f"  Yahoo 暫未回傳{label}資料；請稍後再試。"]
+
+
+def _load_top_prospects(data_dir) -> tuple[list[dict], dict[str, Any]]:
+    """Load the checked-in top prospect candidate list."""
+    import json
+
+    path = data_dir / "top_100_prospects.json"
+    debug: dict[str, Any] = {"path": str(path), "count": 0, "source": ""}
+    if not path.exists():
+        debug["error"] = "top_100_prospects.json not found"
+        return [], debug
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        prospects = data.get("prospects", [])
+        debug.update({
+            "count": len(prospects),
+            "source": data.get("source", ""),
+            "updated_at": data.get("updated_at", ""),
+        })
+        return prospects, debug
+    except Exception as e:
+        debug["error"] = str(e)
+        return [], debug
+
+
+def _build_current_owner_lookup(year: int) -> tuple[dict[str, dict], dict[str, Any]]:
+    """Build player-name ownership from DB synced Yahoo rosters, with snapshot fallback."""
+    debug: dict[str, Any] = {
+        "synced_roster_players": 0,
+        "snapshot_players": 0,
+        "source": [],
+    }
+    owner_by_name: dict[str, dict] = {}
+
+    try:
+        from api.database import get_snapshot
+        from api.serializers import dict_to_league_state
+
+        snapshot = get_snapshot(year)
+        if snapshot and snapshot.get("data"):
+            league_state = dict_to_league_state(snapshot["data"])
+            for team in league_state.teams:
+                for player in team.players:
+                    key = _normalize_player_name(player.name)
+                    if not key:
+                        continue
+                    owner_by_name[key] = {
+                        "owner_manager": team.manager_name,
+                        "owner_team_name": team.team_name,
+                        "position": player.position,
+                        "mlb_team": player.mlb_team,
+                        "contract_type": player.contract.contract_type.value,
+                        "contract_display": player.contract.display,
+                        "player_key": player.yahoo_player_id or "",
+                    }
+                    debug["snapshot_players"] += 1
+            if debug["snapshot_players"]:
+                debug["source"].append("league_snapshot")
+    except Exception as e:
+        debug["snapshot_error"] = str(e)
+
+    try:
+        from api.database import get_synced_roster
+
+        rosters = get_synced_roster(year) or {}
+        if isinstance(rosters, dict):
+            for team_data in rosters.values():
+                if not isinstance(team_data, dict):
+                    continue
+                manager = str(team_data.get("manager") or "").strip()
+                team_name = str(team_data.get("team_name") or "").strip()
+                for player in team_data.get("players", []):
+                    if not isinstance(player, dict):
+                        continue
+                    key = _normalize_player_name(player.get("name", ""))
+                    if not key:
+                        continue
+                    owner_by_name[key] = {
+                        "owner_manager": manager,
+                        "owner_team_name": team_name,
+                        "position": player.get("position", ""),
+                        "mlb_team": player.get("team", ""),
+                        "contract_type": "",
+                        "contract_display": "",
+                        "player_key": player.get("player_key", ""),
+                    }
+                    debug["synced_roster_players"] += 1
+            if debug["synced_roster_players"]:
+                debug["source"].append("synced_rosters")
+    except Exception as e:
+        debug["synced_roster_error"] = str(e)
+
+    return owner_by_name, debug
+
+
+def _is_pitcher_position(position: str) -> bool:
+    tokens = {
+        p.strip().upper()
+        for p in (position or "").replace("/", ",").split(",")
+        if p.strip()
+    }
+    return bool(tokens & {"P", "SP", "RP", "LHP", "RHP"})
+
+
+def _ip_to_outs(value: Any) -> int:
+    try:
+        text = str(value or "0").strip()
+        whole, _, frac = text.partition(".")
+        outs = int(whole or 0) * 3
+        if frac:
+            outs += min(int(frac[0]), 2)
+        return outs
+    except (ValueError, TypeError):
+        return 0
+
+
+def _outs_to_ip(outs: int) -> str:
+    whole, rem = divmod(max(outs, 0), 3)
+    return f"{whole}.{rem}"
+
+
+def _safe_stat_int(stats: dict, *keys: str) -> int:
+    for key in keys:
+        value = stats.get(key)
+        if value not in (None, ""):
+            try:
+                return int(value)
+            except (ValueError, TypeError):
+                continue
+    return 0
+
+
+def _split_in_report_month(split: dict, year: int, report_month: int) -> bool:
+    game = split.get("game") if isinstance(split.get("game"), dict) else {}
+    raw_date = (
+        split.get("date")
+        or game.get("gameDate")
+        or game.get("officialDate")
+        or split.get("gameDate")
+    )
+    if not raw_date:
+        return False
+    try:
+        dt = datetime.fromisoformat(str(raw_date)[:10])
+        return dt.year == year and dt.month == report_month
+    except ValueError:
+        return False
+
+
+def _http_timeout(deadline: float | None, default: float = 5.0) -> float:
+    if deadline is None:
+        return default
+    import time as time_mod
+
+    remaining = deadline - time_mod.monotonic()
+    if remaining <= 0:
+        return 0.0
+    return max(0.5, min(default, remaining))
+
+
+def _find_mlb_person(
+    name: str,
+    position: str,
+    deadline: float | None = None,
+) -> dict | None:
+    import httpx
+
+    clean_name = (name or "").split("(")[0].strip()
+    cache_key = f"{clean_name.lower()}::{position}"
+    if cache_key in _MLB_PERSON_CACHE:
+        return _MLB_PERSON_CACHE[cache_key]
+
+    try:
+        timeout = _http_timeout(deadline)
+        if timeout <= 0:
+            return None
+        resp = httpx.get(
+            f"{MLB_STATS_API_BASE}/people/search",
+            params={"names": clean_name, "hydrate": "currentTeam"},
+            timeout=timeout,
+        )
+        resp.raise_for_status()
+        rows = resp.json().get("people", [])
+    except Exception:
+        _MLB_PERSON_CACHE[cache_key] = None
+        return None
+
+    if not rows:
+        _MLB_PERSON_CACHE[cache_key] = None
+        return None
+
+    best = rows[0]
+    wants_pitcher = _is_pitcher_position(position)
+    for row in rows:
+        primary_pos = row.get("primaryPosition", {}).get("abbreviation", "")
+        is_pitcher = primary_pos in {"P", "SP", "RP", "LHP", "RHP", "TWP"}
+        if wants_pitcher == is_pitcher:
+            best = row
+            break
+
+    _MLB_PERSON_CACHE[cache_key] = best
+    return best
+
+
+def _fetch_rookie_month_stats_line(
+    name: str,
+    position: str,
+    year: int,
+    report_month: int,
+    month_label: str,
+    deadline: float | None = None,
+) -> str:
+    """Return one compact MLB/MiLB monthly stat line for a prospect."""
+    import httpx
+
+    if not ROOKIE_WATCH_STATS_ENABLED:
+        return ""
+
+    cache_key = (name, position, year, report_month)
+    if cache_key in _ROOKIE_MONTH_STATS_CACHE:
+        return _ROOKIE_MONTH_STATS_CACHE[cache_key]
+
+    person = _find_mlb_person(name, position, deadline)
+    if not person:
+        _ROOKIE_MONTH_STATS_CACHE[cache_key] = ""
+        return ""
+
+    mlb_id = person.get("id")
+    if not mlb_id:
+        _ROOKIE_MONTH_STATS_CACHE[cache_key] = ""
+        return ""
+
+    level_map = {1: "MLB", 11: "AAA", 12: "AA", 13: "A+", 14: "A", 16: "ROK"}
+    prefers_pitching = _is_pitcher_position(position)
+
+    for sport_id, level in level_map.items():
+        timeout = _http_timeout(deadline)
+        if timeout <= 0:
+            break
+        hitting = {"games": 0, "ab": 0, "h": 0, "hr": 0, "rbi": 0, "r": 0, "sb": 0}
+        pitching = {
+            "games": 0, "outs": 0, "k": 0, "w": 0, "sv": 0,
+            "hld": 0, "er": 0, "h": 0, "bb": 0,
+        }
+        try:
+            resp = httpx.get(
+                f"{MLB_STATS_API_BASE}/people/{mlb_id}/stats",
+                params={
+                    "stats": "gameLog",
+                    "group": "hitting,pitching",
+                    "season": year,
+                    "sportId": sport_id,
+                },
+                timeout=timeout,
+            )
+            resp.raise_for_status()
+            data = resp.json()
+        except Exception:
+            continue
+
+        for stat_group in data.get("stats", []):
+            group_name = (
+                stat_group.get("group", {}).get("displayName", "")
+                or stat_group.get("group", {}).get("display_name", "")
+            ).lower()
+            for split in stat_group.get("splits", []):
+                if not _split_in_report_month(split, year, report_month):
+                    continue
+                stat = split.get("stat", {})
+                if group_name == "hitting":
+                    hitting["games"] += 1
+                    hitting["ab"] += _safe_stat_int(stat, "atBats")
+                    hitting["h"] += _safe_stat_int(stat, "hits")
+                    hitting["hr"] += _safe_stat_int(stat, "homeRuns")
+                    hitting["rbi"] += _safe_stat_int(stat, "rbi")
+                    hitting["r"] += _safe_stat_int(stat, "runs")
+                    hitting["sb"] += _safe_stat_int(stat, "stolenBases")
+                elif group_name == "pitching":
+                    pitching["games"] += 1
+                    pitching["outs"] += _ip_to_outs(stat.get("inningsPitched"))
+                    pitching["k"] += _safe_stat_int(stat, "strikeOuts", "strikeouts")
+                    pitching["w"] += _safe_stat_int(stat, "wins")
+                    pitching["sv"] += _safe_stat_int(stat, "saves")
+                    pitching["hld"] += _safe_stat_int(stat, "holds")
+                    pitching["er"] += _safe_stat_int(stat, "earnedRuns")
+                    pitching["h"] += _safe_stat_int(stat, "hits")
+                    pitching["bb"] += _safe_stat_int(stat, "baseOnBalls", "walks")
+
+        has_hitting = hitting["games"] > 0 and (hitting["ab"] > 0 or hitting["h"] > 0)
+        has_pitching = pitching["games"] > 0 and pitching["outs"] > 0
+
+        if prefers_pitching and has_pitching:
+            innings = pitching["outs"] / 3
+            era = (pitching["er"] * 9 / innings) if innings else 0
+            whip = ((pitching["h"] + pitching["bb"]) / innings) if innings else 0
+            line = (
+                f"{month_label} {level}: {_outs_to_ip(pitching['outs'])}IP "
+                f"{pitching['k']}K {pitching['w']}W "
+                f"{era:.2f}ERA {whip:.2f}WHIP"
+            )
+            _ROOKIE_MONTH_STATS_CACHE[cache_key] = line
+            return line
+        if (not prefers_pitching) and has_hitting:
+            avg = hitting["h"] / hitting["ab"] if hitting["ab"] else 0
+            line = (
+                f"{month_label} {level}: {hitting['h']}-{hitting['ab']} "
+                f"{_fmt_avg(str(round(avg, 3)))} "
+                f"{hitting['hr']}HR {hitting['rbi']}RBI "
+                f"{hitting['r']}R {hitting['sb']}SB"
+            )
+            _ROOKIE_MONTH_STATS_CACHE[cache_key] = line
+            return line
+        if has_pitching:
+            innings = pitching["outs"] / 3
+            era = (pitching["er"] * 9 / innings) if innings else 0
+            whip = ((pitching["h"] + pitching["bb"]) / innings) if innings else 0
+            line = (
+                f"{month_label} {level}: {_outs_to_ip(pitching['outs'])}IP "
+                f"{pitching['k']}K {era:.2f}ERA {whip:.2f}WHIP"
+            )
+            _ROOKIE_MONTH_STATS_CACHE[cache_key] = line
+            return line
+
+    _ROOKIE_MONTH_STATS_CACHE[cache_key] = ""
+    return ""
+
+
+def _build_rookie_watch_lines(
+    year: int,
+    report_month: int,
+    month_label: str,
+    data_dir,
+) -> tuple[list[str], list[str], dict[str, Any]]:
+    """Build monthly owned R-contract and unowned prospect watch sections."""
+    debug: dict[str, Any] = {}
+    prospects, prospect_debug = _load_top_prospects(data_dir)
+    owner_by_name, owner_debug = _build_current_owner_lookup(year)
+    debug["prospects"] = prospect_debug
+    debug["ownership"] = owner_debug
+
+    prospect_by_name = {
+        _normalize_player_name(p.get("name", "")): p
+        for p in prospects
+        if _normalize_player_name(p.get("name", ""))
+    }
+
+    try:
+        from src.notification.rookie_monitor import _load_r_contract_players
+
+        r_players = _load_r_contract_players(year)
+    except Exception as e:
+        debug["r_error"] = str(e)
+        r_players = []
+
+    import time as time_mod
+
+    stats_deadline = time_mod.monotonic() + ROOKIE_WATCH_STATS_TIMEOUT_SECONDS
+    stats_remaining = ROOKIE_WATCH_STATS_LIMIT
+
+    def maybe_stats_line(player_name: str, position: str) -> str:
+        nonlocal stats_remaining
+        if not ROOKIE_WATCH_STATS_ENABLED or stats_remaining <= 0:
+            return ""
+        if time_mod.monotonic() >= stats_deadline:
+            return ""
+        stats_remaining -= 1
+        return _fetch_rookie_month_stats_line(
+            player_name,
+            position,
+            year,
+            report_month,
+            month_label,
+            stats_deadline,
+        )
+
+    r_candidates: list[dict] = []
+    r_name_keys: set[str] = set()
+    for rp in r_players:
+        key = _normalize_player_name(rp.get("name", ""))
+        if key:
+            r_name_keys.add(key)
+        prospect = prospect_by_name.get(key, {})
+        rank = prospect.get("rank") or 9999
+        r_candidates.append({**rp, "prospect": prospect, "rank": rank})
+    r_candidates.sort(key=lambda p: (p.get("rank") or 9999, p.get("name", "")))
+    debug["r_count"] = len(r_candidates)
+
+    r_lines: list[str] = []
+    if r_candidates:
+        for idx, player in enumerate(r_candidates[:ROOKIE_WATCH_R_LIMIT], 1):
+            prospect = player.get("prospect") or {}
+            position = prospect.get("position") or player.get("position", "")
+            mlb_team = prospect.get("mlb_team") or player.get("mlb_team", "")
+            meta = _format_player_meta(position, mlb_team)
+            label = f"{player['name']} ({meta})" if meta else player["name"]
+            r_lines.append(f" {idx}. {label} - {_format_owner_label(player)}")
+            tags = []
+            if prospect.get("rank"):
+                tags.append(f"Pipeline #{prospect['rank']}")
+            if prospect.get("eta"):
+                tags.append(f"ETA {prospect['eta']}")
+            if tags:
+                r_lines.append(f"    {' | '.join(tags)}")
+            stats_line = maybe_stats_line(player["name"], position)
+            r_lines.append(f"    {stats_line or f'{month_label} MLB/MiLB 數據暫缺'}")
+    else:
+        r_lines.append("  目前沒有可整理的 R 約新秀。")
+
+    fa_lines: list[str] = []
+    unowned: list[dict] = []
+    if owner_by_name:
+        for prospect in sorted(prospects, key=lambda p: p.get("rank") or 9999):
+            key = _normalize_player_name(prospect.get("name", ""))
+            if not key or key in r_name_keys or owner_by_name.get(key):
+                continue
+            unowned.append(prospect)
+    debug["unowned_count"] = len(unowned)
+
+    if unowned:
+        for idx, prospect in enumerate(unowned[:ROOKIE_WATCH_FA_LIMIT], 1):
+            position = prospect.get("position", "")
+            mlb_team = prospect.get("mlb_team", "")
+            meta = _format_player_meta(position, mlb_team)
+            label = f"{prospect['name']} ({meta})" if meta else prospect["name"]
+            fa_lines.append(f" {idx}. {label} - FA")
+            tags = []
+            if prospect.get("rank"):
+                tags.append(f"Pipeline #{prospect['rank']}")
+            if prospect.get("eta"):
+                tags.append(f"ETA {prospect['eta']}")
+            if prospect.get("age"):
+                tags.append(f"{prospect['age']}歲")
+            if tags:
+                fa_lines.append(f"    {' | '.join(tags)}")
+            stats_line = maybe_stats_line(prospect["name"], position)
+            fa_lines.append(f"    {stats_line or f'{month_label} MLB/MiLB 數據暫缺'}")
+    elif prospects and not owner_by_name:
+        fa_lines.append("  ownership 資料暫缺，未持有名單先不列入月報。")
+    else:
+        fa_lines.append("  Top prospect 名單中沒有可列出的未持有新秀。")
+
+    debug["stats_remaining"] = stats_remaining
+    return r_lines, fa_lines, debug
 
 
 def _walk_stats(obj, out: dict) -> None:
@@ -473,6 +954,11 @@ def _daily_player_status_job():
 
         baseline, last_checked_at = get_injury_baseline(year)
         current_statuses = get_player_statuses(year)
+
+        if not INJURY_LINE_ENABLED:
+            save_injury_baseline(year, current_statuses)
+            print("[StatusUpdate] Injury LINE digest disabled; status baseline updated.")
+            return
 
         if baseline is None:
             # First run: seed baseline, don't send.
@@ -1464,6 +1950,11 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
             pitcher_lines.append(f"    {ip} IP  {counting}")
             pitcher_lines.append(f"    {era} ERA / {whip} WHIP")
 
+        if not batter_lines:
+            batter_lines = _format_stats_unavailable("本週最佳打者")
+        if not pitcher_lines:
+            pitcher_lines = _format_stats_unavailable("本週最佳投手")
+
         # page_width: widest non-blank line (content + section headers), floor 28.
         # Headers are included so that long titles like "【本週最佳打者】(...)"
         # still receive symmetric padding when _center() is applied.
@@ -1788,6 +2279,7 @@ def _monthly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
         time.sleep(1)
         top_batters: list[dict] = []
         top_pitchers: list[dict] = []
+        stats_debug: dict[str, Any] = {}
 
         for pos_type, result_list in [("B", top_batters), ("P", top_pitchers)]:
             try:
@@ -1799,9 +2291,19 @@ def _monthly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
                 pdata = yahoo_api_get(players_path)
                 p_league = pdata.get("fantasy_content", {}).get("league", [])
                 if len(p_league) < 2:
+                    stats_debug[pos_type] = {
+                        "error": f"p_league length {len(p_league)} < 2",
+                        "raw_keys": list(pdata.get("fantasy_content", {}).keys()),
+                    }
                     continue
                 p_section = p_league[1].get("players", {})
-                for pk_idx in range(_safe_int(p_section.get("count", 0))):
+                count_val = _safe_int(p_section.get("count", 0))
+                if count_val == 0:
+                    stats_debug[pos_type] = {
+                        "error": "players count=0",
+                        "p_section_keys": list(p_section.keys()) if isinstance(p_section, dict) else None,
+                    }
+                for pk_idx in range(count_val):
                     p_entry = p_section.get(str(pk_idx), {}).get("player", [])
                     if not p_entry or not isinstance(p_entry, list):
                         continue
@@ -1833,10 +2335,19 @@ def _monthly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
                         if sid in raw_stats:
                             named_stats[name] = raw_stats[sid]
                     p_info["stats"] = named_stats
+                    if len(result_list) == 0:
+                        stats_debug[pos_type] = {
+                            "name": p_info.get("name"),
+                            "raw_stat_ids": list(raw_stats.keys()),
+                            "raw_stats": raw_stats,
+                            "named": named_stats,
+                            "points": pts,
+                        }
                     result_list.append(p_info)
                 time.sleep(1)
             except Exception as e:
                 print(f"[MonthlyReport] Error fetching top {pos_type}: {e}")
+                stats_debug[pos_type] = {"error": str(e)}
 
         # --- 5. Transaction summary (read local JSON) ---
         month_trades = 0
@@ -1877,7 +2388,16 @@ def _monthly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
         except Exception as e:
             print(f"[MonthlyReport] Transaction summary error: {e}")
 
-        # --- 6. Build LINE message (weekly-style layout) ---
+        # --- 6. Rookie watch: owned R-contract players + unowned top prospects ---
+        data_dir = Path(__file__).resolve().parent.parent.parent / "data"
+        rookie_r_lines, rookie_fa_lines, rookie_watch_debug = _build_rookie_watch_lines(
+            year,
+            report_month,
+            month_label,
+            data_dir,
+        )
+
+        # --- 7. Build LINE message (weekly-style layout) ---
 
         # Column width shared by overall + division lines.
         max_left_vw = max(
@@ -2032,6 +2552,11 @@ def _monthly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
             pitcher_lines.append(f"    {ip} IP  {' '.join(counting_parts)}")
             pitcher_lines.append(f"    {era} ERA / {whip} WHIP")
 
+        if not batter_lines:
+            batter_lines = _format_stats_unavailable(f"{month_label}最佳打者")
+        if not pitcher_lines:
+            pitcher_lines = _format_stats_unavailable(f"{month_label}最佳投手")
+
         # Transaction summary — totals + full trade list.
         tx_lines: list[str] = []
         if month_trades or month_adds or month_drops:
@@ -2054,6 +2579,8 @@ def _monthly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
         all_content.extend(batter_lines)
         all_content.extend(pitcher_lines)
         all_content.extend(l for l in tx_lines if l)
+        all_content.extend(rookie_r_lines)
+        all_content.extend(rookie_fa_lines)
 
         section_headers: list[str] = ["【聯盟總排名】"]
         if division_blocks:
@@ -2069,6 +2596,10 @@ def _monthly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
             section_headers.append(f"【{month_label}最佳投手】")
         if tx_lines:
             section_headers.append(f"【{month_label}交易摘要】")
+        if rookie_r_lines:
+            section_headers.append("【R 約新秀觀察】")
+        if rookie_fa_lines:
+            section_headers.append("【未持有新秀觀察】")
 
         page_width = max(
             (_visual_width(l) for l in (all_content + section_headers) if l and l.strip()),
@@ -2123,8 +2654,19 @@ def _monthly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
             lines.extend(tx_lines)
             lines.append("")
 
+        if rookie_r_lines:
+            lines.append(_center_line("【R 約新秀觀察】", page_width))
+            lines.extend(rookie_r_lines)
+            lines.append("")
+
+        if rookie_fa_lines:
+            lines.append(_center_line("【未持有新秀觀察】", page_width))
+            lines.extend(rookie_fa_lines)
+            lines.append("")
+
         lines.append(divider_line)
         lines.append("最佳球員排名依據：Yahoo Fantasy Points")
+        lines.append("新秀觀察來源：Yahoo rosters + MLB Stats API")
 
         # AI commentary (monthly variant).
         try:
@@ -2146,7 +2688,13 @@ def _monthly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
 
         if dry_run:
             print(f"[MonthlyReport] Dry-run: returning {month_label} report text.")
-            return {"success": True, "message": "Dry-run (no LINE push)", "report": message}
+            return {
+                "success": True,
+                "message": "Dry-run (no LINE push)",
+                "report": message,
+                "stats_debug": stats_debug,
+                "rookie_watch_debug": rookie_watch_debug,
+            }
 
         if target_id:
             success, error = send_line_push_message(target_id, message)
@@ -2380,15 +2928,15 @@ def start_scheduler():
     """Start the background scheduler.
 
     Jobs:
-    1. Keeper reminder: daily cron during keeper period
-    2. Rookie call-up monitor: daily cron during MLB season
+    1. Keeper reminder: optional daily cron during keeper period
+    2. Rookie call-up monitor: optional daily cron during MLB season
     3. Daily AR-Rank + season stats refresh: 18:00 during MLB season (single pass)
-    4. Daily player status update + injury notification: during MLB season
+    4. Daily player status update + optional injury notification: during MLB season
     5. Daily transaction fetch: daily during MLB season
     6. Daily roster + snapshot + ownership sync: 00:30 Taiwan time (merged)
     7. Weekly war report: Monday 21:00 during MLB season
     8. Monthly war report: 1st of each month 20:45 during MLB season
-    9. Prospect ranking update: Aug 15 annually, fetch MLB API + compare R players
+    9. Prospect ranking update: optional Aug 15 LINE push
     """
     global _scheduler
 
@@ -2411,12 +2959,13 @@ def start_scheduler():
     _scheduler = BackgroundScheduler()
 
     # Job 1: Keeper reminders
-    _scheduler.add_job(
-        _daily_reminder_job,
-        CronTrigger(hour=REMINDER_CRON_HOUR, timezone=REMINDER_CRON_TZ),
-        id="keeper_reminder",
-        replace_existing=True,
-    )
+    if KEEPER_REMINDER_ENABLED:
+        _scheduler.add_job(
+            _daily_reminder_job,
+            CronTrigger(hour=REMINDER_CRON_HOUR, timezone=REMINDER_CRON_TZ),
+            id="keeper_reminder",
+            replace_existing=True,
+        )
 
     # Job 2: Rookie call-up monitor
     if ROOKIE_MONITOR_ENABLED:
@@ -2506,31 +3055,43 @@ def start_scheduler():
     _scheduler.start()
     print(f"[Scheduler] Started ({mode} mode). "
           f"Check daily at {REMINDER_CRON_HOUR}:00 {REMINDER_CRON_TZ}")
-    print(f"[Scheduler] Keeper reminders every {REMINDER_INTERVAL_DAYS} days "
-          f"(period: {period_desc})")
+    if KEEPER_REMINDER_ENABLED:
+        print(f"[Scheduler] Keeper reminders every {REMINDER_INTERVAL_DAYS} days "
+              f"(period: {period_desc})")
+    else:
+        print(f"[Scheduler] Keeper reminders disabled (period would be {period_desc})")
     if ROOKIE_MONITOR_ENABLED:
         print(f"[Scheduler] Rookie monitor active "
               f"(months {ROOKIE_MONITOR_START_MONTH}-{ROOKIE_MONITOR_END_MONTH})")
+    else:
+        print("[Scheduler] Rookie immediate LINE monitor disabled")
     print("[Scheduler] Daily AR-Rank + stats refresh: 18:00")
-    print("[Scheduler] Daily player status update + injury notification: 12:30 PM")
+    if INJURY_LINE_ENABLED:
+        print("[Scheduler] Daily player status update + injury digest: 12:30 PM")
+    else:
+        print("[Scheduler] Daily player status update: 12:30 PM (injury LINE disabled)")
     print(f"[Scheduler] Daily transaction fetch: {DAILY_SYNC_HOUR}:15 {REMINDER_CRON_TZ}")
     print(f"[Scheduler] Daily roster + snapshot + ownership sync: {DAILY_SYNC_HOUR}:30 {REMINDER_CRON_TZ}")
     print("[Scheduler] Weekly war report: every Monday 21:00")
     # Job 10: Annual prospect ranking update (Aug 15)
-    _scheduler.add_job(
-        _prospect_ranking_update_job,
-        CronTrigger(
-            month=8,
-            day=15,
-            hour=19,
-            timezone=REMINDER_CRON_TZ,
-        ),
-        id="prospect_update",
-        replace_existing=True,
-    )
+    if PROSPECT_UPDATE_LINE_ENABLED:
+        _scheduler.add_job(
+            _prospect_ranking_update_job,
+            CronTrigger(
+                month=8,
+                day=15,
+                hour=19,
+                timezone=REMINDER_CRON_TZ,
+            ),
+            id="prospect_update",
+            replace_existing=True,
+        )
 
     print("[Scheduler] Monthly war report: 1st of each month 20:45")
-    print("[Scheduler] Prospect ranking update: Aug 15 19:00")
+    if PROSPECT_UPDATE_LINE_ENABLED:
+        print("[Scheduler] Prospect ranking update: Aug 15 19:00")
+    else:
+        print("[Scheduler] Prospect ranking update disabled")
 
     # One-off test push: today's MLB games preview.
     # Fires 2026-04-22 01:10 Taiwan time then never again (DateTrigger is

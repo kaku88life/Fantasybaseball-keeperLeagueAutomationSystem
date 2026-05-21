@@ -455,7 +455,7 @@ export default function CommissionerDashboard() {
   };
 
   const handleTriggerInjuryDigest = async () => {
-    if (!confirm("確認觸發傷兵彙整？若 INJURY_BATCH_DAYS 冷卻未到會被跳過。")) return;
+    if (!confirm("確認觸發傷兵狀態更新？LINE 推播預設關閉，除非後端啟用 INJURY_LINE_ENABLED。")) return;
     setInjuryDigestLoading(true);
     setInjuryDigestResult(null);
     try {
@@ -1022,10 +1022,10 @@ export default function CommissionerDashboard() {
                 )}
               </div>
 
-              {/* Manual scheduler triggers (war report / injury digest) */}
+              {/* Manual scheduler triggers (war report / status updates) */}
               <div className="mt-3 border-t border-blue-200 pt-3">
                 <p className="mb-2 text-xs text-gray-600">
-                  手動觸發排程作業。週戰報可選「推群組」、「推個人/目標 (用上方 Target ID)」或「只產文字 Dry-run」：
+                  手動觸發排程作業。週戰報/月報可選推群組、推目標或只產文字 Dry-run；傷兵按鈕預設只更新狀態：
                 </p>
                 <div className="flex flex-wrap gap-2">
                   <button
@@ -1075,7 +1075,7 @@ export default function CommissionerDashboard() {
                     disabled={injuryDigestLoading}
                     className="rounded bg-amber-600 px-3 py-1 text-sm font-medium text-white hover:bg-amber-500 disabled:opacity-50"
                   >
-                    {injuryDigestLoading ? "執行中..." : "觸發傷兵彙整 Trigger Injury Digest"}
+                    {injuryDigestLoading ? "執行中..." : "傷兵狀態更新 Injury Status"}
                   </button>
                   <button
                     onClick={handleRefreshTransactions}
@@ -1118,7 +1118,7 @@ export default function CommissionerDashboard() {
                     injuryDigestResult.success ? "border-green-200 bg-green-100" : "border-red-200 bg-red-100"
                   }`}>
                     <p className={injuryDigestResult.success ? "text-green-700" : "text-red-700"}>
-                      傷兵彙整：{injuryDigestResult.message}
+                      傷兵狀態：{injuryDigestResult.message}
                     </p>
                   </div>
                 )}
