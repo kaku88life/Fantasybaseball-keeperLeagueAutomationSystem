@@ -398,7 +398,7 @@ export default function CommissionerDashboard() {
     }
     const prompts: Record<typeof mode, string> = {
       group: "確認觸發週戰報並推送到 LINE 群組？",
-      target: `確認觸發週戰報並推送到 Target ${targetId.slice(0, 6)}...？`,
+      target: `確認背景產生週戰報並推送到 Target ${targetId.slice(0, 6)}...？`,
       dry_run: "確認產生戰報但不推送（回傳訊息文字）？",
     };
     if (!confirm(prompts[mode])) return;
@@ -406,7 +406,7 @@ export default function CommissionerDashboard() {
     setWarReportResult(null);
     try {
       const opts = mode === "target"
-        ? { targetId }
+        ? { targetId, asyncMode: true }
         : mode === "dry_run"
           ? { dryRun: true }
           : undefined;
@@ -430,7 +430,7 @@ export default function CommissionerDashboard() {
     }
     const prompts: Record<typeof mode, string> = {
       group: "確認觸發月戰報並推送到 LINE 群組？",
-      target: `確認觸發月戰報並推送到 Target ${targetId.slice(0, 6)}...？`,
+      target: `確認背景產生月戰報並推送到 Target ${targetId.slice(0, 6)}...？`,
       dry_run: "確認產生月戰報但不推送（回傳訊息文字）？",
     };
     if (!confirm(prompts[mode])) return;
@@ -438,7 +438,7 @@ export default function CommissionerDashboard() {
     setMonthlyReportResult(null);
     try {
       const opts = mode === "target"
-        ? { targetId }
+        ? { targetId, asyncMode: true }
         : mode === "dry_run"
           ? { dryRun: true }
           : undefined;
