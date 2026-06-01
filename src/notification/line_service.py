@@ -7,6 +7,8 @@ from __future__ import annotations
 
 import os
 
+from src.notification.line_format import center_line, divider_line, report_width
+
 LINE_CHANNEL_ACCESS_TOKEN = os.getenv("LINE_CHANNEL_ACCESS_TOKEN", "")
 LINE_GROUP_ID = os.getenv("LINE_GROUP_ID", "")
 # Failed group pushes mirror a diagnostic message to this user.
@@ -62,42 +64,60 @@ def _group_target_error(target_id: str) -> str:
 def _build_group_failure_diagnostic(error: str, original_message: str) -> str:
     preview = _truncate_line_text(original_message, 1200)
     lower_error = (error or "").lower()
+    width = report_width()
     if (
         "monthly limit" in lower_error
         or "too many requests" in lower_error
         or "(429)" in lower_error
         or " 429" in lower_error
     ):
-        action_hint = (
-            "LINE monthly message quota is exhausted. "
-            "Reduce group pushes or wait for the quota reset."
-        )
-    else:
-        action_hint = "Please verify LINE_GROUP_ID and that the bot is still in the group."
-    return "\n".join(
-        [
-            "[5-Man Keeper League] LINE group push failed",
-            f"Group target: {_preview_target(LINE_GROUP_ID)}",
-            f"Error: {error}",
-            "",
-            "The original message was not delivered to the group.",
-            action_hint,
-            "",
-            "-- Original message preview --",
-            preview,
+        action_hint_lines = [
+            "LINE monthly quota exhausted.",
+            "Reduce group pushes",
+            "or wait for quota reset.",
         ]
-    )
+    else:
+        action_hint_lines = [
+            "Please verify LINE_GROUP_ID",
+            "and bot group membership.",
+        ]
+    return "\n".join([
+        divider_line(width),
+        center_line("5-Man Keeper League", width),
+        center_line("群組推送失敗", width),
+        center_line("LINE Group Failed", width),
+        divider_line(width),
+        "",
+        f"Group target:",
+        _preview_target(LINE_GROUP_ID),
+        "",
+        "Error:",
+        error,
+        "",
+        "原訊息未送達群組。",
+        "Original message not delivered.",
+        *action_hint_lines,
+        "",
+        "Original message preview:",
+        preview,
+    ])
 
 
 def _build_personal_fallback_message(original_message: str) -> str:
-    return "\n".join(
-        [
-            "[5-Man Keeper League] 個人備份",
-            "群組推送失敗，以下只送給你個人，不代表群組已送達。",
-            "",
-            original_message,
-        ]
-    )
+    width = report_width()
+    return "\n".join([
+        divider_line(width),
+        center_line("5-Man Keeper League", width),
+        center_line("個人備份", width),
+        center_line("Personal Fallback", width),
+        divider_line(width),
+        "",
+        "群組推送失敗。",
+        "以下只送給你個人，",
+        "不代表群組已送達。",
+        "",
+        original_message,
+    ])
 
 
 def send_line_group_message(message: str) -> tuple[bool, str]:
@@ -284,9 +304,14 @@ def test_line_connection() -> dict:
             "group_id": None,
         }
 
-    success, error = send_line_group_message(
-        "[5-Man Keeper League] LINE Bot connection test OK"
-    )
+    width = report_width()
+    test_message = "\n".join([
+        divider_line(width),
+        center_line("5-Man Keeper League", width),
+        center_line("LINE Bot test OK", width),
+        divider_line(width),
+    ])
+    success, error = send_line_group_message(test_message)
     return {
         "success": success,
         "message": error if not success else "Test message sent to group",

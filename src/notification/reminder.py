@@ -12,6 +12,7 @@ from api.database import (
     get_recent_notifications,
     insert_notification_log,
 )
+from src.notification.line_format import center_line, divider_line, report_width
 from src.notification.line_service import send_line_group_message
 
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3001")
@@ -97,19 +98,25 @@ def build_reminder_text(pending_teams: list[dict], year: int) -> str:
     if frontend and not frontend.startswith("http"):
         frontend = f"https://{frontend}"
 
-    manager_list = "\n".join(
-        f"  - {t['manager_name']}" for t in pending_teams
-    )
+    width = report_width()
+    lines = [
+        divider_line(width),
+        center_line("5-Man Keeper League", width),
+        center_line(f"{year} 留用催繳", width),
+        center_line("Keeper Reminder", width),
+        divider_line(width),
+        "",
+        f"尚未繳交: {len(pending_teams)} 隊",
+        f"Pending teams: {len(pending_teams)}",
+        "",
+    ]
+    for idx, team in enumerate(pending_teams, 1):
+        lines.append(f"  {idx}. {team['manager_name']}")
 
-    return (
-        f"[5-Man Keeper League] {year} 留用名單催繳\n"
-        f"Keeper List Reminder\n"
-        f"\n"
-        f"以下 {len(pending_teams)} 支隊伍尚未繳交：\n"
-        f"The following {len(pending_teams)} team(s) have not submitted:\n"
-        f"\n"
-        f"{manager_list}\n"
-        f"\n"
-        f"請前往填寫 Go to:\n"
-        f"{frontend}/{year}"
-    )
+    lines.extend([
+        "",
+        "請前往填寫:",
+        "Go to:",
+        f"{frontend}/{year}",
+    ])
+    return "\n".join(lines)

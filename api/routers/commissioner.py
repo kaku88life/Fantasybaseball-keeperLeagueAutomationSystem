@@ -498,6 +498,7 @@ async def test_line_push_endpoint(
     The LINE Bot must already be added as a friend (for user IDs) or be a
     member of the target group/room for the push to succeed.
     """
+    from src.notification.line_format import center_line, divider_line, report_width
     from src.notification.line_service import send_line_push_message
 
     target_id = (payload.get("target_id") or "").strip()
@@ -507,10 +508,16 @@ async def test_line_push_endpoint(
         raise HTTPException(status_code=400, detail="target_id is required")
 
     if not message:
-        message = (
-            f"[5-Man Keeper League] LINE push test OK\n"
-            f"Target: {target_id[:6]}...{target_id[-4:]}"
-        )
+        width = report_width()
+        message = "\n".join([
+            divider_line(width),
+            center_line("5-Man Keeper League", width),
+            center_line("LINE push test OK", width),
+            divider_line(width),
+            "",
+            "Target:",
+            f"{target_id[:6]}...{target_id[-4:]}",
+        ])
 
     success, error = send_line_push_message(target_id, message)
     return {
@@ -540,6 +547,7 @@ async def test_line_reminder_endpoint(
     import os
     from datetime import datetime
 
+    from src.notification.line_format import center_line, divider_line, report_width
     from src.notification.line_service import send_line_push_message
     from src.notification.reminder import build_reminder_text, get_pending_teams
 
@@ -556,10 +564,17 @@ async def test_line_reminder_endpoint(
     pending = get_pending_teams(int(year))
 
     if not pending:
-        message = (
-            f"[5-Man Keeper League] {year} \u7559\u7528\u540d\u55ae\u50ac\u7e73 (\u9810\u89bd)\n"
-            f"All teams have already submitted — no reminder would be sent."
-        )
+        width = report_width()
+        message = "\n".join([
+            divider_line(width),
+            center_line("5-Man Keeper League", width),
+            center_line(f"{year} 留用催繳預覽", width),
+            center_line("Reminder Preview", width),
+            divider_line(width),
+            "",
+            "所有隊伍已完成提交。",
+            "No reminder would be sent.",
+        ])
     else:
         message = build_reminder_text(pending, int(year))
 

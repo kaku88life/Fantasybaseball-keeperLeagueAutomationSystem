@@ -20,6 +20,16 @@ import os
 from datetime import datetime
 from typing import Any
 
+from src.notification.line_format import (
+    center_line as _center_line,
+    compact_report_source as _compact_report_source,
+    divider_line as _line_report_divider,
+    format_rookie_stats_lines as _format_rookie_stats_lines,
+    pad_right_visual as _pad_right_visual,
+    report_width as _line_report_width,
+    visual_width as _visual_width,
+)
+
 
 def _env_flag(name: str, default: str = "false") -> bool:
     return os.getenv(name, default).strip().lower() in {"1", "true", "yes", "on"}
@@ -147,48 +157,6 @@ _YAHOO_STAT_ID_NAME: dict[str, str] = {
 
 # --- Shared formatting helpers for LINE reports (weekly / monthly war reports) ---
 
-def _visual_width(s: str) -> int:
-    """Rough visual width: CJK/fullwidth chars ≈ 2 cells, ASCII ≈ 1."""
-    w = 0
-    for c in s:
-        o = ord(c)
-        if (
-            0x1100 <= o <= 0x115F
-            or 0x2600 <= o <= 0x26FF
-            or 0x2700 <= o <= 0x27BF
-            or 0x2B00 <= o <= 0x2BFF
-            or 0x2E80 <= o <= 0x303E
-            or 0x3041 <= o <= 0x33FF
-            or 0x3400 <= o <= 0x4DBF
-            or 0x4E00 <= o <= 0x9FFF
-            or 0xA000 <= o <= 0xA4CF
-            or 0xAC00 <= o <= 0xD7A3
-            or 0xF900 <= o <= 0xFAFF
-            or 0xFE30 <= o <= 0xFE4F
-            or 0xFF00 <= o <= 0xFF60
-            or 0xFFE0 <= o <= 0xFFE6
-            or 0x1F300 <= o <= 0x1FAFF
-        ):
-            w += 2
-        else:
-            w += 1
-    return w
-
-
-def _center_line(text: str, width: int) -> str:
-    """Center `text` within a `width`-cell row using fullwidth spaces for bulk padding.
-    LINE's desktop proportional font collapses leading ASCII spaces, so we bias toward
-    fullwidth (\u3000) padding which takes 2 cells and renders reliably.
-    """
-    pad_cells = max(0, (width - _visual_width(text)) // 2)
-    fw = "\u3000" * (pad_cells // 2)
-    sp = " " * (pad_cells % 2)
-    return fw + sp + text
-
-
-def _pad_right_visual(s: str, width: int) -> str:
-    return s + " " * max(0, width - _visual_width(s))
-
 
 def _team_mgr_block(team_name: str, manager_name: str) -> str:
     """Format `ABBR (manager)` or fall back to raw team name / ? when abbr lookup fails."""
@@ -225,7 +193,53 @@ def _normalize_player_name(name: str) -> str:
 
 
 def _format_stats_unavailable(label: str) -> list[str]:
-    return [f"  Yahoo 暫未回傳{label}資料；請稍後再試。"]
+    return [f"  Yahoo 暫未回傳{label}", "  資料；請稍後再試。"]
+
+
+def _append_report_player_heading(
+    lines: list[str],
+    idx: int,
+    name: str,
+    position: str,
+    owner_abbr: str,
+) -> None:
+    label = f" {idx}. {name} {position}".rstrip()
+    one_line = f"{label} {owner_abbr}".rstrip()
+    if _visual_width(one_line) <= _line_report_width():
+        lines.append(one_line)
+    else:
+        lines.append(label)
+        lines.append(f"    {owner_abbr}")
+
+
+def _append_report_owner_line(
+    lines: list[str],
+    idx: int,
+    label: str,
+    owner_label: str,
+) -> None:
+    one_line = f" {idx}. {label} - {owner_label}"
+    if _visual_width(one_line) <= _line_report_width():
+        lines.append(one_line)
+    else:
+        lines.append(f" {idx}. {label}")
+        lines.append(f"    {owner_label}")
+
+
+def _append_report_tags(lines: list[str], tags: list[str]) -> None:
+    if not tags:
+        return
+    current = "    "
+    for tag in tags:
+        candidate = f"{current} | {tag}" if current.strip() else f"    {tag}"
+        if _visual_width(candidate) <= _line_report_width():
+            current = candidate
+            continue
+        if current.strip():
+            lines.append(current)
+        current = f"    {tag}"
+    if current.strip():
+        lines.append(current)
 
 
 def _load_top_prospects(data_dir) -> tuple[list[dict], dict[str, Any]]:
@@ -666,16 +680,19 @@ def _build_rookie_watch_lines(
             mlb_team = prospect.get("mlb_team") or player.get("mlb_team", "")
             meta = _format_player_meta(position, mlb_team)
             label = f"{player['name']} ({meta})" if meta else player["name"]
-            r_lines.append(f" {idx}. {label} - {_format_owner_label(player)}")
+            _append_report_owner_line(r_lines, idx, label, _format_owner_label(player))
             tags = []
             if prospect.get("rank"):
                 tags.append(f"Pipeline #{prospect['rank']}")
             if prospect.get("eta"):
                 tags.append(f"ETA {prospect['eta']}")
-            if tags:
-                r_lines.append(f"    {' | '.join(tags)}")
+            _append_report_tags(r_lines, tags)
             stats_line = maybe_stats_line(player["name"], position)
-            r_lines.append(f"    {stats_line or f'{month_label} MLB/MiLB 數據暫缺'}")
+            r_lines.extend(
+                _format_rookie_stats_lines(
+                    stats_line or f"{month_label} MLB/MiLB 數據暫缺"
+                )
+            )
     else:
         r_lines.append("  目前沒有可整理的 R 約新秀。")
 
@@ -695,7 +712,7 @@ def _build_rookie_watch_lines(
             mlb_team = prospect.get("mlb_team", "")
             meta = _format_player_meta(position, mlb_team)
             label = f"{prospect['name']} ({meta})" if meta else prospect["name"]
-            fa_lines.append(f" {idx}. {label} - FA")
+            _append_report_owner_line(fa_lines, idx, label, "FA")
             tags = []
             if prospect.get("rank"):
                 tags.append(f"Pipeline #{prospect['rank']}")
@@ -703,10 +720,13 @@ def _build_rookie_watch_lines(
                 tags.append(f"ETA {prospect['eta']}")
             if prospect.get("age"):
                 tags.append(f"{prospect['age']}歲")
-            if tags:
-                fa_lines.append(f"    {' | '.join(tags)}")
+            _append_report_tags(fa_lines, tags)
             stats_line = maybe_stats_line(prospect["name"], position)
-            fa_lines.append(f"    {stats_line or f'{month_label} MLB/MiLB 數據暫缺'}")
+            fa_lines.extend(
+                _format_rookie_stats_lines(
+                    stats_line or f"{month_label} MLB/MiLB 數據暫缺"
+                )
+            )
     elif prospects and not owner_by_name:
         fa_lines.append("  ownership 資料暫缺，未持有名單先不列入月報。")
     else:
@@ -1198,10 +1218,25 @@ def _send_injury_change_notification(
     """Compare old vs new statuses; send LINE digest. Return True on success/no-op, False on LINE failure."""
     from src.notification.line_service import send_line_group_message
 
+    width = _line_report_width()
+
+    def _status_item_lines(info: dict, suffix: str) -> list[str]:
+        name = info["player_name"]
+        pos = info.get("position", "")
+        mlb_team = info.get("mlb_team", "")
+        player_meta = _format_player_meta(pos, mlb_team)
+        owner_label = _format_owner_label(info)
+        player_label = f"  {name} ({player_meta})" if player_meta else f"  {name}"
+        one_line = f"{player_label} - {owner_label} {suffix}"
+        if _visual_width(one_line) <= width:
+            return [one_line]
+        return [player_label, f"    {owner_label} {suffix}"]
+
     # Categorize changes (only for owned players)
     new_injuries: list[str] = []      # NULL/empty -> IL/DTD/IL-LT
     recovered: list[str] = []          # IL/DTD -> NULL/empty
     status_changes: list[str] = []     # IL -> DTD, DTD -> IL, etc.
+    total_changes = 0
 
     injury_statuses = {"IL", "IL-LT", "DTD", "NA", "O", "SUSP"}
 
@@ -1217,31 +1252,30 @@ def _send_injury_change_notification(
         if old_status == new_status:
             continue  # No change
 
-        name = new_info["player_name"]
-        pos = new_info.get("position", "")
-        mlb_team = new_info.get("mlb_team", "")
-        player_meta = _format_player_meta(pos, mlb_team)
-        owner_label = _format_owner_label(new_info)
-        label = (
-            f"  {name} ({player_meta}) - {owner_label}"
-            if player_meta
-            else f"  {name} - {owner_label}"
-        )
-
         if (not old_status or old_status not in injury_statuses) and new_status in injury_statuses:
-            new_injuries.append(f"{label} -> {new_status}")
+            new_injuries.extend(_status_item_lines(new_info, f"-> {new_status}"))
+            total_changes += 1
         elif old_status in injury_statuses and (not new_status or new_status not in injury_statuses):
-            recovered.append(f"{label} -> Active")
+            recovered.extend(_status_item_lines(new_info, "-> Active"))
+            total_changes += 1
         elif old_status in injury_statuses and new_status in injury_statuses and old_status != new_status:
-            status_changes.append(f"{label} -> {new_status} (was {old_status})")
+            status_changes.extend(
+                _status_item_lines(new_info, f"-> {new_status} (was {old_status})")
+            )
+            total_changes += 1
 
     # No changes in the batch window — treat as success so baseline advances.
     if not new_injuries and not recovered and not status_changes:
         print("[StatusUpdate] No injury status changes in batch window.")
         return True
 
-    header = f"[5-Man Keeper League] 傷兵異動彙整（近 {INJURY_BATCH_DAYS} 天）"
-    lines = [header, ""]
+    lines = [
+        _line_report_divider(width),
+        _center_line("5-Man Keeper League", width),
+        _center_line(f"傷兵異動 {INJURY_BATCH_DAYS} 天", width),
+        _line_report_divider(width),
+        "",
+    ]
 
     if new_injuries:
         lines.append("進入傷兵/異常名單:")
@@ -1258,12 +1292,11 @@ def _send_injury_change_notification(
         lines.extend(status_changes)
         lines.append("")
 
-    total = len(new_injuries) + len(recovered) + len(status_changes)
     message = "\n".join(lines)
 
     success, error = send_line_group_message(message)
     if success:
-        print(f"[StatusUpdate] LINE injury digest sent ({total} changes).")
+        print(f"[StatusUpdate] LINE injury digest sent ({total_changes} changes).")
         return True
     print(f"[StatusUpdate] LINE notification failed: {error}")
     return False
@@ -1682,9 +1715,12 @@ def _daily_games_preview_job(target_id: str = "", dry_run: bool = False) -> dict
             game_time = g.get("gameDate", "")  # ISO UTC
             games.append({"away": away, "home": home, "status": status, "time": game_time})
 
+    width = _line_report_width()
     lines: list[str] = []
-    lines.append(f"⚾ 今日 MLB 賽事一覽（{today}）")
-    lines.append("━" * 14)
+    lines.append(_line_report_divider(width))
+    lines.append(_center_line("今日 MLB 賽事", width))
+    lines.append(_center_line(today, width))
+    lines.append(_line_report_divider(width))
     if not games:
         lines.append("（今日無賽事）")
     else:
@@ -1695,7 +1731,8 @@ def _daily_games_preview_job(target_id: str = "", dry_run: bool = False) -> dict
             home = g["home"] or "?"
             lines.append(f"  {away:>3}  @  {home:<3}   {g['status']}")
     lines.append("")
-    lines.append("（資料來源：MLB Stats API）")
+    lines.append("資料來源：")
+    lines.append("MLB Stats API")
     message = "\n".join(lines)
 
     if dry_run:
@@ -2019,11 +2056,11 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
             abbr1 = _fantasy_team_to_mlb_abbr(t1.get("name", "")) or t1.get("manager", "") or "?"
             abbr2 = _fantasy_team_to_mlb_abbr(t2.get("name", "")) or t2.get("manager", "") or "?"
             if t1.get("is_winner"):
-                row = f"⭐ {p1:>2.0f} {abbr1:<3}  vs  {abbr2:<3} {p2:>2.0f}"
+                row = f"W  {p1:>2.0f} {abbr1:<3} vs {abbr2:<3} {p2:>2.0f}"
             elif t2.get("is_winner"):
-                row = f"   {p1:>2.0f} {abbr1:<3}  vs  {abbr2:<3} {p2:>2.0f} ⭐"
+                row = f"   {p1:>2.0f} {abbr1:<3} vs {abbr2:<3} {p2:>2.0f}  W"
             else:
-                row = f"   {p1:>2.0f} {abbr1:<3}  vs  {abbr2:<3} {p2:>2.0f}"
+                row = f"   {p1:>2.0f} {abbr1:<3} vs {abbr2:<3} {p2:>2.0f}"
             matchup_lines.append(row)
             if idx_m < len(matchups) - 1:
                 matchup_lines.append("")
@@ -2044,7 +2081,7 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
             rbi = st.get("RBI", "0")
             r = st.get("R", "0")
             sb = st.get("SB", "0")
-            batter_lines.append(f" {idx}. {name} {pos} {owner_abbr}")
+            _append_report_player_heading(batter_lines, idx, name, pos, owner_abbr)
             batter_lines.append(f"    {h}-{ab}  {avg}/{ops}")
             batter_lines.append(f"    {hr}HR {rbi}RBI {r}R {sb}SB")
 
@@ -2076,7 +2113,7 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
             else:
                 counting_parts.extend([f"{qs}QS", f"{sv}SV", f"{hld}HLD"])
             counting = " ".join(counting_parts)
-            pitcher_lines.append(f" {idx}. {name} {pos} {owner_abbr}")
+            _append_report_player_heading(pitcher_lines, idx, name, pos, owner_abbr)
             pitcher_lines.append(f"    {ip} IP  {counting}")
             pitcher_lines.append(f"    {era} ERA / {whip} WHIP")
 
@@ -2085,40 +2122,9 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
         if not pitcher_lines:
             pitcher_lines = _format_stats_unavailable("本週最佳投手")
 
-        # page_width: widest non-blank line (content + section headers), floor 28.
-        # Headers are included so that long titles like "【本週最佳打者】(...)"
-        # still receive symmetric padding when _center() is applied.
-        all_content: list[str] = []
-        all_content.extend(standings_lines)
-        for _sub_header, team_lines in division_blocks:
-            all_content.extend(team_lines)
-        all_content.extend(l for l in matchup_lines if l)
-        all_content.extend(batter_lines)
-        all_content.extend(pitcher_lines)
-
-        section_headers: list[str] = ["【聯盟總排名】"]
-        if division_blocks:
-            section_headers.append("【分區排名】")
-            section_headers.extend(h for h, _ in division_blocks)
-        if matchup_lines:
-            section_headers.append("【本週對戰】")
-        if batter_lines:
-            section_headers.append("【本週最佳打者】")
-        if pitcher_lines:
-            section_headers.append("【本週最佳投手】")
-
-        page_width = max(
-            (_visual_width(l) for l in (all_content + section_headers) if l and l.strip()),
-            default=28,
-        )
-        page_width = max(page_width, 28)
-        # Force even so centered (even-width) text is pixel-symmetric in fullwidths.
-        if page_width % 2 == 1:
-            page_width += 1
-
-        # Divider spans full page width — clean, always aligned with content edges.
-        divider_raw = "━" * (page_width // 2)
-        divider_line = divider_raw
+        # LINE mobile bubbles are narrow, so reports use a fixed visual width.
+        page_width = _line_report_width()
+        divider_line = _line_report_divider(page_width)
 
         # Assemble final message with centered section headers.
         lines: list[str] = [
@@ -2156,7 +2162,8 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
             lines.append("")
 
         lines.append(divider_line)
-        lines.append(f"最佳球員排名依據：{top_player_source}")
+        lines.append("最佳球員排名依據：")
+        lines.append(_compact_report_source(top_player_source))
 
         # --- 6. AI commentary (OpenAI; no-op if OPENAI_API_KEY not set) ---
         try:
@@ -2584,7 +2591,7 @@ def _monthly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
             rbi = st.get("RBI", "0")
             r = st.get("R", "0")
             sb = st.get("SB", "0")
-            batter_lines.append(f" {idx}. {name} {pos} {owner_abbr}")
+            _append_report_player_heading(batter_lines, idx, name, pos, owner_abbr)
             batter_lines.append(f"    {h}-{ab}  {avg}/{ops}")
             batter_lines.append(f"    {hr}HR {rbi}RBI {r}R {sb}SB")
 
@@ -2614,7 +2621,7 @@ def _monthly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
                 counting_parts.extend([f"{sv}SV", f"{hld}HLD"])
             else:
                 counting_parts.extend([f"{qs}QS", f"{sv}SV", f"{hld}HLD"])
-            pitcher_lines.append(f" {idx}. {name} {pos} {owner_abbr}")
+            _append_report_player_heading(pitcher_lines, idx, name, pos, owner_abbr)
             pitcher_lines.append(f"    {ip} IP  {' '.join(counting_parts)}")
             pitcher_lines.append(f"    {era} ERA / {whip} WHIP")
 
@@ -2633,49 +2640,16 @@ def _monthly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
                 tx_lines.append("")
                 tx_lines.append("  交易明細：")
                 for nt in trade_details:
-                    tx_lines.append(f"    • {nt}")
+                    names = [name.strip() for name in nt.split(",") if name.strip()]
+                    if not names:
+                        continue
+                    tx_lines.append(f"    - {names[0]}")
+                    for name in names[1:]:
+                        tx_lines.append(f"      {name}")
 
-        # Collect content to size the page width.
-        all_content: list[str] = []
-        all_content.extend(standings_lines)
-        for _sh, lines_sub in division_blocks:
-            all_content.extend(lines_sub)
-        all_content.extend(monthly_record_lines)
-        all_content.extend(l for l in playoff_lines if l)
-        all_content.extend(batter_lines)
-        all_content.extend(pitcher_lines)
-        all_content.extend(l for l in tx_lines if l)
-        all_content.extend(rookie_r_lines)
-        all_content.extend(rookie_fa_lines)
-
-        section_headers: list[str] = ["【聯盟總排名】"]
-        if division_blocks:
-            section_headers.append("【分區排名】")
-            section_headers.extend(h for h, _ in division_blocks)
-        if monthly_record_lines:
-            section_headers.append(f"【{month_label}戰績排名】")
-        if playoff_lines:
-            section_headers.append("【季後賽門票】")
-        if batter_lines:
-            section_headers.append(f"【{month_label}最佳打者】")
-        if pitcher_lines:
-            section_headers.append(f"【{month_label}最佳投手】")
-        if tx_lines:
-            section_headers.append(f"【{month_label}交易摘要】")
-        if rookie_r_lines:
-            section_headers.append("【R 約新秀觀察】")
-        if rookie_fa_lines:
-            section_headers.append("【未持有新秀觀察】")
-
-        page_width = max(
-            (_visual_width(l) for l in (all_content + section_headers) if l and l.strip()),
-            default=28,
-        )
-        page_width = max(page_width, 28)
-        if page_width % 2 == 1:
-            page_width += 1
-
-        divider_line = "━" * (page_width // 2)
+        # LINE mobile bubbles are narrow, so reports use a fixed visual width.
+        page_width = _line_report_width()
+        divider_line = _line_report_divider(page_width)
 
         lines: list[str] = [
             divider_line,
@@ -2731,8 +2705,11 @@ def _monthly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
             lines.append("")
 
         lines.append(divider_line)
-        lines.append(f"最佳球員排名依據：{top_player_source}")
-        lines.append("新秀觀察來源：Yahoo rosters + MLB Stats API")
+        lines.append("最佳球員排名依據：")
+        lines.append(_compact_report_source(top_player_source))
+        lines.append("新秀觀察來源：")
+        lines.append("Yahoo rosters")
+        lines.append("+ MLB Stats API")
 
         # AI commentary (monthly variant).
         try:
@@ -2929,17 +2906,22 @@ def _prospect_ranking_update_job():
                 unmatched.append(rp)
 
         # --- 4. Build and send LINE notification ---
+        width = _line_report_width()
         lines = [
-            f"[5-Man Keeper League] {year} 新秀排名更新",
-            f"MLB Prospect Rankings Update",
-            f"",
-            f"資料來源: MLB Stats API ({now.strftime('%Y-%m-%d')})",
+            _line_report_divider(width),
+            _center_line("5-Man Keeper League", width),
+            _center_line(f"{year} 新秀排名更新", width),
+            _center_line("Prospect Rankings", width),
+            _line_report_divider(width),
+            "",
+            f"資料來源: MLB Stats API",
+            f"更新日期: {now.strftime('%Y-%m-%d')}",
             f"聯盟 R 約球員: {len(r_players)} 名",
-            f"",
+            "",
         ]
 
         if matched:
-            lines.append("-- 聯盟 R 約球員 MLB 資訊 --")
+            lines.append(_center_line("【R 約球員資訊】", width))
             for m in matched:
                 pi = m["prospect_info"]
                 rank_str = f"#{pi['rank']}" if pi.get("rank") else ""
@@ -2952,23 +2934,31 @@ def _prospect_ranking_update_job():
                 player_label = (
                     f"{m['name']} ({player_meta})" if player_meta else m["name"]
                 )
-                lines.append(
-                    f"  {player_label} - {_format_owner_label(m)}"
-                )
+                owner_label = _format_owner_label(m)
+                one_line = f"  {player_label} - {owner_label}"
+                if _visual_width(one_line) <= width:
+                    lines.append(one_line)
+                else:
+                    lines.append(f"  {player_label}")
+                    lines.append(f"    {owner_label}")
                 if rank_str or age_str or debut_str:
                     lines.append(f"    {rank_str}{age_str}{debut_str}")
             lines.append("")
 
         if unmatched:
-            lines.append("-- 未在 MLB API 中找到 --")
+            lines.append(_center_line("【未在 MLB API 中找到】", width))
             for u in unmatched:
                 player_meta = _format_player_meta(u["position"], u["mlb_team"])
                 player_label = (
                     f"{u['name']} ({player_meta})" if player_meta else u["name"]
                 )
-                lines.append(
-                    f"  {player_label} - {_format_owner_label(u)}"
-                )
+                owner_label = _format_owner_label(u)
+                one_line = f"  {player_label} - {owner_label}"
+                if _visual_width(one_line) <= width:
+                    lines.append(one_line)
+                else:
+                    lines.append(f"  {player_label}")
+                    lines.append(f"    {owner_label}")
             lines.append("")
 
         if not r_players:

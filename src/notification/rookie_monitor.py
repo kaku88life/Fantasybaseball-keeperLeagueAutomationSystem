@@ -14,6 +14,13 @@ from pathlib import Path
 
 import httpx
 
+from src.notification.line_format import (
+    center_line,
+    divider_line,
+    report_width,
+    visual_width,
+)
+
 MLB_BASE = "https://statsapi.mlb.com/api/v1"
 DATA_DIR = Path(__file__).resolve().parents[2] / "data"
 
@@ -233,9 +240,13 @@ def send_callup_notifications(year: int) -> dict:
 
     # Build LINE message
     frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3001")
+    width = report_width()
     lines = [
-        f"[5-Man Keeper League] 新秀上大聯盟通知",
-        f"Rookie Call-up Alert",
+        divider_line(width),
+        center_line("5-Man Keeper League", width),
+        center_line("新秀上大聯盟通知", width),
+        center_line("Rookie Call-up Alert", width),
+        divider_line(width),
         "",
     ]
     for cu in new_callups:
@@ -243,15 +254,20 @@ def send_callup_notifications(year: int) -> dict:
         debut_str = f" (debut: {di['debut_date']})" if di.get("is_debut_this_year") else ""
         player_meta = _format_player_meta(cu.get("position", ""))
         player_label = f"{cu['name']} ({player_meta})" if player_meta else cu["name"]
+        owner_label = _format_owner_label(cu)
+        one_line = f"  {player_label} - {owner_label}"
+        if visual_width(one_line) <= width:
+            lines.append(one_line)
+        else:
+            lines.append(f"  {player_label}")
+            lines.append(f"    {owner_label}")
         lines.append(
-            f"  {player_label} - {_format_owner_label(cu)}"
-        )
-        lines.append(
-            f"  MLB: {di.get('current_team', cu['mlb_team'])}{debut_str}"
+            f"    MLB: {di.get('current_team', cu['mlb_team'])}{debut_str}"
         )
         lines.append("")
 
-    lines.append(f"球員資料庫 Players DB:")
+    lines.append("球員資料庫:")
+    lines.append("Players DB:")
     lines.append(f"{frontend_url}/players")
 
     message = "\n".join(lines)
