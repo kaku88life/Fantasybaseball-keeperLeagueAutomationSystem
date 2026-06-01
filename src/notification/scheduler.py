@@ -25,7 +25,6 @@ from src.notification.line_format import (
     compact_report_source as _compact_report_source,
     divider_line as _line_report_divider,
     format_rookie_stats_lines as _format_rookie_stats_lines,
-    pad_right_visual as _pad_right_visual,
     report_width as _line_report_width,
     visual_width as _visual_width,
 )
@@ -158,13 +157,6 @@ _YAHOO_STAT_ID_NAME: dict[str, str] = {
 # --- Shared formatting helpers for LINE reports (weekly / monthly war reports) ---
 
 
-def _team_mgr_block(team_name: str, manager_name: str) -> str:
-    """Format `ABBR (manager)` or fall back to raw team name / ? when abbr lookup fails."""
-    abbr = _fantasy_team_to_mlb_abbr(team_name or "") or team_name or "?"
-    mgr = manager_name or "?"
-    return f"{abbr}  ({mgr})"
-
-
 def _format_owner_label(info: dict[str, Any]) -> str:
     """Prefer the Yahoo fantasy team name, with manager as a disambiguator."""
     manager = (info.get("owner_manager") or "").strip()
@@ -194,6 +186,30 @@ def _normalize_player_name(name: str) -> str:
 
 def _format_stats_unavailable(label: str) -> list[str]:
     return [f"  Yahoo 暫未回傳{label}", "  資料；請稍後再試。"]
+
+
+def _team_mgr_short(team_name: str, manager_name: str) -> str:
+    abbr = _fantasy_team_to_mlb_abbr(team_name or "") or team_name or "?"
+    mgr = manager_name or "?"
+    return f"{abbr} ({mgr})"
+
+
+def _line_lr(left: str, right: str = "", width: int | None = None) -> str:
+    width = width or _line_report_width()
+    right = right or ""
+    if not right:
+        return left
+    gap = width - _visual_width(left) - _visual_width(right)
+    if gap < 1:
+        return left
+    return f"{left}{' ' * gap}{right}"
+
+
+def _append_lr(lines: list[str], left: str, right: str = "", cont_indent: str = "    ") -> None:
+    line = _line_lr(left, right)
+    lines.append(line)
+    if right and line == left:
+        lines.append(_line_lr(cont_indent, right))
 
 
 def _append_report_player_heading(
@@ -612,6 +628,125 @@ def _fetch_rookie_month_stats_line(
     return ""
 
 
+def _fetch_mlb_month_player_stats(
+    name: str,
+    position: str,
+    year: int,
+    report_month: int,
+) -> dict[str, str]:
+    """Fetch MLB gameLog stats for the report month and aggregate display stats."""
+    import httpx
+
+    person = _find_mlb_person(name, position, None)
+    if not person or not person.get("id"):
+        return {}
+
+    prefers_pitching = _is_pitcher_position(position)
+    hitting = {
+        "games": 0, "ab": 0, "h": 0, "2b": 0, "3b": 0, "hr": 0,
+        "rbi": 0, "r": 0, "sb": 0, "bb": 0, "hbp": 0, "sf": 0, "tb": 0,
+    }
+    pitching = {
+        "games": 0, "outs": 0, "k": 0, "w": 0, "sv": 0,
+        "hld": 0, "er": 0, "h": 0, "bb": 0, "qs": 0,
+    }
+
+    try:
+        resp = httpx.get(
+            f"{MLB_STATS_API_BASE}/people/{person['id']}/stats",
+            params={
+                "stats": "gameLog",
+                "group": "hitting,pitching",
+                "season": year,
+                "sportId": 1,
+            },
+            timeout=8.0,
+        )
+        resp.raise_for_status()
+        data = resp.json()
+    except Exception as e:
+        print(f"[ReportTopPlayers] MLB month stats failed for {name}: {e}")
+        return {}
+
+    for stat_group in data.get("stats", []):
+        group_name = (
+            stat_group.get("group", {}).get("displayName", "")
+            or stat_group.get("group", {}).get("display_name", "")
+        ).lower()
+        for split in stat_group.get("splits", []):
+            if not _split_in_report_month(split, year, report_month):
+                continue
+            stat = split.get("stat", {})
+            if group_name == "hitting":
+                hitting["games"] += 1
+                hitting["ab"] += _safe_stat_int(stat, "atBats")
+                hitting["h"] += _safe_stat_int(stat, "hits")
+                hitting["2b"] += _safe_stat_int(stat, "doubles")
+                hitting["3b"] += _safe_stat_int(stat, "triples")
+                hitting["hr"] += _safe_stat_int(stat, "homeRuns")
+                hitting["rbi"] += _safe_stat_int(stat, "rbi")
+                hitting["r"] += _safe_stat_int(stat, "runs")
+                hitting["sb"] += _safe_stat_int(stat, "stolenBases")
+                hitting["bb"] += _safe_stat_int(stat, "baseOnBalls", "walks")
+                hitting["hbp"] += _safe_stat_int(stat, "hitByPitch")
+                hitting["sf"] += _safe_stat_int(stat, "sacFlies", "sacrificeFlies")
+                hitting["tb"] += _safe_stat_int(stat, "totalBases")
+            elif group_name == "pitching":
+                outs = _ip_to_outs(stat.get("inningsPitched"))
+                er = _safe_stat_int(stat, "earnedRuns")
+                pitching["games"] += 1
+                pitching["outs"] += outs
+                pitching["k"] += _safe_stat_int(stat, "strikeOuts", "strikeouts")
+                pitching["w"] += _safe_stat_int(stat, "wins")
+                pitching["sv"] += _safe_stat_int(stat, "saves")
+                pitching["hld"] += _safe_stat_int(stat, "holds")
+                pitching["er"] += er
+                pitching["h"] += _safe_stat_int(stat, "hits")
+                pitching["bb"] += _safe_stat_int(stat, "baseOnBalls", "walks")
+                if outs >= 18 and er <= 3:
+                    pitching["qs"] += 1
+
+    if prefers_pitching and pitching["games"] > 0 and pitching["outs"] > 0:
+        innings = pitching["outs"] / 3
+        era = (pitching["er"] * 9 / innings) if innings else 0
+        whip = ((pitching["h"] + pitching["bb"]) / innings) if innings else 0
+        return {
+            "IP": _outs_to_ip(pitching["outs"]),
+            "W": str(pitching["w"]),
+            "SV": str(pitching["sv"]),
+            "HLD": str(pitching["hld"]),
+            "K": str(pitching["k"]),
+            "ERA": f"{era:.2f}",
+            "WHIP": f"{whip:.2f}",
+            "QS": str(pitching["qs"]),
+        }
+
+    if hitting["games"] > 0 and (hitting["ab"] > 0 or hitting["h"] > 0):
+        ab = hitting["ab"]
+        h = hitting["h"]
+        avg = h / ab if ab else 0
+        tb = hitting["tb"]
+        if not tb:
+            singles = h - hitting["2b"] - hitting["3b"] - hitting["hr"]
+            tb = singles + hitting["2b"] * 2 + hitting["3b"] * 3 + hitting["hr"] * 4
+        obp_den = ab + hitting["bb"] + hitting["hbp"] + hitting["sf"]
+        obp = (h + hitting["bb"] + hitting["hbp"]) / obp_den if obp_den else 0
+        slg = tb / ab if ab else 0
+        ops = obp + slg if ab else 0
+        return {
+            "H": str(h),
+            "AB": str(ab),
+            "AVG": f"{avg:.3f}",
+            "OPS": f"{ops:.3f}",
+            "HR": str(hitting["hr"]),
+            "RBI": str(hitting["rbi"]),
+            "R": str(hitting["r"]),
+            "SB": str(hitting["sb"]),
+        }
+
+    return {}
+
+
 def _build_rookie_watch_lines(
     year: int,
     report_month: int,
@@ -674,7 +809,8 @@ def _build_rookie_watch_lines(
 
     r_lines: list[str] = []
     if r_candidates:
-        for idx, player in enumerate(r_candidates[:ROOKIE_WATCH_R_LIMIT], 1):
+        shown_r = r_candidates[:ROOKIE_WATCH_R_LIMIT]
+        for idx, player in enumerate(shown_r, 1):
             prospect = player.get("prospect") or {}
             position = prospect.get("position") or player.get("position", "")
             mlb_team = prospect.get("mlb_team") or player.get("mlb_team", "")
@@ -693,6 +829,8 @@ def _build_rookie_watch_lines(
                     stats_line or f"{month_label} MLB/MiLB 數據暫缺"
                 )
             )
+            if idx < len(shown_r):
+                r_lines.append("")
     else:
         r_lines.append("  目前沒有可整理的 R 約新秀。")
 
@@ -707,7 +845,8 @@ def _build_rookie_watch_lines(
     debug["unowned_count"] = len(unowned)
 
     if unowned:
-        for idx, prospect in enumerate(unowned[:ROOKIE_WATCH_FA_LIMIT], 1):
+        shown_fa = unowned[:ROOKIE_WATCH_FA_LIMIT]
+        for idx, prospect in enumerate(shown_fa, 1):
             position = prospect.get("position", "")
             mlb_team = prospect.get("mlb_team", "")
             meta = _format_player_meta(position, mlb_team)
@@ -727,6 +866,8 @@ def _build_rookie_watch_lines(
                     stats_line or f"{month_label} MLB/MiLB 數據暫缺"
                 )
             )
+            if idx < len(shown_fa):
+                fa_lines.append("")
     elif prospects and not owner_by_name:
         fa_lines.append("  ownership 資料暫缺，未持有名單先不列入月報。")
     else:
@@ -777,6 +918,55 @@ def _walk_first(obj: Any, key: str) -> Any:
             if found is not None:
                 return found
     return None
+
+
+def _iter_yahoo_collection(section: Any, item_key: str) -> list[dict]:
+    if isinstance(section, list):
+        items: list[dict] = []
+        for raw in section:
+            if not isinstance(raw, dict):
+                continue
+            item = raw.get(item_key, raw)
+            if isinstance(item, dict):
+                items.append(item)
+        return items
+    if not isinstance(section, dict):
+        return []
+    count = _safe_int(section.get("count", 0))
+    items: list[dict] = []
+    for idx in range(count):
+        raw = section.get(str(idx), {})
+        if not isinstance(raw, dict):
+            continue
+        item = raw.get(item_key, raw)
+        if isinstance(item, dict):
+            items.append(item)
+    return items
+
+
+def _matchup_category_records(m_raw: dict, team_keys: list[str]) -> dict[str, dict[str, int]]:
+    records = {key: {"w": 0, "l": 0, "t": 0} for key in team_keys if key}
+    if len(records) != 2:
+        return {}
+
+    stat_winners = _walk_first(m_raw, "stat_winners")
+    winners = _iter_yahoo_collection(stat_winners, "stat_winner")
+    if not winners:
+        return {}
+
+    for winner in winners:
+        winner_key = str(winner.get("winner_team_key") or "")
+        is_tied = str(winner.get("is_tied", "0")) == "1" or not winner_key
+        if is_tied or winner_key not in records:
+            for key in records:
+                records[key]["t"] += 1
+            continue
+        for key in records:
+            if key == winner_key:
+                records[key]["w"] += 1
+            else:
+                records[key]["l"] += 1
+    return records
 
 
 def _parse_yahoo_top_player_entry(p_entry: list) -> dict:
@@ -1983,26 +2173,15 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
         # --- 5. Build LINE message (using shared module-level formatting helpers) ---
 
         # Column width for "ABBR (Manager)" — shared by overall + division sections.
-        max_left_vw = max(
-            (
-                _visual_width(_team_mgr_block(s["team_name"], s["manager_name"]))
-                for s in current_standings
-            ),
-            default=0,
-        )
-
-        def _format_standing_line(
+        def _format_standing_lines(
             s: dict,
             rank_override: int | None = None,
             indent: str = "",
             show_change: bool = True,
-        ) -> str:
+        ) -> list[str]:
             w, l, t = s["wins"], s["losses"], s["ties"]
             rank = rank_override if rank_override is not None else s["rank"]
-            left = _pad_right_visual(
-                _team_mgr_block(s["team_name"], s["manager_name"]),
-                max_left_vw,
-            )
+            left = f"{indent}{rank:>2}. {_team_mgr_short(s['team_name'], s['manager_name'])}"
             record = f"{w}-{l}-{t}"
             if show_change:
                 mgr = s["manager_name"] or "?"
@@ -2019,14 +2198,22 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
                     change = "  --"
             else:
                 change = ""
-            return f"{indent}{rank:>2}. {left}  {record:>7}{change}"
+            if show_change:
+                lines: list[str] = []
+                _append_lr(lines, left, change.strip(), cont_indent=f"{indent}    ")
+                lines.append(_line_lr(f"{indent}    戰績", record))
+                return lines
+            line = _line_lr(left, record)
+            if line == left:
+                return [line, _line_lr(f"{indent}    戰績", record)]
+            return [line]
 
         # --- Build content sections first, so page_width matches actual content. ---
 
         # Overall standings
-        standings_lines: list[str] = [
-            _format_standing_line(s) for s in current_standings
-        ]
+        standings_lines: list[str] = []
+        for s in current_standings:
+            standings_lines.extend(_format_standing_lines(s))
 
         # Division standings: group by division_id, rank within each division.
         divisions: dict[str, list[dict]] = {}
@@ -2037,15 +2224,16 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
         division_blocks: list[tuple[str, list[str]]] = []
         for div_id in sorted(divisions.keys()):
             div_teams = sorted(divisions[div_id], key=lambda x: x["rank"] or 999)
-            team_lines = [
-                _format_standing_line(
-                    s,
-                    rank_override=idx,
-                    indent="  ",
-                    show_change=False,
+            team_lines: list[str] = []
+            for idx, s in enumerate(div_teams, 1):
+                team_lines.extend(
+                    _format_standing_lines(
+                        s,
+                        rank_override=idx,
+                        indent="  ",
+                        show_change=False,
+                    )
                 )
-                for idx, s in enumerate(div_teams, 1)
-            ]
             division_blocks.append((f"▸ 分區 {div_id}", team_lines))
 
         # Matchups — scoreboard style, MLB abbrev, W marker on winner's outer side.
@@ -2082,8 +2270,12 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
             r = st.get("R", "0")
             sb = st.get("SB", "0")
             _append_report_player_heading(batter_lines, idx, name, pos, owner_abbr)
-            batter_lines.append(f"    {h}-{ab}  {avg}/{ops}")
-            batter_lines.append(f"    {hr}HR {rbi}RBI {r}R {sb}SB")
+            batter_lines.append(f"    H-AB {h}-{ab} AVG {avg}")
+            batter_lines.append(f"    OPS {ops}")
+            batter_lines.append(f"    HR {hr} RBI {rbi}")
+            batter_lines.append(f"    R {r} SB {sb}")
+            if idx < min(len(top_batters), 5):
+                batter_lines.append("")
 
         # Top pitchers — 3 lines per player: name / IP + counting / ERA / WHIP.
         # SP hides SV/HLD, RP hides QS.
@@ -2114,8 +2306,11 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
                 counting_parts.extend([f"{qs}QS", f"{sv}SV", f"{hld}HLD"])
             counting = " ".join(counting_parts)
             _append_report_player_heading(pitcher_lines, idx, name, pos, owner_abbr)
-            pitcher_lines.append(f"    {ip} IP  {counting}")
-            pitcher_lines.append(f"    {era} ERA / {whip} WHIP")
+            pitcher_lines.append(f"    IP {ip} ERA {era}")
+            pitcher_lines.append(f"    WHIP {whip}")
+            pitcher_lines.append(f"    {counting}")
+            if idx < min(len(top_pitchers), 5):
+                pitcher_lines.append("")
 
         if not batter_lines:
             batter_lines = _format_stats_unavailable("本週最佳打者")
@@ -2373,7 +2568,6 @@ def _monthly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
                 for mi in range(m_count):
                     m_raw = matchups_section.get(str(mi), {}).get("matchup", {})
                     teams_data = m_raw.get("0", {}).get("teams", {})
-                    winner_key = m_raw.get("winner_team_key", "")
                     t_count = _safe_int(teams_data.get("count", 0))
 
                     match_info = []
@@ -2384,26 +2578,48 @@ def _monthly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
                         t_info = t_raw[0] if isinstance(t_raw, list) else []
                         t_key = ""
                         t_mgr = ""
+                        t_name = ""
                         for item in t_info:
                             if isinstance(item, dict):
+                                if "name" in item:
+                                    t_name = str(item["name"])
                                 if "team_key" in item:
-                                    t_key = item["team_key"]
+                                    t_key = str(item["team_key"])
                                 if "managers" in item:
                                     mgrs = item["managers"]
                                     if isinstance(mgrs, list) and mgrs:
-                                        t_mgr = mgrs[0].get("manager", {}).get("nickname", "")
-                        match_info.append({"key": t_key, "mgr": t_mgr})
+                                        t_mgr = str(mgrs[0].get("manager", {}).get("nickname", ""))
+                        match_info.append({"key": t_key, "mgr": t_mgr, "name": t_name})
 
                     if len(match_info) == 2:
+                        category_records = _matchup_category_records(
+                            m_raw,
+                            [mi_t["key"] for mi_t in match_info],
+                        )
+                        winner_key = str(m_raw.get("winner_team_key", ""))
                         for mi_t in match_info:
-                            mgr = mi_t["mgr"] or "?"
-                            team_monthly_record.setdefault(mgr, {"w": 0, "l": 0, "t": 0})
-                            if mi_t["key"] == winner_key:
-                                team_monthly_record[mgr]["w"] += 1
+                            team_key = mi_t["key"] or mi_t["mgr"] or "?"
+                            rec = team_monthly_record.setdefault(
+                                team_key,
+                                {
+                                    "w": 0,
+                                    "l": 0,
+                                    "t": 0,
+                                    "team_name": mi_t["name"],
+                                    "manager_name": mi_t["mgr"],
+                                },
+                            )
+                            if category_records:
+                                cat = category_records.get(mi_t["key"], {})
+                                rec["w"] += cat.get("w", 0)
+                                rec["l"] += cat.get("l", 0)
+                                rec["t"] += cat.get("t", 0)
+                            elif mi_t["key"] == winner_key:
+                                rec["w"] += 1
                             elif winner_key:
-                                team_monthly_record[mgr]["l"] += 1
+                                rec["l"] += 1
                             else:
-                                team_monthly_record[mgr]["t"] += 1
+                                rec["t"] += 1
 
                 time.sleep(0.6)
             except Exception as e:
@@ -2421,11 +2637,18 @@ def _monthly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
                 sort_type="lastmonth",
             )
         )
+        for player in top_batters[:5] + top_pitchers[:5]:
+            month_stats = _fetch_mlb_month_player_stats(
+                player.get("name", ""),
+                player.get("position", ""),
+                year,
+                report_month,
+            )
+            if month_stats:
+                player["stats"] = month_stats
 
         # --- 5. Transaction summary (read local JSON) ---
         month_trades = 0
-        month_adds = 0
-        month_drops = 0
         trade_details: list[str] = []
         try:
             data_dir = Path(__file__).resolve().parent.parent.parent / "data"
@@ -2452,12 +2675,6 @@ def _monthly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
                         names = [p.get("name", "?") for p in players[:4]]
                         if names:
                             trade_details.append(", ".join(names))
-                    elif tx_type in ("add", "add/drop"):
-                        month_adds += 1
-                        if "drop" in tx_type:
-                            month_drops += 1
-                    elif tx_type == "drop":
-                        month_drops += 1
         except Exception as e:
             print(f"[MonthlyReport] Transaction summary error: {e}")
 
@@ -2472,27 +2689,15 @@ def _monthly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
 
         # --- 7. Build LINE message (weekly-style layout) ---
 
-        # Column width shared by overall + division lines.
-        max_left_vw = max(
-            (
-                _visual_width(_team_mgr_block(s["team_name"], s["manager_name"]))
-                for s in current_standings
-            ),
-            default=0,
-        )
-
-        def _format_standing_line(
+        def _format_standing_lines(
             s: dict,
             rank_override: int | None = None,
             indent: str = "",
             show_change: bool = True,
-        ) -> str:
+        ) -> list[str]:
             w, l, t = s["wins"], s["losses"], s["ties"]
             rank = rank_override if rank_override is not None else s["rank"]
-            left = _pad_right_visual(
-                _team_mgr_block(s["team_name"], s["manager_name"]),
-                max_left_vw,
-            )
+            left = f"{indent}{rank:>2}. {_team_mgr_short(s['team_name'], s['manager_name'])}"
             record = f"{w}-{l}-{t}"
             if show_change:
                 mgr = s["manager_name"] or "?"
@@ -2509,10 +2714,20 @@ def _monthly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
                     change = "  --"
             else:
                 change = ""
-            return f"{indent}{rank:>2}. {left}  {record:>7}{change}"
+            if show_change:
+                lines: list[str] = []
+                _append_lr(lines, left, change.strip(), cont_indent=f"{indent}    ")
+                lines.append(_line_lr(f"{indent}    戰績", record))
+                return lines
+            line = _line_lr(left, record)
+            if line == left:
+                return [line, _line_lr(f"{indent}    戰績", record)]
+            return [line]
 
         # Overall standings.
-        standings_lines = [_format_standing_line(s) for s in current_standings]
+        standings_lines: list[str] = []
+        for s in current_standings:
+            standings_lines.extend(_format_standing_lines(s))
 
         # Division standings.
         divisions: dict[str, list[dict]] = {}
@@ -2523,28 +2738,31 @@ def _monthly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
         division_blocks: list[tuple[str, list[str]]] = []
         for div_id in sorted(divisions.keys()):
             div_teams = sorted(divisions[div_id], key=lambda x: x["rank"] or 999)
-            team_lines = [
-                _format_standing_line(s, rank_override=idx, indent="  ", show_change=False)
-                for idx, s in enumerate(div_teams, 1)
-            ]
+            team_lines: list[str] = []
+            for idx, s in enumerate(div_teams, 1):
+                team_lines.extend(
+                    _format_standing_lines(
+                        s,
+                        rank_override=idx,
+                        indent="  ",
+                        show_change=False,
+                    )
+                )
             division_blocks.append((f"▸ 分區 {div_id}", team_lines))
 
         # Monthly W-L-T ranking (hot/cold — sorted best to worst for the month).
         monthly_record_lines: list[str] = []
         if team_monthly_record:
             sorted_monthly = sorted(
-                team_monthly_record.items(),
-                key=lambda x: (x[1]["w"], -x[1]["l"]),
+                team_monthly_record.values(),
+                key=lambda rec: (rec["w"], rec["t"], -rec["l"]),
                 reverse=True,
             )
-            max_mgr_vw = max(
-                (_visual_width(mgr) for mgr, _ in sorted_monthly),
-                default=0,
-            )
-            for idx, (mgr, rec) in enumerate(sorted_monthly, 1):
-                left = _pad_right_visual(mgr or "?", max_mgr_vw)
-                monthly_record_lines.append(
-                    f" {idx:>2}. {left}  {rec['w']}-{rec['l']}-{rec['t']}"
+            for idx, rec in enumerate(sorted_monthly, 1):
+                _append_lr(
+                    monthly_record_lines,
+                    f" {idx:>2}. {_team_mgr_short(rec.get('team_name', ''), rec.get('manager_name', ''))}",
+                    f"{rec['w']}-{rec['l']}-{rec['t']}",
                 )
 
         # Playoff gate — wins relative to 8th place (top 8 = playoffs).
@@ -2552,17 +2770,10 @@ def _monthly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
         if len(current_standings) >= 8:
             eighth = current_standings[7]
             eighth_wins = eighth["wins"]
-            eighth_mgr = eighth["manager_name"] or "?"
-            max_mgr_vw_po = max(
-                (_visual_width(s["manager_name"] or "?") for s in current_standings),
-                default=0,
-            )
             for s in current_standings:
-                mgr = s["manager_name"] or "?"
-                left = _pad_right_visual(mgr, max_mgr_vw_po)
+                left = f" {s['rank']:>2}. {_team_mgr_short(s['team_name'], s['manager_name'])}"
                 if s["rank"] == 8:
-                    marker = "—— 第 8 名 ——"
-                    playoff_lines.append(f"  {left}  {marker}")
+                    _append_lr(playoff_lines, left, "第 8 名")
                 else:
                     diff = s["wins"] - eighth_wins
                     if diff > 0:
@@ -2571,9 +2782,10 @@ def _monthly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
                         tag = f"{diff}W"
                     else:
                         tag = "同勝"
-                    playoff_lines.append(f"  {left}  {tag}")
+                    _append_lr(playoff_lines, left, tag)
             playoff_lines.append("")
-            playoff_lines.append(f"  （以第 8 名 {eighth_mgr} 的勝場為基準）")
+            playoff_lines.append("  以第 8 名勝場為基準")
+            playoff_lines.append(f"  {_team_mgr_short(eighth['team_name'], eighth['manager_name'])}")
 
         # Top batters — 3 lines per player (weekly-style).
         batter_lines: list[str] = []
@@ -2592,8 +2804,12 @@ def _monthly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
             r = st.get("R", "0")
             sb = st.get("SB", "0")
             _append_report_player_heading(batter_lines, idx, name, pos, owner_abbr)
-            batter_lines.append(f"    {h}-{ab}  {avg}/{ops}")
-            batter_lines.append(f"    {hr}HR {rbi}RBI {r}R {sb}SB")
+            batter_lines.append(f"    H-AB {h}-{ab} AVG {avg}")
+            batter_lines.append(f"    OPS {ops}")
+            batter_lines.append(f"    HR {hr} RBI {rbi}")
+            batter_lines.append(f"    R {r} SB {sb}")
+            if idx < min(len(top_batters), 5):
+                batter_lines.append("")
 
         # Top pitchers — 3 lines per player (weekly-style, position-aware).
         pitcher_lines: list[str] = []
@@ -2622,8 +2838,11 @@ def _monthly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
             else:
                 counting_parts.extend([f"{qs}QS", f"{sv}SV", f"{hld}HLD"])
             _append_report_player_heading(pitcher_lines, idx, name, pos, owner_abbr)
-            pitcher_lines.append(f"    {ip} IP  {' '.join(counting_parts)}")
-            pitcher_lines.append(f"    {era} ERA / {whip} WHIP")
+            pitcher_lines.append(f"    IP {ip} ERA {era}")
+            pitcher_lines.append(f"    WHIP {whip}")
+            pitcher_lines.append(f"    {' '.join(counting_parts)}")
+            if idx < min(len(top_pitchers), 5):
+                pitcher_lines.append("")
 
         if not batter_lines:
             batter_lines = _format_stats_unavailable(f"{month_label}最佳打者")
@@ -2632,10 +2851,8 @@ def _monthly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
 
         # Transaction summary — totals + full trade list.
         tx_lines: list[str] = []
-        if month_trades or month_adds or month_drops:
-            tx_lines.append(
-                f"  交易: {month_trades} 筆 | 撿人: {month_adds} 筆 | 釋出: {month_drops} 筆"
-            )
+        if month_trades:
+            tx_lines.append(f"  交易: {month_trades} 筆")
             if trade_details:
                 tx_lines.append("")
                 tx_lines.append("  交易明細：")
@@ -2646,6 +2863,8 @@ def _monthly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
                     tx_lines.append(f"    - {names[0]}")
                     for name in names[1:]:
                         tx_lines.append(f"      {name}")
+        else:
+            tx_lines.append("  本月沒有交易。")
 
         # LINE mobile bubbles are narrow, so reports use a fixed visual width.
         page_width = _line_report_width()
