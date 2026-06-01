@@ -460,17 +460,16 @@ def _fetch_rookie_month_stats_line(
         return ""
 
     level_map = {1: "MLB", 11: "AAA", 12: "AA", 13: "A+", 14: "A", 16: "ROK"}
+    level_order = ["MLB", "AAA", "AA", "A+", "A", "ROK"]
     prefers_pitching = _is_pitcher_position(position)
+    hitting_by_level: dict[str, dict] = {}
+    pitching_by_level: dict[str, dict] = {}
+    seen_splits: set[tuple[str, str]] = set()
 
-    for sport_id, level in level_map.items():
+    for sport_id in level_map:
         timeout = _http_timeout(deadline)
         if timeout <= 0:
             break
-        hitting = {"games": 0, "ab": 0, "h": 0, "hr": 0, "rbi": 0, "r": 0, "sb": 0}
-        pitching = {
-            "games": 0, "outs": 0, "k": 0, "w": 0, "sv": 0,
-            "hld": 0, "er": 0, "h": 0, "bb": 0,
-        }
         try:
             resp = httpx.get(
                 f"{MLB_STATS_API_BASE}/people/{mlb_id}/stats",
@@ -495,8 +494,34 @@ def _fetch_rookie_month_stats_line(
             for split in stat_group.get("splits", []):
                 if not _split_in_report_month(split, year, report_month):
                     continue
+                split_sport_id = (
+                    split.get("sport", {}).get("id")
+                    if isinstance(split.get("sport"), dict)
+                    else None
+                )
+                level = level_map.get(split_sport_id or sport_id, "Other")
+                game = split.get("game") if isinstance(split.get("game"), dict) else {}
+                split_key = (
+                    group_name,
+                    str(
+                        game.get("gamePk")
+                        or split.get("date")
+                        or game.get("gameDate")
+                        or f"{level}:{len(seen_splits)}"
+                    ),
+                )
+                if split_key in seen_splits:
+                    continue
+                seen_splits.add(split_key)
                 stat = split.get("stat", {})
                 if group_name == "hitting":
+                    hitting = hitting_by_level.setdefault(
+                        level,
+                        {
+                            "games": 0, "ab": 0, "h": 0, "hr": 0,
+                            "rbi": 0, "r": 0, "sb": 0,
+                        },
+                    )
                     hitting["games"] += 1
                     hitting["ab"] += _safe_stat_int(stat, "atBats")
                     hitting["h"] += _safe_stat_int(stat, "hits")
@@ -505,6 +530,13 @@ def _fetch_rookie_month_stats_line(
                     hitting["r"] += _safe_stat_int(stat, "runs")
                     hitting["sb"] += _safe_stat_int(stat, "stolenBases")
                 elif group_name == "pitching":
+                    pitching = pitching_by_level.setdefault(
+                        level,
+                        {
+                            "games": 0, "outs": 0, "k": 0, "w": 0,
+                            "sv": 0, "hld": 0, "er": 0, "h": 0, "bb": 0,
+                        },
+                    )
                     pitching["games"] += 1
                     pitching["outs"] += _ip_to_outs(stat.get("inningsPitched"))
                     pitching["k"] += _safe_stat_int(stat, "strikeOuts", "strikeouts")
@@ -515,6 +547,18 @@ def _fetch_rookie_month_stats_line(
                     pitching["h"] += _safe_stat_int(stat, "hits")
                     pitching["bb"] += _safe_stat_int(stat, "baseOnBalls", "walks")
 
+    for level in level_order:
+        hitting = hitting_by_level.get(
+            level,
+            {"games": 0, "ab": 0, "h": 0, "hr": 0, "rbi": 0, "r": 0, "sb": 0},
+        )
+        pitching = pitching_by_level.get(
+            level,
+            {
+                "games": 0, "outs": 0, "k": 0, "w": 0,
+                "sv": 0, "hld": 0, "er": 0, "h": 0, "bb": 0,
+            },
+        )
         has_hitting = hitting["games"] > 0 and (hitting["ab"] > 0 or hitting["h"] > 0)
         has_pitching = pitching["games"] > 0 and pitching["outs"] > 0
 
@@ -688,6 +732,166 @@ def _walk_stats(obj, out: dict) -> None:
     elif isinstance(obj, list):
         for v in obj:
             _walk_stats(v, out)
+
+
+def _safe_int(v, default: int = 0) -> int:
+    """Convert Yahoo string/int fields to int with a safe fallback."""
+    try:
+        return int(v)
+    except (TypeError, ValueError):
+        return default
+
+
+def _walk_first(obj: Any, key: str) -> Any:
+    """Return the first nested value for `key` in a Yahoo JSON payload."""
+    if isinstance(obj, dict):
+        if key in obj:
+            return obj[key]
+        for value in obj.values():
+            found = _walk_first(value, key)
+            if found is not None:
+                return found
+    elif isinstance(obj, list):
+        for value in obj:
+            found = _walk_first(value, key)
+            if found is not None:
+                return found
+    return None
+
+
+def _parse_yahoo_top_player_entry(p_entry: list) -> dict:
+    """Parse one Yahoo players collection entry for report top-player sections."""
+    p_info: dict[str, Any] = {
+        "name": "",
+        "position": "",
+        "mlb_team": "",
+        "owner_team": "FA",
+        "points": 0.0,
+        "stats": {},
+    }
+
+    for item in (p_entry[0] if isinstance(p_entry[0], list) else [p_entry[0]]):
+        if not isinstance(item, dict):
+            continue
+        if "name" in item:
+            p_info["name"] = item["name"].get("full", "")
+        if "display_position" in item:
+            p_info["position"] = item["display_position"]
+        if "editorial_team_abbr" in item:
+            p_info["mlb_team"] = item["editorial_team_abbr"]
+
+    ownership = _walk_first(p_entry, "ownership")
+    if isinstance(ownership, dict):
+        p_info["owner_team"] = ownership.get("owner_team_name", "FA")
+
+    player_points = _walk_first(p_entry, "player_points")
+    if isinstance(player_points, dict):
+        try:
+            p_info["points"] = float(player_points.get("total", 0))
+        except (ValueError, TypeError):
+            p_info["points"] = 0.0
+
+    raw_stats: dict[str, str] = {}
+    _walk_stats(p_entry, raw_stats)
+    named_stats: dict[str, str] = {}
+    for sid, name in _YAHOO_STAT_ID_NAME.items():
+        if sid in raw_stats:
+            named_stats[name] = raw_stats[sid]
+    p_info["stats"] = named_stats
+    p_info["_raw_stat_ids"] = list(raw_stats.keys())
+    p_info["_raw_stats"] = raw_stats
+    return p_info
+
+
+def _fetch_yahoo_report_top_players(
+    yahoo_api_get,
+    league_key: str,
+    *,
+    sort_type: str,
+    sort_week: int | None = None,
+) -> tuple[list[dict], list[dict], str, dict[str, Any]]:
+    """Fetch report top players, preferring Yahoo PTS and falling back to AR."""
+    debug: dict[str, Any] = {}
+    attempts: list[tuple[str, str]] = [("PTS", "Yahoo Fantasy Points（夢幻積分 PTS）")]
+    if sort_type in {"lastweek", "lastmonth"}:
+        attempts.append(("AR", "Yahoo Actual Rank（實際排名 AR）fallback"))
+
+    for sort, source_label in attempts:
+        suffix = f";sort={sort};sort_type={sort_type}"
+        if sort_week is not None and sort_type == "week":
+            suffix += f";sort_week={sort_week}"
+        path = (
+            f"/league/{league_key}/players"
+            f"{suffix};count=50;out=stats,ownership"
+        )
+        try:
+            pdata = yahoo_api_get(path)
+            p_league = pdata.get("fantasy_content", {}).get("league", [])
+            if len(p_league) < 2:
+                debug[sort] = {
+                    "path": path,
+                    "error": f"p_league length {len(p_league)} < 2",
+                    "raw_keys": list(pdata.get("fantasy_content", {}).keys()),
+                }
+                continue
+
+            p_section = p_league[1].get("players", {})
+            count_val = _safe_int(p_section.get("count", 0))
+            if count_val == 0:
+                debug[sort] = {
+                    "path": path,
+                    "error": "players count=0",
+                    "p_section_keys": (
+                        list(p_section.keys()) if isinstance(p_section, dict) else None
+                    ),
+                }
+                continue
+
+            batters: list[dict] = []
+            pitchers: list[dict] = []
+            first_sample: dict[str, Any] | None = None
+            for pk_idx in range(count_val):
+                p_entry = p_section.get(str(pk_idx), {}).get("player", [])
+                if not p_entry or not isinstance(p_entry, list):
+                    continue
+                p_info = _parse_yahoo_top_player_entry(p_entry)
+                if not p_info.get("name"):
+                    continue
+                if first_sample is None:
+                    first_sample = {
+                        "name": p_info.get("name"),
+                        "position": p_info.get("position"),
+                        "points": p_info.get("points"),
+                        "raw_stat_ids": p_info.get("_raw_stat_ids"),
+                        "named": p_info.get("stats"),
+                    }
+                if _is_pitcher_position(p_info.get("position", "")):
+                    if len(pitchers) < 5:
+                        pitchers.append(p_info)
+                elif len(batters) < 5:
+                    batters.append(p_info)
+                if len(batters) >= 5 and len(pitchers) >= 5:
+                    break
+
+            debug[sort] = {
+                "path": path,
+                "count": count_val,
+                "batters": len(batters),
+                "pitchers": len(pitchers),
+                "first_sample": first_sample,
+            }
+            if batters or pitchers:
+                print(
+                    f"[ReportTopPlayers] {source_label}: "
+                    f"{len(batters)} batters, {len(pitchers)} pitchers",
+                    flush=True,
+                )
+                return batters, pitchers, source_label, debug
+        except Exception as e:
+            print(f"[ReportTopPlayers] Error fetching {sort}: {e}")
+            debug[sort] = {"path": path, "error": str(e)}
+
+    return [], [], "Yahoo Fantasy Points（夢幻積分 PTS）", debug
 
 
 def _fmt_avg(v: str) -> str:
@@ -1729,89 +1933,15 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
                     if len(match_teams) == 2:
                         matchups.append(match_teams)
 
-        # --- 4. Fetch top 5 hitters and pitchers by Yahoo Points ---
+        # --- 4. Fetch top 5 hitters and pitchers by Yahoo PTS ---
         time.sleep(1)
-        top_batters: list[dict] = []
-        top_pitchers: list[dict] = []
-        stats_debug: dict[str, Any] = {}
-
-        for pos_type, result_list in [("B", top_batters), ("P", top_pitchers)]:
-            try:
-                players_path = (
-                    f"/league/{league_key}/players"
-                    f";sort=PTS;sort_type=week;sort_week={report_week}"
-                    f";position={pos_type};count=5;out=stats,ownership"
-                )
-                pdata = yahoo_api_get(players_path)
-                p_league = pdata.get("fantasy_content", {}).get("league", [])
-                if len(p_league) < 2:
-                    stats_debug[pos_type] = {
-                        "error": f"p_league length {len(p_league)} < 2",
-                        "raw_keys": list(pdata.get("fantasy_content", {}).keys()),
-                    }
-                if len(p_league) >= 2:
-                    p_section = p_league[1].get("players", {})
-                    count_val = p_section.get("count", 0)
-                    if count_val == 0:
-                        stats_debug[pos_type] = {
-                            "error": "players count=0",
-                            "p_section_keys": list(p_section.keys()) if isinstance(p_section, dict) else None,
-                        }
-                    for pk_idx in range(count_val):
-                        p_entry = p_section.get(str(pk_idx), {}).get("player", [])
-                        if not p_entry or not isinstance(p_entry, list):
-                            continue
-                        # Parse player info
-                        p_info = {}
-                        for item in (p_entry[0] if isinstance(p_entry[0], list) else [p_entry[0]]):
-                            if isinstance(item, dict):
-                                if "name" in item:
-                                    p_info["name"] = item["name"].get("full", "")
-                                if "display_position" in item:
-                                    p_info["position"] = item["display_position"]
-                                if "editorial_team_abbr" in item:
-                                    p_info["mlb_team"] = item["editorial_team_abbr"]
-                                if "ownership" in item:
-                                    owner = item["ownership"]
-                                    p_info["owner_team"] = owner.get("owner_team_name", "FA")
-                        # Parse points
-                        pts = 0.0
-                        if len(p_entry) > 1:
-                            player_pts = p_entry[1].get("player_points", {})
-                            try:
-                                pts = float(player_pts.get("total", 0))
-                            except (ValueError, TypeError):
-                                pts = 0.0
-                        p_info["points"] = pts
-
-                        # Parse weekly stats: walk the full entry to find stat pairs,
-                        # resilient to Yahoo's inconsistent nesting.
-                        raw_stats: dict[str, str] = {}
-                        _walk_stats(p_entry, raw_stats)
-                        named_stats: dict[str, str] = {}
-                        for sid, name in _YAHOO_STAT_ID_NAME.items():
-                            if sid in raw_stats:
-                                named_stats[name] = raw_stats[sid]
-                        p_info["stats"] = named_stats
-                        # Debug: dump first player's full stats once per category
-                        if len(result_list) == 0:
-                            print(
-                                f"[WarReport] First {pos_type} player stats sample: "
-                                f"name={p_info.get('name')!r} raw_stat_ids={list(raw_stats.keys())} "
-                                f"named={named_stats}"
-                            )
-                            stats_debug[pos_type] = {
-                                "name": p_info.get("name"),
-                                "raw_stat_ids": list(raw_stats.keys()),
-                                "raw_stats": raw_stats,
-                                "named": named_stats,
-                                "points": pts,
-                            }
-                        result_list.append(p_info)
-                time.sleep(1)
-            except Exception as e:
-                print(f"[WarReport] Error fetching top {pos_type} players: {e}")
-                stats_debug[pos_type] = {"error": str(e)}
+        top_batters, top_pitchers, top_player_source, stats_debug = (
+            _fetch_yahoo_report_top_players(
+                yahoo_api_get,
+                league_key,
+                sort_type="lastweek",
+            )
+        )
 
         # --- 5. Build LINE message (using shared module-level formatting helpers) ---
 
@@ -2026,7 +2156,7 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
             lines.append("")
 
         lines.append(divider_line)
-        lines.append("最佳球員排名依據：Yahoo Fantasy Points")
+        lines.append(f"最佳球員排名依據：{top_player_source}")
 
         # --- 6. AI commentary (OpenAI; no-op if OPENAI_API_KEY not set) ---
         try:
@@ -2275,79 +2405,15 @@ def _monthly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
                 else:
                     print(f"[MonthlyReport] Scoreboard error week {wk}: {e}")
 
-        # --- 4. Top 5 hitters/pitchers using Yahoo lastmonth sort + full stat walk ---
+        # --- 4. Top 5 hitters/pitchers using Yahoo PTS ---
         time.sleep(1)
-        top_batters: list[dict] = []
-        top_pitchers: list[dict] = []
-        stats_debug: dict[str, Any] = {}
-
-        for pos_type, result_list in [("B", top_batters), ("P", top_pitchers)]:
-            try:
-                players_path = (
-                    f"/league/{league_key}/players"
-                    f";sort=PTS;sort_type=lastmonth"
-                    f";position={pos_type};count=5;out=stats,ownership"
-                )
-                pdata = yahoo_api_get(players_path)
-                p_league = pdata.get("fantasy_content", {}).get("league", [])
-                if len(p_league) < 2:
-                    stats_debug[pos_type] = {
-                        "error": f"p_league length {len(p_league)} < 2",
-                        "raw_keys": list(pdata.get("fantasy_content", {}).keys()),
-                    }
-                    continue
-                p_section = p_league[1].get("players", {})
-                count_val = _safe_int(p_section.get("count", 0))
-                if count_val == 0:
-                    stats_debug[pos_type] = {
-                        "error": "players count=0",
-                        "p_section_keys": list(p_section.keys()) if isinstance(p_section, dict) else None,
-                    }
-                for pk_idx in range(count_val):
-                    p_entry = p_section.get(str(pk_idx), {}).get("player", [])
-                    if not p_entry or not isinstance(p_entry, list):
-                        continue
-                    p_info: dict = {}
-                    for item in (p_entry[0] if isinstance(p_entry[0], list) else [p_entry[0]]):
-                        if isinstance(item, dict):
-                            if "name" in item:
-                                p_info["name"] = item["name"].get("full", "")
-                            if "display_position" in item:
-                                p_info["position"] = item["display_position"]
-                            if "editorial_team_abbr" in item:
-                                p_info["mlb_team"] = item["editorial_team_abbr"]
-                            if "ownership" in item:
-                                owner = item["ownership"]
-                                p_info["owner_team"] = owner.get("owner_team_name", "FA")
-                    pts = 0.0
-                    if len(p_entry) > 1:
-                        player_pts = p_entry[1].get("player_points", {})
-                        try:
-                            pts = float(player_pts.get("total", 0))
-                        except (ValueError, TypeError):
-                            pts = 0.0
-                    p_info["points"] = pts
-
-                    raw_stats: dict[str, str] = {}
-                    _walk_stats(p_entry, raw_stats)
-                    named_stats: dict[str, str] = {}
-                    for sid, name in _YAHOO_STAT_ID_NAME.items():
-                        if sid in raw_stats:
-                            named_stats[name] = raw_stats[sid]
-                    p_info["stats"] = named_stats
-                    if len(result_list) == 0:
-                        stats_debug[pos_type] = {
-                            "name": p_info.get("name"),
-                            "raw_stat_ids": list(raw_stats.keys()),
-                            "raw_stats": raw_stats,
-                            "named": named_stats,
-                            "points": pts,
-                        }
-                    result_list.append(p_info)
-                time.sleep(1)
-            except Exception as e:
-                print(f"[MonthlyReport] Error fetching top {pos_type}: {e}")
-                stats_debug[pos_type] = {"error": str(e)}
+        top_batters, top_pitchers, top_player_source, stats_debug = (
+            _fetch_yahoo_report_top_players(
+                yahoo_api_get,
+                league_key,
+                sort_type="lastmonth",
+            )
+        )
 
         # --- 5. Transaction summary (read local JSON) ---
         month_trades = 0
@@ -2665,7 +2731,7 @@ def _monthly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
             lines.append("")
 
         lines.append(divider_line)
-        lines.append("最佳球員排名依據：Yahoo Fantasy Points")
+        lines.append(f"最佳球員排名依據：{top_player_source}")
         lines.append("新秀觀察來源：Yahoo rosters + MLB Stats API")
 
         # AI commentary (monthly variant).
