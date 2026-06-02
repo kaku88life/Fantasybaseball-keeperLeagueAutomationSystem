@@ -212,6 +212,18 @@ def _append_lr(lines: list[str], left: str, right: str = "", cont_indent: str = 
         lines.append(_line_lr(cont_indent, right))
 
 
+def _rank_change_marker(prev_rank: int | None, current_rank: int) -> str:
+    if (
+        prev_rank is not None
+        and prev_rank > 0
+        and current_rank > 0
+        and prev_rank != current_rank
+    ):
+        diff = prev_rank - current_rank
+        return f"▲{diff}" if diff > 0 else f"▼{-diff}"
+    return "--"
+
+
 def _append_report_player_heading(
     lines: list[str],
     idx: int,
@@ -2185,27 +2197,16 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
             record = f"{w}-{l}-{t}"
             if show_change:
                 mgr = s["manager_name"] or "?"
-                prev_rank = prev_rank_map.get(mgr)
-                if (
-                    prev_rank is not None
-                    and prev_rank > 0
-                    and s["rank"] > 0
-                    and prev_rank != s["rank"]
-                ):
-                    diff = prev_rank - s["rank"]
-                    change = f"  ^{diff}" if diff > 0 else f"  v{-diff}"
-                else:
-                    change = "  --"
+                change = _rank_change_marker(prev_rank_map.get(mgr), s["rank"])
             else:
                 change = ""
             if show_change:
                 lines: list[str] = []
-                _append_lr(lines, left, change.strip(), cont_indent=f"{indent}    ")
-                lines.append(_line_lr(f"{indent}    戰績", record))
+                _append_lr(lines, left, f"{record} {change}", cont_indent=f"{indent}    ")
                 return lines
             line = _line_lr(left, record)
             if line == left:
-                return [line, _line_lr(f"{indent}    戰績", record)]
+                return [line, _line_lr(f"{indent}    ", record)]
             return [line]
 
         # --- Build content sections first, so page_width matches actual content. ---
@@ -2701,27 +2702,16 @@ def _monthly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
             record = f"{w}-{l}-{t}"
             if show_change:
                 mgr = s["manager_name"] or "?"
-                prev_rank = prev_rank_map.get(mgr)
-                if (
-                    prev_rank is not None
-                    and prev_rank > 0
-                    and s["rank"] > 0
-                    and prev_rank != s["rank"]
-                ):
-                    diff = prev_rank - s["rank"]
-                    change = f"  ^{diff}" if diff > 0 else f"  v{-diff}"
-                else:
-                    change = "  --"
+                change = _rank_change_marker(prev_rank_map.get(mgr), s["rank"])
             else:
                 change = ""
             if show_change:
                 lines: list[str] = []
-                _append_lr(lines, left, change.strip(), cont_indent=f"{indent}    ")
-                lines.append(_line_lr(f"{indent}    戰績", record))
+                _append_lr(lines, left, f"{record} {change}", cont_indent=f"{indent}    ")
                 return lines
             line = _line_lr(left, record)
             if line == left:
-                return [line, _line_lr(f"{indent}    戰績", record)]
+                return [line, _line_lr(f"{indent}    ", record)]
             return [line]
 
         # Overall standings.
