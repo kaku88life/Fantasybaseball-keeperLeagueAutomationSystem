@@ -194,6 +194,10 @@ def _team_mgr_short(team_name: str, manager_name: str) -> str:
     return f"{abbr} ({mgr})"
 
 
+def _team_abbr_short(team_name: str) -> str:
+    return _fantasy_team_to_mlb_abbr(team_name or "") or team_name or "?"
+
+
 def _line_lr(left: str, right: str = "", width: int | None = None) -> str:
     width = width or _line_report_width()
     right = right or ""
@@ -210,6 +214,19 @@ def _append_lr(lines: list[str], left: str, right: str = "", cont_indent: str = 
     lines.append(line)
     if right and line == left:
         lines.append(_line_lr(cont_indent, right))
+
+
+def _rank_team_left_for_right(
+    rank: int,
+    team_name: str,
+    manager_name: str,
+    right: str,
+    indent: str = "",
+) -> str:
+    full = f"{indent}{rank:>2}. {_team_mgr_short(team_name, manager_name)}"
+    if not right or _line_lr(full, right) != full:
+        return full
+    return f"{indent}{rank:>2}. {_team_abbr_short(team_name)}"
 
 
 def _rank_change_marker(prev_rank: int | None, current_rank: int) -> str:
@@ -2193,7 +2210,6 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
         ) -> list[str]:
             w, l, t = s["wins"], s["losses"], s["ties"]
             rank = rank_override if rank_override is not None else s["rank"]
-            left = f"{indent}{rank:>2}. {_team_mgr_short(s['team_name'], s['manager_name'])}"
             record = f"{w}-{l}-{t}"
             if show_change:
                 mgr = s["manager_name"] or "?"
@@ -2202,8 +2218,23 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
                 change = ""
             if show_change:
                 lines: list[str] = []
-                _append_lr(lines, left, f"{record} {change}", cont_indent=f"{indent}    ")
+                right = f"{record} {change}"
+                left = _rank_team_left_for_right(
+                    rank,
+                    s["team_name"],
+                    s["manager_name"],
+                    right,
+                    indent=indent,
+                )
+                _append_lr(lines, left, right, cont_indent=f"{indent}    ")
                 return lines
+            left = _rank_team_left_for_right(
+                rank,
+                s["team_name"],
+                s["manager_name"],
+                record,
+                indent=indent,
+            )
             line = _line_lr(left, record)
             if line == left:
                 return [line, _line_lr(f"{indent}    ", record)]
@@ -2698,7 +2729,6 @@ def _monthly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
         ) -> list[str]:
             w, l, t = s["wins"], s["losses"], s["ties"]
             rank = rank_override if rank_override is not None else s["rank"]
-            left = f"{indent}{rank:>2}. {_team_mgr_short(s['team_name'], s['manager_name'])}"
             record = f"{w}-{l}-{t}"
             if show_change:
                 mgr = s["manager_name"] or "?"
@@ -2707,8 +2737,23 @@ def _monthly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
                 change = ""
             if show_change:
                 lines: list[str] = []
-                _append_lr(lines, left, f"{record} {change}", cont_indent=f"{indent}    ")
+                right = f"{record} {change}"
+                left = _rank_team_left_for_right(
+                    rank,
+                    s["team_name"],
+                    s["manager_name"],
+                    right,
+                    indent=indent,
+                )
+                _append_lr(lines, left, right, cont_indent=f"{indent}    ")
                 return lines
+            left = _rank_team_left_for_right(
+                rank,
+                s["team_name"],
+                s["manager_name"],
+                record,
+                indent=indent,
+            )
             line = _line_lr(left, record)
             if line == left:
                 return [line, _line_lr(f"{indent}    ", record)]
@@ -2749,10 +2794,17 @@ def _monthly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
                 reverse=True,
             )
             for idx, rec in enumerate(sorted_monthly, 1):
+                right = f"{rec['w']}-{rec['l']}-{rec['t']}"
                 _append_lr(
                     monthly_record_lines,
-                    f" {idx:>2}. {_team_mgr_short(rec.get('team_name', ''), rec.get('manager_name', ''))}",
-                    f"{rec['w']}-{rec['l']}-{rec['t']}",
+                    _rank_team_left_for_right(
+                        idx,
+                        rec.get("team_name", ""),
+                        rec.get("manager_name", ""),
+                        right,
+                        indent=" ",
+                    ),
+                    right,
                 )
 
         # Playoff gate — wins relative to 8th place (top 8 = playoffs).
@@ -2761,9 +2813,8 @@ def _monthly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
             eighth = current_standings[7]
             eighth_wins = eighth["wins"]
             for s in current_standings:
-                left = f" {s['rank']:>2}. {_team_mgr_short(s['team_name'], s['manager_name'])}"
                 if s["rank"] == 8:
-                    _append_lr(playoff_lines, left, "第 8 名")
+                    tag = "第 8 名"
                 else:
                     diff = s["wins"] - eighth_wins
                     if diff > 0:
@@ -2772,7 +2823,14 @@ def _monthly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
                         tag = f"{diff}W"
                     else:
                         tag = "同勝"
-                    _append_lr(playoff_lines, left, tag)
+                left = _rank_team_left_for_right(
+                    s["rank"],
+                    s["team_name"],
+                    s["manager_name"],
+                    tag,
+                    indent=" ",
+                )
+                _append_lr(playoff_lines, left, tag)
             playoff_lines.append("")
             playoff_lines.append("  以第 8 名勝場為基準")
             playoff_lines.append(f"  {_team_mgr_short(eighth['team_name'], eighth['manager_name'])}")
