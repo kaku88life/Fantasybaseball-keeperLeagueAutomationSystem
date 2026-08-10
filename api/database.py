@@ -488,6 +488,23 @@ MIGRATIONS: dict[str, list[str]] = {
         )
         """,
     ],
+    # Observability for background jobs: without this we cannot tell
+    # "never fired" from "fired but Yahoo/LINE failed".
+    "016_scheduler_job_runs": [
+        """
+        CREATE TABLE IF NOT EXISTS scheduler_job_runs (
+            id SERIAL PRIMARY KEY,
+            job_id TEXT NOT NULL,
+            status TEXT NOT NULL,
+            detail TEXT DEFAULT '',
+            recorded_at TIMESTAMPTZ DEFAULT NOW()
+        )
+        """,
+        "CREATE INDEX IF NOT EXISTS idx_scheduler_job_runs_job "
+        "ON scheduler_job_runs(job_id, recorded_at DESC)",
+        "CREATE INDEX IF NOT EXISTS idx_scheduler_job_runs_recorded "
+        "ON scheduler_job_runs(recorded_at DESC)",
+    ],
 }
 
 
@@ -1542,6 +1559,98 @@ def cleanup_old_notifications(retention_days: int = 365):
         except Exception as e:
             conn.rollback()
             print(f"[Cleanup] notification_log cleanup failed (non-fatal): {e}")
+
+
+# ========== Scheduler Job Runs (observability) ==========
+
+def record_job_run(job_id: str, status: str, detail: str = "") -> None:
+    """Record one background-job outcome.
+
+    Never raises: observability must not be able to break the job it observes.
+    `status` is one of started / success / failed / skipped / missed / error.
+    """
+    try:
+        with get_conn() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """INSERT INTO scheduler_job_runs (job_id, status, detail)
+                       VALUES (%s, %s, %s)""",
+                    (job_id[:100], status[:32], (detail or "")[:2000]),
+                )
+    except Exception as e:
+        print(f"[JobRun] record failed for {job_id}/{status} (non-fatal): {e}", flush=True)
+
+
+def get_recent_job_runs(limit: int = 50, job_id: str = "") -> list[dict]:
+    """Return the most recent job-run records, newest first."""
+    limit = max(1, min(int(limit or 50), 500))
+    with get_conn() as conn:
+        if job_id:
+            return _fetchall(
+                conn,
+                """SELECT job_id, status, detail, recorded_at
+                   FROM scheduler_job_runs
+                   WHERE job_id = %s
+                   ORDER BY recorded_at DESC
+                   LIMIT %s""",
+                (job_id, limit),
+            )
+        return _fetchall(
+            conn,
+            """SELECT job_id, status, detail, recorded_at
+               FROM scheduler_job_runs
+               ORDER BY recorded_at DESC
+               LIMIT %s""",
+            (limit,),
+        )
+
+
+def get_last_job_success(job_id: str):
+    """Return the timestamp of the last successful run of `job_id`, or None."""
+    with get_conn() as conn:
+        row = _fetchone(
+            conn,
+            """SELECT recorded_at FROM scheduler_job_runs
+               WHERE job_id = %s AND status = 'success'
+               ORDER BY recorded_at DESC
+               LIMIT 1""",
+            (job_id,),
+        )
+        return row["recorded_at"] if row else None
+
+
+def has_job_history(job_id: str) -> bool:
+    """Whether `job_id` has ever been recorded.
+
+    Used to avoid firing a catch-up run on a brand-new deployment, where the
+    absence of a success record means "no baseline", not "a run was missed".
+    """
+    with get_conn() as conn:
+        row = _fetchone(
+            conn,
+            "SELECT 1 AS found FROM scheduler_job_runs WHERE job_id = %s LIMIT 1",
+            (job_id,),
+        )
+        return bool(row)
+
+
+def cleanup_old_job_runs(retention_days: int = 90):
+    """Delete scheduler_job_runs records older than retention_days."""
+    with get_conn() as conn:
+        try:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """DELETE FROM scheduler_job_runs
+                       WHERE recorded_at < NOW() - make_interval(days => %s)""",
+                    (retention_days,),
+                )
+                deleted = cur.rowcount
+            conn.commit()
+            if deleted > 0:
+                print(f"[Cleanup] Deleted {deleted} job-run records older than {retention_days} days.")
+        except Exception as e:
+            conn.rollback()
+            print(f"[Cleanup] scheduler_job_runs cleanup failed (non-fatal): {e}")
 
 
 # ========== Synced Rosters ==========

@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import os
 import sys
+import threading
 import traceback
 from pathlib import Path
 
@@ -22,24 +23,25 @@ from fastapi.responses import JSONResponse
 
 load_dotenv(project_root / ".env")
 
-from api.database import cleanup_old_notifications, init_db, seed_if_empty
+from api.database import (
+    cleanup_old_job_runs,
+    cleanup_old_notifications,
+    init_db,
+    seed_if_empty,
+)
 from api.routers import analytics, auth, commissioner, league, players, public, teams, validation
 
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    """Startup / shutdown events."""
-    try:
-        await init_db()
-        seed_if_empty()
-        cleanup_old_notifications(retention_days=365)
-    except Exception as e:
-        print(f"[Startup] DB init/seed error (non-fatal): {e}", flush=True)
-        traceback.print_exc()
+def _deferred_startup_refresh():
+    """Heavy, Yahoo-dependent startup work — runs off the startup path.
+
+    These calls are rate-limited (2s/request) and retry 429s with 60-300s
+    sleeps, so running them inline used to block the event loop for minutes and
+    could get the container killed before the scheduler was ever registered.
+    """
+    from api.database import record_job_run
 
     # Refresh 2026 post-draft snapshot (keepers + draft merge).
-    # Runs after init_db so schema is guaranteed ready. Non-fatal on failure
-    # so uvicorn still comes up even if source data files are missing.
     try:
         from scripts.update_2026_post_draft import run_post_draft_update
         result = run_post_draft_update(verbose=False)
@@ -67,17 +69,62 @@ async def lifespan(app: FastAPI):
             _path = _Path(__file__).resolve().parents[1] / "data" / f"yahoo_{_year}_transactions.json"
             _path.write_text(_json.dumps(_txs, indent=2, ensure_ascii=False), encoding="utf-8")
             print(f"[Startup] Refreshed {_year} transactions: {len(_txs.get('transactions', []))} records", flush=True)
+            record_job_run("startup_refresh", "success", f"{len(_txs.get('transactions', []))} transactions")
         else:
             print(f"[Startup] No Yahoo league for year {_year}; skip transaction refresh", flush=True)
+            record_job_run("startup_refresh", "skipped", f"no Yahoo league for {_year}")
     except Exception as e:
         print(f"[Startup] Transaction refresh error (non-fatal): {e}", flush=True)
+        record_job_run("startup_refresh", "failed", str(e))
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Startup / shutdown events.
+
+    Order matters: the scheduler is registered as early as possible so a slow or
+    failing data refresh can never stop the weekly/monthly reports from being
+    scheduled.
+    """
+    try:
+        await init_db()
+        seed_if_empty()
+    except Exception as e:
+        print(f"[Startup] DB init/seed error (non-fatal): {e}", flush=True)
+        traceback.print_exc()
 
     # Start reminder scheduler (no-op if env vars not configured)
     try:
-        from src.notification.scheduler import start_scheduler, stop_scheduler
+        from src.notification.scheduler import start_scheduler
         start_scheduler()
     except Exception as e:
         print(f"[Startup] Scheduler error (non-fatal): {e}", flush=True)
+        traceback.print_exc()
+
+    # Everything below is best-effort maintenance — deliberately off the
+    # startup path so the container becomes healthy immediately.
+    def _background_startup():
+        try:
+            cleanup_old_notifications(retention_days=365)
+            cleanup_old_job_runs(retention_days=90)
+        except Exception as e:
+            print(f"[Startup] Cleanup error (non-fatal): {e}", flush=True)
+
+        # Re-send any weekly/monthly report whose trigger time passed while the
+        # container was down. No-ops when the last run already succeeded.
+        try:
+            from src.notification.scheduler import run_startup_catchup
+            print(f"[Startup] Report catch-up: {run_startup_catchup()}", flush=True)
+        except Exception as e:
+            print(f"[Startup] Report catch-up error (non-fatal): {e}", flush=True)
+
+        _deferred_startup_refresh()
+
+    threading.Thread(
+        target=_background_startup,
+        name="startup-refresh",
+        daemon=True,
+    ).start()
 
     yield
 

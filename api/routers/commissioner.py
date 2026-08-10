@@ -589,6 +589,43 @@ async def test_line_reminder_endpoint(
     }
 
 
+@router.get("/scheduler/status")
+async def scheduler_status_endpoint(
+    limit: int = 50,
+    job_id: str = "",
+    user: dict = Depends(get_current_commissioner),
+):
+    """Live scheduler state + recent job outcomes.
+
+    This is the answer to "did the weekly report even fire?" — `jobs` shows the
+    next scheduled run, `recent_runs` shows what actually happened.
+    """
+    from api.database import get_recent_job_runs
+    from src.notification.scheduler import get_scheduler_status
+
+    status = get_scheduler_status()
+    try:
+        runs = get_recent_job_runs(limit=limit, job_id=job_id)
+    except Exception as e:
+        runs = []
+        status["recent_runs_error"] = str(e)
+
+    return {
+        **status,
+        "recent_runs": [
+            {
+                "job_id": r["job_id"],
+                "status": r["status"],
+                "detail": r["detail"],
+                "recorded_at": (
+                    r["recorded_at"].isoformat() if r.get("recorded_at") else None
+                ),
+            }
+            for r in runs
+        ],
+    }
+
+
 class TriggerWarReportRequest(BaseModel):
     target_id: Optional[str] = None   # None => scheduled behavior (LINE group)
     dry_run: bool = False              # True => skip LINE, return text only

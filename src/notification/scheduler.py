@@ -16,9 +16,41 @@ to define a fixed annual window (e.g. March 1-15 every year).
 """
 from __future__ import annotations
 
+import functools
 import os
-from datetime import datetime
+import threading
+from datetime import date, datetime, timedelta
 from typing import Any
+
+_ONE_DAY = timedelta(days=1)
+
+# Report jobs can be invoked from three places (cron, startup catch-up, the
+# Commissioner endpoint). Single-flight makes a duplicate invocation a no-op
+# instead of a second LINE push.
+_REPORT_RUN_LOCKS: dict[str, threading.Lock] = {}
+_REPORT_LOCK_GUARD = threading.Lock()
+
+
+def _single_flight(key: str):
+    """Reject re-entrant invocations of a report job while one is in flight."""
+    def decorator(fn):
+        @functools.wraps(fn)
+        def wrapper(*args, **kwargs):
+            with _REPORT_LOCK_GUARD:
+                lock = _REPORT_RUN_LOCKS.setdefault(key, threading.Lock())
+            if not lock.acquire(blocking=False):
+                print(f"[{key}] Already running; skipping duplicate run.", flush=True)
+                return {
+                    "success": False,
+                    "message": "Already running (duplicate invocation skipped)",
+                    "report": "",
+                }
+            try:
+                return fn(*args, **kwargs)
+            finally:
+                lock.release()
+        return wrapper
+    return decorator
 
 from src.notification.line_format import (
     center_line as _center_line,
@@ -70,6 +102,16 @@ DAILY_SYNC_HOUR = int(os.getenv("DAILY_SYNC_HOUR", "0"))           # midnight Ta
 INJURY_BATCH_DAYS = int(os.getenv("INJURY_BATCH_DAYS", "3"))
 INJURY_LINE_ENABLED = _env_flag("INJURY_LINE_ENABLED", "false")
 PROSPECT_UPDATE_LINE_ENABLED = _env_flag("PROSPECT_UPDATE_LINE_ENABLED", "false")
+
+# APScheduler's 1-second default silently drops any run whose trigger time was
+# straddled by a restart. 6 hours means a redeploy at 21:00 still ships the
+# weekly report once the container is back.
+SCHEDULER_MISFIRE_GRACE_SECONDS = int(
+    os.getenv("SCHEDULER_MISFIRE_GRACE_SECONDS", str(6 * 3600))
+)
+# Jobs that write their own started/success/failed records; the generic
+# "executed" listener stays quiet for these to avoid duplicate rows.
+_SELF_RECORDING_JOB_IDS = {"war_report", "monthly_report"}
 
 _scheduler = None
 MLB_STATS_API_BASE = "https://statsapi.mlb.com/api/v1"
@@ -418,7 +460,8 @@ def _safe_stat_int(stats: dict, *keys: str) -> int:
     return 0
 
 
-def _split_in_report_month(split: dict, year: int, report_month: int) -> bool:
+def _split_game_date(split: dict) -> date | None:
+    """Return the calendar date of one MLB gameLog split, or None."""
     game = split.get("game") if isinstance(split.get("game"), dict) else {}
     raw_date = (
         split.get("date")
@@ -427,12 +470,32 @@ def _split_in_report_month(split: dict, year: int, report_month: int) -> bool:
         or split.get("gameDate")
     )
     if not raw_date:
-        return False
+        return None
     try:
-        dt = datetime.fromisoformat(str(raw_date)[:10])
-        return dt.year == year and dt.month == report_month
+        return datetime.fromisoformat(str(raw_date)[:10]).date()
     except ValueError:
-        return False
+        return None
+
+
+def _split_in_date_range(split: dict, start: date, end: date) -> bool:
+    """Inclusive [start, end] membership test for a gameLog split."""
+    game_date = _split_game_date(split)
+    return bool(game_date and start <= game_date <= end)
+
+
+def _month_date_range(year: int, month: int) -> tuple[date, date]:
+    """Return (first_day, last_day) of a calendar month."""
+    start = date(year, month, 1)
+    if month == 12:
+        end = date(year, 12, 31)
+    else:
+        end = date(year, month + 1, 1) - _ONE_DAY
+    return start, end
+
+
+def _split_in_report_month(split: dict, year: int, report_month: int) -> bool:
+    start, end = _month_date_range(year, report_month)
+    return _split_in_date_range(split, start, end)
 
 
 def _http_timeout(deadline: float | None, default: float = 5.0) -> float:
@@ -657,16 +720,26 @@ def _fetch_rookie_month_stats_line(
     return ""
 
 
-def _fetch_mlb_month_player_stats(
+def _fetch_mlb_range_player_stats(
     name: str,
     position: str,
     year: int,
-    report_month: int,
+    start: date,
+    end: date,
+    deadline: float | None = None,
 ) -> dict[str, str]:
-    """Fetch MLB gameLog stats for the report month and aggregate display stats."""
+    """Aggregate MLB gameLog stats over an inclusive [start, end] date range.
+
+    This is what makes report numbers window-scoped. Yahoo's players collection
+    with `out=stats` always returns SEASON totals regardless of `sort_type`, so
+    weekly/monthly reports must source their displayed stats here instead.
+
+    Returns {} when the player has no games in the window or the lookup fails —
+    callers must render that as an explicit "數據暫缺", never as season totals.
+    """
     import httpx
 
-    person = _find_mlb_person(name, position, None)
+    person = _find_mlb_person(name, position, deadline)
     if not person or not person.get("id"):
         return {}
 
@@ -681,6 +754,9 @@ def _fetch_mlb_month_player_stats(
     }
 
     try:
+        timeout = _http_timeout(deadline, default=8.0)
+        if timeout <= 0:
+            return {}
         resp = httpx.get(
             f"{MLB_STATS_API_BASE}/people/{person['id']}/stats",
             params={
@@ -689,12 +765,12 @@ def _fetch_mlb_month_player_stats(
                 "season": year,
                 "sportId": 1,
             },
-            timeout=8.0,
+            timeout=timeout,
         )
         resp.raise_for_status()
         data = resp.json()
     except Exception as e:
-        print(f"[ReportTopPlayers] MLB month stats failed for {name}: {e}")
+        print(f"[ReportTopPlayers] MLB range stats failed for {name}: {e}")
         return {}
 
     for stat_group in data.get("stats", []):
@@ -703,7 +779,7 @@ def _fetch_mlb_month_player_stats(
             or stat_group.get("group", {}).get("display_name", "")
         ).lower()
         for split in stat_group.get("splits", []):
-            if not _split_in_report_month(split, year, report_month):
+            if not _split_in_date_range(split, start, end):
                 continue
             stat = split.get("stat", {})
             if group_name == "hitting":
@@ -774,6 +850,146 @@ def _fetch_mlb_month_player_stats(
         }
 
     return {}
+
+
+# Total seconds allowed for the MLB range-stat lookups of one report
+# (10 players x 2 HTTP calls). Bounded so a slow MLB API cannot stall the job.
+REPORT_STATS_TIMEOUT_SECONDS = float(
+    os.getenv("REPORT_STATS_TIMEOUT_SECONDS", "90")
+)
+
+
+def _apply_window_stats(
+    players: list[dict],
+    year: int,
+    start: date,
+    end: date,
+) -> dict[str, Any]:
+    """Replace each player's stats with window-scoped MLB numbers.
+
+    Yahoo only sorts by window; its returned stats are season totals. Any player
+    we cannot resolve gets `stats = {}` + `stats_window_ok = False` so the
+    renderer prints an explicit gap instead of silently showing season numbers.
+    """
+    import time as time_mod
+
+    deadline = time_mod.monotonic() + REPORT_STATS_TIMEOUT_SECONDS
+    resolved = 0
+    missing: list[str] = []
+
+    for player in players:
+        name = player.get("name", "")
+        window_stats = _fetch_mlb_range_player_stats(
+            name,
+            player.get("position", ""),
+            year,
+            start,
+            end,
+            deadline,
+        )
+        player["stats"] = window_stats
+        player["stats_window_ok"] = bool(window_stats)
+        if window_stats:
+            resolved += 1
+        else:
+            missing.append(name)
+
+    debug = {
+        "window": f"{start.isoformat()}~{end.isoformat()}",
+        "resolved": resolved,
+        "missing": missing,
+    }
+    print(
+        f"[ReportTopPlayers] Window {debug['window']}: "
+        f"{resolved}/{len(players)} players resolved"
+        + (f", missing: {', '.join(missing)}" if missing else ""),
+        flush=True,
+    )
+    return debug
+
+
+def _append_window_gap_lines(lines: list[str], window_label: str) -> None:
+    """Render an explicit gap so a missing window never reads as real output."""
+    lines.append(f"    {window_label}數據暫缺")
+    lines.append("    (MLB Stats API 查無對應)")
+
+
+def _build_top_batter_lines(players: list[dict], window_label: str) -> list[str]:
+    """Render the top-batter block shared by the weekly and monthly reports."""
+    lines: list[str] = []
+    shown = players[:5]
+    for idx, b in enumerate(shown, 1):
+        owner = b.get("owner_team", "FA")
+        owner_abbr = _fantasy_team_to_mlb_abbr(owner) or owner
+        _append_report_player_heading(
+            lines, idx, b.get("name", "?"), b.get("position", ""), owner_abbr
+        )
+        if not b.get("stats_window_ok"):
+            _append_window_gap_lines(lines, window_label)
+        else:
+            st = b.get("stats", {})
+            lines.append(
+                f"    H-AB {st.get('H', '-')}-{st.get('AB', '-')} "
+                f"AVG {_fmt_avg(st.get('AVG', '-'))}"
+            )
+            lines.append(f"    OPS {_fmt_avg(st.get('OPS', '-'))}")
+            lines.append(f"    HR {st.get('HR', '0')} RBI {st.get('RBI', '0')}")
+            lines.append(f"    R {st.get('R', '0')} SB {st.get('SB', '0')}")
+        if idx < len(shown):
+            lines.append("")
+    return lines
+
+
+def _build_top_pitcher_lines(players: list[dict], window_label: str) -> list[str]:
+    """Render the top-pitcher block shared by the weekly and monthly reports.
+
+    SP hides SV/HLD, RP hides QS, dual-eligible shows everything.
+    """
+    lines: list[str] = []
+    shown = players[:5]
+    for idx, p in enumerate(shown, 1):
+        pos = p.get("position", "")
+        owner = p.get("owner_team", "FA")
+        owner_abbr = _fantasy_team_to_mlb_abbr(owner) or owner
+        _append_report_player_heading(lines, idx, p.get("name", "?"), pos, owner_abbr)
+        if not p.get("stats_window_ok"):
+            _append_window_gap_lines(lines, window_label)
+        else:
+            st = p.get("stats", {})
+            pos_upper = (pos or "").upper()
+            is_sp = "SP" in pos_upper
+            is_rp = "RP" in pos_upper
+            counting_parts = [f"{st.get('W', '0')}W", f"{st.get('K', '0')}K"]
+            if is_sp and not is_rp:
+                counting_parts.append(f"{st.get('QS', '0')}QS")
+            elif is_rp and not is_sp:
+                counting_parts.extend(
+                    [f"{st.get('SV', '0')}SV", f"{st.get('HLD', '0')}HLD"]
+                )
+            else:
+                counting_parts.extend([
+                    f"{st.get('QS', '0')}QS",
+                    f"{st.get('SV', '0')}SV",
+                    f"{st.get('HLD', '0')}HLD",
+                ])
+            lines.append(
+                f"    IP {st.get('IP', '-')} ERA {_fmt_era(st.get('ERA', '-'))}"
+            )
+            lines.append(f"    WHIP {_fmt_era(st.get('WHIP', '-'))}")
+            lines.append(f"    {' '.join(counting_parts)}")
+        if idx < len(shown):
+            lines.append("")
+    return lines
+
+
+def _report_source_lines(top_player_source: str, window_label: str) -> list[str]:
+    """Footer that keeps ranking source and stat source visibly distinct."""
+    return [
+        "最佳球員排名依據：",
+        _compact_report_source(top_player_source),
+        f"數據區間：{window_label}",
+        "數據來源：MLB Stats API",
+    ]
 
 
 def _build_rookie_watch_lines(
@@ -973,6 +1189,36 @@ def _iter_yahoo_collection(section: Any, item_key: str) -> list[dict]:
     return items
 
 
+def _matchup_week_range(m_raw: dict) -> tuple[date | None, date | None]:
+    """Extract the fantasy week's real calendar window from a Yahoo matchup.
+
+    Yahoo exposes `week_start` / `week_end` (YYYY-MM-DD) per matchup; this is the
+    authoritative window for "how did this player do THIS week".
+    """
+    def _parse(value: Any) -> date | None:
+        if not value:
+            return None
+        try:
+            return datetime.fromisoformat(str(value)[:10]).date()
+        except ValueError:
+            return None
+
+    start = _parse(_walk_first(m_raw, "week_start"))
+    end = _parse(_walk_first(m_raw, "week_end"))
+    if start and end and end >= start:
+        return start, end
+    return None, None
+
+
+def _fallback_week_range(today: date) -> tuple[date, date]:
+    """Last completed Monday-Sunday window, used if Yahoo omits week_start/end."""
+    # today.weekday(): Monday == 0. The most recent completed week ends on the
+    # Sunday before this week's Monday.
+    this_monday = today - timedelta(days=today.weekday())
+    last_monday = this_monday - timedelta(days=7)
+    return last_monday, last_monday + timedelta(days=6)
+
+
 def _matchup_category_records(m_raw: dict, team_keys: list[str]) -> dict[str, dict[str, int]]:
     records = {key: {"w": 0, "l": 0, "t": 0} for key in team_keys if key}
     if len(records) != 2:
@@ -1153,6 +1399,16 @@ def _fmt_era(v: str) -> str:
         return f"{float(v):.2f}"
     except (ValueError, TypeError):
         return v
+
+
+def _record_run(job_id: str, status: str, detail: str = "") -> None:
+    """Persist one job outcome so 'never fired' is distinguishable from 'failed'."""
+    try:
+        from api.database import record_job_run
+
+        record_job_run(job_id, status, detail)
+    except Exception as e:
+        print(f"[JobRun] {job_id}/{status} not recorded (non-fatal): {e}", flush=True)
 
 
 def _is_in_reminder_period(today: datetime) -> tuple[bool, str]:
@@ -1976,6 +2232,7 @@ def _daily_games_preview_job(target_id: str = "", dry_run: bool = False) -> dict
     return {"success": success, "error": error, "games_count": len(games), "dest": dest}
 
 
+@_single_flight("war_report")
 def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
     """Weekly job (Monday 21:00): generate and send weekly war report to LINE.
 
@@ -1994,17 +2251,23 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
     """
     now = datetime.now()
     month = now.month
+    job_id = "war_report" if not (target_id or dry_run) else "war_report_manual"
 
     # Only run during MLB season (March-October)
     if month < 3 or month > 10:
         print(f"[WarReport] Off-season (month {month}), skipping.")
+        _record_run(job_id, "skipped", f"Off-season (month {month})")
         return {"success": False, "message": f"Off-season (month {month})", "report": ""}
 
     year = now.year
     print(f"[WarReport] Generating weekly war report for {year}...")
+    _record_run(job_id, "started", f"year={year}")
+
+    # Imported before the try block so `except YahooTokenError` can never hit a
+    # NameError when the import itself is what failed.
+    from api.yahoo_service import yahoo_api_get, YahooTokenError
 
     try:
-        from api.yahoo_service import yahoo_api_get, YahooTokenError
         from api.database import save_weekly_standings, get_weekly_standings
         from src.notification.line_service import send_line_group_message
         from config.settings import get_league_key
@@ -2013,6 +2276,7 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
         league_key = get_league_key(year)
         if not league_key:
             print(f"[WarReport] No league key for year {year}")
+            _record_run(job_id, "failed", f"No league key for {year}")
             return {"success": False, "message": f"No league key for {year}", "report": ""}
 
         # --- 1. Get current week from league metadata ---
@@ -2037,6 +2301,7 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
         league_standings = standings_data.get("fantasy_content", {}).get("league", [])
         if len(league_standings) < 2:
             print("[WarReport] No standings data.")
+            _record_run(job_id, "failed", "No standings data from Yahoo")
             return {"success": False, "message": "No standings data from Yahoo", "report": ""}
 
         teams_section = league_standings[1].get("standings", [{}])[0].get("teams", {})
@@ -2138,6 +2403,8 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
         scoreboard_data = yahoo_api_get(scoreboard_path)
         league_sb = scoreboard_data.get("fantasy_content", {}).get("league", [])
         matchups: list[dict] = []
+        week_start: date | None = None
+        week_end: date | None = None
         if len(league_sb) >= 2:
             sb = league_sb[1].get("scoreboard", {})
             # Handle nested structure
@@ -2151,6 +2418,8 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
                 m_count = matchups_section.get("count", 0)
                 for mi in range(m_count):
                     m_raw = matchups_section.get(str(mi), {}).get("matchup", {})
+                    if week_start is None:
+                        week_start, week_end = _matchup_week_range(m_raw)
                     teams_data = m_raw.get("0", {}).get("teams", {})
                     t_count = teams_data.get("count", 0)
                     winner_key = m_raw.get("winner_team_key", "")
@@ -2189,7 +2458,17 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
                     if len(match_teams) == 2:
                         matchups.append(match_teams)
 
-        # --- 4. Fetch top 5 hitters and pitchers by Yahoo PTS ---
+        # --- 4. Top 5 hitters/pitchers: Yahoo ranks the window, MLB supplies
+        # the window's actual numbers (Yahoo `out=stats` is season-only). ---
+        if week_start is None or week_end is None:
+            week_start, week_end = _fallback_week_range(now.date())
+            print(
+                f"[WarReport] Yahoo omitted week_start/end; "
+                f"falling back to {week_start}~{week_end}",
+                flush=True,
+            )
+        window_label = f"{week_start.month}/{week_start.day}-{week_end.month}/{week_end.day}"
+
         time.sleep(1)
         top_batters, top_pitchers, top_player_source, stats_debug = (
             _fetch_yahoo_report_top_players(
@@ -2197,6 +2476,12 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
                 league_key,
                 sort_type="lastweek",
             )
+        )
+        stats_debug["window"] = _apply_window_stats(
+            top_batters[:5] + top_pitchers[:5],
+            year,
+            week_start,
+            week_end,
         )
 
         # --- 5. Build LINE message (using shared module-level formatting helpers) ---
@@ -2285,64 +2570,8 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
             if idx_m < len(matchups) - 1:
                 matchup_lines.append("")
 
-        # Top batters — 3 lines per player: name / rate stats / counting stats.
-        batter_lines: list[str] = []
-        for idx, b in enumerate(top_batters[:5], 1):
-            name = b.get("name", "?")
-            pos = b.get("position", "")
-            owner = b.get("owner_team", "FA")
-            owner_abbr = _fantasy_team_to_mlb_abbr(owner) or owner
-            st = b.get("stats", {})
-            h = st.get("H", "-")
-            ab = st.get("AB", "-")
-            avg = _fmt_avg(st.get("AVG", "-"))
-            ops = _fmt_avg(st.get("OPS", "-"))
-            hr = st.get("HR", "0")
-            rbi = st.get("RBI", "0")
-            r = st.get("R", "0")
-            sb = st.get("SB", "0")
-            _append_report_player_heading(batter_lines, idx, name, pos, owner_abbr)
-            batter_lines.append(f"    H-AB {h}-{ab} AVG {avg}")
-            batter_lines.append(f"    OPS {ops}")
-            batter_lines.append(f"    HR {hr} RBI {rbi}")
-            batter_lines.append(f"    R {r} SB {sb}")
-            if idx < min(len(top_batters), 5):
-                batter_lines.append("")
-
-        # Top pitchers — 3 lines per player: name / IP + counting / ERA / WHIP.
-        # SP hides SV/HLD, RP hides QS.
-        pitcher_lines: list[str] = []
-        for idx, p in enumerate(top_pitchers[:5], 1):
-            name = p.get("name", "?")
-            pos = p.get("position", "")
-            owner = p.get("owner_team", "FA")
-            owner_abbr = _fantasy_team_to_mlb_abbr(owner) or owner
-            st = p.get("stats", {})
-            ip = st.get("IP", "-")
-            w = st.get("W", "0")
-            sv = st.get("SV", "0")
-            hld = st.get("HLD", "0")
-            k = st.get("K", "0")
-            era = _fmt_era(st.get("ERA", "-"))
-            whip = _fmt_era(st.get("WHIP", "-"))
-            qs = st.get("QS", "0")
-            pos_upper = (pos or "").upper()
-            is_sp = "SP" in pos_upper
-            is_rp = "RP" in pos_upper
-            counting_parts = [f"{w}W", f"{k}K"]
-            if is_sp and not is_rp:
-                counting_parts.append(f"{qs}QS")
-            elif is_rp and not is_sp:
-                counting_parts.extend([f"{sv}SV", f"{hld}HLD"])
-            else:
-                counting_parts.extend([f"{qs}QS", f"{sv}SV", f"{hld}HLD"])
-            counting = " ".join(counting_parts)
-            _append_report_player_heading(pitcher_lines, idx, name, pos, owner_abbr)
-            pitcher_lines.append(f"    IP {ip} ERA {era}")
-            pitcher_lines.append(f"    WHIP {whip}")
-            pitcher_lines.append(f"    {counting}")
-            if idx < min(len(top_pitchers), 5):
-                pitcher_lines.append("")
+        batter_lines = _build_top_batter_lines(top_batters, "本週")
+        pitcher_lines = _build_top_pitcher_lines(top_pitchers, "本週")
 
         if not batter_lines:
             batter_lines = _format_stats_unavailable("本週最佳打者")
@@ -2358,6 +2587,7 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
             divider_line,
             _center_line("5-Man Keeper League", page_width),
             _center_line(f"第 {report_week} 週戰報", page_width),
+            _center_line(f"({window_label})", page_width),
             divider_line,
             "",
             _center_line("【聯盟總排名】", page_width),
@@ -2389,8 +2619,7 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
             lines.append("")
 
         lines.append(divider_line)
-        lines.append("最佳球員排名依據：")
-        lines.append(_compact_report_source(top_player_source))
+        lines.extend(_report_source_lines(top_player_source, window_label))
 
         # --- 6. AI commentary (OpenAI; no-op if OPENAI_API_KEY not set) ---
         try:
@@ -2411,6 +2640,7 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
 
         if dry_run:
             print(f"[WarReport] Dry-run: returning week {report_week} report text.")
+            _record_run(job_id, "success", f"dry-run week {report_week}")
             return {
                 "success": True,
                 "message": "Dry-run (no LINE push)",
@@ -2429,18 +2659,26 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
 
         if success:
             print(f"[WarReport] Week {report_week} war report sent to {destination}.")
+            _record_run(job_id, "success", f"week {report_week} -> {destination}")
             return {"success": True, "message": f"Sent to {destination}", "report": message}
         print(f"[WarReport] LINE send failed: {error}")
+        _record_run(job_id, "failed", f"LINE send failed: {error}")
         return {"success": False, "message": f"LINE send failed: {error}", "report": message}
 
     except YahooTokenError as e:
         print(f"[WarReport] Token error: {e}")
+        _record_run(job_id, "failed", f"Token error: {e}")
         return {"success": False, "message": f"Token error: {e}", "report": ""}
     except Exception as e:
+        import traceback
+
         print(f"[WarReport] Error: {e}")
+        traceback.print_exc()
+        _record_run(job_id, "failed", f"Error: {e}")
         return {"success": False, "message": f"Error: {e}", "report": ""}
 
 
+@_single_flight("monthly_report")
 def _monthly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
     """Monthly job (1st of each month, 20:45): generate monthly summary report.
 
@@ -2454,22 +2692,27 @@ def _monthly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
     """
     now = datetime.now()
     month = now.month
+    job_id = "monthly_report" if not (target_id or dry_run) else "monthly_report_manual"
 
-    # Only run during MLB season (April-October; skips March since no full month data yet)
-    if month < 4 or month > 10:
+    # Runs on the 1st for the previous month. March is skipped (no full month of
+    # games yet); November is included so the final month (October) still ships.
+    if month < 4 or month > 11:
         print(f"[MonthlyReport] Off-season or too early (month {month}), skipping.")
+        _record_run(job_id, "skipped", f"Off-season (month {month})")
         return {"success": False, "message": f"Off-season (month {month})", "report": ""}
 
     year = now.year
     report_month = month - 1  # Report covers the previous month
-    month_names = {3: "3月", 4: "4月", 5: "5月", 6: "6月",
-                   7: "7月", 8: "8月", 9: "9月", 10: "10月"}
-    month_label = month_names.get(report_month, f"{report_month}月")
+    month_label = f"{report_month}月"
+    month_start, month_end = _month_date_range(year, report_month)
 
     print(f"[MonthlyReport] Generating {month_label} report for {year}...")
+    _record_run(job_id, "started", f"year={year} month={report_month}")
+
+    # Imported before the try block so `except YahooTokenError` cannot NameError.
+    from api.yahoo_service import yahoo_api_get, YahooTokenError
 
     try:
-        from api.yahoo_service import yahoo_api_get, YahooTokenError
         from api.database import get_weekly_standings
         from src.notification.line_service import (
             send_line_group_message,
@@ -2483,6 +2726,7 @@ def _monthly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
         league_key = get_league_key(year)
         if not league_key:
             print(f"[MonthlyReport] No league key for year {year}")
+            _record_run(job_id, "failed", f"No league key for {year}")
             return {"success": False, "message": f"No league key for {year}", "report": ""}
 
         # --- 1. Current week (to bracket the report month's weeks) ---
@@ -2520,6 +2764,7 @@ def _monthly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
         league_standings = standings_data.get("fantasy_content", {}).get("league", [])
         if len(league_standings) < 2:
             print("[MonthlyReport] No standings data.")
+            _record_run(job_id, "failed", "No standings data from Yahoo")
             return {"success": False, "message": "No standings data", "report": ""}
 
         teams_section = league_standings[1].get("standings", [{}])[0].get("teams", {})
@@ -2660,7 +2905,8 @@ def _monthly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
                 else:
                     print(f"[MonthlyReport] Scoreboard error week {wk}: {e}")
 
-        # --- 4. Top 5 hitters/pitchers using Yahoo PTS ---
+        # --- 4. Top 5 hitters/pitchers: Yahoo ranks (its `lastmonth` is a rolling
+        # 30-day window), MLB supplies the calendar-month numbers we display. ---
         time.sleep(1)
         top_batters, top_pitchers, top_player_source, stats_debug = (
             _fetch_yahoo_report_top_players(
@@ -2669,15 +2915,12 @@ def _monthly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
                 sort_type="lastmonth",
             )
         )
-        for player in top_batters[:5] + top_pitchers[:5]:
-            month_stats = _fetch_mlb_month_player_stats(
-                player.get("name", ""),
-                player.get("position", ""),
-                year,
-                report_month,
-            )
-            if month_stats:
-                player["stats"] = month_stats
+        stats_debug["window"] = _apply_window_stats(
+            top_batters[:5] + top_pitchers[:5],
+            year,
+            month_start,
+            month_end,
+        )
 
         # --- 5. Transaction summary (read local JSON) ---
         month_trades = 0
@@ -2835,62 +3078,8 @@ def _monthly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
             playoff_lines.append("  以第 8 名勝場為基準")
             playoff_lines.append(f"  {_team_mgr_short(eighth['team_name'], eighth['manager_name'])}")
 
-        # Top batters — 3 lines per player (weekly-style).
-        batter_lines: list[str] = []
-        for idx, b in enumerate(top_batters[:5], 1):
-            name = b.get("name", "?")
-            pos = b.get("position", "")
-            owner = b.get("owner_team", "FA")
-            owner_abbr = _fantasy_team_to_mlb_abbr(owner) or owner
-            st = b.get("stats", {})
-            h = st.get("H", "-")
-            ab = st.get("AB", "-")
-            avg = _fmt_avg(st.get("AVG", "-"))
-            ops = _fmt_avg(st.get("OPS", "-"))
-            hr = st.get("HR", "0")
-            rbi = st.get("RBI", "0")
-            r = st.get("R", "0")
-            sb = st.get("SB", "0")
-            _append_report_player_heading(batter_lines, idx, name, pos, owner_abbr)
-            batter_lines.append(f"    H-AB {h}-{ab} AVG {avg}")
-            batter_lines.append(f"    OPS {ops}")
-            batter_lines.append(f"    HR {hr} RBI {rbi}")
-            batter_lines.append(f"    R {r} SB {sb}")
-            if idx < min(len(top_batters), 5):
-                batter_lines.append("")
-
-        # Top pitchers — 3 lines per player (weekly-style, position-aware).
-        pitcher_lines: list[str] = []
-        for idx, p in enumerate(top_pitchers[:5], 1):
-            name = p.get("name", "?")
-            pos = p.get("position", "")
-            owner = p.get("owner_team", "FA")
-            owner_abbr = _fantasy_team_to_mlb_abbr(owner) or owner
-            st = p.get("stats", {})
-            ip = st.get("IP", "-")
-            w = st.get("W", "0")
-            sv = st.get("SV", "0")
-            hld = st.get("HLD", "0")
-            k = st.get("K", "0")
-            era = _fmt_era(st.get("ERA", "-"))
-            whip = _fmt_era(st.get("WHIP", "-"))
-            qs = st.get("QS", "0")
-            pos_upper = (pos or "").upper()
-            is_sp = "SP" in pos_upper
-            is_rp = "RP" in pos_upper
-            counting_parts = [f"{w}W", f"{k}K"]
-            if is_sp and not is_rp:
-                counting_parts.append(f"{qs}QS")
-            elif is_rp and not is_sp:
-                counting_parts.extend([f"{sv}SV", f"{hld}HLD"])
-            else:
-                counting_parts.extend([f"{qs}QS", f"{sv}SV", f"{hld}HLD"])
-            _append_report_player_heading(pitcher_lines, idx, name, pos, owner_abbr)
-            pitcher_lines.append(f"    IP {ip} ERA {era}")
-            pitcher_lines.append(f"    WHIP {whip}")
-            pitcher_lines.append(f"    {' '.join(counting_parts)}")
-            if idx < min(len(top_pitchers), 5):
-                pitcher_lines.append("")
+        batter_lines = _build_top_batter_lines(top_batters, month_label)
+        pitcher_lines = _build_top_pitcher_lines(top_pitchers, month_label)
 
         if not batter_lines:
             batter_lines = _format_stats_unavailable(f"{month_label}最佳打者")
@@ -2972,8 +3161,12 @@ def _monthly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
             lines.append("")
 
         lines.append(divider_line)
-        lines.append("最佳球員排名依據：")
-        lines.append(_compact_report_source(top_player_source))
+        lines.extend(
+            _report_source_lines(
+                top_player_source,
+                f"{month_start.month}/{month_start.day}-{month_end.month}/{month_end.day}",
+            )
+        )
         lines.append("新秀觀察來源：")
         lines.append("Yahoo rosters")
         lines.append("+ MLB Stats API")
@@ -2998,6 +3191,7 @@ def _monthly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
 
         if dry_run:
             print(f"[MonthlyReport] Dry-run: returning {month_label} report text.")
+            _record_run(job_id, "success", f"dry-run {month_label}")
             return {
                 "success": True,
                 "message": "Dry-run (no LINE push)",
@@ -3015,15 +3209,22 @@ def _monthly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
 
         if success:
             print(f"[MonthlyReport] {month_label} report sent to {dest}.")
+            _record_run(job_id, "success", f"{month_label} -> {dest}")
             return {"success": True, "message": f"Sent to {dest}", "report": message}
         print(f"[MonthlyReport] LINE send failed: {error}")
+        _record_run(job_id, "failed", f"LINE send failed: {error}")
         return {"success": False, "message": f"LINE send failed: {error}", "report": message}
 
     except YahooTokenError as e:
         print(f"[MonthlyReport] Token error: {e}")
+        _record_run(job_id, "failed", f"Token error: {e}")
         return {"success": False, "message": f"Token error: {e}", "report": ""}
     except Exception as e:
+        import traceback
+
         print(f"[MonthlyReport] Error: {e}")
+        traceback.print_exc()
+        _record_run(job_id, "failed", f"Error: {e}")
         return {"success": False, "message": f"Error: {e}", "report": ""}
 
 
@@ -3247,6 +3448,179 @@ def _prospect_ranking_update_job():
         print(f"[ProspectUpdate] Error: {e}")
 
 
+# --- Startup catch-up for runs missed while the container was down ---------
+# misfire_grace_time only rescues a run the scheduler itself was late for. A
+# container that was simply not running at 21:00 computes its next cron time
+# forward and skips that week entirely, which is how weekly reports vanish
+# without a trace. On startup we compare the last successful run against the
+# most recent scheduled occurrence and fire once if it was genuinely missed.
+CATCHUP_ENABLED = _env_flag("REPORT_CATCHUP_ENABLED", "true")
+WEEKLY_CATCHUP_MAX_AGE_HOURS = float(os.getenv("WEEKLY_CATCHUP_MAX_AGE_HOURS", "48"))
+MONTHLY_CATCHUP_MAX_AGE_HOURS = float(os.getenv("MONTHLY_CATCHUP_MAX_AGE_HOURS", "72"))
+
+
+def _last_weekly_occurrence(now_local: datetime) -> datetime:
+    """Most recent Monday 21:00 local time at or before `now_local`."""
+    candidate = now_local.replace(hour=21, minute=0, second=0, microsecond=0)
+    candidate -= timedelta(days=now_local.weekday())  # back to this Monday
+    if candidate > now_local:
+        candidate -= timedelta(days=7)
+    return candidate
+
+
+def _last_monthly_occurrence(now_local: datetime) -> datetime:
+    """Most recent 1st-of-month 20:45 local time at or before `now_local`."""
+    candidate = now_local.replace(
+        day=1, hour=20, minute=45, second=0, microsecond=0
+    )
+    if candidate > now_local:
+        last_month_end = candidate.replace(day=1) - _ONE_DAY
+        candidate = last_month_end.replace(
+            day=1, hour=20, minute=45, second=0, microsecond=0
+        )
+    return candidate
+
+
+def _catch_up_job(
+    job_id: str,
+    job_fn,
+    occurrence: datetime,
+    max_age_hours: float,
+    now_local: datetime,
+) -> bool:
+    """Fire `job_fn` once if its last scheduled occurrence was missed."""
+    from api.database import get_last_job_success, has_job_history
+
+    age_hours = (now_local - occurrence).total_seconds() / 3600
+    if age_hours > max_age_hours:
+        print(
+            f"[Catchup] {job_id}: last occurrence {occurrence} is {age_hours:.1f}h old "
+            f"(> {max_age_hours}h), too stale to send.",
+            flush=True,
+        )
+        return False
+
+    if not has_job_history(job_id):
+        # Fresh deployment: record a baseline rather than pushing to the group.
+        _record_run(job_id, "skipped", "catch-up baseline (no prior history)")
+        print(f"[Catchup] {job_id}: no history yet, baseline recorded.", flush=True)
+        return False
+
+    last_success = get_last_job_success(job_id)
+    if last_success is not None:
+        if last_success.tzinfo is None:
+            last_success = last_success.replace(tzinfo=occurrence.tzinfo)
+        if last_success >= occurrence:
+            print(
+                f"[Catchup] {job_id}: already sent at {last_success} "
+                f"(>= {occurrence}), nothing to do.",
+                flush=True,
+            )
+            return False
+
+    print(
+        f"[Catchup] {job_id}: missed run for {occurrence} "
+        f"(last success {last_success}), firing now.",
+        flush=True,
+    )
+    _record_run(job_id, "catchup", f"missed occurrence {occurrence.isoformat()}")
+    job_fn()
+    return True
+
+
+def run_startup_catchup() -> dict:
+    """Re-send weekly/monthly reports that were missed during downtime."""
+    if not CATCHUP_ENABLED:
+        print("[Catchup] Disabled via REPORT_CATCHUP_ENABLED.", flush=True)
+        return {"enabled": False, "fired": []}
+
+    fired: list[str] = []
+    try:
+        from zoneinfo import ZoneInfo
+
+        now_local = datetime.now(ZoneInfo(REMINDER_CRON_TZ))
+    except Exception as e:
+        print(f"[Catchup] Cannot resolve timezone, skipping: {e}", flush=True)
+        return {"enabled": True, "fired": [], "error": str(e)}
+
+    for job_id, job_fn, occurrence, max_age in (
+        (
+            "war_report",
+            _weekly_war_report_job,
+            _last_weekly_occurrence(now_local),
+            WEEKLY_CATCHUP_MAX_AGE_HOURS,
+        ),
+        (
+            "monthly_report",
+            _monthly_war_report_job,
+            _last_monthly_occurrence(now_local),
+            MONTHLY_CATCHUP_MAX_AGE_HOURS,
+        ),
+    ):
+        try:
+            if _catch_up_job(job_id, job_fn, occurrence, max_age, now_local):
+                fired.append(job_id)
+        except Exception as e:
+            print(f"[Catchup] {job_id} failed (non-fatal): {e}", flush=True)
+            _record_run(job_id, "failed", f"catch-up error: {e}")
+
+    return {"enabled": True, "fired": fired}
+
+
+def _register_scheduler_listeners(scheduler) -> None:
+    """Log and persist job errors / misfires instead of losing them silently."""
+    try:
+        from apscheduler.events import (
+            EVENT_JOB_ERROR,
+            EVENT_JOB_EXECUTED,
+            EVENT_JOB_MISSED,
+        )
+    except ImportError:
+        return
+
+    def _on_event(event):
+        job_id = getattr(event, "job_id", "unknown")
+        if event.code == EVENT_JOB_MISSED:
+            print(f"[Scheduler] MISSED job {job_id} (scheduled {event.scheduled_run_time})",
+                  flush=True)
+            _record_run(job_id, "missed", f"scheduled {event.scheduled_run_time}")
+        elif event.code == EVENT_JOB_ERROR:
+            print(f"[Scheduler] ERROR in job {job_id}: {event.exception}", flush=True)
+            _record_run(job_id, "error", str(event.exception))
+        else:
+            # Executed cleanly — only jobs that don't self-record need this.
+            if job_id in _SELF_RECORDING_JOB_IDS:
+                return
+            _record_run(job_id, "success", "executed")
+
+    scheduler.add_listener(
+        _on_event, EVENT_JOB_ERROR | EVENT_JOB_MISSED | EVENT_JOB_EXECUTED
+    )
+
+
+def get_scheduler_status() -> dict:
+    """Return live scheduler state for the Commissioner diagnostics endpoint."""
+    if _scheduler is None:
+        return {"running": False, "reason": "scheduler not started", "jobs": []}
+
+    jobs = []
+    for job in _scheduler.get_jobs():
+        next_run = getattr(job, "next_run_time", None)
+        jobs.append({
+            "id": job.id,
+            "next_run_time": next_run.isoformat() if next_run else None,
+            "trigger": str(job.trigger),
+            "misfire_grace_time": job.misfire_grace_time,
+        })
+    jobs.sort(key=lambda j: (j["next_run_time"] is None, j["next_run_time"] or ""))
+    return {
+        "running": bool(_scheduler.running),
+        "timezone": REMINDER_CRON_TZ,
+        "misfire_grace_seconds": SCHEDULER_MISFIRE_GRACE_SECONDS,
+        "jobs": jobs,
+    }
+
+
 def start_scheduler():
     """Start the background scheduler.
 
@@ -3274,12 +3648,23 @@ def start_scheduler():
     try:
         from apscheduler.schedulers.background import BackgroundScheduler
         from apscheduler.triggers.cron import CronTrigger
-        from apscheduler.triggers.date import DateTrigger
     except ImportError:
         print("[Scheduler] apscheduler not installed, scheduler disabled.")
+        _record_run("scheduler", "failed", "apscheduler not installed")
         return
 
-    _scheduler = BackgroundScheduler()
+    # Job defaults matter more than the triggers here. APScheduler's default
+    # misfire_grace_time is 1 second, so any container restart or redeploy that
+    # straddles the trigger time silently drops that run forever. A 6h grace +
+    # coalesce means a late-starting container still fires the run once.
+    _scheduler = BackgroundScheduler(
+        job_defaults={
+            "misfire_grace_time": SCHEDULER_MISFIRE_GRACE_SECONDS,
+            "coalesce": True,
+            "max_instances": 1,
+        }
+    )
+    _register_scheduler_listeners(_scheduler)
 
     # Job 1: Keeper reminders
     if KEEPER_REMINDER_ENABLED:
@@ -3415,27 +3800,13 @@ def start_scheduler():
         print("[Scheduler] Prospect ranking update: Aug 15 19:00")
     else:
         print("[Scheduler] Prospect ranking update disabled")
-
-    # One-off test push: today's MLB games preview.
-    # Fires 2026-04-22 01:10 Taiwan time then never again (DateTrigger is
-    # idempotent after the time passes — safe to keep in code).
-    try:
-        from datetime import datetime as _dt
-        from zoneinfo import ZoneInfo as _ZI
-        tz = _ZI(REMINDER_CRON_TZ)
-        run_at = _dt(2026, 4, 22, 1, 10, 0, tzinfo=tz)
-        if run_at > _dt.now(tz):
-            _scheduler.add_job(
-                _daily_games_preview_job,
-                DateTrigger(run_date=run_at),
-                id="one_off_games_preview_20260422_0110",
-                replace_existing=True,
-            )
-            print(f"[Scheduler] One-off games preview scheduled: {run_at}")
-        else:
-            print(f"[Scheduler] One-off games preview skipped (already past: {run_at})")
-    except Exception as e:
-        print(f"[Scheduler] One-off games preview registration failed: {e}")
+    print(
+        f"[Scheduler] Misfire grace: {SCHEDULER_MISFIRE_GRACE_SECONDS}s, "
+        f"coalesce=True (restarts no longer drop a run)"
+    )
+    for job in _scheduler.get_jobs():
+        print(f"[Scheduler]   {job.id} -> next run {job.next_run_time}")
+    _record_run("scheduler", "started", f"{len(_scheduler.get_jobs())} jobs registered")
 
 
 def stop_scheduler():
