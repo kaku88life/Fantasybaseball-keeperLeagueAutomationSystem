@@ -15,6 +15,7 @@ const PUBLIC_LINKS = [
 const AUTH_LINKS = [
   { href: `/${new Date().getFullYear()}`, label: "聯盟 League" },
   { href: "/analytics", label: "統計 Stats" },
+  { href: "/radar", label: "雷達 Radar" },
 ];
 
 export default function Navbar() {

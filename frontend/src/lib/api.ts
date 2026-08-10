@@ -11,8 +11,10 @@ import type {
   PlayerDatabaseResponse,
   PlayerKeeperOptions,
   PlayerStats,
+  FaRadarResponse,
   ProspectsResponse,
   RankingFetchStatus,
+  StatcastCoverage,
   SubmissionDetail,
   SubmissionStatus,
   Team,
@@ -975,4 +977,29 @@ export async function calculateBuyout(
       use_faab: useFaab,
     }),
   });
+}
+
+// ========== Statcast / FA Radar ==========
+
+/** Unowned players whose recent Statcast profile is trending up. */
+export async function getFaRadar(params: {
+  role?: "batter" | "pitcher";
+  windowDays?: number;
+  limit?: number;
+  includeOwned?: boolean;
+  year?: number;
+}): Promise<FaRadarResponse> {
+  const query = new URLSearchParams({
+    role: params.role ?? "batter",
+    window_days: String(params.windowDays ?? 15),
+    limit: String(params.limit ?? 25),
+    include_owned: String(params.includeOwned ?? false),
+  });
+  if (params.year) query.set("year", String(params.year));
+  // Radar aggregates a rolling window server-side; allow for a cold start.
+  return request(`/api/analytics/fa-radar?${query.toString()}`, {}, 60_000);
+}
+
+export async function getStatcastCoverage(): Promise<StatcastCoverage> {
+  return request("/api/analytics/statcast-coverage");
 }

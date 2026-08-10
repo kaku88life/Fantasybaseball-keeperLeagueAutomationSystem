@@ -60,12 +60,12 @@ def _deferred_startup_refresh():
         import json as _json
         from datetime import datetime as _dt
         from pathlib import Path as _Path
-        from api.yahoo_service import discover_league_keys, fetch_transactions_full
+        from api.yahoo_service import fetch_transactions_full, resolve_league_key
 
         _year = _dt.now().year
-        _keys = discover_league_keys()
-        if _year in _keys:
-            _txs = fetch_transactions_full(_keys[_year])
+        _league_key = resolve_league_key(_year)
+        if _league_key:
+            _txs = fetch_transactions_full(_league_key)
             _path = _Path(__file__).resolve().parents[1] / "data" / f"yahoo_{_year}_transactions.json"
             _path.write_text(_json.dumps(_txs, indent=2, ensure_ascii=False), encoding="utf-8")
             print(f"[Startup] Refreshed {_year} transactions: {len(_txs.get('transactions', []))} records", flush=True)

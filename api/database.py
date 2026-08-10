@@ -488,6 +488,50 @@ MIGRATIONS: dict[str, list[str]] = {
         )
         """,
     ],
+    # Per-day Statcast totals. Savant's leaderboards ignore date filters, so we
+    # store daily aggregates and compute any rolling window from them.
+    "018_statcast_daily": [
+        """
+        CREATE TABLE IF NOT EXISTS statcast_daily (
+            game_date DATE NOT NULL,
+            player_id INTEGER NOT NULL,
+            role TEXT NOT NULL,
+            player_name TEXT DEFAULT '',
+            pa INTEGER DEFAULT 0,
+            bbe INTEGER DEFAULT 0,
+            barrels INTEGER DEFAULT 0,
+            hard_hits INTEGER DEFAULT 0,
+            ev_sum DOUBLE PRECISION DEFAULT 0,
+            xwoba_sum DOUBLE PRECISION DEFAULT 0,
+            woba_sum DOUBLE PRECISION DEFAULT 0,
+            woba_den INTEGER DEFAULT 0,
+            strikeouts INTEGER DEFAULT 0,
+            walks INTEGER DEFAULT 0,
+            pitches INTEGER DEFAULT 0,
+            swings INTEGER DEFAULT 0,
+            whiffs INTEGER DEFAULT 0,
+            velo_sum DOUBLE PRECISION DEFAULT 0,
+            velo_count INTEGER DEFAULT 0,
+            PRIMARY KEY (game_date, player_id, role)
+        )
+        """,
+        "CREATE INDEX IF NOT EXISTS idx_statcast_daily_role_date "
+        "ON statcast_daily(role, game_date DESC)",
+        "CREATE INDEX IF NOT EXISTS idx_statcast_daily_player "
+        "ON statcast_daily(player_id, role, game_date DESC)",
+    ],
+    # Caches Yahoo league keys discovered at runtime so a new season does not
+    # require a code edit (the old hardcoded map silently broke every Yahoo job).
+    "017_league_keys": [
+        """
+        CREATE TABLE IF NOT EXISTS league_keys (
+            year INTEGER PRIMARY KEY,
+            league_key TEXT NOT NULL,
+            source TEXT DEFAULT 'discovered',
+            resolved_at TIMESTAMPTZ DEFAULT NOW()
+        )
+        """,
+    ],
     # Observability for background jobs: without this we cannot tell
     # "never fired" from "fired but Yahoo/LINE failed".
     "016_scheduler_job_runs": [
@@ -1559,6 +1603,150 @@ def cleanup_old_notifications(retention_days: int = 365):
         except Exception as e:
             conn.rollback()
             print(f"[Cleanup] notification_log cleanup failed (non-fatal): {e}")
+
+
+# ========== Statcast daily aggregates ==========
+
+_STATCAST_COLUMNS = (
+    "game_date", "player_id", "role", "player_name",
+    "pa", "bbe", "barrels", "hard_hits", "ev_sum",
+    "xwoba_sum", "woba_sum", "woba_den", "strikeouts", "walks",
+    "pitches", "swings", "whiffs", "velo_sum", "velo_count",
+)
+
+
+def save_statcast_daily(game_date, entries: list[dict]) -> int:
+    """Upsert one day of per-player Statcast aggregates. Returns row count."""
+    if not entries:
+        return 0
+    placeholders = ", ".join(["%s"] * len(_STATCAST_COLUMNS))
+    updates = ", ".join(
+        f"{col} = EXCLUDED.{col}"
+        for col in _STATCAST_COLUMNS
+        if col not in ("game_date", "player_id", "role")
+    )
+    sql = (
+        f"INSERT INTO statcast_daily ({', '.join(_STATCAST_COLUMNS)}) "
+        f"VALUES ({placeholders}) "
+        f"ON CONFLICT (game_date, player_id, role) DO UPDATE SET {updates}"
+    )
+    payload = [
+        tuple(
+            game_date if col == "game_date" else entry.get(col, 0)
+            for col in _STATCAST_COLUMNS
+        )
+        for entry in entries
+    ]
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            psycopg2.extras.execute_batch(cur, sql, payload, page_size=500)
+    return len(payload)
+
+
+def get_statcast_synced_dates(start, end) -> list:
+    """Dates in [start, end] that already have Statcast rows."""
+    with get_conn() as conn:
+        rows = _fetchall(
+            conn,
+            """SELECT DISTINCT game_date FROM statcast_daily
+               WHERE game_date BETWEEN %s AND %s
+               ORDER BY game_date""",
+            (start, end),
+        )
+        return [r["game_date"] for r in rows]
+
+
+def get_statcast_window(start, end, role: str, min_pa: int = 0) -> list[dict]:
+    """Sum daily Statcast rows over [start, end] for one role.
+
+    Returns raw accumulators; rate stats are derived by
+    src.analytics.statcast.summarize() so the maths lives in one place.
+    """
+    with get_conn() as conn:
+        return _fetchall(
+            conn,
+            """SELECT player_id,
+                      role,
+                      MAX(player_name) FILTER (WHERE player_name <> '') AS player_name,
+                      SUM(pa)::int          AS pa,
+                      SUM(bbe)::int         AS bbe,
+                      SUM(barrels)::int     AS barrels,
+                      SUM(hard_hits)::int   AS hard_hits,
+                      SUM(ev_sum)           AS ev_sum,
+                      SUM(xwoba_sum)        AS xwoba_sum,
+                      SUM(woba_sum)         AS woba_sum,
+                      SUM(woba_den)::int    AS woba_den,
+                      SUM(strikeouts)::int  AS strikeouts,
+                      SUM(walks)::int       AS walks,
+                      SUM(pitches)::int     AS pitches,
+                      SUM(swings)::int      AS swings,
+                      SUM(whiffs)::int      AS whiffs,
+                      SUM(velo_sum)         AS velo_sum,
+                      SUM(velo_count)::int  AS velo_count
+               FROM statcast_daily
+               WHERE role = %s AND game_date BETWEEN %s AND %s
+               GROUP BY player_id, role
+               HAVING SUM(pa) >= %s""",
+            (role, start, end, min_pa),
+        )
+
+
+def get_statcast_coverage() -> dict:
+    """Earliest/latest ingested day and day count — shown in the UI."""
+    with get_conn() as conn:
+        row = _fetchone(
+            conn,
+            """SELECT MIN(game_date) AS first_date,
+                      MAX(game_date) AS last_date,
+                      COUNT(DISTINCT game_date)::int AS days
+               FROM statcast_daily""",
+        )
+        return row or {"first_date": None, "last_date": None, "days": 0}
+
+
+# ========== League Keys (per-season, auto-discovered) ==========
+
+def get_cached_league_key(year: int) -> Optional[str]:
+    """Return the cached Yahoo league key for `year`, or None."""
+    try:
+        with get_conn() as conn:
+            row = _fetchone(
+                conn,
+                "SELECT league_key FROM league_keys WHERE year = %s",
+                (year,),
+            )
+            return row["league_key"] if row else None
+    except Exception as e:
+        print(f"[LeagueKey] cache read failed for {year} (non-fatal): {e}", flush=True)
+        return None
+
+
+def save_league_key(year: int, league_key: str, source: str = "discovered") -> None:
+    """Persist a resolved league key so later boots skip discovery."""
+    try:
+        with get_conn() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """INSERT INTO league_keys (year, league_key, source, resolved_at)
+                       VALUES (%s, %s, %s, NOW())
+                       ON CONFLICT(year) DO UPDATE SET
+                           league_key = EXCLUDED.league_key,
+                           source = EXCLUDED.source,
+                           resolved_at = NOW()""",
+                    (year, league_key, source),
+                )
+    except Exception as e:
+        print(f"[LeagueKey] cache write failed for {year} (non-fatal): {e}", flush=True)
+
+
+def get_all_league_keys() -> list[dict]:
+    """All cached league keys, newest season first."""
+    with get_conn() as conn:
+        return _fetchall(
+            conn,
+            """SELECT year, league_key, source, resolved_at
+               FROM league_keys ORDER BY year DESC""",
+        )
 
 
 # ========== Scheduler Job Runs (observability) ==========

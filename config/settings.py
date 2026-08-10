@@ -114,23 +114,37 @@ PLAYOFF_TEAMS = 8
 YAHOO_LEAGUE_ID = None  # set via environment variable
 YAHOO_GAME_KEY = "mlb"
 
-# Yahoo game keys and league numbers per year
-# Used by scheduler jobs and yahoo_service to resolve league keys
+# Known Yahoo game keys and league numbers per year.
+#
+# These are a static fast path only. New seasons do NOT need to be added here:
+# api.yahoo_service.resolve_league_key() falls back to a DB cache and then to
+# live discovery via the Yahoo API. Prefer resolve_league_key() in any code
+# that must keep working next season without a manual edit.
 YAHOO_GAME_KEYS: dict[int, str] = {
     2024: "431", 2025: "458", 2026: "469",
-    2027: "TBD",  # placeholder — update when Yahoo 2027 league is created
 }
 YAHOO_LEAGUE_NUMS: dict[int, str] = {
     2024: "28498", 2025: "40288", 2026: "80910",
-    2027: "TBD",  # placeholder — update when Yahoo 2027 league is created
 }
+
+# Guards against placeholder rows ever producing a syntactically valid but
+# meaningless key like "TBD.l.TBD", which Yahoo answers with a 400.
+_INVALID_KEY_TOKENS = {"", "tbd", "none", "null", "?"}
+
+
+def _is_valid_key_token(value: str | None) -> bool:
+    return bool(value) and str(value).strip().lower() not in _INVALID_KEY_TOKENS
 
 
 def get_league_key(year: int) -> str | None:
-    """Get Yahoo league key string for a given year (e.g. '469.l.80910')."""
+    """Statically configured Yahoo league key (e.g. '469.l.80910'), if known.
+
+    Returns None for unknown or placeholder years — callers that need a value
+    for the current season should use api.yahoo_service.resolve_league_key().
+    """
     gk = YAHOO_GAME_KEYS.get(year)
     ln = YAHOO_LEAGUE_NUMS.get(year)
-    if not gk or not ln:
+    if not _is_valid_key_token(gk) or not _is_valid_key_token(ln):
         return None
     return f"{gk}.l.{ln}"
 

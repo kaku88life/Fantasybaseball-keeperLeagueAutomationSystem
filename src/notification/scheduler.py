@@ -1401,6 +1401,60 @@ def _fmt_era(v: str) -> str:
         return v
 
 
+STATCAST_SYNC_ENABLED = _env_flag("STATCAST_SYNC_ENABLED", "true")
+STATCAST_BACKFILL_DAYS = int(os.getenv("STATCAST_BACKFILL_DAYS", "20"))
+
+
+def _daily_statcast_sync_job() -> dict:
+    """Daily job: ingest yesterday's Statcast, backfilling any gaps.
+
+    Backfill matters because the container is ephemeral and jobs can be missed;
+    without it a restart would leave permanent holes in the rolling windows.
+    """
+    now = datetime.now()
+    if not STATCAST_SYNC_ENABLED:
+        _record_run("statcast_sync", "skipped", "disabled via STATCAST_SYNC_ENABLED")
+        return {"success": False, "message": "disabled"}
+
+    # Statcast only has regular-season data; skip the off-season entirely.
+    if now.month < 3 or now.month > 11:
+        print(f"[Statcast] Off-season (month {now.month}), skipping.", flush=True)
+        _record_run("statcast_sync", "skipped", f"Off-season (month {now.month})")
+        return {"success": False, "message": f"Off-season (month {now.month})"}
+
+    _record_run("statcast_sync", "started", f"backfill window {STATCAST_BACKFILL_DAYS}d")
+    try:
+        from src.analytics.statcast import backfill_statcast
+
+        end = now.date() - _ONE_DAY
+        start = end - timedelta(days=STATCAST_BACKFILL_DAYS - 1)
+        # Never reach back before opening day of the current season.
+        start = max(start, date(now.year, 3, 1))
+
+        results = backfill_statcast(start, end, max_days=STATCAST_BACKFILL_DAYS)
+        synced = [r for r in results if not r.get("error")]
+        failed = [r for r in results if r.get("error")]
+        pitches = sum(r.get("pitches", 0) for r in synced)
+
+        detail = f"{len(synced)} days, {pitches} pitches"
+        if failed:
+            detail += f", {len(failed)} failed"
+        print(f"[Statcast] Sync complete: {detail}", flush=True)
+        _record_run(
+            "statcast_sync",
+            "success" if not failed else "failed",
+            detail,
+        )
+        return {"success": not failed, "message": detail, "results": results}
+    except Exception as e:
+        import traceback
+
+        print(f"[Statcast] Sync error: {e}", flush=True)
+        traceback.print_exc()
+        _record_run("statcast_sync", "failed", str(e))
+        return {"success": False, "message": str(e)}
+
+
 def _record_run(job_id: str, status: str, detail: str = "") -> None:
     """Persist one job outcome so 'never fired' is distinguishable from 'failed'."""
     try:
@@ -1524,9 +1578,9 @@ def _daily_ar_rank_refresh_job():
         from api.yahoo_service import YahooTokenError
         from api.database import update_ar_ranks, update_last_season_stats
         from api.routers.commissioner import _fetch_yahoo_players_batch
-        from config.settings import get_league_key
+        from api.yahoo_service import resolve_league_key
 
-        league_key = get_league_key(year)
+        league_key = resolve_league_key(year)
         if not league_key:
             print(f"[DailyRankStats] No league key for year {year}")
             return
@@ -1586,8 +1640,8 @@ def _daily_player_status_job():
         import time
 
         # Resolve league key
-        from config.settings import get_league_key
-        league_key = get_league_key(year)
+        from api.yahoo_service import resolve_league_key
+        league_key = resolve_league_key(year)
         if not league_key:
             print(f"[StatusUpdate] No league key for year {year}")
             return
@@ -1796,8 +1850,8 @@ def _daily_transaction_fetch_job():
         from pathlib import Path
 
         # Resolve league key
-        from config.settings import get_league_key
-        league_key = get_league_key(year)
+        from api.yahoo_service import resolve_league_key
+        league_key = resolve_league_key(year)
         if not league_key:
             print(f"[TransactionFetch] No league key for year {year}")
             return
@@ -1851,12 +1905,12 @@ def sync_rosters_and_rebuild(year: int) -> dict:
     try:
         from api.yahoo_service import yahoo_api_get, YahooTokenError
         from api.database import get_all_teams
-        from config.settings import get_league_key
+        from api.yahoo_service import resolve_league_key
         import json as json_mod
         import time
         from pathlib import Path
 
-        league_key = get_league_key(year)
+        league_key = resolve_league_key(year)
         if not league_key:
             raise RuntimeError(f"No league key configured for year {year}")
 
@@ -2270,10 +2324,10 @@ def _weekly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
     try:
         from api.database import save_weekly_standings, get_weekly_standings
         from src.notification.line_service import send_line_group_message
-        from config.settings import get_league_key
+        from api.yahoo_service import resolve_league_key
         import time
 
-        league_key = get_league_key(year)
+        league_key = resolve_league_key(year)
         if not league_key:
             print(f"[WarReport] No league key for year {year}")
             _record_run(job_id, "failed", f"No league key for {year}")
@@ -2718,12 +2772,12 @@ def _monthly_war_report_job(target_id: str = "", dry_run: bool = False) -> dict:
             send_line_group_message,
             send_line_push_message,
         )
-        from config.settings import get_league_key
+        from api.yahoo_service import resolve_league_key
         import time
         import json
         from pathlib import Path
 
-        league_key = get_league_key(year)
+        league_key = resolve_league_key(year)
         if not league_key:
             print(f"[MonthlyReport] No league key for year {year}")
             _record_run(job_id, "failed", f"No league key for {year}")
@@ -3733,6 +3787,20 @@ def start_scheduler():
         id="roster_snapshot_rebuild",
         replace_existing=True,
     )
+
+    # Job 6b: Daily Statcast ingestion (19:30 Taiwan = 7:30 AM ET, after all
+    # previous-day US games are final and Savant has processed them).
+    if STATCAST_SYNC_ENABLED:
+        _scheduler.add_job(
+            _daily_statcast_sync_job,
+            CronTrigger(
+                hour=19,
+                minute=30,
+                timezone=REMINDER_CRON_TZ,
+            ),
+            id="statcast_sync",
+            replace_existing=True,
+        )
 
     # Job 7: Weekly war report (Monday 21:00 - 3hr buffer after 18:00 AR-Rank refresh)
     _scheduler.add_job(

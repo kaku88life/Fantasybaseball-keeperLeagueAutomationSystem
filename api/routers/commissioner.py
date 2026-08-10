@@ -589,6 +589,68 @@ async def test_line_reminder_endpoint(
     }
 
 
+@router.post("/statcast/sync")
+async def trigger_statcast_sync(
+    background_tasks: BackgroundTasks,
+    days: int = 20,
+    async_mode: bool = True,
+    user: dict = Depends(get_current_commissioner),
+):
+    """Ingest recent Statcast days (backfills gaps). Commissioner only.
+
+    Defaults to background execution — a cold backfill is ~8s per day fetched.
+    """
+    from src.notification.scheduler import _daily_statcast_sync_job
+
+    if not async_mode:
+        return _daily_statcast_sync_job()
+
+    background_tasks.add_task(_daily_statcast_sync_job)
+    return {
+        "success": True,
+        "status": "scheduled",
+        "message": f"Statcast sync dispatched (up to {days} days). Check coverage in ~1-3 min.",
+    }
+
+
+@router.get("/league-keys")
+async def get_league_keys_endpoint(user: dict = Depends(get_current_commissioner)):
+    """Resolved Yahoo league keys per season, plus this season's status.
+
+    Surfaces the failure mode where a new season has no key and every
+    Yahoo-dependent job goes quiet.
+    """
+    from datetime import date as _date
+
+    from api.database import get_all_league_keys
+    from api.yahoo_service import resolve_league_key
+
+    current_year = _date.today().year
+    try:
+        cached = get_all_league_keys()
+    except Exception as e:
+        cached = []
+        print(f"[CommissionerAPI] league key cache read failed: {e}")
+
+    current_key = resolve_league_key(current_year, allow_discovery=False)
+    return {
+        "current_year": current_year,
+        "current_league_key": current_key,
+        "current_resolved": bool(current_key),
+        "cached": [
+            {
+                "year": row["year"],
+                "league_key": row["league_key"],
+                "source": row["source"],
+                "resolved_at": (
+                    row["resolved_at"].isoformat() if row.get("resolved_at") else None
+                ),
+            }
+            for row in cached
+        ],
+    }
+
+
 @router.get("/scheduler/status")
 async def scheduler_status_endpoint(
     limit: int = 50,

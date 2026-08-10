@@ -355,3 +355,54 @@ export interface DBTeam {
   team_name: string;
   yahoo_team_id: string;
 }
+
+// ========== Statcast / FA Radar ==========
+
+/** Aggregated Statcast profile over a date window. Nulls mean "no sample". */
+export interface StatcastProfile {
+  player_id: number;
+  player_name: string;
+  role: "batter" | "pitcher";
+  pa: number;
+  bbe: number;
+  pitches: number;
+  barrel_rate: number | null;
+  hard_hit_rate: number | null;
+  avg_ev: number | null;
+  whiff_rate: number | null;
+  k_rate: number | null;
+  bb_rate: number | null;
+  xwoba: number | null;
+  woba: number | null;
+  /** wOBA minus xwOBA: negative = unlucky (buy), positive = regression risk. */
+  woba_minus_xwoba: number | null;
+  avg_fastball_velo: number | null;
+}
+
+export interface RadarPlayer {
+  player_id: number;
+  name: string;
+  score: number;
+  reasons: string[];
+  recent: StatcastProfile;
+  season: StatcastProfile | null;
+  owned: boolean;
+  owner_team: string;
+  owner_manager: string;
+}
+
+export interface FaRadarResponse {
+  window: { start: string; end: string; days: number };
+  role: "batter" | "pitcher";
+  players: RadarPlayer[];
+  total_candidates: number;
+  coverage: { first_date: string | null; last_date: string | null; days: number };
+  ownership: { sources: string[]; players: number };
+  notes: string[];
+}
+
+export interface StatcastCoverage {
+  first_date: string | null;
+  last_date: string | null;
+  days: number;
+}

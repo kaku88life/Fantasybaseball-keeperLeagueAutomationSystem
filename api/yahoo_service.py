@@ -236,30 +236,109 @@ def yahoo_api_get(path: str, _retry_count: int = 0) -> dict:
     return resp.json()
 
 
+LEAGUE_NAME_MARKERS = ("5-man", "keeper", "keep盟")
+
+
+def _walk_yahoo(obj, key: str, out: list) -> None:
+    """Collect every value stored under `key` anywhere in a Yahoo payload."""
+    if isinstance(obj, dict):
+        if key in obj:
+            out.append(obj[key])
+        for value in obj.values():
+            _walk_yahoo(value, key, out)
+    elif isinstance(obj, list):
+        for value in obj:
+            _walk_yahoo(value, key, out)
+
+
 def discover_league_keys() -> dict[int, str]:
-    """Discover all 5-Man Keep league keys across years using DB-backed token."""
-    import re
+    """Discover 5-Man Keep league keys per season from the Yahoo API.
 
+    Reads each game's own `season` field rather than a hardcoded game-key map,
+    so a new season is picked up automatically instead of silently resolving to
+    nothing (which is how every Yahoo-dependent job used to die each January).
+    """
     data = yahoo_api_get("/users;use_login=1/games;game_codes=mlb/leagues")
-    raw = json.dumps(data, ensure_ascii=False)
 
-    gk_to_season = {
-        "346": 2013, "357": 2014, "370": 2015, "378": 2016,
-        "388": 2017, "398": 2018, "404": 2019, "412": 2020,
-        "422": 2023, "431": 2024, "458": 2025, "469": 2026,
-    }
+    games: list[dict] = []
+    _walk_yahoo(data, "game", games)
 
     league_keys: dict[int, str] = {}
-    for gk, season in gk_to_season.items():
-        pattern = rf"{gk}\.l\.(\d+)"
-        for match in re.finditer(pattern, raw):
-            league_key = f"{gk}.l.{match.group(1)}"
-            idx = raw.find(league_key)
-            nearby = raw[idx : idx + 400]
-            if "5-Man" in nearby or "Keeper" in nearby:
+    for game in games:
+        # A game entry may be a list of fragments (metadata + leagues).
+        fragments = game if isinstance(game, list) else [game]
+
+        season = None
+        for fragment in fragments:
+            if isinstance(fragment, dict) and fragment.get("season"):
+                try:
+                    season = int(fragment["season"])
+                    break
+                except (TypeError, ValueError):
+                    continue
+        if season is None:
+            continue
+
+        leagues: list[dict] = []
+        _walk_yahoo(fragments, "league", leagues)
+        for league in leagues:
+            league_fragments = league if isinstance(league, list) else [league]
+            league_key = ""
+            league_name = ""
+            for fragment in league_fragments:
+                if not isinstance(fragment, dict):
+                    continue
+                league_key = league_key or str(fragment.get("league_key", ""))
+                league_name = league_name or str(fragment.get("name", ""))
+            if not league_key:
+                continue
+            name_lower = league_name.lower()
+            if any(marker in name_lower for marker in LEAGUE_NAME_MARKERS):
                 league_keys[season] = league_key
 
     return league_keys
+
+
+def resolve_league_key(year: int, allow_discovery: bool = True) -> Optional[str]:
+    """Resolve a season's Yahoo league key without needing a yearly code edit.
+
+    Resolution order: static config -> DB cache -> live Yahoo discovery.
+    A discovered key is cached so subsequent boots skip the API round-trip.
+    """
+    from config.settings import get_league_key
+
+    static_key = get_league_key(year)
+    if static_key:
+        return static_key
+
+    from api.database import get_cached_league_key, save_league_key
+
+    cached = get_cached_league_key(year)
+    if cached:
+        return cached
+
+    if not allow_discovery:
+        return None
+
+    try:
+        discovered = discover_league_keys()
+    except Exception as e:
+        print(f"[LeagueKey] Discovery failed for {year}: {e}", flush=True)
+        return None
+
+    for season, league_key in discovered.items():
+        save_league_key(season, league_key, source="discovered")
+
+    resolved = discovered.get(year)
+    if resolved:
+        print(f"[LeagueKey] Discovered {year} -> {resolved}", flush=True)
+    else:
+        print(
+            f"[LeagueKey] No 5-Man Keep league found for {year} "
+            f"(discovered seasons: {sorted(discovered) or 'none'})",
+            flush=True,
+        )
+    return resolved
 
 
 def fetch_draft_results(league_key: str) -> list[dict]:

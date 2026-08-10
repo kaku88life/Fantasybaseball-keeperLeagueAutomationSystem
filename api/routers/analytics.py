@@ -10,6 +10,81 @@ from api.dependencies import get_current_user
 router = APIRouter()
 
 
+@router.get("/fa-radar")
+async def get_fa_radar(
+    year: int = Query(default=0, description="Season, 0 = current year"),
+    role: str = Query(default="batter", pattern="^(batter|pitcher)$"),
+    window_days: int = Query(default=15, ge=3, le=60),
+    limit: int = Query(default=25, ge=1, le=100),
+    include_owned: bool = Query(default=False, description="Include rostered players"),
+    _user: dict = Depends(get_current_user),
+):
+    """Unowned players whose recent Statcast profile is trending up."""
+    from datetime import date as _date
+
+    from src.analytics.fa_radar import build_radar
+
+    today = _date.today()
+    return build_radar(
+        year=year or today.year,
+        as_of=today,
+        role=role,
+        window_days=window_days,
+        limit=limit,
+        include_owned=include_owned,
+    )
+
+
+@router.get("/statcast-coverage")
+async def get_statcast_coverage_endpoint(_user: dict = Depends(get_current_user)):
+    """How much Statcast history is ingested — drives the UI's freshness note."""
+    from api.database import get_statcast_coverage
+
+    coverage = get_statcast_coverage()
+    return {
+        "first_date": (
+            coverage["first_date"].isoformat() if coverage.get("first_date") else None
+        ),
+        "last_date": (
+            coverage["last_date"].isoformat() if coverage.get("last_date") else None
+        ),
+        "days": coverage.get("days", 0),
+    }
+
+
+@router.get("/player-statcast/{player_id}")
+async def get_player_statcast(
+    player_id: int,
+    year: int = Query(default=0),
+    window_days: int = Query(default=15, ge=3, le=60),
+    role: str = Query(default="batter", pattern="^(batter|pitcher)$"),
+    _user: dict = Depends(get_current_user),
+):
+    """Recent vs season Statcast profile for one player."""
+    from datetime import date as _date, timedelta as _timedelta
+
+    from api.database import get_statcast_window
+    from src.analytics.statcast import summarize
+
+    today = _date.today()
+    season = year or today.year
+    recent_start = today - _timedelta(days=window_days - 1)
+
+    def _find(rows):
+        for row in rows:
+            if row["player_id"] == player_id:
+                return summarize(row)
+        return None
+
+    return {
+        "player_id": player_id,
+        "role": role,
+        "recent": _find(get_statcast_window(recent_start, today, role)),
+        "season": _find(get_statcast_window(_date(season, 3, 1), today, role)),
+        "window": {"start": recent_start.isoformat(), "end": today.isoformat()},
+    }
+
+
 @router.get("/draft-stats")
 async def get_draft_stats(
     years: str = Query(default="", description="Comma-separated years, empty = all"),
