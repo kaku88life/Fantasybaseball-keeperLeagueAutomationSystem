@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import StatcastPanel from "@/components/StatcastPanel";
 import { getPlayerStats } from "@/lib/api";
 import type { PlayerStats } from "@/types";
 
@@ -249,6 +250,12 @@ export default function PlayerStatsModal({
             </div>
 
             <div className="px-4 py-3 space-y-6 sm:px-6 sm:py-4">
+              {/* Statcast: recent form vs season baseline */}
+              <StatcastPanel
+                mlbId={stats.mlb_id}
+                position={stats.primary_position || position}
+              />
+
               {/* Hitting stats */}
               {filteredHitting.length > 0 && (
                 <div>

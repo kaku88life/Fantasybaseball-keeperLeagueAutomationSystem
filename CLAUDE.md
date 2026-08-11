@@ -1,5 +1,7 @@
 # Fantasy Baseball Keeper League - Project CLAUDE.md
 
+> 本專案繼承工作區母法 `C:\vibe coding\AGENTS.md`；本檔為專案憲章**單一真相本體**，同目錄 `AGENTS.md` 只是薄版入口，不得再鏡像全文。
+> 在哪開新 session：Windows 原生（純本機專案，依母法環境節）。
 > 本文件為專案的核心規則參考，涵蓋所有聯盟規則、合約邏輯、驗證條件。
 > 所有程式碼修改與新功能開發，必須以此文件為依據進行規劃與確認。
 
@@ -340,7 +342,17 @@ computeNextSalary(contractType, currentSalary, action, extensionYears):
 - `PUT /api/teams/{id}/keeper-selections/{year}` → 儲存留用選擇 (auto-save)
 - `POST /api/teams/{id}/keeper-submit/{year}` → 提交留用 (鎖定)
 
+### 進階數據 / 雷達 (Analytics — 需登入，全聯盟可見)
+- `GET /api/analytics/fa-radar` → FA 雷達：近期底層數據上升的未持有球員
+  - query: `role=batter|pitcher`、`window_days`(3-60)、`limit`、`include_owned`、`year`
+- `GET /api/analytics/statcast-coverage` → 已匯入的 Statcast 天數與起訖日
+- `GET /api/analytics/player-statcast/{player_id}` → 單一球員「近期 vs 本季」對比（player_id 為 **MLB ID**）
+- 其餘既有端點：`/draft-stats`、`/faab-stats`、`/position-preference`、`/trade-stats`、`/salary-rankings`、`/contract-values`、`/league-summary`
+
 ### Commissioner
+- `GET /api/commissioner/scheduler/status` → 排程狀態：各 job 的 next_run_time + 近期執行紀錄
+- `GET /api/commissioner/league-keys` → 各年度 league key 與當年是否解析成功
+- `POST /api/commissioner/statcast/sync` → 手動觸發 Statcast 同步（含缺漏回補）
 - `POST /api/commissioner/import-excel` → 上傳 Excel
 - `GET /api/commissioner/submissions/{year}` → 所有提交狀態
 - `GET /api/commissioner/submissions/{year}/{team_id}` → 單隊提交詳情
@@ -446,6 +458,69 @@ Excel (歷史名冊)
 
 ---
 
+## 18-1. 排程與通知 (Scheduler)
+
+### 排程工作一覽（時間為 Asia/Taipei）
+| Job ID | 時間 | 說明 |
+|--------|------|------|
+| `transaction_fetch` | 每日 00:15 | Yahoo 交易紀錄 |
+| `roster_snapshot_rebuild` | 每日 00:30 | 名冊 + 快照 + ownership 同步 |
+| `player_status_update` | 每日 12:30 | IL/DTD/NA/O 狀態（傷兵 LINE 摘要預設關閉） |
+| `ar_rank_refresh` | 每日 18:00 | AR-Rank + 球季數據 |
+| `statcast_sync` | 每日 19:30 | Baseball Savant 逐球資料（= 美東 07:30，前一日賽事已結算） |
+| `war_report` | 每週一 21:00 | 週報 |
+| `monthly_report` | 每月 1 日 20:45 | 月報 |
+
+### 可靠性機制（2026-08 修復，勿移除）
+- **`misfire_grace_time=6h` + `coalesce`**：APScheduler 預設只有 1 秒，容器重啟橫跨觸發時間就會永久漏掉那次
+- **啟動補發 `run_startup_catchup()`**：記憶體 jobstore 在重啟後只會往後算，所以另外比對「最近應發時間 vs 最後成功紀錄」補送。含全新部署 baseline 防呆、48h/72h 過期不補
+- **single-flight 鎖**：cron / 補發 / 手動端點三個入口不會重複推播
+- **`scheduler_job_runs` 表**：每次戰報都寫 started/success/failed，這是判斷「沒觸發」還是「送失敗」的唯一依據
+- **`start_scheduler()` 必須排在 lifespan 前段**：先前排在一連串同步 Yahoo 呼叫之後，啟動逾時會讓排程永遠沒註冊
+
+### 戰報數據區間（重要）
+Yahoo players collection 的 `;out=stats` **只受 `sort_type` 影響排序，回傳一律是球季累積**。週報／月報顯示的球員數據因此改由 MLB Stats API 依區間聚合：
+- 週報：取 Yahoo scoreboard 的 `week_start` / `week_end`
+- 月報：曆月起訖
+- 抓不到時顯示「數據暫缺」，**不得靜默退回球季累積數字**
+
+---
+
+## 18-2. 進階數據 (Statcast)
+
+### 為什麼是逐球資料而非 leaderboard
+Baseball Savant 的 `leaderboard/custom` **完全忽略 `start_date` / `end_date` / `month`**（實測三種查詢回傳相同結果），無法支援滾動區間。因此改抓 `statcast_search/csv` 逐球資料（日期過濾有效），聚合成 per-player-per-day 存進 `statcast_daily`，任意區間即為一次 DB 查詢。
+
+### 關鍵實作限制
+- 一份逐球資料**同時聚合打者與投手兩個視角**（每列都有 batter/pitcher ID），流量省一半
+- 正確性不變式：**打者側與投手側的 PA 與球數總計必須相等**（測試已釘住）
+- 必須**串流處理**（`iter_statcast_day`）：materialize 成 list 會讓忙碌單日峰值從 4.6MB 暴增到 58MB
+- Savant CSV 帶 UTF-8 BOM，未剝除會讓第一欄變成 `﻿"pitch_type"` 而所有查詢靜默落空（見 `parse_csv_header`）
+- Savant 的 `player_name` 欄**永遠是打者**，投手名字需另外用 MLB Stats API 批次補
+- barrel 判定：`launch_speed_angle == 6`；強擊：`launch_speed >= 95`
+- 這些都是**非官方端點**，壞掉時必須顯性降級，不可呈現過期數字
+
+### 資料量
+約 14 MB/季（每天約 376 列 × 186 天）。目前**不設保留期**，全部保留。
+
+### 自動供裝
+`ensure_statcast_coverage()` 在啟動時檢查，若已匯入天數 < `STATCAST_MIN_COVERAGE_DAYS`（預設 10）就自動回補，不需人工呼叫 sync 端點。
+
+---
+
+## 18-3. 年度自動化（新賽季不需改程式）
+
+`api/yahoo_service.resolve_league_key(year)` 的解析順序：
+1. `config/settings.py` 的靜態 `YAHOO_GAME_KEYS` / `YAHOO_LEAGUE_NUMS`
+2. `league_keys` 表快取
+3. `discover_league_keys()` 即時向 Yahoo 探索（讀回傳的 `season` 欄位，不再依賴寫死的 game key 對照表），成功後寫回快取
+
+**任何需要跨年存活的程式碼一律用 `resolve_league_key()`，不要直接用 `config.settings.get_league_key()`**（後者只回靜態設定，未知年度回 `None`）。
+
+> 歷史教訓：舊版 `YAHOO_GAME_KEYS[2027] = "TBD"` 會組出 `"TBD.l.TBD"` 這種語法合法但無效的 key，Yahoo 回 400，所有 Yahoo 相關 job 靜默停擺。
+
+---
+
 ## 19. 資料庫遷移系統
 
 ### 概述
@@ -465,6 +540,23 @@ schema_migrations (
 | `001_add_line_name` | users 表新增 line_name 欄位 |
 | `002_add_indexes` | 5 個效能索引（selections/submissions/notifications） |
 | `003_add_foreign_keys` | 6 個外鍵約束（資料一致性保護） |
+| `004_buyouts_table` | buyouts 表（買斷紀錄）+ 1 索引 + 1 外鍵 |
+| `005_yahoo_tokens` | yahoo_tokens 表（DB-backed OAuth token）+ 1 索引 + 1 外鍵 |
+| `006_player_rankings` | player_rankings 表（Yahoo O-Rank / AR-Rank / 數據）+ 2 索引 |
+| `007_add_ar_rank` | player_rankings 新增 ar_rank 欄位 + 索引 |
+| `008_add_ab_ip_columns` | player_rankings 新增 stat_ab / proj_ab / stat_ip / proj_ip |
+| `009_add_stats_sort_type` | player_rankings 新增 stats_sort_type（區分 season / lastweek 等） |
+| `010_rookie_callup_log` | rookie_callup_log 表（R 約新秀升上大聯盟紀錄）+ 1 索引 |
+| `011_add_player_status` | player_rankings 新增 status 欄位（IL/DTD/NA/O） |
+| `012_add_owner_manager` | 新增 owner_manager 欄位 |
+| `013_weekly_standings` | weekly_standings 表（每週戰績快照，供週報升降比較）+ 1 索引 |
+| `014_synced_rosters` | synced_rosters 表（Yahoo 名冊 JSON，跨部署保存） |
+| `015_injury_notification_state` | injury_notification_state 表（傷兵通知 baseline） |
+| `016_scheduler_job_runs` | scheduler_job_runs 表（排程執行紀錄，可觀測性）+ 2 索引 |
+| `017_league_keys` | league_keys 表（自動探索的年度 Yahoo league key 快取） |
+| `018_statcast_daily` | statcast_daily 表（每日 Statcast 聚合）+ 2 索引 |
+
+> 註：檔案中 `004_buyouts_table` 的位置排在 `003` 之前，但套用順序依 key 排序決定，不受撰寫順序影響。
 
 ### 如何新增遷移
 在 `api/database.py` 的 `MIGRATIONS` dict 中新增項目：
@@ -472,7 +564,7 @@ schema_migrations (
 ```python
 MIGRATIONS: dict[str, list[str]] = {
     # ... 既有遷移 ...
-    "004_your_migration_name": [
+    "019_your_migration_name": [
         "SQL statement 1;",
         "SQL statement 2;",
     ],
@@ -480,7 +572,7 @@ MIGRATIONS: dict[str, list[str]] = {
 ```
 
 **規則：**
-- 版本號格式：`NNN_描述`，數字遞增（如 `004_xxx`、`005_xxx`）
+- 版本號格式：`NNN_描述`，數字遞增（下一個是 `019_xxx`）
 - 每個 SQL 必須**冪等**（可重複執行不出錯），使用 `IF NOT EXISTS` / `DO $$` 保護
 - 遷移在 `init_db()` 啟動時自動執行，只跑尚未套用的版本
 - 失敗時自動 rollback 並印錯誤，不影響其他遷移
@@ -516,13 +608,19 @@ MIGRATIONS: dict[str, list[str]] = {
 
 ### 啟動順序（start.sh + lifespan）
 ```
-1. start.sh: 載入 2026 合約 JSON → DB
+1. start.sh: 載入 2027 合約投影 + 買斷種子
 2. lifespan: init_db() → 建表 + 跑遷移
 3. lifespan: seed_if_empty() → 首次部署自動種子化
-4. lifespan: cleanup_old_notifications(365) → 清理超過 1 年的通知紀錄
-5. lifespan: start_scheduler() → 啟動排程器
-6. uvicorn: 開始接受請求
+4. lifespan: start_scheduler() → 啟動排程器（刻意排在重活之前）
+5. uvicorn: 開始接受請求
+--- 以下在背景 thread 執行，不擋啟動 ---
+6. cleanup_old_notifications(365) / cleanup_old_job_runs(90)
+7. run_startup_catchup() → 補發停機期間漏掉的週報／月報
+8. ensure_statcast_coverage() → 首次部署自動回補 Statcast
+9. _deferred_startup_refresh() → 2026 post-draft 快照 + Yahoo 交易重抓
 ```
+
+> **順序是刻意的**：步驟 6-9 含大量 Yahoo API 呼叫（2 秒節流、429 時 sleep 60-300 秒）。先前它們排在 `start_scheduler()` 之前且同步執行，啟動逾時會導致排程永遠沒註冊、週報月報靜默消失。
 
 ### 環境變數（完整清單見 .env.example）
 | 變數 | 必要性 | 說明 |
@@ -535,6 +633,11 @@ MIGRATIONS: dict[str, list[str]] = {
 | `OAUTH_REDIRECT_URI` | 必要 | OAuth 回調 URL |
 | `FRONTEND_URL` | 必要 | 前端 URL（登入後導向） |
 | `ALLOWED_ORIGINS` | 建議 | 額外 CORS 允許來源 |
+| `STATCAST_SYNC_ENABLED` | 選用 | Statcast 每日同步開關（預設 true） |
+| `STATCAST_BACKFILL_DAYS` | 選用 | 每次同步回補天數（預設 20） |
+| `STATCAST_MIN_COVERAGE_DAYS` | 選用 | 低於此天數則啟動時自動回補（預設 10） |
+| `SCHEDULER_MISFIRE_GRACE_SECONDS` | 選用 | 排程遲到容忍（預設 21600 = 6 小時） |
+| `REPORT_CATCHUP_ENABLED` | 選用 | 停機漏發的戰報是否補送（預設 true） |
 
 ### JWT 安全機制
 - 支援 `JWT_SECRET` 或 `JWT_SECRET_KEY` 兩個變數名稱

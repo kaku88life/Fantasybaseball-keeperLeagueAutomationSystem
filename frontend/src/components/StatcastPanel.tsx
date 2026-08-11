@@ -1,0 +1,268 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { getPlayerStatcast } from "@/lib/api";
+import type { PlayerStatcastResponse, StatcastProfile } from "@/types";
+
+interface StatcastPanelProps {
+  mlbId: number;
+  /** Primary position, used to decide whether to show hitting or pitching metrics. */
+  position: string;
+}
+
+const WINDOW_DAYS = 15;
+
+/** Position tokens that mean "treat this player as a pitcher". */
+const PITCHER_TOKENS = new Set(["P", "SP", "RP", "LHP", "RHP", "TWP"]);
+
+function isPitcher(position: string): boolean {
+  return (position || "")
+    .replace(/\//g, ",")
+    .split(",")
+    .map((token) => token.trim().toUpperCase())
+    .some((token) => PITCHER_TOKENS.has(token));
+}
+
+function woba(value: number | null | undefined): string {
+  if (value === null || value === undefined) return "—";
+  const text = value.toFixed(3);
+  return text.startsWith("0.") ? text.slice(1) : text;
+}
+
+function num(value: number | null | undefined, suffix = ""): string {
+  return value === null || value === undefined ? "—" : `${value}${suffix}`;
+}
+
+/**
+ * One metric with its recent value, season value, and the gap between them.
+ * `higherIsBetter` flips the colour so "lower ERA-ish" metrics read correctly.
+ */
+function MetricRow({
+  label,
+  hint,
+  recent,
+  season,
+  format,
+  higherIsBetter = true,
+}: {
+  label: string;
+  hint: string;
+  recent: number | null | undefined;
+  season: number | null | undefined;
+  format: (v: number | null | undefined) => string;
+  higherIsBetter?: boolean;
+}) {
+  const hasBoth = recent !== null && recent !== undefined && season !== null && season !== undefined;
+  const diff = hasBoth ? recent - season : null;
+  const meaningful = diff !== null && Math.abs(diff) >= 0.001;
+  const improving = meaningful ? (higherIsBetter ? diff > 0 : diff < 0) : false;
+
+  return (
+    <tr className="border-t border-gray-100">
+      <td className="px-2 py-1.5">
+        <div className="text-xs font-medium text-gray-800">{label}</div>
+        <div className="text-[10px] text-gray-400">{hint}</div>
+      </td>
+      <td className="px-2 py-1.5 text-right text-sm font-semibold text-gray-900 tabular-nums">
+        {format(recent)}
+      </td>
+      <td className="px-2 py-1.5 text-right text-sm text-gray-500 tabular-nums">
+        {format(season)}
+      </td>
+      <td className="px-2 py-1.5 text-right text-xs tabular-nums">
+        {meaningful ? (
+          <span className={improving ? "text-emerald-600" : "text-rose-600"}>
+            {diff > 0 ? "+" : ""}
+            {Math.abs(diff) < 1 ? diff.toFixed(3).replace(/^(-?)0\./, "$1.") : diff.toFixed(1)}
+          </span>
+        ) : (
+          <span className="text-gray-300">—</span>
+        )}
+      </td>
+    </tr>
+  );
+}
+
+function ProfileTable({
+  recent,
+  season,
+  pitcher,
+}: {
+  recent: StatcastProfile | null;
+  season: StatcastProfile | null;
+  pitcher: boolean;
+}) {
+  return (
+    <div className="overflow-x-auto rounded-lg border">
+      <table className="w-full min-w-[380px]">
+        <thead className="bg-gray-50 text-[10px] text-gray-500">
+          <tr>
+            <th className="px-2 py-1.5 text-left">指標</th>
+            <th className="px-2 py-1.5 text-right">近 {WINDOW_DAYS} 天</th>
+            <th className="px-2 py-1.5 text-right">本季</th>
+            <th className="px-2 py-1.5 text-right">差異</th>
+          </tr>
+        </thead>
+        <tbody>
+          {pitcher ? (
+            <>
+              <MetricRow
+                label="被打 xwOBA"
+                hint="預期被上壘率，越低越好"
+                recent={recent?.xwoba}
+                season={season?.xwoba}
+                format={woba}
+                higherIsBetter={false}
+              />
+              <MetricRow
+                label="Whiff%"
+                hint="揮空率，代表決勝球宰制力"
+                recent={recent?.whiff_rate}
+                season={season?.whiff_rate}
+                format={(v) => num(v, "%")}
+              />
+              <MetricRow
+                label="速球均速"
+                hint="掉速常是傷兵前兆"
+                recent={recent?.avg_fastball_velo}
+                season={season?.avg_fastball_velo}
+                format={(v) => num(v, " mph")}
+              />
+              <MetricRow
+                label="被 Barrel%"
+                hint="被扎實擊中的比例，越低越好"
+                recent={recent?.barrel_rate}
+                season={season?.barrel_rate}
+                format={(v) => num(v, "%")}
+                higherIsBetter={false}
+              />
+              <MetricRow
+                label="被強擊率"
+                hint="被打出 95mph 以上的比例"
+                recent={recent?.hard_hit_rate}
+                season={season?.hard_hit_rate}
+                format={(v) => num(v, "%")}
+                higherIsBetter={false}
+              />
+            </>
+          ) : (
+            <>
+              <MetricRow
+                label="xwOBA"
+                hint="依擊球品質推算的預期產能"
+                recent={recent?.xwoba}
+                season={season?.xwoba}
+                format={woba}
+              />
+              <MetricRow
+                label="wOBA"
+                hint="實際產能，低於 xwOBA 代表運氣不好"
+                recent={recent?.woba}
+                season={season?.woba}
+                format={woba}
+              />
+              <MetricRow
+                label="Barrel%"
+                hint="兼具初速與角度的理想擊球比例"
+                recent={recent?.barrel_rate}
+                season={season?.barrel_rate}
+                format={(v) => num(v, "%")}
+              />
+              <MetricRow
+                label="強擊率"
+                hint="初速 95mph 以上的擊球比例"
+                recent={recent?.hard_hit_rate}
+                season={season?.hard_hit_rate}
+                format={(v) => num(v, "%")}
+              />
+              <MetricRow
+                label="平均初速"
+                hint="擊球出去的平均速度"
+                recent={recent?.avg_ev}
+                season={season?.avg_ev}
+                format={(v) => num(v, " mph")}
+              />
+            </>
+          )}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+export default function StatcastPanel({ mlbId, position }: StatcastPanelProps) {
+  const pitcher = isPitcher(position);
+  const [data, setData] = useState<PlayerStatcastResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (!mlbId) {
+      setLoading(false);
+      return;
+    }
+    let cancelled = false;
+    setLoading(true);
+    setError("");
+    getPlayerStatcast(mlbId, {
+      role: pitcher ? "pitcher" : "batter",
+      windowDays: WINDOW_DAYS,
+    })
+      .then((res) => {
+        if (!cancelled) setData(res);
+      })
+      .catch((e) => {
+        if (!cancelled) setError(e instanceof Error ? e.message : "載入失敗");
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [mlbId, pitcher]);
+
+  if (!mlbId) return null;
+
+  return (
+    <div>
+      <h4 className="mb-2 text-sm font-semibold text-gray-700">
+        進階數據 Statcast
+        <span className="ml-2 text-xs font-normal text-gray-400">
+          {pitcher ? "投手視角" : "打者視角"}
+        </span>
+      </h4>
+
+      {loading && (
+        <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 text-center text-xs text-gray-500">
+          載入中...
+        </div>
+      )}
+
+      {!loading && error && (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-700">
+          進階數據載入失敗：{error}
+        </div>
+      )}
+
+      {!loading && !error && data && !data.recent && !data.season && (
+        <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 text-center text-xs text-gray-500">
+          這名球員在已匯入的區間內沒有 Statcast 紀錄
+          <div className="mt-1 text-[10px] text-gray-400">
+            （小聯盟球員與尚未出賽者不會有資料）
+          </div>
+        </div>
+      )}
+
+      {!loading && !error && data && (data.recent || data.season) && (
+        <>
+          <ProfileTable recent={data.recent} season={data.season} pitcher={pitcher} />
+          <p className="mt-2 text-[10px] text-gray-400">
+            區間 {data.window.start} ~ {data.window.end}。綠色代表較本季進步、紅色代表退步。
+            資料來源：Baseball Savant。
+          </p>
+        </>
+      )}
+    </div>
+  );
+}

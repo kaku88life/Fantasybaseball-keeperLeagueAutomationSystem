@@ -1403,6 +1403,47 @@ def _fmt_era(v: str) -> str:
 
 STATCAST_SYNC_ENABLED = _env_flag("STATCAST_SYNC_ENABLED", "true")
 STATCAST_BACKFILL_DAYS = int(os.getenv("STATCAST_BACKFILL_DAYS", "20"))
+# Below this many ingested days the radar has nothing useful to say, so a fresh
+# deployment backfills itself instead of waiting for the next nightly run.
+STATCAST_MIN_COVERAGE_DAYS = int(os.getenv("STATCAST_MIN_COVERAGE_DAYS", "10"))
+
+
+def _in_statcast_season(now: datetime) -> bool:
+    """Statcast only carries regular-season data."""
+    return 3 <= now.month <= 11
+
+
+def ensure_statcast_coverage() -> dict:
+    """Backfill on startup when the rolling window would otherwise be empty.
+
+    Makes the feature self-provisioning: deploying is enough, no manual sync
+    call is needed. A no-op once enough days are stored.
+    """
+    now = datetime.now()
+    if not STATCAST_SYNC_ENABLED:
+        return {"ran": False, "reason": "disabled"}
+    if not _in_statcast_season(now):
+        return {"ran": False, "reason": f"off-season (month {now.month})"}
+
+    try:
+        from api.database import get_statcast_coverage
+
+        days = (get_statcast_coverage() or {}).get("days", 0) or 0
+    except Exception as e:
+        print(f"[Statcast] Coverage check failed: {e}", flush=True)
+        return {"ran": False, "reason": f"coverage check failed: {e}"}
+
+    if days >= STATCAST_MIN_COVERAGE_DAYS:
+        print(f"[Statcast] Coverage OK ({days} days), no startup backfill.", flush=True)
+        return {"ran": False, "reason": f"coverage ok ({days} days)"}
+
+    print(
+        f"[Statcast] Only {days} day(s) ingested (< {STATCAST_MIN_COVERAGE_DAYS}); "
+        f"running startup backfill.",
+        flush=True,
+    )
+    result = _daily_statcast_sync_job()
+    return {"ran": True, "had_days": days, "result": result}
 
 
 def _daily_statcast_sync_job() -> dict:
@@ -1416,8 +1457,7 @@ def _daily_statcast_sync_job() -> dict:
         _record_run("statcast_sync", "skipped", "disabled via STATCAST_SYNC_ENABLED")
         return {"success": False, "message": "disabled"}
 
-    # Statcast only has regular-season data; skip the off-season entirely.
-    if now.month < 3 or now.month > 11:
+    if not _in_statcast_season(now):
         print(f"[Statcast] Off-season (month {now.month}), skipping.", flush=True)
         _record_run("statcast_sync", "skipped", f"Off-season (month {now.month})")
         return {"success": False, "message": f"Off-season (month {now.month})"}

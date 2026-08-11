@@ -406,3 +406,11 @@ export interface StatcastCoverage {
   last_date: string | null;
   days: number;
 }
+
+export interface PlayerStatcastResponse {
+  player_id: number;
+  role: "batter" | "pitcher";
+  recent: StatcastProfile | null;
+  season: StatcastProfile | null;
+  window: { start: string; end: string };
+}

@@ -13,6 +13,7 @@ import type {
   PlayerStats,
   FaRadarResponse,
   ProspectsResponse,
+  PlayerStatcastResponse,
   RankingFetchStatus,
   StatcastCoverage,
   SubmissionDetail,
@@ -1002,4 +1003,17 @@ export async function getFaRadar(params: {
 
 export async function getStatcastCoverage(): Promise<StatcastCoverage> {
   return request("/api/analytics/statcast-coverage");
+}
+
+/** Recent-vs-season Statcast profile for one player (by MLB player id). */
+export async function getPlayerStatcast(
+  playerId: number,
+  params: { role?: "batter" | "pitcher"; windowDays?: number; year?: number } = {},
+): Promise<PlayerStatcastResponse> {
+  const query = new URLSearchParams({
+    role: params.role ?? "batter",
+    window_days: String(params.windowDays ?? 15),
+  });
+  if (params.year) query.set("year", String(params.year));
+  return request(`/api/analytics/player-statcast/${playerId}?${query.toString()}`);
 }

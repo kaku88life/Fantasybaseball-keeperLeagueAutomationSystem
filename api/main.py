@@ -118,6 +118,14 @@ async def lifespan(app: FastAPI):
         except Exception as e:
             print(f"[Startup] Report catch-up error (non-fatal): {e}", flush=True)
 
+        # Self-provision Statcast on a fresh deployment so the radar has data
+        # without anyone having to call the sync endpoint by hand.
+        try:
+            from src.notification.scheduler import ensure_statcast_coverage
+            print(f"[Startup] Statcast coverage: {ensure_statcast_coverage()}", flush=True)
+        except Exception as e:
+            print(f"[Startup] Statcast coverage error (non-fatal): {e}", flush=True)
+
         _deferred_startup_refresh()
 
     threading.Thread(
