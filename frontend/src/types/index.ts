@@ -414,3 +414,15 @@ export interface PlayerStatcastResponse {
   season: StatcastProfile | null;
   window: { start: string; end: string };
 }
+
+export interface StatcastLookupEntry {
+  recent: StatcastProfile | null;
+  season: StatcastProfile | null;
+}
+
+export interface StatcastLookupResponse {
+  results: Record<string, StatcastLookupEntry>;
+  window: { start: string; end: string; days: number };
+  matched: number;
+  requested: number;
+}

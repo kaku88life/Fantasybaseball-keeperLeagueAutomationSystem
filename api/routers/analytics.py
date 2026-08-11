@@ -4,10 +4,86 @@ Fantasy Baseball Keeper League - Analytics Routes (auth required)
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends, Query
+from pydantic import BaseModel, Field
 
 from api.dependencies import get_current_user
 
 router = APIRouter()
+
+
+class StatcastLookupPlayer(BaseModel):
+    name: str
+    is_pitcher: bool = False
+
+
+class StatcastLookupRequest(BaseModel):
+    """Batch lookup so a 50-row table costs one request, not 50."""
+    players: list[StatcastLookupPlayer] = Field(default_factory=list, max_length=200)
+    window_days: int = Field(default=15, ge=3, le=60)
+    year: int = 0
+
+
+@router.post("/statcast-lookup")
+async def statcast_lookup(
+    payload: StatcastLookupRequest,
+    _user: dict = Depends(get_current_user),
+):
+    """Resolve many players' Statcast profiles by name in one call.
+
+    Name normalisation happens here only. The response is keyed by the exact
+    name the caller sent, so the frontend never has to reimplement the matching
+    rules (and cannot drift from them).
+    """
+    from datetime import date as _date, timedelta as _timedelta
+
+    from api.database import get_statcast_window
+    from src.analytics.statcast import summarize
+    from src.notification.scheduler import _normalize_player_name
+
+    today = _date.today()
+    season = payload.year or today.year
+    recent_start = today - _timedelta(days=payload.window_days - 1)
+    season_start = _date(season, 3, 1)
+
+    if not payload.players:
+        return {"results": {}, "window": {"start": recent_start.isoformat(),
+                                          "end": today.isoformat()}}
+
+    def index(rows):
+        out = {}
+        for row in rows:
+            profile = summarize(row)
+            key = _normalize_player_name(profile.get("player_name", ""))
+            if key:
+                out[key] = profile
+        return out
+
+    indexed = {
+        role: {
+            "recent": index(get_statcast_window(recent_start, today, role)),
+            "season": index(get_statcast_window(season_start, today, role)),
+        }
+        for role in ("batter", "pitcher")
+    }
+
+    results: dict[str, dict] = {}
+    for player in payload.players:
+        key = _normalize_player_name(player.name)
+        if not key:
+            continue
+        role = "pitcher" if player.is_pitcher else "batter"
+        recent = indexed[role]["recent"].get(key)
+        season_profile = indexed[role]["season"].get(key)
+        if recent or season_profile:
+            results[player.name] = {"recent": recent, "season": season_profile}
+
+    return {
+        "results": results,
+        "window": {"start": recent_start.isoformat(), "end": today.isoformat(),
+                   "days": payload.window_days},
+        "matched": len(results),
+        "requested": len(payload.players),
+    }
 
 
 @router.get("/fa-radar")

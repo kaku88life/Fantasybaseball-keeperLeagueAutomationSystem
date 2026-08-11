@@ -16,6 +16,7 @@ import type {
   PlayerStatcastResponse,
   RankingFetchStatus,
   StatcastCoverage,
+  StatcastLookupResponse,
   SubmissionDetail,
   SubmissionStatus,
   Team,
@@ -1016,4 +1017,15 @@ export async function getPlayerStatcast(
   });
   if (params.year) query.set("year", String(params.year));
   return request(`/api/analytics/player-statcast/${playerId}?${query.toString()}`);
+}
+
+/** Batch Statcast lookup for a table page. Keyed by the exact names sent. */
+export async function lookupStatcast(
+  players: Array<{ name: string; is_pitcher: boolean }>,
+  windowDays = 15,
+): Promise<StatcastLookupResponse> {
+  return request("/api/analytics/statcast-lookup", {
+    method: "POST",
+    body: JSON.stringify({ players, window_days: windowDays }),
+  }, 60_000);
 }

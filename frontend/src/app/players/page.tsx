@@ -66,7 +66,21 @@ interface SortState {
 }
 
 // Stat columns config (shared)
-import { HITTING_COLS, PITCHING_COLS, formatStat } from "@/lib/stats";
+import {
+  ADV_BATTING_COLS,
+  ADV_PITCHING_COLS,
+  BUY_SIGNAL_MILD,
+  BUY_SIGNAL_STRONG,
+  HITTING_COLS,
+  PITCHING_COLS,
+  buySignalGap,
+  buySignalLevel,
+  formatAdvStat,
+  formatStat,
+} from "@/lib/stats";
+import { metricTooltip, type MetricKey } from "@/lib/statcastGlossary";
+import { lookupStatcast } from "@/lib/api";
+import type { StatcastLookupResponse } from "@/types";
 
 // Prospect ownership filter options
 const PROSPECT_OWNER_OPTIONS = [
@@ -111,6 +125,12 @@ export default function PlayersPage() {
   // Stats column visibility (collapsible)
   const [showHitting, setShowHitting] = useState(true);
   const [showPitching, setShowPitching] = useState(true);
+
+  // Statcast columns are opt-in: they cost an extra request and widen the table.
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [advData, setAdvData] = useState<StatcastLookupResponse | null>(null);
+  const [advLoading, setAdvLoading] = useState(false);
+  const [advError, setAdvError] = useState("");
 
   // Auto-toggle based on position filter
   const effectiveShowHitting = positionFilter === "PITCHER" ? false : showHitting;
@@ -225,6 +245,38 @@ export default function PlayersPage() {
   const ownerList = data?.owners ?? [];
   const totalPages = data?.total_pages ?? 1;
   const paginatedPlayers = data?.players ?? [];
+
+  // Fetch Statcast for the visible page only, in one batched request.
+  const advKey = showAdvanced
+    ? paginatedPlayers.map((p) => `${p.name}|${isPitcher(p.position) ? 1 : 0}`).join(",")
+    : "";
+  useEffect(() => {
+    if (!showAdvanced || !advKey) {
+      setAdvData(null);
+      return;
+    }
+    let cancelled = false;
+    setAdvLoading(true);
+    setAdvError("");
+    lookupStatcast(
+      advKey.split(",").filter(Boolean).map((token) => {
+        const idx = token.lastIndexOf("|");
+        return { name: token.slice(0, idx), is_pitcher: token.slice(idx + 1) === "1" };
+      }),
+    )
+      .then((res) => {
+        if (!cancelled) setAdvData(res);
+      })
+      .catch((e) => {
+        if (!cancelled) setAdvError(e instanceof Error ? e.message : "進階數據載入失敗");
+      })
+      .finally(() => {
+        if (!cancelled) setAdvLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [showAdvanced, advKey]);
 
   // Sort arrow indicator
   const SortArrow = ({ col }: { col: SortKey }) => {
@@ -675,8 +727,49 @@ export default function PlayersPage() {
                   >
                     {effectiveShowPitching ? "Hide" : "Show"} 投球
                   </button>
+                  <button
+                    onClick={() => setShowAdvanced((v) => !v)}
+                    className={`rounded-full px-2.5 py-0.5 text-[10px] font-medium transition-colors ${
+                      showAdvanced
+                        ? "bg-violet-100 text-violet-700"
+                        : "bg-gray-100 text-gray-400"
+                    }`}
+                    title="顯示 Baseball Savant 進階數據（近 15 天）：擊球品質與制球宰制力"
+                  >
+                    {showAdvanced ? "Hide" : "Show"} 進階數據
+                  </button>
                 </div>
               </div>
+
+              {/* Advanced stats legend + status */}
+              {showAdvanced && (
+                <div className="mb-2 rounded-md border border-violet-200 bg-violet-50 px-3 py-2 text-xs text-violet-900">
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                    <span className="font-medium">進階數據 Statcast</span>
+                    {advLoading && <span className="text-violet-600">載入中...</span>}
+                    {advError && <span className="text-rose-600">{advError}</span>}
+                    {advData && !advLoading && (
+                      <span className="text-violet-700">
+                        區間 {advData.window.start} ~ {advData.window.end}
+                        （近 {advData.window.days} 天）· 本頁 {advData.matched}/{advData.requested} 位有資料
+                      </span>
+                    )}
+                  </div>
+                  <div className="mt-1 space-y-0.5 text-[11px] text-violet-800">
+                    <div>
+                      <span className="text-emerald-600">★</span> = 實際 wOBA 落後預期 xwOBA 達{" "}
+                      {BUY_SIGNAL_STRONG.toFixed(2).replace(/^0/, "")} 以上：擊球品質好但成績還沒反映，
+                      <span className="font-medium">買點訊號強</span>。
+                      <span className="ml-1 text-emerald-500">·</span> = 落後{" "}
+                      {BUY_SIGNAL_MILD.toFixed(2).replace(/^0/, "")} 以上，訊號較弱。
+                    </div>
+                    <div className="text-violet-600">
+                      欄位名稱可 hover 看說明。此區數據為近期滾動區間，與左側 Yahoo 成績的區間不同；
+                      進階欄位不支援排序（排序由後端處理），需要排名請用「雷達 Radar」頁。
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Stats mismatch hint */}
               {data?.stats_sort_type && sortType !== data.stats_sort_type && (
@@ -735,6 +828,27 @@ export default function PlayersPage() {
                           label={c.label}
                           className=""
                         />
+                      ))}
+
+                      {/* Advanced (Statcast) columns — not sortable: these are
+                          joined client-side, while sorting happens server-side. */}
+                      {showAdvanced && effectiveShowHitting && ADV_BATTING_COLS.map((c) => (
+                        <th
+                          key={`adv-b-${c.key}`}
+                          title={metricTooltip(c.glossary as MetricKey)}
+                          className="cursor-help whitespace-nowrap bg-violet-50 px-2 py-2 text-right text-xs font-medium uppercase text-violet-700"
+                        >
+                          {c.label}
+                        </th>
+                      ))}
+                      {showAdvanced && effectiveShowPitching && ADV_PITCHING_COLS.map((c) => (
+                        <th
+                          key={`adv-p-${c.key}`}
+                          title={metricTooltip(c.glossary as MetricKey)}
+                          className="cursor-help whitespace-nowrap bg-violet-50 px-2 py-2 text-right text-xs font-medium uppercase text-violet-700"
+                        >
+                          {c.label}
+                        </th>
                       ))}
                     </tr>
                   </thead>
@@ -867,6 +981,55 @@ export default function PlayersPage() {
                                 : "-"}
                             </td>
                           ))}
+
+                          {/* Advanced (Statcast) cells */}
+                          {showAdvanced && effectiveShowHitting && ADV_BATTING_COLS.map((c) => {
+                            const prof = advData?.results[p.name]?.recent ?? null;
+                            const value = pitcher || !prof
+                              ? null
+                              : (prof[c.key as keyof typeof prof] as number | null);
+                            const gap = c.key === "xwoba" && !pitcher
+                              ? buySignalGap(prof?.xwoba, prof?.woba)
+                              : null;
+                            const level = buySignalLevel(gap);
+                            return (
+                              <td
+                                key={`adv-b-${c.key}`}
+                                className={`whitespace-nowrap bg-violet-50/40 px-2 py-1.5 text-right text-xs ${
+                                  pitcher ? "text-gray-300" : "text-gray-700"
+                                }`}
+                                title={
+                                  level !== "none" && gap !== null
+                                    ? `買點：實際 wOBA 落後預期 ${gap.toFixed(3)}，代表擊球品質還沒反映在成績上`
+                                    : undefined
+                                }
+                              >
+                                {formatAdvStat(c.key, value)}
+                                {level === "strong" && (
+                                  <span className="ml-0.5 text-emerald-600">★</span>
+                                )}
+                                {level === "mild" && (
+                                  <span className="ml-0.5 text-emerald-500">·</span>
+                                )}
+                              </td>
+                            );
+                          })}
+                          {showAdvanced && effectiveShowPitching && ADV_PITCHING_COLS.map((c) => {
+                            const prof = advData?.results[p.name]?.recent ?? null;
+                            const value = !pitcher || !prof
+                              ? null
+                              : (prof[c.key as keyof typeof prof] as number | null);
+                            return (
+                              <td
+                                key={`adv-p-${c.key}`}
+                                className={`whitespace-nowrap bg-violet-50/40 px-2 py-1.5 text-right text-xs ${
+                                  !pitcher ? "text-gray-300" : "text-gray-700"
+                                }`}
+                              >
+                                {formatAdvStat(c.key, value)}
+                              </td>
+                            );
+                          })}
                         </tr>
                       );
                     })}
@@ -874,7 +1037,13 @@ export default function PlayersPage() {
                     {paginatedPlayers.length === 0 && (
                       <tr>
                         <td
-                          colSpan={(isAuth ? 9 : 5) + (effectiveShowHitting ? HITTING_COLS.length : 0) + (effectiveShowPitching ? PITCHING_COLS.length : 0)}
+                          colSpan={
+                            (isAuth ? 9 : 5) +
+                            (effectiveShowHitting ? HITTING_COLS.length : 0) +
+                            (effectiveShowPitching ? PITCHING_COLS.length : 0) +
+                            (showAdvanced && effectiveShowHitting ? ADV_BATTING_COLS.length : 0) +
+                            (showAdvanced && effectiveShowPitching ? ADV_PITCHING_COLS.length : 0)
+                          }
                           className="py-8 text-center text-gray-400"
                         >
                           沒有符合條件的球員
