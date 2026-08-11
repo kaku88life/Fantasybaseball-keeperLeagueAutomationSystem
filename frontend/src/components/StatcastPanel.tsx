@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { getPlayerStatcast } from "@/lib/api";
+import { STATCAST_GLOSSARY, metricTooltip, type MetricKey } from "@/lib/statcastGlossary";
 import type { PlayerStatcastResponse, StatcastProfile } from "@/types";
 
 interface StatcastPanelProps {
@@ -51,22 +52,21 @@ function formatDiff(diff: number, scale: "woba" | "plain"): string {
  * `higherIsBetter` flips the colour so "lower is good" metrics read correctly.
  */
 function MetricRow({
-  label,
-  hint,
+  metric,
   recent,
   season,
   format,
   higherIsBetter = true,
   scale = "plain",
 }: {
-  label: string;
-  hint: string;
+  metric: MetricKey;
   recent: number | null | undefined;
   season: number | null | undefined;
   format: (v: number | null | undefined) => string;
   higherIsBetter?: boolean;
   scale?: "woba" | "plain";
 }) {
+  const glossary = STATCAST_GLOSSARY[metric];
   const hasBoth = recent !== null && recent !== undefined && season !== null && season !== undefined;
   const diff = hasBoth ? recent - season : null;
   // A wOBA move of .001 matters; 0.05 mph does not.
@@ -76,9 +76,11 @@ function MetricRow({
 
   return (
     <tr className="border-t border-gray-100">
-      <td className="px-2 py-1.5">
-        <div className="text-xs font-medium text-gray-800">{label}</div>
-        <div className="text-[10px] text-gray-400">{hint}</div>
+      <td className="px-2 py-1.5" title={metricTooltip(metric)}>
+        <div className="cursor-help text-xs font-medium text-gray-800 underline decoration-dotted decoration-gray-300 underline-offset-2">
+          {glossary.label}
+        </div>
+        <div className="text-[10px] text-gray-400">{glossary.meaning}</div>
       </td>
       <td className="px-2 py-1.5 text-right text-sm font-semibold text-gray-900 tabular-nums">
         {format(recent)}
@@ -123,8 +125,7 @@ function ProfileTable({
           {pitcher ? (
             <>
               <MetricRow
-                label="被打 xwOBA"
-                hint="預期被上壘率，越低越好"
+                metric="xwoba_against"
                 recent={recent?.xwoba}
                 season={season?.xwoba}
                 format={woba}
@@ -132,30 +133,26 @@ function ProfileTable({
                 higherIsBetter={false}
               />
               <MetricRow
-                label="Whiff%"
-                hint="揮空率，代表決勝球宰制力"
+                metric="whiff_rate"
                 recent={recent?.whiff_rate}
                 season={season?.whiff_rate}
                 format={(v) => num(v, "%")}
               />
               <MetricRow
-                label="速球均速"
-                hint="掉速常是傷兵前兆"
+                metric="velo"
                 recent={recent?.avg_fastball_velo}
                 season={season?.avg_fastball_velo}
                 format={(v) => num(v, " mph")}
               />
               <MetricRow
-                label="被 Barrel%"
-                hint="被扎實擊中的比例，越低越好"
+                metric="barrel_rate_against"
                 recent={recent?.barrel_rate}
                 season={season?.barrel_rate}
                 format={(v) => num(v, "%")}
                 higherIsBetter={false}
               />
               <MetricRow
-                label="被強擊率"
-                hint="被打出 95mph 以上的比例"
+                metric="hard_hit_rate_against"
                 recent={recent?.hard_hit_rate}
                 season={season?.hard_hit_rate}
                 format={(v) => num(v, "%")}
@@ -165,38 +162,33 @@ function ProfileTable({
           ) : (
             <>
               <MetricRow
-                label="xwOBA"
-                hint="依擊球品質推算的預期產能"
+                metric="xwoba"
                 recent={recent?.xwoba}
                 season={season?.xwoba}
                 format={woba}
                 scale="woba"
               />
               <MetricRow
-                label="wOBA"
-                hint="實際產能，低於 xwOBA 代表運氣不好"
+                metric="woba"
                 recent={recent?.woba}
                 season={season?.woba}
                 format={woba}
                 scale="woba"
               />
               <MetricRow
-                label="Barrel%"
-                hint="兼具初速與角度的理想擊球比例"
+                metric="barrel_rate"
                 recent={recent?.barrel_rate}
                 season={season?.barrel_rate}
                 format={(v) => num(v, "%")}
               />
               <MetricRow
-                label="強擊率"
-                hint="初速 95mph 以上的擊球比例"
+                metric="hard_hit_rate"
                 recent={recent?.hard_hit_rate}
                 season={season?.hard_hit_rate}
                 format={(v) => num(v, "%")}
               />
               <MetricRow
-                label="平均初速"
-                hint="擊球出去的平均速度"
+                metric="avg_ev"
                 recent={recent?.avg_ev}
                 season={season?.avg_ev}
                 format={(v) => num(v, " mph")}
@@ -278,7 +270,7 @@ export default function StatcastPanel({ mlbId, position }: StatcastPanelProps) {
           <ProfileTable recent={data.recent} season={data.season} pitcher={pitcher} />
           <p className="mt-2 text-[10px] text-gray-400">
             區間 {data.window.start} ~ {data.window.end}。綠色代表較本季進步、紅色代表退步。
-            資料來源：Baseball Savant。
+            將游標移到指標名稱上可看說明。資料來源：Baseball Savant。
           </p>
         </>
       )}
