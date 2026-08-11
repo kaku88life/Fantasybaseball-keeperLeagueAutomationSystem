@@ -13,7 +13,9 @@ import pytest
 from src.analytics import fa_radar
 from src.analytics.statcast import (
     aggregate_statcast_rows,
+    aggregate_statcast_stream,
     normalize_savant_name,
+    parse_csv_header,
     summarize,
 )
 
@@ -57,7 +59,32 @@ def test_savant_names_are_flipped_to_first_last(raw, expected):
     assert normalize_savant_name(raw) == expected
 
 
+# --- CSV header / BOM -----------------------------------------------------
+
+def test_bom_is_stripped_from_the_first_column_name():
+    """Savant prefixes a BOM; leaving it in silently breaks pitch_type lookups."""
+    header = '﻿"pitch_type",game_date,release_speed'
+    assert parse_csv_header(header) == ["pitch_type", "game_date", "release_speed"]
+
+
+def test_header_without_bom_is_unchanged():
+    assert parse_csv_header("a,b,c") == ["a", "b", "c"]
+
+
 # --- aggregation ----------------------------------------------------------
+
+def test_streaming_aggregation_reports_pitch_count_without_a_list():
+    """sync uses the streaming variant, so it must return the pitch tally itself."""
+    def rows():
+        yield pitch(description="swinging_strike")
+        yield pitch(events="single", description="hit_into_play",
+                    launch_speed="99.0", woba_value="0.9", woba_denom="1")
+
+    entries, pitch_count = aggregate_statcast_stream(rows(), DAY)
+    assert pitch_count == 2
+    assert {e["role"] for e in entries} == {"batter", "pitcher"}
+
+
 
 def test_batter_and_pitcher_totals_reconcile():
     """Both roles are folded from the same rows, so their sums must match."""

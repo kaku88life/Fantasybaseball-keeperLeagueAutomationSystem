@@ -17,10 +17,9 @@ caller must degrade visibly rather than present stale numbers as current.
 from __future__ import annotations
 
 import csv
-import io
 import os
 from datetime import date, timedelta
-from typing import Any, Iterable
+from typing import Any, Iterable, Iterator
 
 import httpx
 
@@ -74,9 +73,8 @@ def normalize_savant_name(name: str) -> str:
     return f"{first.strip()} {last.strip()}".strip()
 
 
-def fetch_statcast_day(game_day: date) -> list[dict]:
-    """Fetch one day of regular-season pitch-level Statcast rows."""
-    params = {
+def _statcast_day_params(game_day: date) -> dict[str, str]:
+    return {
         "all": "true",
         "hfGT": "R|",                      # regular season only
         "player_type": "batter",
@@ -84,16 +82,43 @@ def fetch_statcast_day(game_day: date) -> list[dict]:
         "game_date_lt": game_day.isoformat(),
         "type": "details",
     }
-    resp = httpx.get(
+
+
+def parse_csv_header(header_line: str) -> list[str]:
+    """Parse the CSV header, stripping the UTF-8 BOM Savant prefixes it with.
+
+    Without this the first column arrives as '\\ufeff"pitch_type"' and every
+    lookup of that column silently misses.
+    """
+    return next(csv.reader([header_line.lstrip("﻿")]))
+
+
+def iter_statcast_day(game_day: date) -> Iterator[dict]:
+    """Stream one day of regular-season pitch-level Statcast rows.
+
+    Yields rather than materializing: a busy day is ~5.4k rows x 119 columns,
+    which costs ~58MB as a list but ~6MB streamed. The container is small, so
+    the aggregator consumes each row and drops it.
+    """
+    with httpx.stream(
+        "GET",
         STATCAST_CSV_URL,
-        params=params,
+        params=_statcast_day_params(game_day),
         timeout=STATCAST_TIMEOUT_SECONDS,
         follow_redirects=True,
-    )
-    resp.raise_for_status()
-    # utf-8-sig strips the BOM that otherwise corrupts the first column name.
-    text = resp.content.decode("utf-8-sig", errors="replace")
-    return list(csv.DictReader(io.StringIO(text)))
+    ) as resp:
+        resp.raise_for_status()
+        lines = resp.iter_lines()
+        try:
+            header = next(lines)
+        except StopIteration:
+            return
+        yield from csv.DictReader(lines, fieldnames=parse_csv_header(header))
+
+
+def fetch_statcast_day(game_day: date) -> list[dict]:
+    """Eager variant of iter_statcast_day(), for tests and ad-hoc analysis."""
+    return list(iter_statcast_day(game_day))
 
 
 def _new_batter_row(player_id: int, name: str, game_day: date) -> dict:
@@ -115,14 +140,25 @@ def _new_pitcher_row(player_id: int, name: str, game_day: date) -> dict:
 
 
 def aggregate_statcast_rows(rows: Iterable[dict], game_day: date) -> list[dict]:
-    """Fold pitch-level rows into per-player-per-day totals for both roles.
+    """Fold pitch-level rows into per-player-per-day totals for both roles."""
+    entries, _ = aggregate_statcast_stream(rows, game_day)
+    return entries
+
+
+def aggregate_statcast_stream(
+    rows: Iterable[dict], game_day: date
+) -> tuple[list[dict], int]:
+    """Fold pitch rows into per-player-per-day totals; also return pitch count.
 
     Batter rows accumulate the batter's own contact quality; pitcher rows
     accumulate what the pitcher allowed, plus his own velocity and whiffs.
+    Consumes `rows` lazily so a streamed day never sits in memory as a list.
     """
     agg: dict[tuple[int, str], dict] = {}
+    pitch_count = 0
 
     for row in rows:
+        pitch_count += 1
         description = (row.get("description") or "").strip()
         events = (row.get("events") or "").strip()
         launch_speed = _f(row.get("launch_speed"))
@@ -184,7 +220,7 @@ def aggregate_statcast_rows(rows: Iterable[dict], game_day: date) -> list[dict]:
                 entry["velo_sum"] += release_speed
                 entry["velo_count"] += 1
 
-    return list(agg.values())
+    return list(agg.values()), pitch_count
 
 
 def summarize(entry: dict) -> dict:
@@ -265,11 +301,11 @@ def sync_statcast_day(game_day: date) -> dict:
     """Fetch, aggregate and persist one day. Returns a small summary dict."""
     from api.database import save_statcast_daily
 
-    rows = fetch_statcast_day(game_day)
-    if not rows:
-        return {"date": game_day.isoformat(), "pitches": 0, "players": 0}
-
-    entries = aggregate_statcast_rows(rows, game_day)
+    entries, pitch_count = aggregate_statcast_stream(
+        iter_statcast_day(game_day), game_day
+    )
+    if not entries:
+        return {"date": game_day.isoformat(), "pitches": pitch_count, "players": 0}
 
     missing = [e["player_id"] for e in entries if not e.get("player_name")]
     if missing:
@@ -281,7 +317,7 @@ def sync_statcast_day(game_day: date) -> dict:
     save_statcast_daily(game_day, entries)
     return {
         "date": game_day.isoformat(),
-        "pitches": len(rows),
+        "pitches": pitch_count,
         "players": len(entries),
         "named": sum(1 for e in entries if e.get("player_name")),
     }
