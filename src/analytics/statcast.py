@@ -47,6 +47,13 @@ _WHIFF_DESCRIPTIONS = {
     "swinging_pitchout",
 }
 _FASTBALL_NAMES = {"4-Seam Fastball", "Sinker", "Cutter"}
+_CALLED_STRIKE_DESCRIPTIONS = {"called_strike"}
+# Savant's `zone` column already classifies location: 1-9 inside the strike
+# zone, 11-14 outside. Using it avoids hand-rolling plate geometry.
+_OUT_OF_ZONE_CODES = {"11", "12", "13", "14"}
+# bb_type values for batted-ball mix.
+_BB_TYPES = {"ground_ball": "gb", "line_drive": "ld",
+             "fly_ball": "fb", "popup": "pu"}
 
 
 def _f(value: Any) -> float | None:
@@ -127,8 +134,11 @@ def _new_batter_row(player_id: int, name: str, game_day: date) -> dict:
         "player_name": name,
         "pa": 0, "bbe": 0, "barrels": 0, "hard_hits": 0,
         "ev_sum": 0.0, "xwoba_sum": 0.0, "woba_sum": 0.0, "woba_den": 0,
+        "xba_sum": 0.0, "xslg_sum": 0.0,
         "strikeouts": 0, "walks": 0,
         "pitches": 0, "swings": 0, "whiffs": 0,
+        "called_strikes": 0, "out_of_zone_pitches": 0, "out_of_zone_swings": 0,
+        "gb": 0, "ld": 0, "fb": 0, "pu": 0,
         "velo_sum": 0.0, "velo_count": 0,
     }
 
@@ -170,8 +180,13 @@ def aggregate_statcast_stream(
         release_speed = _f(row.get("release_speed"))
         is_fastball = (row.get("pitch_name") or "").strip() in _FASTBALL_NAMES
         xwoba = _f(row.get("estimated_woba_using_speedangle"))
+        xba = _f(row.get("estimated_ba_using_speedangle"))
+        xslg = _f(row.get("estimated_slg_using_speedangle"))
         woba_value = _f(row.get("woba_value"))
         woba_den = _i(row.get("woba_denom"))
+        is_called_strike = description in _CALLED_STRIKE_DESCRIPTIONS
+        out_of_zone = (row.get("zone") or "").strip() in _OUT_OF_ZONE_CODES
+        bb_key = _BB_TYPES.get((row.get("bb_type") or "").strip())
         name = normalize_savant_name(row.get("player_name", ""))
 
         batter_id = _i(row.get("batter"))
@@ -196,6 +211,14 @@ def aggregate_statcast_stream(
                 entry["swings"] += 1
             if is_whiff:
                 entry["whiffs"] += 1
+            if is_called_strike:
+                entry["called_strikes"] += 1
+            if out_of_zone:
+                entry["out_of_zone_pitches"] += 1
+                if is_swing:
+                    entry["out_of_zone_swings"] += 1
+            if bb_key:
+                entry[bb_key] += 1
             if is_bbe:
                 entry["bbe"] += 1
                 entry["ev_sum"] += launch_speed
@@ -215,6 +238,10 @@ def aggregate_statcast_stream(
                         entry["woba_sum"] += woba_value
                     if xwoba is not None:
                         entry["xwoba_sum"] += xwoba
+                    if xba is not None:
+                        entry["xba_sum"] += xba
+                    if xslg is not None:
+                        entry["xslg_sum"] += xslg
             # Velocity is a property of the pitcher only.
             if role == "pitcher" and is_fastball and release_speed is not None:
                 entry["velo_sum"] += release_speed
@@ -237,6 +264,10 @@ def summarize(entry: dict) -> dict:
 
     xwoba = round(entry["xwoba_sum"] / woba_den, 3) if woba_den else None
     woba = round(entry["woba_sum"] / woba_den, 3) if woba_den else None
+    xba = round(entry.get("xba_sum", 0.0) / woba_den, 3) if woba_den else None
+    xslg = round(entry.get("xslg_sum", 0.0) / woba_den, 3) if woba_den else None
+    batted = sum(entry.get(k, 0) or 0 for k in ("gb", "ld", "fb", "pu"))
+    oz_pitches = entry.get("out_of_zone_pitches", 0) or 0
 
     return {
         "player_id": entry.get("player_id"),
@@ -249,10 +280,23 @@ def summarize(entry: dict) -> dict:
         "hard_hit_rate": pct(entry.get("hard_hits", 0), bbe),
         "avg_ev": round(entry["ev_sum"] / bbe, 1) if bbe else None,
         "whiff_rate": pct(entry.get("whiffs", 0), swings),
+        # CSW% uses total pitches as the denominator, which makes it steadier
+        # than whiff% and a better early read on a pitcher's stuff.
+        "csw_rate": pct(
+            (entry.get("called_strikes", 0) or 0) + (entry.get("whiffs", 0) or 0),
+            pitches,
+        ),
+        "swing_rate": pct(swings, pitches),
+        "chase_rate": pct(entry.get("out_of_zone_swings", 0), oz_pitches),
         "k_rate": pct(entry.get("strikeouts", 0), pa),
         "bb_rate": pct(entry.get("walks", 0), pa),
+        "gb_rate": pct(entry.get("gb", 0), batted),
+        "ld_rate": pct(entry.get("ld", 0), batted),
+        "fb_rate": pct((entry.get("fb", 0) or 0) + (entry.get("pu", 0) or 0), batted),
         "xwoba": xwoba,
         "woba": woba,
+        "xba": xba,
+        "xslg": xslg,
         # Positive means the player has out-hit his contact quality (regression
         # risk); negative means he has been unlucky (a buy signal).
         "woba_minus_xwoba": (

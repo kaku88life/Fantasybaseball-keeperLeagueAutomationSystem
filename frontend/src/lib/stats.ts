@@ -59,6 +59,8 @@ export const ADV_BATTING_COLS: Array<{ key: string; label: string; glossary: str
   { key: "barrel_rate", label: "Brl%", glossary: "barrel_rate" },
   { key: "hard_hit_rate", label: "HH%", glossary: "hard_hit_rate" },
   { key: "avg_ev", label: "EV", glossary: "avg_ev" },
+  { key: "k_rate", label: "K%", glossary: "k_rate" },
+  { key: "bb_rate", label: "BB%", glossary: "bb_rate" },
 ];
 
 export const ADV_PITCHING_COLS: Array<{ key: string; label: string; glossary: string }> = [
@@ -67,6 +69,9 @@ export const ADV_PITCHING_COLS: Array<{ key: string; label: string; glossary: st
   { key: "avg_fastball_velo", label: "Velo", glossary: "velo" },
   { key: "barrel_rate", label: "Brl%-A", glossary: "barrel_rate_against" },
   { key: "hard_hit_rate", label: "HH%-A", glossary: "hard_hit_rate_against" },
+  { key: "csw_rate", label: "CSW%", glossary: "csw_rate" },
+  { key: "k_rate", label: "K%", glossary: "k_rate" },
+  { key: "fip", label: "FIP", glossary: "fip" },
 ];
 
 /** Format one Statcast value for the compact table cell. */
@@ -77,6 +82,11 @@ export function formatAdvStat(key: string, value: number | null | undefined): st
     return text.startsWith("0.") ? text.slice(1) : text;
   }
   if (key === "avg_ev" || key === "avg_fastball_velo") return value.toFixed(1);
+  if (key === "xba" || key === "xslg") {
+    const text = value.toFixed(3);
+    return text.startsWith("0.") ? text.slice(1) : text;
+  }
+  if (key === "fip") return value.toFixed(2);
   return `${value}`;
 }
 

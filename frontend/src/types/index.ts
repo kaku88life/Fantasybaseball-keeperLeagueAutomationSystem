@@ -377,6 +377,19 @@ export interface StatcastProfile {
   /** wOBA minus xwOBA: negative = unlucky (buy), positive = regression risk. */
   woba_minus_xwoba: number | null;
   avg_fastball_velo: number | null;
+  csw_rate: number | null;
+  swing_rate: number | null;
+  chase_rate: number | null;
+  gb_rate: number | null;
+  ld_rate: number | null;
+  fb_rate: number | null;
+  xba: number | null;
+  xslg: number | null;
+  /** Merged from official MLB pitching lines (pitchers only). */
+  fip?: number | null;
+  ip?: string | null;
+  era?: number | null;
+  era_minus_fip?: number | null;
 }
 
 export interface RadarPlayer {

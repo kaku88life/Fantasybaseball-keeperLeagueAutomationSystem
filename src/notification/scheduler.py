@@ -1476,7 +1476,18 @@ def _daily_statcast_sync_job() -> dict:
         failed = [r for r in results if r.get("error")]
         pitches = sum(r.get("pitches", 0) for r in synced)
 
-        detail = f"{len(synced)} days, {pitches} pitches"
+        # Official MLB pitching lines (innings pitched etc.) power FIP; Statcast
+        # has no innings column so this is a separate, cheap source.
+        from src.analytics.mlb_pitching import backfill_pitching
+
+        pitch_results = backfill_pitching(start, end, max_days=STATCAST_BACKFILL_DAYS)
+        pitch_failed = [r for r in pitch_results if r.get("error")]
+        failed = failed + pitch_failed
+
+        detail = (
+            f"{len(synced)} statcast days, {pitches} pitches; "
+            f"{len(pitch_results) - len(pitch_failed)} pitching days"
+        )
         if failed:
             detail += f", {len(failed)} failed"
         print(f"[Statcast] Sync complete: {detail}", flush=True)

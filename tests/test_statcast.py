@@ -202,3 +202,71 @@ def test_pitcher_scoring_rewards_stuff():
     score, reasons = fa_radar._score_pitcher(recent, None)
     assert score >= 50
     assert any("whiff" in r for r in reasons)
+
+
+# --- new metrics: CSW%, chase%, batted-ball mix, xBA/xSLG ------------------
+
+def test_csw_counts_called_strikes_and_whiffs_over_all_pitches():
+    rows = [
+        pitch(description="called_strike"),
+        pitch(description="swinging_strike"),
+        pitch(description="ball"),
+        pitch(description="foul"),
+    ]
+    stats = summarize(
+        next(e for e in aggregate_statcast_rows(rows, DAY) if e["role"] == "pitcher")
+    )
+    # 1 called + 1 whiff out of 4 pitches
+    assert stats["csw_rate"] == 50.0
+    # whiff% uses swings (3: swinging_strike, foul... only 2 are swings here)
+    assert stats["whiff_rate"] == 50.0
+
+
+def test_chase_rate_uses_savant_zone_codes():
+    rows = [
+        pitch(zone="13", description="swinging_strike"),  # out of zone, swung
+        pitch(zone="14", description="ball"),             # out of zone, took
+        pitch(zone="5", description="swinging_strike"),   # in zone, swung
+    ]
+    stats = summarize(
+        next(e for e in aggregate_statcast_rows(rows, DAY) if e["role"] == "batter")
+    )
+    assert stats["chase_rate"] == 50.0  # 1 of 2 out-of-zone pitches
+
+
+def test_batted_ball_mix_sums_to_100():
+    rows = [
+        pitch(events="single", description="hit_into_play", bb_type="ground_ball",
+              launch_speed="80.0", woba_value="0.9", woba_denom="1"),
+        pitch(events="double", description="hit_into_play", bb_type="line_drive",
+              launch_speed="99.0", woba_value="1.2", woba_denom="1"),
+        pitch(events="field_out", description="hit_into_play", bb_type="fly_ball",
+              launch_speed="90.0", woba_value="0", woba_denom="1"),
+        pitch(events="field_out", description="hit_into_play", bb_type="popup",
+              launch_speed="60.0", woba_value="0", woba_denom="1"),
+    ]
+    stats = summarize(
+        next(e for e in aggregate_statcast_rows(rows, DAY) if e["role"] == "batter")
+    )
+    assert stats["gb_rate"] == 25.0
+    assert stats["ld_rate"] == 25.0
+    assert stats["fb_rate"] == 50.0  # fly balls and popups together
+    assert stats["gb_rate"] + stats["ld_rate"] + stats["fb_rate"] == 100.0
+
+
+def test_xba_and_xslg_use_the_woba_denominator():
+    rows = [
+        pitch(events="home_run", description="hit_into_play", launch_speed="108.0",
+              woba_value="2.0", woba_denom="1",
+              estimated_ba_using_speedangle="0.9",
+              estimated_slg_using_speedangle="3.2"),
+        pitch(events="field_out", description="hit_into_play", launch_speed="70.0",
+              woba_value="0", woba_denom="1",
+              estimated_ba_using_speedangle="0.1",
+              estimated_slg_using_speedangle="0.1"),
+    ]
+    stats = summarize(
+        next(e for e in aggregate_statcast_rows(rows, DAY) if e["role"] == "batter")
+    )
+    assert stats["xba"] == pytest.approx(0.5)
+    assert stats["xslg"] == pytest.approx(1.65)

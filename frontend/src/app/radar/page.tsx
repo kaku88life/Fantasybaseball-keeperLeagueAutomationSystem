@@ -55,6 +55,26 @@ function metricValue(key: MetricKey, profile: StatcastProfile): string {
       return pct(profile.whiff_rate);
     case "velo":
       return profile.avg_fastball_velo === null ? "—" : `${profile.avg_fastball_velo}`;
+    case "csw_rate":
+      return pct(profile.csw_rate);
+    case "swing_rate":
+      return pct(profile.swing_rate);
+    case "chase_rate":
+      return pct(profile.chase_rate);
+    case "k_rate":
+      return pct(profile.k_rate);
+    case "bb_rate":
+      return pct(profile.bb_rate);
+    case "gb_rate":
+      return pct(profile.gb_rate);
+    case "xba":
+      return woba(profile.xba);
+    case "xslg":
+      return woba(profile.xslg);
+    case "fip":
+      return profile.fip === null || profile.fip === undefined
+        ? "—"
+        : profile.fip.toFixed(2);
     case "pa":
       return plain(profile.pa);
     case "pitches":
@@ -78,6 +98,18 @@ function seasonValue(key: MetricKey, profile: StatcastProfile | null): number | 
       return profile.avg_fastball_velo;
     case "avg_ev":
       return profile.avg_ev;
+    case "csw_rate":
+      return profile.csw_rate;
+    case "swing_rate":
+      return profile.swing_rate;
+    case "chase_rate":
+      return profile.chase_rate;
+    case "k_rate":
+      return profile.k_rate;
+    case "bb_rate":
+      return profile.bb_rate;
+    case "gb_rate":
+      return profile.gb_rate;
     default:
       return null;
   }

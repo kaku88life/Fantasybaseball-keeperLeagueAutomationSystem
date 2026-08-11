@@ -83,10 +83,19 @@ def _score_pitcher(recent: dict, season: dict | None) -> tuple[float, list[str]]
     reasons: list[str] = []
 
     whiff = recent.get("whiff_rate")
+    csw = recent.get("csw_rate")
     xwoba_allowed = recent.get("xwoba")
     velo = recent.get("avg_fastball_velo")
 
-    if whiff is not None and whiff >= 32:
+    # CSW% is the steadier read on stuff (denominator is every pitch), so it
+    # leads; whiff% only speaks up when CSW is unavailable.
+    if csw is not None and csw >= 33:
+        score += 25
+        reasons.append(f"近期 CSW% {csw}（頂級）")
+    elif csw is not None and csw >= 30:
+        score += 15
+        reasons.append(f"近期 CSW% {csw}（優異）")
+    elif whiff is not None and whiff >= 32:
         score += 25
         reasons.append(f"近期 whiff% {whiff}（優異）")
     elif whiff is not None and whiff >= 27:
@@ -113,6 +122,19 @@ def _score_pitcher(recent: dict, season: dict | None) -> tuple[float, list[str]]
         if whiff_delta is not None and whiff_delta >= 5:
             score += 15
             reasons.append(f"whiff% 較整季 +{whiff_delta}")
+
+        csw_delta = _delta(csw, season.get("csw_rate"))
+        if csw_delta is not None and csw_delta >= 3:
+            score += 15
+            reasons.append(f"CSW% 較整季 +{csw_delta}")
+
+    # ERA well above FIP means the damage was luck/defence, not the pitcher —
+    # exactly the profile the market under-rates.
+    fip = recent.get("fip")
+    era_gap = recent.get("era_minus_fip")
+    if fip is not None and era_gap is not None and era_gap >= 1.0:
+        score += 20
+        reasons.append(f"ERA 比 FIP 高 {era_gap}（運氣/守備拖累，買點）")
 
     return score, reasons
 
@@ -154,6 +176,32 @@ def build_radar(
     season_rows = get_statcast_window(season_start, as_of, role)
     season_by_id = {r["player_id"]: summarize(r) for r in season_rows}
 
+    # FIP needs innings pitched, which Statcast does not carry — merge it from
+    # the official MLB lines, keyed by MLB player id (both sources use it).
+    fip_recent: dict[int, dict] = {}
+    fip_season: dict[int, dict] = {}
+    if role == "pitcher":
+        try:
+            from api.database import get_mlb_pitching_window
+            from src.analytics.mlb_pitching import (
+                league_fip_constant,
+                summarize_pitching,
+            )
+
+            def _fip_index(rows):
+                constant = league_fip_constant(rows)
+                return {
+                    r["player_id"]: summarize_pitching(r, constant) for r in rows
+                }
+
+            fip_recent = _fip_index(get_mlb_pitching_window(recent_start, as_of))
+            fip_season = _fip_index(get_mlb_pitching_window(season_start, as_of))
+            if not fip_recent:
+                notes.append("官方投球數據暫缺，FIP 未納入評分。")
+        except Exception as e:
+            print(f"[Radar] FIP merge skipped: {e}", flush=True)
+            notes.append("官方投球數據載入失敗，FIP 未納入評分。")
+
     owner_by_name, owner_debug = _build_current_owner_lookup(year)
     if not owner_by_name:
         notes.append("持有名單暫缺，結果未排除已被選走的球員。")
@@ -176,6 +224,16 @@ def build_radar(
             continue
 
         season = season_by_id.get(recent["player_id"])
+
+        if role == "pitcher":
+            for profile, source in ((recent, fip_recent), (season, fip_season)):
+                extra = source.get(recent["player_id"])
+                if profile is not None and extra:
+                    profile["fip"] = extra["fip"]
+                    profile["ip"] = extra["ip"]
+                    profile["era"] = extra["era"]
+                    profile["era_minus_fip"] = extra["era_minus_fip"]
+
         score, reasons = scorer(recent, season)
         if score <= 0:
             continue

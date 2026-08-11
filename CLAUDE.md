@@ -512,8 +512,27 @@ Baseball Savant 的 `leaderboard/custom` **完全忽略 `start_date` / `end_date
 - barrel 判定：`launch_speed_angle == 6`；強擊：`launch_speed >= 95`
 - 這些都是**非官方端點**，壞掉時必須顯性降級，不可呈現過期數字
 
+### 目前收集的指標
+打者與投手共用同一份逐球聚合：
+- 擊球品質：Barrel%、強擊率、平均初速、xwOBA、xBA、xSLG、擊球類型（GB/LD/FB）
+- 選球與宰制力：Whiff%、**CSW%**（被抓看好球+揮空 ÷ 總球數）、Swing%、**Chase%**、K%、BB%
+- 投手專屬：速球均速
+
+> Chase% 直接用 Savant 的 `zone` 欄位判定（1-9 好球帶內、11-14 外），不必自行計算好球帶幾何。
+> CSW% 的分母是總球數而非揮棒數，比 Whiff% 穩定，是投手狀態的先行指標。
+
+### FIP 為何另外接 MLB 官方 API
+逐球資料**沒有局數欄位**，而從 `outs_when_up` 回推出局數在換局／換投／雙殺時極易算錯。
+因此改用 MLB Stats API 的 `stats=byDateRange&group=pitching`（一次請求可取回全聯盟約 450 位投手的
+IP / HR / BB / HBP / K / ER），存進 `mlb_pitching_daily`，再據以計算 FIP。
+
+- **局數一律以 outs 儲存**：MLB 的 `"2.2"` 是 2⅔ 局，當十進位相加會靜默算錯
+- **FIP 常數自行反推**（`lgERA - (13HR+3(BB+HBP)-2K)/lgIP`），不寫死 ~3.10，才不會逐年失準
+- **xERA 刻意不做**：那是 Savant 未公開的專有迴歸，自行近似會與官網數字對不上，比沒有更糟
+
 ### 資料量
-約 14 MB/季（每天約 376 列 × 186 天）。目前**不設保留期**，全部保留。
+Statcast 約 14 MB/季（每天約 376 列 × 186 天），官方投球數據每天約 450 列。
+目前**不設保留期**，全部保留。
 
 ### 自動供裝
 `ensure_statcast_coverage()` 在啟動時檢查，若已匯入天數 < `STATCAST_MIN_COVERAGE_DAYS`（預設 10）就自動回補，不需人工呼叫 sync 端點。
@@ -567,6 +586,8 @@ schema_migrations (
 | `016_scheduler_job_runs` | scheduler_job_runs 表（排程執行紀錄，可觀測性）+ 2 索引 |
 | `017_league_keys` | league_keys 表（自動探索的年度 Yahoo league key 快取） |
 | `018_statcast_daily` | statcast_daily 表（每日 Statcast 聚合）+ 2 索引 |
+| `019_statcast_extra_metrics` | statcast_daily 新增 CSW% / Chase% / xBA / xSLG / 擊球類型所需欄位 |
+| `020_mlb_pitching_daily` | mlb_pitching_daily 表（MLB 官方投球數據，供 FIP）+ 2 索引 |
 
 > 註：檔案中 `004_buyouts_table` 的位置排在 `003` 之前，但套用順序依 key 排序決定，不受撰寫順序影響。
 
@@ -576,7 +597,7 @@ schema_migrations (
 ```python
 MIGRATIONS: dict[str, list[str]] = {
     # ... 既有遷移 ...
-    "019_your_migration_name": [
+    "021_your_migration_name": [
         "SQL statement 1;",
         "SQL statement 2;",
     ],
@@ -584,7 +605,7 @@ MIGRATIONS: dict[str, list[str]] = {
 ```
 
 **規則：**
-- 版本號格式：`NNN_描述`，數字遞增（下一個是 `019_xxx`）
+- 版本號格式：`NNN_描述`，數字遞增（下一個是 `021_xxx`）
 - 每個 SQL 必須**冪等**（可重複執行不出錯），使用 `IF NOT EXISTS` / `DO $$` 保護
 - 遷移在 `init_db()` 啟動時自動執行，只跑尚未套用的版本
 - 失敗時自動 rollback 並印錯誤，不影響其他遷移

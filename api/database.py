@@ -488,6 +488,58 @@ MIGRATIONS: dict[str, list[str]] = {
         )
         """,
     ],
+    # New Statcast metrics (CSW%, chase%, xBA/xSLG, batted-ball mix). Added
+    # before the table accumulates history so no backfill is needed.
+    "019_statcast_extra_metrics": [
+        """
+        DO $$
+        DECLARE col TEXT;
+        BEGIN
+            FOREACH col IN ARRAY ARRAY[
+                'called_strikes', 'out_of_zone_pitches', 'out_of_zone_swings',
+                'gb', 'ld', 'fb', 'pu'
+            ] LOOP
+                IF NOT EXISTS (
+                    SELECT 1 FROM information_schema.columns
+                    WHERE table_name = 'statcast_daily' AND column_name = col
+                ) THEN
+                    EXECUTE format('ALTER TABLE statcast_daily ADD COLUMN %I INTEGER DEFAULT 0', col);
+                END IF;
+            END LOOP;
+            FOREACH col IN ARRAY ARRAY['xba_sum', 'xslg_sum'] LOOP
+                IF NOT EXISTS (
+                    SELECT 1 FROM information_schema.columns
+                    WHERE table_name = 'statcast_daily' AND column_name = col
+                ) THEN
+                    EXECUTE format('ALTER TABLE statcast_daily ADD COLUMN %I DOUBLE PRECISION DEFAULT 0', col);
+                END IF;
+            END LOOP;
+        END $$;
+        """,
+    ],
+    # Official MLB pitching lines. Statcast has no innings-pitched column, so
+    # FIP is built from these rather than from inferred outs.
+    "020_mlb_pitching_daily": [
+        """
+        CREATE TABLE IF NOT EXISTS mlb_pitching_daily (
+            game_date DATE NOT NULL,
+            player_id INTEGER NOT NULL,
+            player_name TEXT DEFAULT '',
+            ip_outs INTEGER DEFAULT 0,
+            hr INTEGER DEFAULT 0,
+            bb INTEGER DEFAULT 0,
+            hbp INTEGER DEFAULT 0,
+            strikeouts INTEGER DEFAULT 0,
+            earned_runs INTEGER DEFAULT 0,
+            batters_faced INTEGER DEFAULT 0,
+            PRIMARY KEY (game_date, player_id)
+        )
+        """,
+        "CREATE INDEX IF NOT EXISTS idx_mlb_pitching_daily_date "
+        "ON mlb_pitching_daily(game_date DESC)",
+        "CREATE INDEX IF NOT EXISTS idx_mlb_pitching_daily_player "
+        "ON mlb_pitching_daily(player_id, game_date DESC)",
+    ],
     # Per-day Statcast totals. Savant's leaderboards ignore date filters, so we
     # store daily aggregates and compute any rolling window from them.
     "018_statcast_daily": [
@@ -1610,8 +1662,12 @@ def cleanup_old_notifications(retention_days: int = 365):
 _STATCAST_COLUMNS = (
     "game_date", "player_id", "role", "player_name",
     "pa", "bbe", "barrels", "hard_hits", "ev_sum",
-    "xwoba_sum", "woba_sum", "woba_den", "strikeouts", "walks",
-    "pitches", "swings", "whiffs", "velo_sum", "velo_count",
+    "xwoba_sum", "woba_sum", "woba_den", "xba_sum", "xslg_sum",
+    "strikeouts", "walks",
+    "pitches", "swings", "whiffs",
+    "called_strikes", "out_of_zone_pitches", "out_of_zone_swings",
+    "gb", "ld", "fb", "pu",
+    "velo_sum", "velo_count",
 )
 
 
@@ -1676,6 +1732,15 @@ def get_statcast_window(start, end, role: str, min_pa: int = 0) -> list[dict]:
                       SUM(xwoba_sum)        AS xwoba_sum,
                       SUM(woba_sum)         AS woba_sum,
                       SUM(woba_den)::int    AS woba_den,
+                      SUM(xba_sum)          AS xba_sum,
+                      SUM(xslg_sum)         AS xslg_sum,
+                      SUM(called_strikes)::int      AS called_strikes,
+                      SUM(out_of_zone_pitches)::int AS out_of_zone_pitches,
+                      SUM(out_of_zone_swings)::int  AS out_of_zone_swings,
+                      SUM(gb)::int          AS gb,
+                      SUM(ld)::int          AS ld,
+                      SUM(fb)::int          AS fb,
+                      SUM(pu)::int          AS pu,
                       SUM(strikeouts)::int  AS strikeouts,
                       SUM(walks)::int       AS walks,
                       SUM(pitches)::int     AS pitches,
@@ -1700,6 +1765,87 @@ def get_statcast_coverage() -> dict:
                       MAX(game_date) AS last_date,
                       COUNT(DISTINCT game_date)::int AS days
                FROM statcast_daily""",
+        )
+        return row or {"first_date": None, "last_date": None, "days": 0}
+
+
+
+# ========== Official MLB pitching lines (for FIP) ==========
+
+_MLB_PITCHING_COLUMNS = (
+    "game_date", "player_id", "player_name", "ip_outs",
+    "hr", "bb", "hbp", "strikeouts", "earned_runs", "batters_faced",
+)
+
+
+def save_mlb_pitching_daily(game_date, rows: list[dict]) -> int:
+    """Upsert one day of official pitching lines."""
+    if not rows:
+        return 0
+    placeholders = ", ".join(["%s"] * len(_MLB_PITCHING_COLUMNS))
+    updates = ", ".join(
+        f"{col} = EXCLUDED.{col}"
+        for col in _MLB_PITCHING_COLUMNS
+        if col not in ("game_date", "player_id")
+    )
+    sql = (
+        f"INSERT INTO mlb_pitching_daily ({', '.join(_MLB_PITCHING_COLUMNS)}) "
+        f"VALUES ({placeholders}) "
+        f"ON CONFLICT (game_date, player_id) DO UPDATE SET {updates}"
+    )
+    payload = [
+        tuple(
+            game_date if col == "game_date" else row.get(col, 0)
+            for col in _MLB_PITCHING_COLUMNS
+        )
+        for row in rows
+    ]
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            psycopg2.extras.execute_batch(cur, sql, payload, page_size=500)
+    return len(payload)
+
+
+def get_mlb_pitching_synced_dates(start, end) -> list:
+    with get_conn() as conn:
+        rows = _fetchall(
+            conn,
+            """SELECT DISTINCT game_date FROM mlb_pitching_daily
+               WHERE game_date BETWEEN %s AND %s ORDER BY game_date""",
+            (start, end),
+        )
+        return [r["game_date"] for r in rows]
+
+
+def get_mlb_pitching_window(start, end) -> list[dict]:
+    """Sum official pitching lines over [start, end], one row per pitcher."""
+    with get_conn() as conn:
+        return _fetchall(
+            conn,
+            """SELECT player_id,
+                      MAX(player_name) FILTER (WHERE player_name <> '') AS player_name,
+                      SUM(ip_outs)::int        AS ip_outs,
+                      SUM(hr)::int             AS hr,
+                      SUM(bb)::int             AS bb,
+                      SUM(hbp)::int            AS hbp,
+                      SUM(strikeouts)::int     AS strikeouts,
+                      SUM(earned_runs)::int    AS earned_runs,
+                      SUM(batters_faced)::int  AS batters_faced
+               FROM mlb_pitching_daily
+               WHERE game_date BETWEEN %s AND %s
+               GROUP BY player_id""",
+            (start, end),
+        )
+
+
+def get_mlb_pitching_coverage() -> dict:
+    with get_conn() as conn:
+        row = _fetchone(
+            conn,
+            """SELECT MIN(game_date) AS first_date,
+                      MAX(game_date) AS last_date,
+                      COUNT(DISTINCT game_date)::int AS days
+               FROM mlb_pitching_daily""",
         )
         return row or {"first_date": None, "last_date": None, "days": 0}
 

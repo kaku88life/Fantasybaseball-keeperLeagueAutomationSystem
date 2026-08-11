@@ -66,6 +66,30 @@ async def statcast_lookup(
         for role in ("batter", "pitcher")
     }
 
+    # Official pitching lines carry innings pitched, which Statcast lacks, so
+    # FIP is merged in from there rather than inferred.
+    from api.database import get_mlb_pitching_window
+    from src.analytics.mlb_pitching import league_fip_constant, summarize_pitching
+
+    def index_pitching(rows):
+        constant = league_fip_constant(rows)
+        out = {}
+        for row in rows:
+            summary = summarize_pitching(row, constant)
+            key = _normalize_player_name(summary.get("player_name", ""))
+            if key:
+                out[key] = summary
+        return out
+
+    try:
+        official = {
+            "recent": index_pitching(get_mlb_pitching_window(recent_start, today)),
+            "season": index_pitching(get_mlb_pitching_window(season_start, today)),
+        }
+    except Exception as e:
+        print(f"[StatcastLookup] official pitching merge skipped: {e}")
+        official = {"recent": {}, "season": {}}
+
     results: dict[str, dict] = {}
     for player in payload.players:
         key = _normalize_player_name(player.name)
@@ -74,6 +98,14 @@ async def statcast_lookup(
         role = "pitcher" if player.is_pitcher else "batter"
         recent = indexed[role]["recent"].get(key)
         season_profile = indexed[role]["season"].get(key)
+        if player.is_pitcher:
+            for window_name, profile in (("recent", recent), ("season", season_profile)):
+                extra = official[window_name].get(key)
+                if profile is not None and extra:
+                    profile["fip"] = extra["fip"]
+                    profile["ip"] = extra["ip"]
+                    profile["era"] = extra["era"]
+                    profile["era_minus_fip"] = extra["era_minus_fip"]
         if recent or season_profile:
             results[player.name] = {"recent": recent, "season": season_profile}
 
