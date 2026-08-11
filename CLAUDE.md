@@ -17,7 +17,7 @@
 | 打擊數據 | R, H, HR, RBI, SB, AVG, OPS |
 | 投球數據 | W, SV, HLD, K, ERA, WHIP, QS |
 | 每週最低投球局數 | 30 IP |
-| Commissioner | Kaku (楊善合) |
+| Commissioner | Kaku（Yahoo 暱稱 `Ｋａｋｕ`） |
 
 ---
 
@@ -410,11 +410,20 @@ Excel (歷史名冊)
 
 ---
 
-## 17. Manager 名稱對照
+## 17. Manager 名稱對照（**舊 Excel 遺留，非身分來源**）
+
+> **身分的真相來源是 Yahoo**（OAuth GUID / 暱稱）與各經理在自己帳號輸入的資料。
+> 舊 Excel 名冊已全部匯入資料庫，**不再作為資料來源**；本表只剩 `_match_by_nickname()`
+> 在「首次登入且 Yahoo API 比對失敗」時當最後手段用，新功能一律不要依賴它。
+>
+> ⚠ **對錯會把使用者指派到別人的隊伍**（進而能改別人的留用選擇）。
+> 修改前先看 `tests/test_manager_mapping.py`，該表已與 `scripts/analyze_all_trades.py`
+> 的 `YAHOO_MGR_TO_EXCEL`（依真實聯盟資料建立）對齊並由測試釘住。
 
 | Excel 名稱 | Yahoo 暱稱 |
 |------------|-----------|
-| 楊善合 | Kaku |
+| 郭子睿(Rangers) | Ｋａｋｕ |
+| 楊善合 | 哈寶好 |
 | 林剛 | Hyper |
 | Yu-Che Chang | 小喆 |
 | Issac | rawstuff |
@@ -429,6 +438,9 @@ Excel (歷史名冊)
 | TIMMY LIU | TIMMY LIU |
 | Javier | 謙謙 |
 | Leo | Leo |
+
+> 歷史錯誤：先前本表寫成「楊善合 → Kaku」，兩邊都錯——Ｋａｋｕ 的 Excel 名是
+> `郭子睿(Rangers)`，而 `楊善合` 是暱稱 `哈寶好` 的另一位經理。
 
 ---
 

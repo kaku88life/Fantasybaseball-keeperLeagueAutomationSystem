@@ -149,18 +149,28 @@ def get_league_key(year: int) -> str | None:
     return f"{gk}.l.{ln}"
 
 # ========== Manager Name Mapping ==========
-# Maps Excel manager names to Yahoo nicknames (for teams that don't auto-match)
+# Maps legacy Excel manager names to Yahoo nicknames.
 # Format: {excel_name: yahoo_nickname}
+#
+# STATUS: legacy. The Excel workbook is no longer the source of truth — the
+# historical rosters are already imported into the database, and identity now
+# comes from Yahoo (OAuth GUID / nickname) plus what each manager enters in
+# their own account. This table only survives as a last-resort fallback in
+# api/routers/auth.py::_match_by_nickname for older rows whose manager_name
+# still holds an Excel-era name. Do not build new features on it.
+#
+# WARNING: a wrong entry here can assign a user to SOMEONE ELSE'S team on first
+# login. "楊善合" was previously mapped to "Ｋａｋｕ" — that was wrong on both
+# sides: Ｋａｋｕ's Excel name is "郭子睿(Rangers)", and "楊善合" belongs to the
+# manager whose Yahoo nickname is "哈寶好". Values below match the verified
+# YAHOO_MGR_TO_EXCEL table in scripts/analyze_all_trades.py.
 MANAGER_NAME_MAPPING = {
+    "郭子睿(Rangers)": "Ｋａｋｕ",
+    "楊善合": "哈寶好",
     "林剛": "Hyper",
     "Yu-Che Chang": "小喆",
     "Javier": "謙謙",
     "Issac": "rawstuff",
-    "楊善合": "Ｋａｋｕ",
-    # 郭子睿(Rangers) is Kaku's old Excel name (2023-2024).
-    # In 2025+, Kaku uses "楊善合" in Excel and "Ｋａｋｕ" on Yahoo.
-    # Only add this mapping if processing older years:
-    # "郭子睿(Rangers)": "Ｋａｋｕ",
     "Tony林芳民": "Tony",
     "Billy WU": "Billy",
     "Eddie Chen": "EDDIE",
@@ -169,4 +179,6 @@ MANAGER_NAME_MAPPING = {
     "Chih-Wei": "wei",
     "Ponpon": "Ponpon",
     "Hank": "叫我寬哥",
+    "TIMMY LIU": "TIMMY LIU",
+    "Leo": "Leo",
 }
