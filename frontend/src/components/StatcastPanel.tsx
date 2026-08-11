@@ -34,8 +34,21 @@ function num(value: number | null | undefined, suffix = ""): string {
 }
 
 /**
+ * Format a gap. wOBA-scale metrics read as .037; counting/rate metrics as 0.8,
+ * because ".800" on a mph or percentage row is badly misleading.
+ */
+function formatDiff(diff: number, scale: "woba" | "plain"): string {
+  const sign = diff > 0 ? "+" : "-";
+  const magnitude = Math.abs(diff);
+  if (scale === "woba") {
+    return `${sign}${magnitude.toFixed(3).replace(/^0\./, ".")}`;
+  }
+  return `${sign}${magnitude.toFixed(1)}`;
+}
+
+/**
  * One metric with its recent value, season value, and the gap between them.
- * `higherIsBetter` flips the colour so "lower ERA-ish" metrics read correctly.
+ * `higherIsBetter` flips the colour so "lower is good" metrics read correctly.
  */
 function MetricRow({
   label,
@@ -44,6 +57,7 @@ function MetricRow({
   season,
   format,
   higherIsBetter = true,
+  scale = "plain",
 }: {
   label: string;
   hint: string;
@@ -51,10 +65,13 @@ function MetricRow({
   season: number | null | undefined;
   format: (v: number | null | undefined) => string;
   higherIsBetter?: boolean;
+  scale?: "woba" | "plain";
 }) {
   const hasBoth = recent !== null && recent !== undefined && season !== null && season !== undefined;
   const diff = hasBoth ? recent - season : null;
-  const meaningful = diff !== null && Math.abs(diff) >= 0.001;
+  // A wOBA move of .001 matters; 0.05 mph does not.
+  const threshold = scale === "woba" ? 0.001 : 0.05;
+  const meaningful = diff !== null && Math.abs(diff) >= threshold;
   const improving = meaningful ? (higherIsBetter ? diff > 0 : diff < 0) : false;
 
   return (
@@ -72,8 +89,7 @@ function MetricRow({
       <td className="px-2 py-1.5 text-right text-xs tabular-nums">
         {meaningful ? (
           <span className={improving ? "text-emerald-600" : "text-rose-600"}>
-            {diff > 0 ? "+" : ""}
-            {Math.abs(diff) < 1 ? diff.toFixed(3).replace(/^(-?)0\./, "$1.") : diff.toFixed(1)}
+            {formatDiff(diff, scale)}
           </span>
         ) : (
           <span className="text-gray-300">—</span>
@@ -112,6 +128,7 @@ function ProfileTable({
                 recent={recent?.xwoba}
                 season={season?.xwoba}
                 format={woba}
+                scale="woba"
                 higherIsBetter={false}
               />
               <MetricRow
@@ -153,6 +170,7 @@ function ProfileTable({
                 recent={recent?.xwoba}
                 season={season?.xwoba}
                 format={woba}
+                scale="woba"
               />
               <MetricRow
                 label="wOBA"
@@ -160,6 +178,7 @@ function ProfileTable({
                 recent={recent?.woba}
                 season={season?.woba}
                 format={woba}
+                scale="woba"
               />
               <MetricRow
                 label="Barrel%"
