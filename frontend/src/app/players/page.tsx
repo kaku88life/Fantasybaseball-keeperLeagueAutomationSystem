@@ -128,6 +128,9 @@ export default function PlayersPage() {
 
   // Statcast columns are opt-in: they cost an extra request and widen the table.
   const [showAdvanced, setShowAdvanced] = useState(false);
+  // "season" shows the season aggregate the lookup already returns; numbers are
+  // rolling windows in days (backend accepts 3-60).
+  const [advWindow, setAdvWindow] = useState<number | "season">(15);
   const [advData, setAdvData] = useState<StatcastLookupResponse | null>(null);
   const [advLoading, setAdvLoading] = useState(false);
   const [advError, setAdvError] = useState("");
@@ -263,6 +266,7 @@ export default function PlayersPage() {
         const idx = token.lastIndexOf("|");
         return { name: token.slice(0, idx), is_pitcher: token.slice(idx + 1) === "1" };
       }),
+      typeof advWindow === "number" ? advWindow : 15,
     )
       .then((res) => {
         if (!cancelled) setAdvData(res);
@@ -276,7 +280,17 @@ export default function PlayersPage() {
     return () => {
       cancelled = true;
     };
-  }, [showAdvanced, advKey]);
+  }, [showAdvanced, advKey, advWindow]);
+
+  // Which aggregate the advanced cells read from
+  const advProfileOf = useCallback(
+    (name: string) => {
+      const entry = advData?.results[name];
+      if (!entry) return null;
+      return advWindow === "season" ? entry.season : entry.recent;
+    },
+    [advData, advWindow],
+  );
 
   // Sort arrow indicator
   const SortArrow = ({ col }: { col: SortKey }) => {
@@ -299,7 +313,7 @@ export default function PlayersPage() {
     className?: string;
   }) => (
     <th
-      className={`cursor-pointer select-none whitespace-nowrap px-2 py-2 text-left text-xs font-medium uppercase text-gray-500 hover:text-gray-700 ${className}`}
+      className={`sticky top-0 z-20 cursor-pointer select-none whitespace-nowrap bg-gray-50 px-2 py-2 text-left text-xs font-medium uppercase text-gray-500 hover:text-gray-700 ${className}`}
       onClick={() => handleSort(col)}
     >
       {label}
@@ -734,10 +748,26 @@ export default function PlayersPage() {
                         ? "bg-violet-100 text-violet-700"
                         : "bg-gray-100 text-gray-400"
                     }`}
-                    title="顯示 Baseball Savant 進階數據（近 15 天）：擊球品質與制球宰制力"
+                    title="顯示 Baseball Savant 進階數據：擊球品質與制球宰制力"
                   >
                     {showAdvanced ? "Hide" : "Show"} 進階數據
                   </button>
+                  {showAdvanced && (
+                    <select
+                      value={String(advWindow)}
+                      onChange={(e) =>
+                        setAdvWindow(
+                          e.target.value === "season" ? "season" : Number(e.target.value),
+                        )
+                      }
+                      className="rounded-full border border-violet-200 bg-violet-50 px-2 py-0.5 text-[10px] font-medium text-violet-700"
+                    >
+                      <option value="7">近 7 天</option>
+                      <option value="15">近 15 天</option>
+                      <option value="30">近 30 天</option>
+                      <option value="season">本季</option>
+                    </select>
+                  )}
                 </div>
               </div>
 
@@ -748,10 +778,23 @@ export default function PlayersPage() {
                     <span className="font-medium">進階數據 Statcast</span>
                     {advLoading && <span className="text-violet-600">載入中...</span>}
                     {advError && <span className="text-rose-600">{advError}</span>}
-                    {advData && !advLoading && (
+                    {advData && !advLoading && advWindow !== "season" && (
                       <span className="text-violet-700">
                         區間 {advData.window.start} ~ {advData.window.end}
                         （近 {advData.window.days} 天）· 本頁 {advData.matched}/{advData.requested} 位有資料
+                      </span>
+                    )}
+                    {advData && !advLoading && advWindow === "season" && (
+                      <span className="text-violet-700">
+                        本季 {advData.season_window?.coverage_start ?? advData.season_window?.start} ~{" "}
+                        {advData.season_window?.end} · 本頁 {advData.matched}/{advData.requested} 位有資料
+                        {advData.season_window?.coverage_start &&
+                          advData.season_window.coverage_start > advData.season_window.start && (
+                            <span className="ml-1 text-amber-600">
+                              ⚠ 資料僅回補到 {advData.season_window.coverage_start}，尚非完整球季，
+                              可請 Commissioner 觸發整季回補
+                            </span>
+                          )}
                       </span>
                     )}
                   </div>
@@ -764,7 +807,7 @@ export default function PlayersPage() {
                       {BUY_SIGNAL_MILD.toFixed(2).replace(/^0/, "")} 以上，訊號較弱。
                     </div>
                     <div className="text-violet-600">
-                      欄位名稱可 hover 看說明。此區數據為近期滾動區間，與左側 Yahoo 成績的區間不同；
+                      欄位名稱可 hover 看說明。此區數據依上方選單為滾動區間或本季，與左側 Yahoo 成績的區間不同；
                       進階欄位不支援排序（排序由後端處理），需要排名請用「雷達 Radar」頁。
                     </div>
                   </div>
@@ -780,33 +823,34 @@ export default function PlayersPage() {
                 </div>
               )}
 
-              {/* Table */}
-              <div className="overflow-x-auto rounded-lg border border-gray-200">
+              {/* Table — header sticks to the top, rank/player/pos columns stick
+                  to the left so stats stay comparable while scrolling */}
+              <div className="max-h-[70vh] overflow-auto rounded-lg border border-gray-200">
                 <table className="min-w-full divide-y divide-gray-200 text-sm">
                   <thead className="bg-gray-50">
                     <tr>
-                      <SortTh col="o_rank" label="OR" className="w-10" />
-                      <SortTh col="ar_rank" label="AR" className="hidden sm:table-cell w-10" />
-                      <SortTh col="name" label="球員" />
-                      <th className="whitespace-nowrap px-2 py-2 text-left text-xs font-medium uppercase text-gray-500">
+                      <SortTh col="o_rank" label="OR" className="w-12 left-0 z-30" />
+                      <SortTh col="ar_rank" label="AR" className="hidden sm:table-cell w-12 sm:left-12 sm:z-30" />
+                      <SortTh col="name" label="球員" className="left-12 sm:left-24 z-30 w-40" />
+                      <th className="sticky top-0 left-[13rem] sm:left-[16rem] z-30 whitespace-nowrap border-r border-gray-200 bg-gray-50 px-2 py-2 text-left text-xs font-medium uppercase text-gray-500">
                         Pos
                       </th>
-                      <th className="hidden md:table-cell whitespace-nowrap px-2 py-2 text-left text-xs font-medium uppercase text-gray-500">
+                      <th className="sticky top-0 z-20 hidden md:table-cell whitespace-nowrap bg-gray-50 px-2 py-2 text-left text-xs font-medium uppercase text-gray-500">
                         MLB
                       </th>
                       {isAuth && (
-                        <th className="px-2 py-2 text-left text-xs font-medium uppercase text-gray-500">
+                        <th className="sticky top-0 z-20 bg-gray-50 px-2 py-2 text-left text-xs font-medium uppercase text-gray-500">
                           {effectiveYear}
                         </th>
                       )}
                       {isAuth && (
-                        <th className="px-2 py-2 text-left text-xs font-medium uppercase text-gray-500">
+                        <th className="sticky top-0 z-20 bg-gray-50 px-2 py-2 text-left text-xs font-medium uppercase text-gray-500">
                           {effectiveYear + 1}
                         </th>
                       )}
                       {isAuth && <SortTh col="salary" label="$" />}
                       {isAuth && (
-                        <th className="whitespace-nowrap px-2 py-2 text-left text-xs font-medium uppercase text-gray-500">
+                        <th className="sticky top-0 z-20 whitespace-nowrap bg-gray-50 px-2 py-2 text-left text-xs font-medium uppercase text-gray-500">
                           歸屬
                         </th>
                       )}
@@ -836,7 +880,7 @@ export default function PlayersPage() {
                         <th
                           key={`adv-b-${c.key}`}
                           title={metricTooltip(c.glossary as MetricKey)}
-                          className="cursor-help whitespace-nowrap bg-violet-50 px-2 py-2 text-right text-xs font-medium uppercase text-violet-700"
+                          className="sticky top-0 z-20 cursor-help whitespace-nowrap bg-violet-50 px-2 py-2 text-right text-xs font-medium uppercase text-violet-700"
                         >
                           {c.label}
                         </th>
@@ -845,7 +889,7 @@ export default function PlayersPage() {
                         <th
                           key={`adv-p-${c.key}`}
                           title={metricTooltip(c.glossary as MetricKey)}
-                          className="cursor-help whitespace-nowrap bg-violet-50 px-2 py-2 text-right text-xs font-medium uppercase text-violet-700"
+                          className="sticky top-0 z-20 cursor-help whitespace-nowrap bg-violet-50 px-2 py-2 text-right text-xs font-medium uppercase text-violet-700"
                         >
                           {c.label}
                         </th>
@@ -863,26 +907,27 @@ export default function PlayersPage() {
                       return (
                         <tr
                           key={`${p.yahoo_player_id || p.name}-${idx}`}
-                          className="hover:bg-gray-50"
+                          className="group hover:bg-gray-50"
                         >
-                          {/* OR (Overall Rank) */}
-                          <td className="whitespace-nowrap px-2 py-1.5 text-gray-400">
+                          {/* OR (Overall Rank) — frozen */}
+                          <td className="sticky left-0 z-10 whitespace-nowrap bg-white px-2 py-1.5 text-gray-400 group-hover:bg-gray-50">
                             {p.o_rank ?? "-"}
                           </td>
 
-                          {/* AR (Actual Rank) */}
-                          <td className="hidden sm:table-cell whitespace-nowrap px-2 py-1.5 text-xs text-gray-500">
+                          {/* AR (Actual Rank) — frozen */}
+                          <td className="hidden sm:table-cell sm:sticky sm:left-12 sm:z-10 whitespace-nowrap bg-white px-2 py-1.5 text-xs text-gray-500 group-hover:bg-gray-50">
                             {p.ar_rank ?? "-"}
                           </td>
 
-                          {/* Player name */}
-                          <td className="whitespace-nowrap px-2 py-1.5 font-medium">
-                            <span className="inline-flex items-center gap-1">
+                          {/* Player name — frozen, fixed width so Pos offset stays aligned */}
+                          <td className="sticky left-12 sm:left-24 z-10 w-40 max-w-40 bg-white px-2 py-1.5 font-medium group-hover:bg-gray-50">
+                            <span className="flex items-center gap-1">
                               <button
                                 onClick={() =>
                                   setModalPlayer({ name: p.name, position: p.position })
                                 }
-                                className="text-left text-indigo-600 hover:text-indigo-800 hover:underline"
+                                className="truncate text-left text-indigo-600 hover:text-indigo-800 hover:underline"
+                                title={p.name}
                               >
                                 {p.name}
                               </button>
@@ -890,8 +935,8 @@ export default function PlayersPage() {
                             </span>
                           </td>
 
-                          {/* Position */}
-                          <td className="whitespace-nowrap px-2 py-1.5 text-xs text-gray-600">
+                          {/* Position — frozen, right edge of the frozen block */}
+                          <td className="sticky left-[13rem] sm:left-[16rem] z-10 whitespace-nowrap border-r border-gray-200 bg-white px-2 py-1.5 text-xs text-gray-600 group-hover:bg-gray-50">
                             {p.position}
                           </td>
 
@@ -984,7 +1029,7 @@ export default function PlayersPage() {
 
                           {/* Advanced (Statcast) cells */}
                           {showAdvanced && effectiveShowHitting && ADV_BATTING_COLS.map((c) => {
-                            const prof = advData?.results[p.name]?.recent ?? null;
+                            const prof = advProfileOf(p.name);
                             const value = pitcher || !prof
                               ? null
                               : (prof[c.key as keyof typeof prof] as number | null);
@@ -1015,7 +1060,7 @@ export default function PlayersPage() {
                             );
                           })}
                           {showAdvanced && effectiveShowPitching && ADV_PITCHING_COLS.map((c) => {
-                            const prof = advData?.results[p.name]?.recent ?? null;
+                            const prof = advProfileOf(p.name);
                             const value = !pitcher || !prof
                               ? null
                               : (prof[c.key as keyof typeof prof] as number | null);

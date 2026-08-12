@@ -526,6 +526,17 @@ export async function refreshTransactions(): Promise<{
   });
 }
 
+/** Dispatch a Statcast backfill; already-stored days are skipped server-side. */
+export async function triggerStatcastSync(days: number): Promise<{
+  success: boolean;
+  status?: string;
+  message: string;
+}> {
+  return request(`/api/commissioner/statcast/sync?days=${days}`, {
+    method: "POST",
+  });
+}
+
 // ========== Buyout Management (Commissioner) ==========
 
 export async function getAllBuyouts(year: number): Promise<{

@@ -22,6 +22,7 @@ import {
   triggerMonthlyReport,
   triggerInjuryDigest,
   refreshTransactions,
+  triggerStatcastSync,
   verifyCommissionerPassword,
   getYahooTokenStatus,
   refreshYahooToken,
@@ -211,6 +212,8 @@ export default function CommissionerDashboard() {
   const [injuryDigestResult, setInjuryDigestResult] = useState<{ success: boolean; message: string } | null>(null);
   const [txRefreshLoading, setTxRefreshLoading] = useState(false);
   const [txRefreshResult, setTxRefreshResult] = useState<{ success: boolean; message: string } | null>(null);
+  const [statcastBackfillLoading, setStatcastBackfillLoading] = useState(false);
+  const [statcastBackfillResult, setStatcastBackfillResult] = useState<{ success: boolean; message: string } | null>(null);
 
   // Yahoo API token state
   const [yahooToken, setYahooToken] = useState<YahooTokenStatus | null>(null);
@@ -468,6 +471,26 @@ export default function CommissionerDashboard() {
       });
     } finally {
       setInjuryDigestLoading(false);
+    }
+  };
+
+  const handleStatcastBackfill = async () => {
+    if (!confirm(
+      "回補整季 Statcast 逐球資料？已匯入的日期會自動跳過，" +
+      "缺漏一天約 8 秒，全新回補約 15-20 分鐘（背景執行，不擋其他操作）。",
+    )) return;
+    setStatcastBackfillLoading(true);
+    setStatcastBackfillResult(null);
+    try {
+      const result = await triggerStatcastSync(200);
+      setStatcastBackfillResult(result);
+    } catch (e) {
+      setStatcastBackfillResult({
+        success: false,
+        message: e instanceof Error ? e.message : "Backfill failed",
+      });
+    } finally {
+      setStatcastBackfillLoading(false);
     }
   };
 
@@ -1084,7 +1107,23 @@ export default function CommissionerDashboard() {
                   >
                     {txRefreshLoading ? "執行中..." : "重抓交易紀錄 Refresh Transactions"}
                   </button>
+                  <button
+                    onClick={handleStatcastBackfill}
+                    disabled={statcastBackfillLoading}
+                    className="rounded bg-violet-600 px-3 py-1 text-sm font-medium text-white hover:bg-violet-500 disabled:opacity-50"
+                  >
+                    {statcastBackfillLoading ? "執行中..." : "Statcast 整季回補 Season Backfill"}
+                  </button>
                 </div>
+                {statcastBackfillResult && (
+                  <div className={`mt-2 rounded border p-2 text-xs ${
+                    statcastBackfillResult.success ? "border-green-200 bg-green-100" : "border-red-200 bg-red-100"
+                  }`}>
+                    <p className={statcastBackfillResult.success ? "text-green-700" : "text-red-700"}>
+                      Statcast 回補：{statcastBackfillResult.message}
+                    </p>
+                  </div>
+                )}
                 {warReportResult && (
                   <div className={`mt-2 rounded border p-2 text-xs ${
                     warReportResult.success ? "border-green-200 bg-green-100" : "border-red-200 bg-red-100"

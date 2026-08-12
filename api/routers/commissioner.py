@@ -602,14 +602,19 @@ async def trigger_statcast_sync(
     """
     from src.notification.scheduler import _daily_statcast_sync_job
 
+    days = max(1, min(days, 366))
     if not async_mode:
-        return _daily_statcast_sync_job()
+        return _daily_statcast_sync_job(days)
 
-    background_tasks.add_task(_daily_statcast_sync_job)
+    background_tasks.add_task(_daily_statcast_sync_job, days)
     return {
         "success": True,
         "status": "scheduled",
-        "message": f"Statcast sync dispatched (up to {days} days). Check coverage in ~1-3 min.",
+        "message": (
+            f"Statcast sync dispatched (up to {days} days, already-stored days are "
+            "skipped; a cold full-season backfill takes ~8s per missing day). "
+            "Track progress via /api/analytics/statcast-coverage."
+        ),
     }
 
 

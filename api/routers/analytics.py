@@ -109,10 +109,25 @@ async def statcast_lookup(
         if recent or season_profile:
             results[player.name] = {"recent": recent, "season": season_profile}
 
+    # Actual ingested coverage — the "season" aggregate is only as complete as
+    # what has been imported, so the UI must be able to say so.
+    from api.database import get_statcast_coverage
+
+    try:
+        coverage = get_statcast_coverage() or {}
+        coverage_first = coverage.get("first_date")
+    except Exception:
+        coverage_first = None
+
     return {
         "results": results,
         "window": {"start": recent_start.isoformat(), "end": today.isoformat(),
                    "days": payload.window_days},
+        "season_window": {
+            "start": season_start.isoformat(),
+            "end": today.isoformat(),
+            "coverage_start": coverage_first.isoformat() if coverage_first else None,
+        },
         "matched": len(results),
         "requested": len(payload.players),
     }

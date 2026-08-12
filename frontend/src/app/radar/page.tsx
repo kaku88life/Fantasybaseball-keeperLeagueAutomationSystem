@@ -18,6 +18,7 @@ const WINDOW_OPTIONS = [
   { value: 7, label: "近 7 天" },
   { value: 15, label: "近 15 天" },
   { value: 30, label: "近 30 天" },
+  { value: 60, label: "近 60 天" },
 ];
 
 /** Format a wOBA-scale number as .385 (leading zero dropped, baseball style). */

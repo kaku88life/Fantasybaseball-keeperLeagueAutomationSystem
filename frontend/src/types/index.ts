@@ -436,6 +436,8 @@ export interface StatcastLookupEntry {
 export interface StatcastLookupResponse {
   results: Record<string, StatcastLookupEntry>;
   window: { start: string; end: string; days: number };
+  /** Season aggregate window; coverage_start marks how far back ingestion actually goes */
+  season_window?: { start: string; end: string; coverage_start: string | null };
   matched: number;
   requested: number;
 }

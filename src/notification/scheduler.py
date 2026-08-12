@@ -1446,11 +1446,14 @@ def ensure_statcast_coverage() -> dict:
     return {"ran": True, "had_days": days, "result": result}
 
 
-def _daily_statcast_sync_job() -> dict:
+def _daily_statcast_sync_job(days: int | None = None) -> dict:
     """Daily job: ingest yesterday's Statcast, backfilling any gaps.
 
     Backfill matters because the container is ephemeral and jobs can be missed;
     without it a restart would leave permanent holes in the rolling windows.
+
+    `days` overrides the backfill window (manual full-season backfill); already
+    stored days are skipped so a large window only fetches what is missing.
     """
     now = datetime.now()
     if not STATCAST_SYNC_ENABLED:
@@ -1462,16 +1465,17 @@ def _daily_statcast_sync_job() -> dict:
         _record_run("statcast_sync", "skipped", f"Off-season (month {now.month})")
         return {"success": False, "message": f"Off-season (month {now.month})"}
 
-    _record_run("statcast_sync", "started", f"backfill window {STATCAST_BACKFILL_DAYS}d")
+    window_days = max(1, min(int(days or STATCAST_BACKFILL_DAYS), 366))
+    _record_run("statcast_sync", "started", f"backfill window {window_days}d")
     try:
         from src.analytics.statcast import backfill_statcast
 
         end = now.date() - _ONE_DAY
-        start = end - timedelta(days=STATCAST_BACKFILL_DAYS - 1)
+        start = end - timedelta(days=window_days - 1)
         # Never reach back before opening day of the current season.
         start = max(start, date(now.year, 3, 1))
 
-        results = backfill_statcast(start, end, max_days=STATCAST_BACKFILL_DAYS)
+        results = backfill_statcast(start, end, max_days=window_days)
         synced = [r for r in results if not r.get("error")]
         failed = [r for r in results if r.get("error")]
         pitches = sum(r.get("pitches", 0) for r in synced)
@@ -1480,7 +1484,7 @@ def _daily_statcast_sync_job() -> dict:
         # has no innings column so this is a separate, cheap source.
         from src.analytics.mlb_pitching import backfill_pitching
 
-        pitch_results = backfill_pitching(start, end, max_days=STATCAST_BACKFILL_DAYS)
+        pitch_results = backfill_pitching(start, end, max_days=window_days)
         pitch_failed = [r for r in pitch_results if r.get("error")]
         failed = failed + pitch_failed
 
