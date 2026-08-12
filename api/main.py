@@ -29,7 +29,17 @@ from api.database import (
     init_db,
     seed_if_empty,
 )
-from api.routers import analytics, auth, commissioner, league, players, public, teams, validation
+from api.routers import (
+    analytics,
+    auth,
+    commissioner,
+    league,
+    line_webhook,
+    players,
+    public,
+    teams,
+    validation,
+)
 
 
 def _deferred_startup_refresh():
@@ -203,6 +213,7 @@ app.include_router(validation.router, prefix="/api/validate", tags=["validation"
 app.include_router(players.router, prefix="/api/players", tags=["players"])
 app.include_router(analytics.router, prefix="/api/analytics", tags=["analytics"])
 app.include_router(public.router, prefix="/api/public", tags=["public"])
+app.include_router(line_webhook.router, prefix="/api/line", tags=["line"])
 
 
 @app.middleware("http")

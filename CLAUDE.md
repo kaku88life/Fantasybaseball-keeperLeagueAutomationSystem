@@ -367,6 +367,13 @@ computeNextSalary(contractType, currentSalary, action, extensionYears):
 ### 球員 (Players)
 - `GET /api/players/stats?name={name}&position={position}` → MLB Stats API 代理
 
+### LINE Bot Webhook
+- `POST /api/line/webhook` → LINE 官方 webhook（`X-Line-Signature` HMAC 驗證）
+  - 文字指令（僅限 `LINE_ADMIN_USER_IDS` 白名單）：`戰報`／`月報`／`雷達`／`雷達投手`／`排程`
+  - 全部走 **reply**（不耗每月 200 則推播配額）；reply token 逾時（約 1 分鐘）時自動改推播給該管理者
+  - 非白名單傳訊者只會收到**自己的 user id**（這是設定白名單的 bootstrap 路徑：先傳訊息給 bot 拿 id，再設環境變數）
+  - LINE Developers Console 需設定 webhook URL 為 `https://<backend>/api/line/webhook`、開啟 Use webhook、關閉自動回覆
+
 ---
 
 ## 16. 技術架構
@@ -666,6 +673,8 @@ MIGRATIONS: dict[str, list[str]] = {
 | `OAUTH_REDIRECT_URI` | 必要 | OAuth 回調 URL |
 | `FRONTEND_URL` | 必要 | 前端 URL（登入後導向） |
 | `ALLOWED_ORIGINS` | 建議 | 額外 CORS 允許來源 |
+| `LINE_CHANNEL_SECRET` | webhook 必要 | LINE webhook 簽章驗證密鑰（未設定時 webhook 回 503） |
+| `LINE_ADMIN_USER_IDS` | webhook 必要 | 可執行 bot 指令的 user id 白名單（逗號分隔） |
 | `STATCAST_SYNC_ENABLED` | 選用 | Statcast 每日同步開關（預設 true） |
 | `STATCAST_BACKFILL_DAYS` | 選用 | 每次同步回補天數（預設 20） |
 | `STATCAST_MIN_COVERAGE_DAYS` | 選用 | 低於此天數則啟動時自動回補（預設 10） |

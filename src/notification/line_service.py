@@ -1,7 +1,10 @@
 """
-LINE Bot push message service for group notifications.
-Push-only: sends messages to a LINE group via the Messaging API.
-No webhook handler needed.
+LINE Bot messaging service.
+
+Push: sends messages to the LINE group / arbitrary targets (counts against the
+monthly push quota). Reply: answers a webhook event via its reply token, which
+is free — the interactive command interface (api/routers/line_webhook.py)
+relies on this so testing reports costs no quota.
 """
 from __future__ import annotations
 
@@ -275,6 +278,46 @@ def send_line_push_message(to_id: str, message: str) -> tuple[bool, str]:
             messaging_api.push_message(
                 PushMessageRequest(
                     to=to_id,
+                    messages=[TextMessage(text=_truncate_line_text(message))],
+                )
+            )
+        return True, ""
+
+    except ImportError:
+        return False, "line-bot-sdk not installed"
+    except Exception as e:
+        return False, _summarize_error(e)
+
+
+def send_line_reply_message(reply_token: str, message: str) -> tuple[bool, str]:
+    """
+    Reply to a webhook event. Free of charge, but the token is single-use and
+    expires about a minute after the event — callers should fall back to a
+    push when this fails after slow report generation.
+    Returns (success, error_message).
+    """
+    if not LINE_CHANNEL_ACCESS_TOKEN:
+        return False, "LINE_CHANNEL_ACCESS_TOKEN not configured"
+    if not reply_token:
+        return False, "Empty reply_token"
+    if not message.strip():
+        return False, "Empty message"
+
+    try:
+        from linebot.v3.messaging import (
+            ApiClient,
+            Configuration,
+            MessagingApi,
+            ReplyMessageRequest,
+            TextMessage,
+        )
+
+        configuration = Configuration(access_token=LINE_CHANNEL_ACCESS_TOKEN)
+        with ApiClient(configuration) as api_client:
+            messaging_api = MessagingApi(api_client)
+            messaging_api.reply_message(
+                ReplyMessageRequest(
+                    reply_token=reply_token,
                     messages=[TextMessage(text=_truncate_line_text(message))],
                 )
             )
