@@ -1040,3 +1040,36 @@ export async function lookupStatcast(
     body: JSON.stringify({ players, window_days: windowDays }),
   }, 60_000);
 }
+
+// ========== Scheduler Status (Commissioner) ==========
+
+export interface SchedulerJob {
+  id: string;
+  next_run_time: string | null;
+  trigger: string;
+  misfire_grace_time: number | null;
+}
+
+export interface SchedulerJobRun {
+  job_id: string;
+  status: string; // started | success | failed | skipped
+  detail: string | null;
+  recorded_at: string | null;
+}
+
+export interface SchedulerStatusResponse {
+  running: boolean;
+  reason?: string;
+  timezone?: string;
+  misfire_grace_seconds?: number;
+  jobs: SchedulerJob[];
+  recent_runs: SchedulerJobRun[];
+  recent_runs_error?: string;
+}
+
+/** Live scheduler state + recent job outcomes (scheduler_job_runs). */
+export async function getSchedulerStatus(
+  limit = 50,
+): Promise<SchedulerStatusResponse> {
+  return request(`/api/commissioner/scheduler/status?limit=${limit}`);
+}

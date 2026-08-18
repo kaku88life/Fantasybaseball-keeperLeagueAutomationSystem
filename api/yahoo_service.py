@@ -33,6 +33,12 @@ _RATE_LIMIT_INTERVAL = 2.0
 _last_request_time = 0.0
 _rate_lock = threading.Lock()
 
+# Serialize token refreshes. Yahoo rotates the refresh_token on every refresh:
+# if two threads (scheduler job + web request) refresh concurrently, the loser
+# overwrites the DB with a stale refresh_token and every later refresh fails
+# with invalid_grant until the commissioner logs in again.
+_refresh_lock = threading.Lock()
+
 
 class YahooTokenError(Exception):
     """Raised when Yahoo token is missing or refresh fails."""
@@ -114,8 +120,28 @@ def refresh_db_token(token_row: dict) -> str:
     Returns: new access_token
     Raises: YahooTokenError if refresh fails
     """
-    from api.database import upsert_yahoo_token
+    from api.database import get_commissioner_yahoo_token, upsert_yahoo_token
 
+    with _refresh_lock:
+        # Another thread may have refreshed while we waited for the lock —
+        # re-read and reuse its still-valid token instead of refreshing again
+        # (a second refresh would rotate the refresh_token needlessly).
+        current = get_commissioner_yahoo_token()
+        if current and current.get("access_token") != token_row.get("access_token"):
+            expires_at = current.get("expires_at")
+            if expires_at is not None:
+                if expires_at.tzinfo is None:
+                    expires_at = expires_at.replace(tzinfo=datetime.timezone.utc)
+                now = datetime.datetime.now(datetime.timezone.utc)
+                if now < expires_at - datetime.timedelta(seconds=_REFRESH_BUFFER_SECONDS):
+                    return current["access_token"]
+            token_row = current
+
+        return _do_refresh(token_row, upsert_yahoo_token)
+
+
+def _do_refresh(token_row: dict, upsert_yahoo_token) -> str:
+    """Perform the actual refresh HTTP call. Caller must hold _refresh_lock."""
     refresh_token = token_row.get("refresh_token", "")
     if not refresh_token:
         raise YahooTokenError("No refresh_token available. Commissioner must re-login.")

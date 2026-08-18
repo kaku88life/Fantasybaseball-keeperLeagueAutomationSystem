@@ -31,6 +31,7 @@ import {
   syncRosters,
 } from "@/lib/api";
 import type { YahooTokenStatus } from "@/lib/api";
+import SchedulerStatusPanel from "@/components/SchedulerStatusPanel";
 import { useAuth } from "@/lib/auth";
 import type { SubmissionStatus, SubmissionDetail, TeamAdjustments } from "@/types";
 
@@ -926,6 +927,9 @@ export default function CommissionerDashboard() {
           </div>
         )}
       </div>
+
+      {/* Scheduler diagnostics: next runs + scheduler_job_runs outcomes */}
+      <SchedulerStatusPanel />
 
       {/* Keeper Reminders (LINE) */}
       <div className="mb-6">

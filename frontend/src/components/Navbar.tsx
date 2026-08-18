@@ -90,7 +90,7 @@ export default function Navbar() {
             ) : (
               <a
                 href={`${process.env.NEXT_PUBLIC_API_URL || "https://localhost:8002"}/api/auth/yahoo/login`}
-                className="rounded bg-indigo-600 px-3 py-1.5 text-sm hover:bg-indigo-500"
+                className="rounded bg-indigo-600 px-4 py-2 text-sm hover:bg-indigo-500"
               >
                 Login with Yahoo
               </a>
@@ -102,7 +102,7 @@ export default function Navbar() {
             {!user && (
               <a
                 href={`${process.env.NEXT_PUBLIC_API_URL || "https://localhost:8002"}/api/auth/yahoo/login`}
-                className="rounded bg-indigo-600 px-3 py-1.5 text-sm hover:bg-indigo-500"
+                className="rounded bg-indigo-600 px-4 py-2 text-sm hover:bg-indigo-500"
               >
                 Login
               </a>

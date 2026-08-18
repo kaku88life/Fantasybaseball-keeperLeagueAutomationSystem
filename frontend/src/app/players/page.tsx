@@ -814,6 +814,37 @@ export default function PlayersPage() {
                 </div>
               )}
 
+              {/* Data freshness — quiet when current, loud when stale so a
+                  silent pipeline outage is visible on day one, not day 22 */}
+              {data?.last_fetched_at && (() => {
+                const ageHours =
+                  (Date.now() - new Date(data.last_fetched_at).getTime()) / 3_600_000;
+                if (isNaN(ageHours)) return null;
+                if (ageHours >= 48) {
+                  return (
+                    <div className="mb-2 flex flex-wrap items-center gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+                      <span className="inline-block h-2 w-2 rounded-full bg-amber-500" />
+                      <span className="font-semibold">
+                        數據更新於 {new Date(data.last_fetched_at).toLocaleString("zh-TW", { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit", hour12: false })}
+                        （{Math.round(ageHours / 24)} 天前）
+                      </span>
+                      <span>資料可能過期。</span>
+                    </div>
+                  );
+                }
+                return (
+                  <p className="mb-2 flex items-center gap-1.5 text-xs text-green-700">
+                    <span className="inline-block h-1.5 w-1.5 rounded-full bg-green-500" />
+                    數據更新於 {new Date(data.last_fetched_at).toLocaleString("zh-TW", { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit", hour12: false })}（每日 18:00 自動更新）
+                  </p>
+                );
+              })()}
+
+              {/* Mobile-only reminder that the table scrolls sideways */}
+              <p className="mb-1 text-center text-[11px] text-gray-400 sm:hidden">
+                ← 表格可左右滑動查看更多欄位 →
+              </p>
+
               {/* Stats mismatch hint */}
               {data?.stats_sort_type && sortType !== data.stats_sort_type && (
                 <div className="mb-2 rounded-md bg-amber-50 border border-amber-200 px-3 py-2 text-xs text-amber-700">
@@ -926,7 +957,7 @@ export default function PlayersPage() {
                                 onClick={() =>
                                   setModalPlayer({ name: p.name, position: p.position })
                                 }
-                                className="truncate text-left text-indigo-600 hover:text-indigo-800 hover:underline"
+                                className="truncate py-2 -my-2 text-left text-indigo-600 hover:text-indigo-800 hover:underline"
                                 title={p.name}
                               >
                                 {p.name}
@@ -1339,7 +1370,7 @@ export default function PlayersPage() {
                                 position: p.position,
                               })
                             }
-                            className="text-left text-indigo-600 hover:text-indigo-800 hover:underline"
+                            className="py-2 -my-2 text-left text-indigo-600 hover:text-indigo-800 hover:underline"
                           >
                             {p.name}
                           </button>
