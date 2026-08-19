@@ -973,16 +973,49 @@ async def refresh_yahoo_token(
 async def test_yahoo_connection(
     user: dict = Depends(get_current_commissioner),
 ):
-    """Test Yahoo API connection with current token. Commissioner only."""
-    from api.yahoo_service import YahooTokenError, yahoo_api_get
+    """Test Yahoo API connection with current token. Commissioner only.
+
+    Tests BOTH levels: the profile endpoint only needs the openid scope, so it
+    kept reporting "connection working" through the 2026-07/08 outage while
+    every league call was failing 403 (missing fspt-r / app-level Fantasy
+    Sports permission). The league metadata probe is what the scheduler jobs
+    actually depend on.
+    """
+    from api.yahoo_service import YahooTokenError, resolve_league_key, yahoo_api_get
 
     try:
         yahoo_api_get("/users;use_login=1/profile")
-        return {"status": "ok", "message": "Yahoo API 連線正常 Connection working"}
     except YahooTokenError as e:
         return {"status": "error", "message": f"Token error: {e}"}
     except RuntimeError as e:
         return {"status": "error", "message": f"API error: {e}"}
+
+    from datetime import date as _date
+    league_key = resolve_league_key(_date.today().year, allow_discovery=False)
+    if not league_key:
+        return {
+            "status": "error",
+            "message": "Token 正常，但找不到本年度 league key（無法測試聯盟資料存取）",
+        }
+    try:
+        yahoo_api_get(f"/league/{league_key}/metadata")
+    except (YahooTokenError, RuntimeError) as e:
+        detail = str(e)
+        hint = ""
+        if "not authorized" in detail or "403" in detail:
+            hint = (
+                "。Token 有效但無 Fantasy Sports 存取權——請到 developer.yahoo.com "
+                "檢查此 App 的 API Permissions 是否含 Fantasy Sports (Read)，修正後重新登入"
+            )
+        return {
+            "status": "error",
+            "message": f"Token 正常，但聯盟資料存取失敗：{detail[:300]}{hint}",
+        }
+
+    return {
+        "status": "ok",
+        "message": "Yahoo API 連線正常（含聯盟資料存取）Connection working",
+    }
 
 
 @router.delete("/yahoo-token")
