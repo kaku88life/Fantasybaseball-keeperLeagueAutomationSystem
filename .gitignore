@@ -24,6 +24,11 @@ oauth2.json
 Thumbs.db
 nul
 
+# Local databases (contain league data and OAuth tokens)
+*.db
+*.db-wal
+*.db-shm
+
 # Data files (keep Excel templates out of repo)
 *.xlsx
 *.xls
