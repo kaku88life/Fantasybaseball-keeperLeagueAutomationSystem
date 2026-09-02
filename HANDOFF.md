@@ -1,7 +1,7 @@
 # HANDOFF — Fantasy Baseball 5-Man Keepers
 
 > 工程快照，只留最新狀態＋下一步。完整 session 敘事在 Obsidian，規則在 `CLAUDE.md`。
-> 最後更新：2026-09-02（Session 2）
+> 最後更新：2026-09-02（Session 2；同日深夜由 ObsidianVault 盤點 session 補註：OpenAI 已閉合、postgres 密碼項以關 port＋刪專案取代）
 
 ---
 
@@ -17,7 +17,8 @@ Zeabur 環境變數洩漏後啟動整廠搬遷：DB 已搬 Supabase（18 表逐�
 - git 歷史稽查乾淨：`oauth2.json`／`.env` 從未入庫；`.gitignore` 補上 `*.db`（含 wal/shm）。
 - 已輪替：LINE channel secret＋access token（Master 重發）、JWT（Fly 上是全新 64 字元值，與 Zeabur 不同）。
 - **Zeabur postgres 公網 port 已關**（網路分頁的連線埠轉送）：外部連 `43.133.9.186:31826` 已 Connection refused，Zeabur 後端走內網不受影響（API 200 實測）。「洩漏密碼＋公網門」的組合洞已補。
-- **未處理：`OPENAI_API_KEY`**（Zeabur 上有一把 `sk-proj-dSGRYO2a...`，用於 AI 週報摘要）——Master 尚未去 platform.openai.com revoke。
+- **OpenAI：已閉合**——08/29 已在 platform.openai.com 刪除所有舊 key（事件台帳），Zeabur 上那把已失效，免再 revoke。要續用 AI 週報摘要，需發一把新 key 設進 Fly secrets（Master 手動）。
+- **postgres 密碼**：Jikka HANDOFF 曾列「Five-man postgres 密碼未輪替（需 ALTER USER）」；本專案以「關公網 port（實測拒連）＋切換日刪除整個 Zeabur 專案」取代，不做 ALTER USER，Jikka 側已同步改註。
 
 ### B. DB 搬遷（Zeabur postgres 18 → Supabase postgres 17）
 - Supabase 專案：`keeper-league`（id `gbgruifhwvdzybqgngcv`，ap-northeast-1）。
@@ -46,7 +47,7 @@ Zeabur 環境變數洩漏後啟動整廠搬遷：DB 已搬 Supabase（18 表逐�
 ## 下一步從這開始
 
 1. **[需 Master] Yahoo 撤銷＋重授權**（上面 D 的下一招）→ 成功後跑 `POST /api/commissioner/yahoo-token/test` 驗證。
-2. **[需 Master] OpenAI key revoke**（platform.openai.com/api-keys），要續用 AI 摘要就重發一把設進 Fly。
+2. **[需 Master，僅若要續用 AI 週報摘要] 發新 OpenAI key 設進 Fly**（舊 key 08/29 已全數刪除，revoke 步驟免做）。
 3. **LINE console 兩個設定**（Master 按或授權代按）：Webhook URL 設 `https://keeper-league-api.fly.dev/api/line/webhook`＋開 Use webhook；**Auto-reply messages 關閉**（目前 Enabled）。設完傳「排程」給 bot 實測。
 4. **前端搬 Cloudflare**（OpenNext/Workers）→ 改 Fly 的 `FRONTEND_URL`／`ALLOWED_ORIGINS`。
 5. **切換日 runbook**：開 Zeabur postgres 公網 port 5 分鐘 → 最終 re-dump→restore（流程同 B，先 `TRUNCATE`／drop schema 再灌）→ 關 port → `REPORT_CATCHUP_ENABLED=true` → 驗證隔日 00:15 `transaction_fetch` 寫入 `scheduler_job_runs` → **刪除整個 Zeabur 專案**（洩漏的 secrets 隨之消滅）。
@@ -96,6 +97,6 @@ Windows 原生（純本機專案）。dump/restore 用 `wsl -d Ubuntu-22.04`（�
 讀 HANDOFF.md。現況：後端已在 https://keeper-league-api.fly.dev（Fly nrt 單機）跑著、
 資料在 Supabase（keeper-league），Zeabur 是現網但 postgres 公網 port 已關。
 卡點：Yahoo Fantasy API 全面 403（app 層級、Zeabur 也一樣壞）。
-先問 Master：(1) Yahoo 撤銷舊授權＋重授權做了沒？結果？(2) OpenAI key revoke 了沒？
+先問 Master：(1) Yahoo 撤銷舊授權＋重授權做了沒？結果？(2) 要不要續用 AI 週報摘要（要就發新 OpenAI key 進 Fly；舊 key 08/29 已全刪）？
 然後照 HANDOFF「下一步」1→5 推進；切換日照 runbook，完成後刪 Zeabur 專案。
 ```
