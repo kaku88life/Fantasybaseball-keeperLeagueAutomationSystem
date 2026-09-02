@@ -1,0 +1,24 @@
+# Fly.io 部署設定 — keeper-league backend
+# 排程器（APScheduler）跑在同一個 process，機器必須常駐：
+# - auto_stop_machines = "off" + min_machines_running = 1：禁止 scale-to-zero
+# - 部署一律用 --ha=false 維持單機，多機會讓排程重複觸發（LINE 重複推播）
+
+app = "keeper-league-api"
+primary_region = "nrt"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  PORT = "8002"
+
+[http_service]
+  internal_port = 8002
+  force_https = true
+  auto_stop_machines = "off"
+  auto_start_machines = true
+  min_machines_running = 1
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"
